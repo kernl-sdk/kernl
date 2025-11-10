@@ -1,0 +1,22 @@
+{
+  "name": "@kernl/cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "kernl": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "dev": "tsc --watch",
+    "lint": "eslint src/",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kernl/core": "workspace:*"
+  },
+  "devDependencies": {
+    "tsc-alias": "^1.8.10",
+    "typescript": "5.9.2"
+  }
+}
