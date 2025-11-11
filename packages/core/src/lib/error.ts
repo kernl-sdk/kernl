@@ -5,7 +5,7 @@ import {
   OutputGuardrailResult,
 } from "@/guardrail";
 
-import { SerializedThread } from "@/serde/thread";
+import { SerializedThread } from "@/lib/serde/thread";
 import { randomID } from "@/lib/utils";
 
 import { AgentResponseType } from "@/types/agent";

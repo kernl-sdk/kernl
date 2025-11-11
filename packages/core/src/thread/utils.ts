@@ -3,7 +3,7 @@ import { ZodType } from "zod";
 import type { ResolvedAgentResponse } from "@/guardrail";
 
 /* lib */
-import { json } from "@/serde/codec";
+import { json } from "@/lib/serde/codec";
 import { ModelBehaviorError } from "@/lib/error";
 
 /* types */

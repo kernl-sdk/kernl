@@ -3,7 +3,7 @@ import { z } from "zod";
 import { Task } from "@/task";
 import { Context } from "@/context";
 import { LanguageModel } from "@/model";
-import { JSONValue } from "@/serde/json";
+import { JSONValue } from "@/lib/serde/json";
 
 /**
  * Set of actionable items extracted from a model response

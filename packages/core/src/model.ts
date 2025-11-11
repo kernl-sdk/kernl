@@ -1,5 +1,5 @@
 import { Usage } from "./usage";
-import { SerializedTool } from "./serde/tool";
+import { SerializedTool } from "./lib/serde/tool";
 import { ThreadEvent, ThreadStreamEvent } from "./types/thread";
 
 export type ModelTracing = boolean | "enabled_without_data";

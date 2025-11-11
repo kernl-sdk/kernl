@@ -1,9 +1,9 @@
 import { Context, UnknownContext } from "@/context";
 
-import type { SerializedTool } from "@/serde/tool";
+import type { SerializedTool } from "@/lib/serde/tool";
 import { ModelBehaviorError } from "@/lib/error";
 import { logger } from "@/lib/logger";
-import { json } from "@/serde/codec";
+import { json } from "@/lib/serde/codec";
 
 import type {
   ToolType,
