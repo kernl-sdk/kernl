@@ -8,7 +8,7 @@ import type {
   LanguageModelRequest,
   LanguageModelResponse,
 } from "@/model";
-import type { Task } from "@/sched/task";
+import type { Task } from "@/task";
 
 import { filter, randomID } from "@/lib/utils";
 
@@ -19,16 +19,25 @@ import type {
   ThreadOptions,
   TickResult,
   PerformActionsResult,
+  ThreadExecuteResult,
 } from "@/types/thread";
+
+import { getFinalResponse, parseFinalResponse } from "./utils";
+
+import type { AgentResponseType } from "@/types/agent";
+import type { ResolvedAgentResponse } from "@/guardrail";
 
 /**
  * A thread drives the execution loop for an agent.
  */
-export class Thread<TContext = unknown> {
+export class Thread<
+  TContext = unknown,
+  TResponse extends AgentResponseType = "text",
+> {
   private kernl: Kernl;
 
   readonly id: string;
-  readonly agent: Agent<TContext>;
+  readonly agent: Agent<TContext, TResponse>;
   readonly context: Context<TContext>;
   readonly model: LanguageModel; /* inherited from the agent unless specified */
   readonly parent: Task<TContext> | null; /* parent task which spawned this thread */
@@ -40,7 +49,7 @@ export class Thread<TContext = unknown> {
 
   constructor(
     kernl: Kernl,
-    agent: Agent<TContext>,
+    agent: Agent<TContext, TResponse>,
     input: ThreadEvent[] | string,
     options?: ThreadOptions<TContext>,
   ) {
@@ -58,12 +67,12 @@ export class Thread<TContext = unknown> {
     if (typeof input === "string") {
       this.history = [
         {
-          kind: "message" as const,
+          kind: "message",
           id: `msg_${randomID()}`,
-          role: "user" as const,
+          role: "user",
           content: [
             {
-              kind: "text" as const,
+              kind: "text",
               text: input,
             },
           ],
@@ -77,7 +86,9 @@ export class Thread<TContext = unknown> {
   /**
    * Main thread execution loop - runs until terminal state or interruption
    */
-  async execute(): Promise<ThreadState> {
+  async execute(): Promise<
+    ThreadExecuteResult<ResolvedAgentResponse<TResponse>>
+  > {
     while (true) {
       const { events, intentions } = await this.tick(); // actions: { syscalls, functions, mcpApprovalRequests }
 
@@ -96,15 +107,20 @@ export class Thread<TContext = unknown> {
 
       // if model returns a message with no actions, terminal state for the thread
       if (!intentions) {
-        // todo: get the output
+        const text = getFinalResponse(events);
+        if (!text) continue; // run again, policy-dependent?
+
+        const parsed = parseFinalResponse(text, this.agent.responseType);
+
         // await this.agent.runOutputGuardails(context, state);
         // this.kernl.emit("thread.terminated", context, output);
-        return this.state;
+        return { response: parsed, state: this.state };
       }
 
       // perform the actions intended by the model
       const { actions, pendingApprovals } =
         await this.performActions(intentions);
+
       this.history.push(...actions);
 
       if (pendingApprovals.length > 0) {
@@ -118,6 +134,10 @@ export class Thread<TContext = unknown> {
       }
     }
   }
+
+  // ----------------------
+  // Internal helpers
+  // ----------------------
 
   /**
    * A single tick of the thread's execution.
@@ -163,7 +183,9 @@ export class Thread<TContext = unknown> {
   /**
    * Perform the actions returned by the model
    */
-  async performActions(intentions: ActionSet): Promise<PerformActionsResult> {
+  private async performActions(
+    intentions: ActionSet,
+  ): Promise<PerformActionsResult> {
     // (TODO): refactor into a general actions system - probably shouldn't be handled by Thread
     const toolEvents = await this.executeTools(intentions.toolCalls);
     // const mcpEvents = await this.executeMCPRequests(actions.mcpRequests);
@@ -187,9 +209,6 @@ export class Thread<TContext = unknown> {
       }
     }
 
-    // TODO: publish a single approval request containing all of them
-    // ? how to then checkpoint + suspend?
-
     return {
       actions: actions,
       pendingApprovals,
@@ -201,11 +220,11 @@ export class Thread<TContext = unknown> {
    *
    * TODO: refactor into actions system
    */
-  async executeTools(calls: ToolCall[]): Promise<ThreadEvent[]> {
+  private async executeTools(calls: ToolCall[]): Promise<ThreadEvent[]> {
     return await Promise.all(
       calls.map(async (call: ToolCall) => {
         try {
-          const tool = this.agent.toolkit.get(call.id);
+          const tool = this.agent.tool(call.id);
           if (!tool) {
             throw new Error(`Tool ${call.id} not found`);
           }
@@ -245,12 +264,7 @@ export class Thread<TContext = unknown> {
     );
   }
 
-  // ----------------------
-  // Internal helpers
-  // ----------------------
-
   /**
-   * @internal
    * Applies call-level filters and prepares the model request for the language model
    */
   private async prepareModelRequest(
@@ -271,7 +285,7 @@ export class Thread<TContext = unknown> {
     const filtered = input;
 
     // serialize action repertoire
-    const allTools = this.agent.toolkit.list();
+    const allTools = await this.agent.tools(this.context);
     const enabled = await filter(
       allTools,
       async (tool) => await tool.isEnabled(this.context, this.agent),

@@ -20,12 +20,12 @@ import type {
  * MCP server client that communicates over Server-Sent Events (SSE).
  */
 export class MCPServerSSE extends BaseMCPServer {
+  readonly id: string;
   protected session: Client | null = null;
   protected timeout: number;
   protected serverInitializeResult: InitializeResult | null = null;
 
   params: MCPServerSSEOptions;
-  private _name: string;
   private transport: any = null;
 
   constructor(options: MCPServerSSEOptions) {
@@ -36,15 +36,8 @@ export class MCPServerSSE extends BaseMCPServer {
     });
 
     this.params = options;
-    this._name = options.name || `sse: ${this.params.url}`;
+    this.id = options.id || `sse: ${this.params.url}`;
     this.timeout = options.timeout ?? DEFAULT_REQUEST_TIMEOUT_MSEC;
-  }
-
-  /**
-   * The unique name identifier for this MCP server.
-   */
-  get name(): string {
-    return this._name;
   }
 
   /**
@@ -59,14 +52,14 @@ export class MCPServerSSE extends BaseMCPServer {
       });
 
       this.session = new Client({
-        name: this._name,
+        name: this.id,
         version: "1.0.0",
       });
 
       await this.session.connect(this.transport);
 
       this.serverInitializeResult = {
-        serverInfo: { name: this._name, version: "1.0.0" },
+        serverInfo: { name: this.id, version: "1.0.0" },
       } as InitializeResult;
     } catch (e) {
       this.logger.error("Error initializing MCP server:", e);
@@ -74,7 +67,7 @@ export class MCPServerSSE extends BaseMCPServer {
       throw e;
     }
 
-    this.logger.debug(`Connected to MCP server: ${this._name}`);
+    this.logger.debug(`Connected to MCP server: ${this.id}`);
   }
 
   /**

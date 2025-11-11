@@ -28,16 +28,34 @@ export const MCPToolSchema = z.object({
 });
 
 /**
- * Context provided to callable tool filters during tool resolution.
+ * Context provided to server-level tool filters during tool resolution.
  */
 export interface MCPToolFilterContext<TContext = UnknownContext> {
   context: Context<TContext>;
   agent: Agent<TContext, any>;
-  serverName: string;
+  serverId: string;
 }
 
 /**
- * Function that determines whether a tool should be made available to an agent.
+ * Server-level filter for MCP tools.
+ *
+ * Operates at the protocol layer on raw MCPTool objects before conversion.
+ * Use this for static, security-focused filtering (e.g., "never expose tool X").
+ *
+ * This is the first filter in the pipeline. For dynamic, context-aware filtering,
+ * use ToolkitFilter on MCPToolkit instead.
+ *
+ * @example
+ * ```typescript
+ * const server = new MCPServerStdio({
+ *   command: "npx",
+ *   args: ["-y", "some-server"],
+ *   toolFilter: async (ctx, tool) => {
+ *     // Never expose dangerous tools
+ *     return !tool.name.startsWith("dangerous_");
+ *   }
+ * });
+ * ```
  */
 export type MCPToolFilter<TContext = UnknownContext> = (
   context: MCPToolFilterContext<TContext>,
@@ -117,7 +135,7 @@ export interface BaseMCPServerStdioOptions {
   cwd?: string;
   cacheToolsList?: boolean;
   clientSessionTimeoutSeconds?: number;
-  name?: string;
+  id?: string;
   encoding?: string;
   encodingErrorHandler?: "strict" | "ignore" | "replace";
   logger?: Logger;
@@ -128,23 +146,10 @@ export interface BaseMCPServerStdioOptions {
 /**
  * Stdio MCP server options with command and args.
  */
-export interface DefaultMCPServerStdioOptions
-  extends BaseMCPServerStdioOptions {
+export interface MCPServerStdioOptions extends BaseMCPServerStdioOptions {
   command: string;
   args?: string[];
 }
-
-/**
- * Stdio MCP server options with full command string.
- */
-export interface FullCommandMCPServerStdioOptions
-  extends BaseMCPServerStdioOptions {
-  fullCommand: string;
-}
-
-export type MCPServerStdioOptions =
-  | DefaultMCPServerStdioOptions
-  | FullCommandMCPServerStdioOptions;
 
 /**
  * Configuration options for streamable HTTP MCP servers.
@@ -153,7 +158,7 @@ export interface MCPServerStreamableHttpOptions {
   url: string;
   cacheToolsList?: boolean;
   clientSessionTimeoutSeconds?: number;
-  name?: string;
+  id?: string;
   logger?: Logger;
   toolFilter?: MCPToolFilter;
   timeout?: number;
@@ -180,7 +185,7 @@ export interface MCPServerSSEOptions {
   url: string;
   cacheToolsList?: boolean;
   clientSessionTimeoutSeconds?: number;
-  name?: string;
+  id?: string;
   logger?: Logger;
   toolFilter?: MCPToolFilter;
   timeout?: number;

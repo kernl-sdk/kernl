@@ -13,7 +13,6 @@ import type {
   MCPTool,
   CallToolResultContent,
   MCPServerStdioOptions,
-  DefaultMCPServerStdioOptions,
   InitializeResult,
 } from "./types";
 
@@ -21,12 +20,12 @@ import type {
  * MCP server client that communicates over stdio (standard input/output).
  */
 export class MCPServerStdio extends BaseMCPServer {
+  readonly id: string;
   protected session: Client | null = null;
   protected timeout: number;
   protected serverInitializeResult: InitializeResult | null = null;
 
-  params: DefaultMCPServerStdioOptions;
-  private _name: string;
+  private params: MCPServerStdioOptions;
   private transport: any = null;
 
   constructor(options: MCPServerStdioOptions) {
@@ -37,33 +36,8 @@ export class MCPServerStdio extends BaseMCPServer {
     });
 
     this.timeout = options.timeout ?? DEFAULT_REQUEST_TIMEOUT_MSEC;
-
-    // Parse command if using fullCommand format
-    if ("fullCommand" in options) {
-      const elements = options.fullCommand.split(" ");
-      const command = elements.shift();
-      if (!command) {
-        throw new Error("Invalid fullCommand: " + options.fullCommand);
-      }
-      this.params = {
-        ...options,
-        command,
-        args: elements,
-        encoding: options.encoding || "utf-8",
-        encodingErrorHandler: options.encodingErrorHandler || "strict",
-      };
-    } else {
-      this.params = options;
-    }
-
-    this._name = options.name || `stdio: ${this.params.command}`;
-  }
-
-  /**
-   * The unique name identifier for this MCP server.
-   */
-  get name(): string {
-    return this._name;
+    this.params = options;
+    this.id = options.id || `stdio: ${this.params.command}`;
   }
 
   /**
@@ -79,17 +53,17 @@ export class MCPServerStdio extends BaseMCPServer {
       });
 
       this.session = new Client({
-        name: this._name,
+        name: this.id,
         version: "1.0.0",
       });
 
       await this.session.connect(this.transport);
 
       this.serverInitializeResult = {
-        serverInfo: { name: this._name, version: "1.0.0" },
+        serverInfo: { name: this.id, version: "1.0.0" },
       } as InitializeResult;
 
-      this.logger.debug(`Connected to MCP server: ${this._name}`);
+      this.logger.debug(`Connected to MCP server: ${this.id}`);
     } catch (e) {
       this.logger.error("Error initializing MCP server:", e);
       await this.close();

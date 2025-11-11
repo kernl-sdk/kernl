@@ -1,3 +1,11 @@
 export { BaseTool, FunctionTool, HostedTool, tool } from "./tool";
-export type { Tool, ToolResult } from "./types";
+export { Toolkit, FunctionToolkit, MCPToolkit } from "./toolkit";
+export type {
+  Tool,
+  ToolResult,
+  FunctionToolkitConfig,
+  MCPToolkitConfig,
+  ToolkitFilter,
+  ToolkitFilterContext,
+} from "./types";
 export type { ToolStatus } from "@/types/thread";

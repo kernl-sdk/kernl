@@ -3,7 +3,8 @@ import { LanguageModel, LanguageModelSettings } from "@/model";
 import { InputGuardrail, OutputGuardrail } from "@/guardrail";
 import { AgentHooks } from "@/lifecycle";
 import { Toolkit } from "@/tool/toolkit";
-import { DEFAULT_LANGUAGE_MODEL } from "@/providers/default";
+import { Tool } from "@/tool";
+// import { DEFAULT_LANGUAGE_MODEL } from "@/providers/default";
 
 import { MisconfiguredError } from "@/lib/error";
 
@@ -18,21 +19,19 @@ export class Agent<
   extends AgentHooks<TContext, TResponse>
   implements AgentConfig<TContext, TResponse>
 {
-  readonly version: "1.0";
   id: string;
   name: string;
   instructions: (context: Context<TContext>) => Promise<string> | string;
 
   model: LanguageModel;
   modelSettings: LanguageModelSettings;
-  toolkit: Toolkit<TContext>;
+  toolkits: Toolkit<TContext>[];
 
   // --- (TODO) ---
   // handoffDescription: string; // ??
   // handoffs: (Agent<any, TResponse> | Handoff<any, TResponse>)[];
   // ----------
 
-  //  // (agent)
   // /* Process/thread-group–wide signal state shared by all threads in the group: shared pending signals, job control
   // (stops/cont, group exit), rlimits, etc. */
   // signal: *struct signal_struct;
@@ -68,22 +67,23 @@ export class Agent<
 
   constructor(config: AgentConfig<TContext, TResponse>) {
     super();
-    if (typeof config.name !== "string" || config.name.trim() === "") {
-      throw new MisconfiguredError("Agent must have a name.");
+    if (config.id.trim() === "") {
+      throw new MisconfiguredError("Agent must have an id.");
     }
-    this.version = config.version;
     this.id = config.id;
     this.name = config.name;
     this.instructions =
       typeof config.instructions === "function"
         ? config.instructions
         : () => config.instructions as string;
-    this.model = config.model ?? DEFAULT_LANGUAGE_MODEL;
+    this.model = config.model as LanguageModel; // TODO: Add default model
     this.modelSettings = config.modelSettings ?? {};
-    this.toolkit = new Toolkit<TContext>({
-      tools: config.tools,
-      mcpServers: config.mcpServers,
-    });
+
+    this.toolkits = config.toolkits ?? [];
+    for (const toolkit of this.toolkits) {
+      toolkit.bind(this);
+    }
+
     this.guardrails = config.guardrails ?? { input: [], output: [] };
     if (config.responseType) {
       this.responseType = config.responseType;
@@ -117,6 +117,54 @@ export class Agent<
     //     }
     //   }
     // }
+  }
+
+  /**
+   * Get a specific tool by ID from all toolkits.
+   *
+   * @param id The tool ID to look up
+   * @returns The tool if found, undefined otherwise
+   */
+  tool(id: string): Tool<TContext> | undefined {
+    for (const toolkit of this.toolkits) {
+      const tool = toolkit.get(id);
+      if (tool) return tool;
+    }
+    return undefined;
+  }
+
+  /**
+   * Get all tools available from all toolkits for the given context.
+   * Checks for duplicate tool IDs across toolkits and throws an error if found.
+   *
+   * (TODO): Consider returning toolkits alongside tools so we can serialize them
+   * together and give agents more options for dealing with tool groups.
+   *
+   * @param context The context to use for filtering tools
+   * @returns Array of all available tools
+   * @throws {MisconfiguredError} If duplicate tool IDs are found across toolkits
+   */
+  async tools(context: Context<TContext>): Promise<Tool<TContext>[]> {
+    const allTools: Tool<TContext>[] = [];
+    const toolIds = new Set<string>();
+
+    for (const toolkit of this.toolkits) {
+      const tools = await toolkit.list(context);
+
+      // Check for duplicates
+      const duplicates = tools.map((t) => t.id).filter((id) => toolIds.has(id));
+
+      if (duplicates.length > 0) {
+        throw new MisconfiguredError(
+          `Duplicate tool IDs found across toolkits: ${duplicates.join(", ")}`,
+        );
+      }
+
+      tools.forEach((t) => toolIds.add(t.id));
+      allTools.push(...tools);
+    }
+
+    return allTools;
   }
 
   // async run<TContext>(

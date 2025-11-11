@@ -12,7 +12,7 @@ import type { TextResponse, ThreadEvent } from "./types/thread";
  * - If TResponse is "text" → output is string
  * - If TResponse is a ZodType → output is the inferred type from that schema
  */
-export type ResolvedAgentOutput<TResponse extends AgentResponseType> =
+export type ResolvedAgentResponse<TResponse extends AgentResponseType> =
   TResponse extends TextResponse
     ? string
     : TResponse extends ZodType
@@ -152,7 +152,7 @@ export interface OutputGuardrailFunctionArgs<
   TResponse extends AgentResponseType = TextResponse,
 > {
   agent: Agent<any, any>;
-  agentOutput: ResolvedAgentOutput<TResponse>; // ??
+  agentOutput: ResolvedAgentResponse<TResponse>; // ??
   context: Context<TContext>;
   /**
    * Additional details about the agent output.
@@ -211,7 +211,7 @@ export interface OutputGuardrailResult<
   /**
    * The output of the agent that ran.
    */
-  agentOutput: ResolvedAgentOutput<TResponse>; // ??
+  agentOutput: ResolvedAgentResponse<TResponse>; // ??
 
   /**
    * The agent that ran.

@@ -9,8 +9,8 @@ import type { MCPTool, MCPToolFilter } from "./types";
 /**
  * Converts an MCP tool definition into a function tool usable by the SDK.
  */
-export function mcpToFunctionTool(mcpTool: MCPTool, server: MCPServer) {
-  async function invoke(input: any, _context: UnknownContext) {
+export function mcpToFunctionTool(server: MCPServer, mcpTool: MCPTool) {
+  async function invoke(_ctx: UnknownContext, input: any) {
     const content = await server.callTool(mcpTool.name, input);
     return content.length === 1 ? content[0] : content;
   }
@@ -38,7 +38,7 @@ export function mcpToFunctionTool(mcpTool: MCPTool, server: MCPServer) {
  * Creates a static tool filter from allowed and blocked tool name lists.
  * Returns a filter function that can be used with MCP servers.
  */
-export function createMCPToolStaticFilter<TContext = any>(options?: {
+export function createMCPToolStaticFilter<TContext = UnknownContext>(options?: {
   allowed?: string[];
   blocked?: string[];
 }): MCPToolFilter<TContext> | undefined {

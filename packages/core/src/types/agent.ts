@@ -3,8 +3,7 @@ import { type ZodType } from "zod";
 import { Context, UnknownContext } from "@/context";
 import { LanguageModel, LanguageModelSettings } from "@/model";
 import { InputGuardrail, OutputGuardrail } from "@/guardrail";
-import { MCPServer } from "@/mcp/base";
-import { Tool } from "@/tool";
+import { Toolkit } from "@/tool";
 
 import { TextResponse } from "./thread";
 
@@ -15,12 +14,6 @@ export interface AgentConfig<
   TContext = UnknownContext,
   TResponse extends AgentResponseType = TextResponse,
 > {
-  /**
-   * The specification version of the agent interface. This will enable
-   * us to evolve the agent interface and retain backwards compatibility.
-   */
-  readonly version: "1.0";
-
   /* The unique identifier for the agent */
   id: string;
 
@@ -65,20 +58,29 @@ export interface AgentConfig<
   modelSettings?: LanguageModelSettings;
 
   /**
-   * A list of tools the agent can use. The Agent will construct a Toolkit from these tools.
-   */
-  tools?: Tool<TContext>[];
-
-  /**
-   * A list of [Model Context Protocol](https://modelcontextprotocol.io/) servers the agent can use.
-   * Every time the agent runs, it will include tools from these servers in the list of available
-   * tools.
+   * A list of toolkits the agent can use. Toolkits are collections of related tools
+   * that can be static (FunctionToolkit) or dynamic (MCPToolkit).
    *
-   * NOTE: You are expected to manage the lifecycle of these servers. Specifically, you must call
-   * `server.connect()` before passing it to the agent, and `server.cleanup()` when the server is
-   * no longer needed.
+   * @example
+   * ```typescript
+   * const myTools = new FunctionToolkit({
+   *   id: "custom",
+   *   tools: [tool1, tool2]
+   * });
+   *
+   * const github = new MCPToolkit({
+   *   id: "github",
+   *   server: githubServer
+   * });
+   *
+   * const agent = new Agent({
+   *   name: "Assistant",
+   *   instructions: "...",
+   *   toolkits: [myTools, github]
+   * });
+   * ```
    */
-  mcpServers?: MCPServer[];
+  toolkits?: Toolkit<TContext>[];
 
   /**
    * A list of checks that run in parallel to the agent's execution on the input + output for the agent,

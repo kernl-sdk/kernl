@@ -5,8 +5,9 @@ import { Thread } from "../thread";
 import { Agent } from "@/agent";
 import { Kernl } from "@/kernl";
 import { Context } from "@/context";
-import { tool } from "@/tool/tool";
+import { tool, FunctionToolkit } from "@/tool";
 import { Usage } from "@/usage";
+import { ModelBehaviorError } from "@/lib/error";
 
 import type { LanguageModel, LanguageModelRequest } from "@/model";
 import type { ThreadEvent } from "@/types/thread";
@@ -43,13 +44,12 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        version: "1.0",
       });
 
       const kernl = new Kernl();
       const thread = new Thread(kernl, agent, "Hello world");
 
-      const state = await thread.execute();
+      const result = await thread.execute();
 
       // Access private history via type assertion for testing
       const history = (thread as any).history as ThreadEvent[];
@@ -69,8 +69,8 @@ describe("Thread", () => {
         },
       ]);
 
-      expect(state.tick).toBe(1);
-      expect(state.modelResponses).toHaveLength(1);
+      expect(result.state.tick).toBe(1);
+      expect(result.state.modelResponses).toHaveLength(1);
     });
 
     it("should convert string input to UserMessage", async () => {
@@ -103,7 +103,6 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        version: "1.0",
       });
 
       const kernl = new Kernl();
@@ -152,7 +151,6 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        version: "1.0",
       });
 
       const events: ThreadEvent[] = [
@@ -246,14 +244,13 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        tools: [echoTool],
-        version: "1.0",
+        toolkits: [new FunctionToolkit({ id: "test-tools", tools: [echoTool] })],
       });
 
       const kernl = new Kernl();
       const thread = new Thread(kernl, agent, "Use the echo tool");
 
-      const state = await thread.execute();
+      const result = await thread.execute();
 
       const history = (thread as any).history as ThreadEvent[];
 
@@ -298,8 +295,8 @@ describe("Thread", () => {
         },
       ]);
 
-      expect(state.tick).toBe(2);
-      expect(state.modelResponses).toHaveLength(2);
+      expect(result.state.tick).toBe(2);
+      expect(result.state.modelResponses).toHaveLength(2);
     });
 
     it("should accumulate history across multiple turns", async () => {
@@ -393,20 +390,19 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        tools: [simpleTool],
-        version: "1.0",
+        toolkits: [new FunctionToolkit({ id: "test-tools", tools: [simpleTool] })],
       });
 
       const kernl = new Kernl();
       const thread = new Thread(kernl, agent, "Start");
 
-      const state = await thread.execute();
+      const result = await thread.execute();
 
       const history = (thread as any).history as ThreadEvent[];
 
       // Should have: 1 user msg + 3 assistant msgs + 2 tool calls + 2 tool results = 8 events
       expect(history).toHaveLength(8);
-      expect(state.tick).toBe(3);
+      expect(result.state.tick).toBe(3);
     });
   });
 
@@ -472,8 +468,7 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        tools: [], // No tools available
-        version: "1.0",
+        toolkits: [], // No tools available
       });
 
       const kernl = new Kernl();
@@ -565,8 +560,7 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        tools: [failingTool],
-        version: "1.0",
+        toolkits: [new FunctionToolkit({ id: "test-tools", tools: [failingTool] })],
       });
 
       const kernl = new Kernl();
@@ -655,8 +649,7 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        tools: [addTool],
-        version: "1.0",
+        toolkits: [new FunctionToolkit({ id: "test-tools", tools: [addTool] })],
       });
 
       const kernl = new Kernl();
@@ -760,8 +753,7 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        tools: [tool1, tool2],
-        version: "1.0",
+        toolkits: [new FunctionToolkit({ id: "test-tools", tools: [tool1, tool2] })],
       });
 
       const kernl = new Kernl();
@@ -864,16 +856,15 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        tools: [simpleTool],
-        version: "1.0",
+        toolkits: [new FunctionToolkit({ id: "test-tools", tools: [simpleTool] })],
       });
 
       const kernl = new Kernl();
       const thread = new Thread(kernl, agent, "test");
 
-      const state = await thread.execute();
+      const result = await thread.execute();
 
-      expect(state.tick).toBe(3);
+      expect(result.state.tick).toBe(3);
     });
 
     it("should accumulate model responses", async () => {
@@ -942,18 +933,17 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        tools: [simpleTool],
-        version: "1.0",
+        toolkits: [new FunctionToolkit({ id: "test-tools", tools: [simpleTool] })],
       });
 
       const kernl = new Kernl();
       const thread = new Thread(kernl, agent, "test");
 
-      const state = await thread.execute();
+      const result = await thread.execute();
 
-      expect(state.modelResponses).toHaveLength(2);
-      expect(state.modelResponses[0].usage.inputTokens).toBe(10);
-      expect(state.modelResponses[1].usage.inputTokens).toBe(20);
+      expect(result.state.modelResponses).toHaveLength(2);
+      expect(result.state.modelResponses[0].usage.inputTokens).toBe(10);
+      expect(result.state.modelResponses[1].usage.inputTokens).toBe(20);
     });
   });
 
@@ -988,15 +978,14 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        version: "1.0",
       });
 
       const kernl = new Kernl();
       const thread = new Thread(kernl, agent, "test");
 
-      const state = await thread.execute();
+      const result = await thread.execute();
 
-      expect(state.tick).toBe(1);
+      expect(result.state.tick).toBe(1);
     });
 
     it("should continue when assistant message has tool calls", async () => {
@@ -1067,17 +1056,403 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        tools: [simpleTool],
-        version: "1.0",
+        toolkits: [new FunctionToolkit({ id: "test-tools", tools: [simpleTool] })],
       });
 
       const kernl = new Kernl();
       const thread = new Thread(kernl, agent, "test");
 
-      const state = await thread.execute();
+      const result = await thread.execute();
 
       // Should have made 2 calls - first with tool, second without
-      expect(state.tick).toBe(2);
+      expect(result.state.tick).toBe(2);
+    });
+  });
+
+  describe("Final Output Parsing", () => {
+    it("should return text output when responseType is 'text'", async () => {
+      const model: LanguageModel = {
+        async generate(req: LanguageModelRequest) {
+          return {
+            events: [
+              {
+                kind: "message" as const,
+                id: "msg_1",
+                role: "assistant" as const,
+                content: [{ kind: "text" as const, text: "Hello, world!" }],
+              },
+            ],
+            usage: new Usage({
+              requests: 1,
+              inputTokens: 2,
+              outputTokens: 2,
+              totalTokens: 4,
+            }),
+          };
+        },
+        stream: async function* () {
+          throw new Error("Not implemented");
+        },
+      };
+
+      const agent = new Agent({
+        id: "test",
+        name: "Test",
+        instructions: "Test agent",
+        model,
+        responseType: "text",
+      });
+
+      const kernl = new Kernl();
+      const thread = new Thread(kernl, agent, "test");
+
+      const result = await thread.execute();
+
+      expect(result.response).toBe("Hello, world!");
+      expect(result.state.tick).toBe(1);
+    });
+
+    it("should parse and validate structured output with valid JSON", async () => {
+      const responseSchema = z.object({
+        name: z.string(),
+        age: z.number(),
+        email: z.string().email(),
+      });
+
+      const model: LanguageModel = {
+        async generate(req: LanguageModelRequest) {
+          return {
+            events: [
+              {
+                kind: "message" as const,
+                id: "msg_1",
+                role: "assistant" as const,
+                content: [
+                  {
+                    kind: "text" as const,
+                    text: '{"name": "Alice", "age": 30, "email": "alice@example.com"}',
+                  },
+                ],
+              },
+            ],
+            usage: new Usage({
+              requests: 1,
+              inputTokens: 2,
+              outputTokens: 2,
+              totalTokens: 4,
+            }),
+          };
+        },
+        stream: async function* () {
+          throw new Error("Not implemented");
+        },
+      };
+
+      const agent = new Agent({
+        id: "test",
+        name: "Test",
+        instructions: "Test agent",
+        model,
+        responseType: responseSchema,
+      });
+
+      const kernl = new Kernl();
+      const thread = new Thread(kernl, agent, "test");
+
+      const result = await thread.execute();
+
+      expect(result.response).toEqual({
+        name: "Alice",
+        age: 30,
+        email: "alice@example.com",
+      });
+    });
+
+    it("should throw ModelBehaviorError for invalid JSON syntax", async () => {
+      const responseSchema = z.object({
+        name: z.string(),
+      });
+
+      const model: LanguageModel = {
+        async generate(req: LanguageModelRequest) {
+          return {
+            events: [
+              {
+                kind: "message" as const,
+                id: "msg_1",
+                role: "assistant" as const,
+                content: [
+                  {
+                    kind: "text" as const,
+                    text: '{"name": "Alice"', // Invalid JSON - missing closing brace
+                  },
+                ],
+              },
+            ],
+            usage: new Usage({
+              requests: 1,
+              inputTokens: 2,
+              outputTokens: 2,
+              totalTokens: 4,
+            }),
+          };
+        },
+        stream: async function* () {
+          throw new Error("Not implemented");
+        },
+      };
+
+      const agent = new Agent({
+        id: "test",
+        name: "Test",
+        instructions: "Test agent",
+        model,
+        responseType: responseSchema,
+      });
+
+      const kernl = new Kernl();
+      const thread = new Thread(kernl, agent, "test");
+
+      await expect(thread.execute()).rejects.toThrow(ModelBehaviorError);
+    });
+
+    it("should throw ModelBehaviorError when JSON doesn't match schema", async () => {
+      const responseSchema = z.object({
+        name: z.string(),
+        age: z.number(),
+      });
+
+      const model: LanguageModel = {
+        async generate(req: LanguageModelRequest) {
+          return {
+            events: [
+              {
+                kind: "message" as const,
+                id: "msg_1",
+                role: "assistant" as const,
+                content: [
+                  {
+                    kind: "text" as const,
+                    text: '{"name": "Alice", "age": "thirty"}', // age is string instead of number
+                  },
+                ],
+              },
+            ],
+            usage: new Usage({
+              requests: 1,
+              inputTokens: 2,
+              outputTokens: 2,
+              totalTokens: 4,
+            }),
+          };
+        },
+        stream: async function* () {
+          throw new Error("Not implemented");
+        },
+      };
+
+      const agent = new Agent({
+        id: "test",
+        name: "Test",
+        instructions: "Test agent",
+        model,
+        responseType: responseSchema,
+      });
+
+      const kernl = new Kernl();
+      const thread = new Thread(kernl, agent, "test");
+
+      await expect(thread.execute()).rejects.toThrow(ModelBehaviorError);
+    });
+
+    it("should throw ModelBehaviorError when required fields are missing", async () => {
+      const responseSchema = z.object({
+        name: z.string(),
+        age: z.number(),
+        email: z.string(),
+      });
+
+      const model: LanguageModel = {
+        async generate(req: LanguageModelRequest) {
+          return {
+            events: [
+              {
+                kind: "message" as const,
+                id: "msg_1",
+                role: "assistant" as const,
+                content: [
+                  {
+                    kind: "text" as const,
+                    text: '{"name": "Alice", "age": 30}', // missing email
+                  },
+                ],
+              },
+            ],
+            usage: new Usage({
+              requests: 1,
+              inputTokens: 2,
+              outputTokens: 2,
+              totalTokens: 4,
+            }),
+          };
+        },
+        stream: async function* () {
+          throw new Error("Not implemented");
+        },
+      };
+
+      const agent = new Agent({
+        id: "test",
+        name: "Test",
+        instructions: "Test agent",
+        model,
+        responseType: responseSchema,
+      });
+
+      const kernl = new Kernl();
+      const thread = new Thread(kernl, agent, "test");
+
+      await expect(thread.execute()).rejects.toThrow(ModelBehaviorError);
+    });
+
+    it("should handle nested structured output", async () => {
+      const responseSchema = z.object({
+        user: z.object({
+          name: z.string(),
+          profile: z.object({
+            bio: z.string(),
+            age: z.number(),
+          }),
+        }),
+        metadata: z.object({
+          timestamp: z.string(),
+        }),
+      });
+
+      const model: LanguageModel = {
+        async generate(req: LanguageModelRequest) {
+          return {
+            events: [
+              {
+                kind: "message" as const,
+                id: "msg_1",
+                role: "assistant" as const,
+                content: [
+                  {
+                    kind: "text" as const,
+                    text: JSON.stringify({
+                      user: {
+                        name: "Bob",
+                        profile: { bio: "Engineer", age: 25 },
+                      },
+                      metadata: { timestamp: "2024-01-01" },
+                    }),
+                  },
+                ],
+              },
+            ],
+            usage: new Usage({
+              requests: 1,
+              inputTokens: 2,
+              outputTokens: 2,
+              totalTokens: 4,
+            }),
+          };
+        },
+        stream: async function* () {
+          throw new Error("Not implemented");
+        },
+      };
+
+      const agent = new Agent({
+        id: "test",
+        name: "Test",
+        instructions: "Test agent",
+        model,
+        responseType: responseSchema,
+      });
+
+      const kernl = new Kernl();
+      const thread = new Thread(kernl, agent, "test");
+
+      const result = await thread.execute();
+
+      expect(result.response).toEqual({
+        user: {
+          name: "Bob",
+          profile: { bio: "Engineer", age: 25 },
+        },
+        metadata: { timestamp: "2024-01-01" },
+      });
+    });
+
+    it("should continue loop when no text in assistant message", async () => {
+      let callCount = 0;
+
+      const model: LanguageModel = {
+        async generate(req: LanguageModelRequest) {
+          callCount++;
+
+          // First call: return empty message (no text)
+          if (callCount === 1) {
+            return {
+              events: [
+                {
+                  kind: "message" as const,
+                  id: "msg_1",
+                  role: "assistant" as const,
+                  content: [], // No content
+                },
+              ],
+              usage: new Usage({
+                requests: 1,
+                inputTokens: 2,
+                outputTokens: 2,
+                totalTokens: 4,
+              }),
+            };
+          }
+
+          // Second call: return message with text
+          return {
+            events: [
+              {
+                kind: "message" as const,
+                id: "msg_2",
+                role: "assistant" as const,
+                content: [{ kind: "text" as const, text: "Now I have text" }],
+              },
+            ],
+            usage: new Usage({
+              requests: 1,
+              inputTokens: 2,
+              outputTokens: 2,
+              totalTokens: 4,
+            }),
+          };
+        },
+        stream: async function* () {
+          throw new Error("Not implemented");
+        },
+      };
+
+      const agent = new Agent({
+        id: "test",
+        name: "Test",
+        instructions: "Test agent",
+        model,
+        responseType: "text",
+      });
+
+      const kernl = new Kernl();
+      const thread = new Thread(kernl, agent, "test");
+
+      const result = await thread.execute();
+
+      // Should have made 2 calls
+      expect(callCount).toBe(2);
+      expect(result.response).toBe("Now I have text");
+      expect(result.state.tick).toBe(2);
     });
   });
 });

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Task } from "@/sched/task";
+import { Task } from "@/task";
 import { Context } from "@/context";
 import { LanguageModel } from "@/model";
 import { JSONValue } from "@/serde/json";
@@ -39,6 +39,20 @@ export interface PerformActionsResult {
    * Tool calls that require approval before execution
    */
   pendingApprovals: ToolCall[];
+}
+
+/**
+ * Result of thread execution
+ */
+export interface ThreadExecuteResult<TResponse = any> {
+  /**
+   * The final parsed response from the agent
+   */
+  response: TResponse;
+  /**
+   * The thread state at completion
+   */
+  state: any; // Will be ThreadState, but avoiding circular dependency
 }
 
 export interface ThreadOptions<TContext> {

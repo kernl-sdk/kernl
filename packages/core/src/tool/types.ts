@@ -2,6 +2,7 @@ import { z, type ZodType } from "zod";
 
 import { Agent } from "@/agent";
 import { Context, UnknownContext } from "@/context";
+import { MCPServer } from "@/mcp/base";
 import type { ToolStatus } from "@/types/thread";
 
 import type { FunctionTool, HostedTool } from "./tool";
@@ -72,6 +73,83 @@ export type ToolConfig<
    */
   isEnabled?: ToolEnabledOption<TContext>;
 };
+
+/**
+ * Context provided to toolkit filters during tool resolution.
+ */
+export interface ToolkitFilterContext<TContext = UnknownContext> {
+  context: Context<TContext>;
+  agent: Agent<TContext, any>;
+  toolkitId: string;
+}
+
+/**
+ * Toolkit-level filter for tools.
+ *
+ * Operates at the application layer on converted Tool objects.
+ * Use this for dynamic, context-aware filtering based on runtime state
+ * (e.g., user permissions, current workflow, etc.).
+ *
+ * This is the second filter in the pipeline (after MCPToolFilter for MCP tools).
+ *
+ * @example
+ * ```typescript
+ * const toolkit = new MCPToolkit({
+ *   id: "github",
+ *   server: githubServer,
+ *   filter: async (ctx, tool) => {
+ *     // Only allow read tools for non-admin users
+ *     if (!ctx.context.data.isAdmin) {
+ *       return tool.id.startsWith("read_");
+ *     }
+ *     return true;
+ *   }
+ * });
+ * ```
+ */
+export type ToolkitFilter<TContext = UnknownContext> = (
+  context: ToolkitFilterContext<TContext>,
+  tool: Tool<TContext>,
+) => Promise<boolean> | boolean;
+
+/**
+ * Configuration for FunctionToolkit.
+ */
+export interface FunctionToolkitConfig<TContext = UnknownContext> {
+  /**
+   * Unique identifier for this toolkit.
+   */
+  id: string;
+
+  /**
+   * Array of tools to include in this toolkit.
+   */
+  tools: Tool<TContext>[];
+}
+
+/**
+ * Configuration for MCPToolkit.
+ */
+export interface MCPToolkitConfig<TContext = UnknownContext> {
+  /**
+   * Unique identifier for this toolkit.
+   */
+  id: string;
+
+  /**
+   * The MCP server instance to wrap.
+   */
+  server: MCPServer;
+
+  /**
+   * Toolkit-level filter to control which tools are exposed to the agent.
+   * Defaults to allowing all tools if not provided.
+   *
+   * This is applied after the server's toolFilter (if any). Use this for
+   * dynamic, context-aware filtering. Use server.toolFilter for static filtering.
+   */
+  filter?: ToolkitFilter<TContext>;
+}
 
 /**
  * Type of tool
