@@ -1,5 +1,14 @@
 # @kernl/cli
 
+## 0.2.1
+
+### Patch Changes
+
+- Fix module resolution errors after kernl init and add missing exports
+  - Update template tsconfig to use moduleResolution "bundler" for proper package.json exports resolution
+  - Export tool, FunctionToolkit, and MCPToolkit from kernl package
+  - Refactor CLI template tools into individual files with better structure
+
 ## 0.2.0
 
 ### Minor Changes
