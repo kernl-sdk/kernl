@@ -1,5 +1,11 @@
 # @kernl/core
 
+## 0.1.4
+
+### Patch Changes
+
+- Add description field to Toolkit base class and implementations
+
 ## 0.1.3
 
 ### Patch Changes
