@@ -25,6 +25,11 @@ export abstract class Toolkit<TContext = UnknownContext> {
   abstract readonly id: string;
 
   /**
+   * Description of what this toolkit provides
+   */
+  abstract readonly description: string;
+
+  /**
    * The agent this toolkit is bound to (if any)
    */
   protected agent?: Agent<TContext, any>;
@@ -79,6 +84,7 @@ export class FunctionToolkit<
   TContext = UnknownContext,
 > extends Toolkit<TContext> {
   readonly id: string;
+  readonly description: string;
   private tools: Map<string, Tool<TContext>>;
 
   /**
@@ -89,6 +95,7 @@ export class FunctionToolkit<
   constructor(config: FunctionToolkitConfig<TContext>) {
     super();
     this.id = config.id;
+    this.description = config.description ?? "";
     this.tools = new Map(config.tools.map((t) => [t.id, t]));
   }
 
@@ -146,6 +153,7 @@ export class FunctionToolkit<
  */
 export class MCPToolkit<TContext = UnknownContext> extends Toolkit<TContext> {
   readonly id: string;
+  readonly description: string;
   private server: MCPServer;
   private cache: Map<string, Tool<TContext>>;
   private filter: ToolkitFilter<TContext>;
@@ -161,6 +169,7 @@ export class MCPToolkit<TContext = UnknownContext> extends Toolkit<TContext> {
   constructor(config: MCPToolkitConfig<TContext>) {
     super();
     this.id = config.id;
+    this.description = config.description ?? "";
     this.server = config.server;
     this.filter = config.filter ?? (() => true);
     this.cache = new Map();

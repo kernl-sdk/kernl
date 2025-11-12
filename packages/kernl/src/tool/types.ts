@@ -122,6 +122,11 @@ export interface FunctionToolkitConfig<TContext = UnknownContext> {
   id: string;
 
   /**
+   * Optional description of what this toolkit provides.
+   */
+  description?: string;
+
+  /**
    * Array of tools to include in this toolkit.
    */
   tools: Tool<TContext>[];
@@ -135,6 +140,11 @@ export interface MCPToolkitConfig<TContext = UnknownContext> {
    * Unique identifier for this toolkit.
    */
   id: string;
+
+  /**
+   * Optional description of what this toolkit provides.
+   */
+  description?: string;
 
   /**
    * The MCP server instance to wrap.

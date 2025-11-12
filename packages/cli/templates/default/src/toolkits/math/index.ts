@@ -7,6 +7,6 @@ import { divide } from "./divide";
 
 export const math = new FunctionToolkit({
   id: "math",
-  description: "",
+  description: "A collection of basic mathematical operations",
   tools: [add, subtract, multiply, divide],
 });
