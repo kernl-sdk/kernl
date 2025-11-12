@@ -85,7 +85,7 @@ export interface LanguageModelResponse {
   /**
    * Warnings for the call, e.g. unsupported settings.
    */
-  warnings: Array<LanguageModelWarning>;
+  warnings: LanguageModelWarning[];
 
   /**
    * Raw response data from the underlying model provider.
@@ -141,10 +141,9 @@ export interface LanguageModelUsage {
 }
 
 /**
-Warning from the model provider for this call. The call will proceed, but e.g.
-some settings might not be supported, which can lead to suboptimal results.
+ * Warning from the model provider for this call. The call will proceed, but e.g.
+ * some settings might not be supported, which can lead to suboptimal results.
  */
-// TODO rename to LanguageModelV3Warning
 export type LanguageModelWarning =
   | {
       type: "unsupported-setting";

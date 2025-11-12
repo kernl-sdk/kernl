@@ -51,7 +51,7 @@ export interface LanguageModelItemBase extends SharedBase {
  */
 export interface PartBase extends SharedBase {
   /** Optional metadata associated with this part. */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -101,7 +101,7 @@ export interface DataPart extends PartBase {
   /**
    * The structured data content.
    */
-  data: Record<string, any>;
+  data: Record<string, unknown>;
 }
 
 export type MessagePart = TextPart | FilePart | DataPart;
@@ -128,7 +128,7 @@ export interface Reasoning extends LanguageModelItemBase {
  * This enables new features to be added to be added by a model provider without breaking the protocol.
  */
 export interface Unknown extends LanguageModelItemBase {
-  readonly kind: "reasoning";
+  readonly kind: "unknown";
 }
 
 // ----------------------------
@@ -151,7 +151,7 @@ export interface MessageBase extends SharedBase {
   /**
    * Optional additional metadata for the message
    */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface SystemMessage extends MessageBase {
