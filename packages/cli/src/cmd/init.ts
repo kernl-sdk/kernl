@@ -15,7 +15,7 @@ interface InitOptions {
 }
 
 export const init = new Command("init")
-  .description("Initialize a new Kernl application")
+  .description("Initialize a new kernl application")
   .argument("<project-name>", "Name of the project")
   .option("--skip-install", "Skip dependency installation", false)
   .option("--skip-git", "Skip git initialization", false)

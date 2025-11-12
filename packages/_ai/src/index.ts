@@ -1,5 +1,5 @@
 /**
- * @kernl-sdk/ai - AI SDK adapter for Kernl
+ * @kernl-sdk/ai - AI SDK adapter for kernl
  *
  * Universal provider support via Vercel AI SDK v5.
  *

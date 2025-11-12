@@ -2,7 +2,7 @@ import { openai as createOpenAIModel } from "@ai-sdk/openai";
 import { AISDKLanguageModel } from "../language-model";
 
 /**
- * Create a Kernl-compatible OpenAI language model.
+ * Create a kernl-compatible OpenAI language model.
  *
  * @example
  * ```ts

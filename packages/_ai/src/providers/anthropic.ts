@@ -2,7 +2,7 @@ import { anthropic as createAnthropicModel } from "@ai-sdk/anthropic";
 import { AISDKLanguageModel } from "../language-model";
 
 /**
- * Create a Kernl-compatible Anthropic language model.
+ * Create a kernl-compatible Anthropic language model.
  *
  * @example
  * ```ts

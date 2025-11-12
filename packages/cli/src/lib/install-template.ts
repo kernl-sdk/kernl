@@ -16,7 +16,7 @@ interface InstallTemplateOptions {
 }
 
 /**
- * Install the default Kernl template to the target directory.
+ * Install the default kernl template to the target directory.
  */
 export async function installTemplate({
   appName,

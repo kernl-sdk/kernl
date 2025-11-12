@@ -1,7 +1,7 @@
 /**
  * Protocol Constants
  *
- * Centralized constants for the Kernl protocol.
+ * Centralized constants for the kernl protocol.
  */
 
 // ----------------------------

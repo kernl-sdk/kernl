@@ -2,7 +2,7 @@ import { google as createGoogleModel } from "@ai-sdk/google";
 import { AISDKLanguageModel } from "../language-model";
 
 /**
- * Create a Kernl-compatible Google Generative AI language model.
+ * Create a kernl-compatible Google Generative AI language model.
  *
  * @example
  * ```ts

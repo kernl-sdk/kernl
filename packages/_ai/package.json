@@ -1,7 +1,7 @@
 {
   "name": "@kernl-sdk/ai",
   "version": "0.1.1",
-  "description": "AI SDK adapter for Kernl - Universal provider support via Vercel AI SDK",
+  "description": "AI SDK adapter for kernl - Universal provider support via Vercel AI SDK",
   "keywords": [
     "kernl",
     "ai",

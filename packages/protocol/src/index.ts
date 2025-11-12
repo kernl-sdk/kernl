@@ -1,5 +1,5 @@
 /**
- * Kernl Provider Protocol
+ * kernl Provider Protocol
  *
  * Standard interfaces and types for AI model providers.
  */

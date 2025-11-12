@@ -1,0 +1,19 @@
+{
+  "name": "example-llm-tmp",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@kernl-sdk/ai": "workspace:*",
+    "@kernl-sdk/protocol": "workspace:*",
+    "@ai-sdk/anthropic": "^3.0.0-beta.53"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.9.2"
+  }
+}

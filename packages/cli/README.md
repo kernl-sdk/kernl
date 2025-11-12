@@ -1,6 +1,6 @@
 # @kernl-sdk/cli
 
-CLI for scaffolding and managing Kernl applications.
+CLI for scaffolding and managing kernl applications.
 
 ## Installation
 
@@ -12,7 +12,7 @@ pnpm add -g @kernl-sdk/cli
 
 ## Usage
 
-### Create a new Kernl application
+### Create a new kernl application
 
 ```bash
 kernl init my-app
@@ -22,7 +22,7 @@ pnpm dev
 
 This will:
 - Create a new directory with your project name
-- Scaffold a basic Kernl application structure
+- Scaffold a basic kernl application structure
 - Set up an example agent (Jarvis) with a math toolkit
 - Install dependencies
 - Initialize a git repository

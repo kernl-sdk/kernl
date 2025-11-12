@@ -1,5 +1,5 @@
 /**
- * Bidirectional codec for converting between Kernl protocol types and provider-specific types.
+ * Bidirectional codec for converting between kernl protocol types and provider-specific types.
  *
  * @example
  * ```typescript
@@ -11,12 +11,12 @@
  */
 export interface Codec<TKernl, TProvider> {
   /**
-   * Transform from Kernl protocol format to provider format.
+   * Transform from kernl protocol format to provider format.
    */
   encode: (value: TKernl) => TProvider;
 
   /**
-   * Transform from provider format to Kernl protocol format.
+   * Transform from provider format to kernl protocol format.
    */
   decode: (value: TProvider) => TKernl;
 }
