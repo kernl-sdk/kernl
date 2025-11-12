@@ -1,5 +1,11 @@
 # @kernl/core
 
+## 0.1.2
+
+### Patch Changes
+
+- Fix dependencies to use correct @kernl-sdk scope
+
 ## 0.1.1
 
 ### Patch Changes
