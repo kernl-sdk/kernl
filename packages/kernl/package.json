@@ -1,6 +1,25 @@
 {
   "name": "kernl",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "description": "A modern AI agent framework with MCP integration",
+  "keywords": [
+    "kernl",
+    "ai",
+    "agent",
+    "framework",
+    "mcp"
+  ],
+  "author": "dremnik",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dremnik/kernl.git",
+    "directory": "packages/kernl"
+  },
+  "homepage": "https://github.com/dremnik/kernl#readme",
+  "bugs": {
+    "url": "https://github.com/dremnik/kernl/issues"
+  },
   "type": "module",
   "exports": {
     ".": {
@@ -18,8 +37,8 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@kernl/protocol": "workspace:*",
-    "@kernl/shared": "workspace:^",
+    "@kernl-sdk/protocol": "workspace:*",
+    "@kernl-sdk/shared": "workspace:^",
     "@modelcontextprotocol/sdk": "^1.20.2",
     "pino": "^9.6.0",
     "zod": "^4.1.12"

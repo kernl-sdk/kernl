@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import type { LanguageModelRequestSettings } from "@kernl/protocol";
+import type { LanguageModelRequestSettings } from "@kernl-sdk/protocol";
 
 import { MODEL_SETTINGS } from "../settings";
 

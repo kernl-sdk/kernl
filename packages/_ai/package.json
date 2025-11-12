@@ -1,6 +1,6 @@
 {
-  "name": "@kernl/ai",
-  "version": "0.1.0",
+  "name": "@kernl-sdk/ai",
+  "version": "0.1.1",
   "description": "AI SDK adapter for Kernl - Universal provider support via Vercel AI SDK",
   "keywords": [
     "kernl",
@@ -9,6 +9,17 @@
     "llm",
     "adapter"
   ],
+  "author": "dremnik",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dremnik/kernl.git",
+    "directory": "packages/_ai"
+  },
+  "homepage": "https://github.com/dremnik/kernl#readme",
+  "bugs": {
+    "url": "https://github.com/dremnik/kernl/issues"
+  },
   "type": "module",
   "exports": {
     ".": {
@@ -39,7 +50,7 @@
   },
   "peerDependencies": {
     "@ai-sdk/provider": "^3.0.0-beta.15",
-    "@kernl/protocol": "workspace:*"
+    "@kernl-sdk/protocol": "workspace:*"
   },
   "peerDependenciesMeta": {
     "@ai-sdk/anthropic": {
@@ -63,6 +74,6 @@
     "vitest": "^4.0.8"
   },
   "dependencies": {
-    "@kernl/shared": "workspace:^"
+    "@kernl-sdk/shared": "workspace:^"
   }
 }

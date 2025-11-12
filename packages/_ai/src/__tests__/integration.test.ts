@@ -275,7 +275,7 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
               kind: "function",
               name: "calculate",
               description: "Perform a mathematical calculation",
-              inputSchema: {
+              parameters: {
                 type: "object",
                 properties: {
                   expression: {
@@ -328,7 +328,7 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
               kind: "function",
               name: "get_weather",
               description: "Get weather for a city",
-              inputSchema: {
+              parameters: {
                 type: "object",
                 properties: {
                   city: {
@@ -376,7 +376,7 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
               kind: "function",
               name: "get_weather",
               description: "Get weather for a city",
-              inputSchema: {
+              parameters: {
                 type: "object",
                 properties: {
                   city: {

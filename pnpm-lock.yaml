@@ -26,10 +26,10 @@ importers:
       '@ai-sdk/anthropic':
         specifier: ^3.0.0-beta.53
         version: 3.0.0-beta.53(zod@4.1.12)
-      '@kernl/ai':
+      '@kernl-sdk/ai':
         specifier: workspace:*
         version: link:../../packages/_ai
-      '@kernl/protocol':
+      '@kernl-sdk/protocol':
         specifier: workspace:*
         version: link:../../packages/protocol
     devDependencies:
@@ -45,10 +45,10 @@ importers:
 
   packages/_ai:
     dependencies:
-      '@kernl/protocol':
+      '@kernl-sdk/protocol':
         specifier: workspace:*
         version: link:../protocol
-      '@kernl/shared':
+      '@kernl-sdk/shared':
         specifier: workspace:^
         version: link:../shared
     devDependencies:
@@ -85,9 +85,6 @@ importers:
       fast-glob:
         specifier: ^3.3.3
         version: 3.3.3
-      kernl:
-        specifier: workspace:*
-        version: link:../kernl
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
@@ -107,10 +104,10 @@ importers:
 
   packages/kernl:
     dependencies:
-      '@kernl/protocol':
+      '@kernl-sdk/protocol':
         specifier: workspace:*
         version: link:../protocol
-      '@kernl/shared':
+      '@kernl-sdk/shared':
         specifier: workspace:^
         version: link:../shared
       '@modelcontextprotocol/sdk':

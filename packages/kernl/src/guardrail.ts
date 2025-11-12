@@ -1,6 +1,6 @@
 import { z, type ZodType } from "zod";
 
-import { LanguageModelResponse } from "@kernl/protocol";
+import { LanguageModelResponse } from "@kernl-sdk/protocol";
 
 import { Agent } from "./agent";
 import { Context, UnknownContext } from "./context";

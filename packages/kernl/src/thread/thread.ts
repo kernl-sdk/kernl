@@ -12,8 +12,8 @@ import {
   LanguageModelResponse,
   LanguageModelItem,
   FAILED,
-} from "@kernl/protocol";
-import { randomID, filter } from "@kernl/shared/lib";
+} from "@kernl-sdk/protocol";
+import { randomID, filter } from "@kernl-sdk/shared/lib";
 
 import type {
   ActionSet,

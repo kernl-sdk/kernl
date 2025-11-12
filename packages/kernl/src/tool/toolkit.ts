@@ -3,7 +3,7 @@ import type { Context, UnknownContext } from "@/context";
 
 import { MCPServer } from "@/mcp/base";
 import { mcpToFunctionTool } from "@/mcp/utils";
-import { filter } from "@kernl/shared/lib";
+import { filter } from "@kernl-sdk/shared/lib";
 
 import type { Tool } from ".";
 import type {

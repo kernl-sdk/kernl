@@ -1,3 +1,3 @@
 /**
- * @kernl/shared - Shared utilities for Kernl
+ * @kernl-sdk/shared - Shared utilities for Kernl
  */

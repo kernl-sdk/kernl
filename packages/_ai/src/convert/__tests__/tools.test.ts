@@ -14,7 +14,7 @@ describe("TOOL codec", () => {
         kind: "function",
         name: "get_weather",
         description: "Get current weather for a location",
-        inputSchema: {
+        parameters: {
           type: "object",
           properties: {
             city: { type: "string" },
@@ -42,7 +42,7 @@ describe("TOOL codec", () => {
       const result = TOOL.encode({
         kind: "function",
         name: "simple_tool",
-        inputSchema: {
+        parameters: {
           type: "object",
           properties: {},
         },
@@ -65,7 +65,7 @@ describe("TOOL codec", () => {
         kind: "function",
         name: "search",
         description: "Search for information",
-        inputSchema: {
+        parameters: {
           type: "object",
           properties: {
             query: {

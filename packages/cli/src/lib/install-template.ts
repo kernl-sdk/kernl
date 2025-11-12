@@ -54,7 +54,7 @@ export async function installTemplate({
     },
     dependencies: {
       kernl: "latest",
-      "@kernl/ai": "latest",
+      "@kernl-sdk/ai": "latest",
       zod: "^4.1.12",
     },
     devDependencies: {

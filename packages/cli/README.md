@@ -1,13 +1,13 @@
-# @kernl/cli
+# @kernl-sdk/cli
 
 CLI for scaffolding and managing Kernl applications.
 
 ## Installation
 
 ```bash
-npm install -g @kernl/cli
+npm install -g @kernl-sdk/cli
 # or
-pnpm add -g @kernl/cli
+pnpm add -g @kernl-sdk/cli
 ```
 
 ## Usage

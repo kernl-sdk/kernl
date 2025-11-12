@@ -2,7 +2,7 @@ import type {
   Codec,
   LanguageModelTool,
   LanguageModelToolChoice,
-} from "@kernl/protocol";
+} from "@kernl-sdk/protocol";
 import type {
   LanguageModelV3FunctionTool,
   LanguageModelV3ProviderDefinedTool,
@@ -19,7 +19,7 @@ export const TOOL: Codec<
         type: "function",
         name: tool.name,
         description: tool.description,
-        inputSchema: tool.inputSchema,
+        inputSchema: tool.parameters,
         providerOptions: tool.providerOptions,
       } satisfies LanguageModelV3FunctionTool;
     } else {

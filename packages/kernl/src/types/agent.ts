@@ -1,7 +1,7 @@
 import { type ZodType } from "zod";
 
 import { Context, UnknownContext } from "@/context";
-import { LanguageModel, LanguageModelRequestSettings } from "@kernl/protocol";
+import { LanguageModel, LanguageModelRequestSettings } from "@kernl-sdk/protocol";
 import { InputGuardrail, OutputGuardrail } from "@/guardrail";
 import { Toolkit } from "@/tool";
 

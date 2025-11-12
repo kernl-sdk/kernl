@@ -2,9 +2,9 @@ import { Context, UnknownContext } from "@/context";
 
 import { ModelBehaviorError } from "@/lib/error";
 import { logger } from "@/lib/logger";
-import { json } from "@kernl/shared/lib";
-import { FAILED, COMPLETED, INTERRUPTIBLE } from "@kernl/protocol";
-import type { LanguageModelTool } from "@kernl/protocol";
+import { json } from "@kernl-sdk/shared/lib";
+import { FAILED, COMPLETED, INTERRUPTIBLE } from "@kernl-sdk/protocol";
+import type { LanguageModelTool } from "@kernl-sdk/protocol";
 
 import type {
   ToolType,

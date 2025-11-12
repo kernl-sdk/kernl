@@ -3,7 +3,7 @@ import {
   LanguageModel,
   LanguageModelItem,
   LanguageModelStreamEvent,
-} from "@kernl/protocol";
+} from "@kernl-sdk/protocol";
 
 import { Task } from "@/task";
 import { Context } from "@/context";

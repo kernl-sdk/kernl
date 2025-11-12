@@ -3,7 +3,7 @@ import { ZodType } from "zod";
 import type { ResolvedAgentResponse } from "@/guardrail";
 
 /* lib */
-import { json } from "@kernl/shared/lib";
+import { json } from "@kernl-sdk/shared/lib";
 import { ModelBehaviorError } from "@/lib/error";
 
 /* types */

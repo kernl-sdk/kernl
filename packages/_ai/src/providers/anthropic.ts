@@ -6,7 +6,7 @@ import { AISDKLanguageModel } from "../language-model";
  *
  * @example
  * ```ts
- * import { anthropic } from '@kernl/ai/anthropic';
+ * import { anthropic } from '@kernl-sdk/ai/anthropic';
  *
  * const claude = anthropic('claude-3-5-sonnet-20241022');
  * const response = await claude.generate([...], {});

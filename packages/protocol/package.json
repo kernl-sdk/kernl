@@ -1,6 +1,6 @@
 {
-  "name": "@kernl/protocol",
-  "version": "0.1.0",
+  "name": "@kernl-sdk/protocol",
+  "version": "0.1.1",
   "description": "Kernl Provider Protocol - Standard interfaces for AI model providers",
   "keywords": [
     "kernl",
@@ -8,6 +8,17 @@
     "ai",
     "llm"
   ],
+  "author": "dremnik",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dremnik/kernl.git",
+    "directory": "packages/protocol"
+  },
+  "homepage": "https://github.com/dremnik/kernl#readme",
+  "bugs": {
+    "url": "https://github.com/dremnik/kernl/issues"
+  },
   "type": "module",
   "exports": {
     ".": {

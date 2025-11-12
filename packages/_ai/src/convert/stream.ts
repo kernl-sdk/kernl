@@ -1,4 +1,4 @@
-import type { Codec, LanguageModelStreamEvent } from "@kernl/protocol";
+import type { Codec, LanguageModelStreamEvent } from "@kernl-sdk/protocol";
 import type { LanguageModelV3StreamPart } from "@ai-sdk/provider";
 import { WARNING } from "./response";
 
