@@ -1,0 +1,30 @@
+{
+  "name": "@kernl/protocol",
+  "version": "0.1.0",
+  "description": "Kernl Provider Protocol - Standard interfaces for AI model providers",
+  "keywords": [
+    "kernl",
+    "protocol",
+    "ai",
+    "llm"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "dev": "tsc --watch",
+    "lint": "eslint src/",
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/json-schema": "^7.0.15",
+    "@types/node": "^24.10.0",
+    "tsc-alias": "^1.8.10",
+    "typescript": "5.9.2"
+  }
+}

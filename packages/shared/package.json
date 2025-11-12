@@ -1,0 +1,38 @@
+{
+  "name": "@kernl/shared",
+  "version": "0.1.0",
+  "description": "Shared utilities for kernl",
+  "keywords": [
+    "kernl",
+    "utilities",
+    "shared"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./lib": {
+      "types": "./dist/lib/index.d.ts",
+      "import": "./dist/lib/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "dev": "tsc --watch",
+    "check-types": "tsc --noEmit",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:run": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "tsc-alias": "^1.8.10",
+    "typescript": "5.9.2",
+    "vitest": "^4.0.8"
+  },
+  "dependencies": {
+    "zod": "^4.1.12"
+  }
+}

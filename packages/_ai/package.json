@@ -1,0 +1,68 @@
+{
+  "name": "@kernl/ai",
+  "version": "0.1.0",
+  "description": "AI SDK adapter for Kernl - Universal provider support via Vercel AI SDK",
+  "keywords": [
+    "kernl",
+    "ai",
+    "ai-sdk",
+    "llm",
+    "adapter"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./anthropic": {
+      "types": "./dist/providers/anthropic.d.ts",
+      "import": "./dist/providers/anthropic.js"
+    },
+    "./openai": {
+      "types": "./dist/providers/openai.d.ts",
+      "import": "./dist/providers/openai.js"
+    },
+    "./google": {
+      "types": "./dist/providers/google.d.ts",
+      "import": "./dist/providers/google.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "dev": "tsc --watch",
+    "lint": "eslint src/",
+    "check-types": "tsc --noEmit",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:run": "vitest run"
+  },
+  "peerDependencies": {
+    "@ai-sdk/provider": "^3.0.0-beta.15",
+    "@kernl/protocol": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "@ai-sdk/anthropic": {
+      "optional": true
+    },
+    "@ai-sdk/openai": {
+      "optional": true
+    },
+    "@ai-sdk/google": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@ai-sdk/anthropic": "3.0.0-beta.53",
+    "@ai-sdk/google": "3.0.0-beta.43",
+    "@ai-sdk/openai": "3.0.0-beta.57",
+    "@ai-sdk/provider": "3.0.0-beta.15",
+    "@types/node": "^24.10.0",
+    "tsc-alias": "^1.8.10",
+    "typescript": "5.9.2",
+    "vitest": "^4.0.8"
+  },
+  "dependencies": {
+    "@kernl/shared": "workspace:^"
+  }
+}
