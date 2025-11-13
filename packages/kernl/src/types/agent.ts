@@ -1,9 +1,12 @@
 import { type ZodType } from "zod";
 
 import { Context, UnknownContext } from "@/context";
-import { LanguageModel, LanguageModelRequestSettings } from "@kernl-sdk/protocol";
+import {
+  LanguageModel,
+  LanguageModelRequestSettings,
+} from "@kernl-sdk/protocol";
 import { InputGuardrail, OutputGuardrail } from "@/guardrail";
-import { ToolkitBase } from "@/tool";
+import { BaseToolkit } from "@/tool";
 
 import { TextResponse } from "./thread";
 
@@ -50,7 +53,7 @@ export interface AgentConfig<
    *
    * By default, if not set, the agent will use a default model that throws an error when called.
    */
-  model?: LanguageModel;
+  model: LanguageModel;
 
   /**
    * Configures model-specific tuning parameters (e.g. temperature, top_p, etc.)
@@ -80,7 +83,7 @@ export interface AgentConfig<
    * });
    * ```
    */
-  toolkits?: ToolkitBase<TContext>[];
+  toolkits?: BaseToolkit<TContext>[];
 
   /**
    * A list of checks that run in parallel to the agent's execution on the input + output for the agent,

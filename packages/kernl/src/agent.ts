@@ -1,6 +1,7 @@
 import {
   LanguageModel,
   LanguageModelRequestSettings,
+  message,
 } from "@kernl-sdk/protocol";
 
 import type { Context, UnknownContext } from "./context";
@@ -8,12 +9,19 @@ import { InputGuardrail, OutputGuardrail } from "./guardrail";
 import { AgentHooks } from "./lifecycle";
 import { BaseToolkit } from "./tool/toolkit";
 import { Tool } from "./tool";
-// import { DEFAULT_LANGUAGE_MODEL } from "@/providers/default";
+import { Thread } from "./thread";
 
 import { MisconfiguredError } from "./lib/error";
 
 import type { AgentConfig, AgentResponseType } from "./types/agent";
-import { TextResponse } from "./types/thread";
+import type {
+  TextResponse,
+  ThreadOptions,
+  ThreadExecuteResult,
+  ThreadStreamEvent,
+} from "./types/thread";
+import type { Kernl } from "./kernl";
+import type { ResolvedAgentResponse } from "./guardrail";
 
 export class Agent<
     TContext = UnknownContext,
@@ -22,6 +30,8 @@ export class Agent<
   extends AgentHooks<TContext, TResponse>
   implements AgentConfig<TContext, TResponse>
 {
+  private kernl?: Kernl;
+
   id: string;
   name: string;
   instructions: (context: Context<TContext>) => Promise<string> | string;
@@ -29,6 +39,13 @@ export class Agent<
   model: LanguageModel;
   modelSettings: LanguageModelRequestSettings;
   toolkits: BaseToolkit<TContext>[];
+  guardrails: {
+    input: InputGuardrail[];
+    output: OutputGuardrail<AgentResponseType>[];
+  };
+  responseType: TResponse = "text" as TResponse;
+  resetToolChoice: boolean;
+  // toolUseBehavior: ToolUseBehavior; (TODO)
 
   // --- (TODO) ---
   // handoffDescription: string; // ??
@@ -38,35 +55,10 @@ export class Agent<
   // /* Process/thread-group–wide signal state shared by all threads in the group: shared pending signals, job control
   // (stops/cont, group exit), rlimits, etc. */
   // signal: *struct signal_struct;
-  //  /* Table of signal handlers (sa_handler, sa_mask, flags) shared by threads (CLONE_SIGHAND). RCU-protected so readers can access it locklessly. */
+  //
+  //  /* Table of signal handlers (sa_handler, sa_mask, flags) shared by threads
+  // (CLONE_SIGHAND). RCU-protected so readers can access it locklessly. */
   // sighand: *struct sighand_struct __rcu;
-
-  guardrails: {
-    input: InputGuardrail[];
-    output: OutputGuardrail<AgentResponseType>[];
-  };
-  responseType: TResponse = "text" as TResponse;
-  resetToolChoice: boolean;
-  // toolUseBehavior: ToolUseBehavior; (TODO)
-
-  // /**
-  //  * Create an Agent with handoffs and automatically infer the union type for TResponse from the handoff agents' response types.
-  //  */
-  // static create<
-  //   TResponse extends AgentResponseType = TextResponse,
-  //   Handoffs extends readonly (Agent<any, any> | Handoff<any, any>)[] = [],
-  // >(
-  //   config: AgentConfigWithHandoffs<TResponse, Handoffs>,
-  // ): Agent<UnknownContext, TResponse | HandoffsOutputUnion<Handoffs>> {
-  //   return new Agent<UnknownContext, TResponse | HandoffsOutputUnion<Handoffs>>(
-  //     {
-  //       ...config,
-  //       handoffs: config.handoffs as any,
-  //       responseType: config.responseType,
-  //       handoffresponseTypeWarningEnabled: false,
-  //     },
-  //   );
-  // }
 
   constructor(config: AgentConfig<TContext, TResponse>) {
     super();
@@ -79,7 +71,7 @@ export class Agent<
       typeof config.instructions === "function"
         ? config.instructions
         : () => config.instructions as string;
-    this.model = config.model as LanguageModel; // TODO: Add default model
+    this.model = config.model; // (TODO): include optional default setting for convenience like env.DEFAULT_LLM = "gpt-5"
     this.modelSettings = config.modelSettings ?? {};
 
     this.toolkits = config.toolkits ?? [];
@@ -98,28 +90,80 @@ export class Agent<
     // this.handoffs = config.handoffs ?? [];
 
     // --- Runtime warning for handoff response type compatibility ---
-    // if (
-    //   config.handoffresponseTypeWarningEnabled === undefined ||
-    //   config.handoffresponseTypeWarningEnabled
-    // ) {
-    //   if (this.handoffs && this.responseType) {
-    //     const responseTypes = new Set<string>([
-    //       JSON.stringify(this.responseType),
-    //     ]);
-    //     for (const h of this.handoffs) {
-    //       if ("responseType" in h && h.responseType) {
-    //         responseTypes.add(JSON.stringify(h.responseType));
-    //       } else if ("agent" in h && h.agent.responseType) {
-    //         responseTypes.add(JSON.stringify(h.agent.responseType));
-    //       }
-    //     }
+    // if (config.handoffresponseTypeWarningEnabled) {
+    //     ...
     //     if (responseTypes.size > 1) {
     //       logger.warn(
-    //         `[Agent] Warning: Handoff agents have different response types: ${Array.from(responseTypes).join(", ")}. You can make it type-safe by using Agent.create({ ... }) method instead.`,
+    //         `[Agent] Warning: Handoff agents have different response types: ${Array.from(responseTypes).join(", ")}.
+    //          You can make it type-safe by using Agent.create({ ... }) method instead.`,
     //       );
     //     }
     //   }
     // }
+  }
+
+  /**
+   * Bind this agent to a kernl instance. Called by kernl.register().
+   */
+  bind(kernl: Kernl): void {
+    this.kernl = kernl;
+  }
+
+  /**
+   * Blocking execution - spawns or resumes thread and waits for completion
+   */
+  async run(
+    instructions: string,
+    options?: ThreadOptions<TContext>,
+  ): Promise<ThreadExecuteResult<ResolvedAgentResponse<TResponse>>> {
+    if (!this.kernl) {
+      throw new MisconfiguredError(
+        `Agent ${this.id} not bound to kernl. Call kernl.register(agent) first.`,
+      );
+    }
+
+    const m = message({ role: "user", text: instructions });
+    const tid = options?.threadId;
+
+    // NOTE: may end up moving this to the kernl
+    let thread = tid ? this.kernl.threads.get(tid) : null;
+    if (!thread) {
+      thread = new Thread(this.kernl, this, [m], options);
+      return this.kernl.spawn(thread);
+    }
+
+    thread.append(m);
+    return this.kernl.schedule(thread);
+  }
+
+  /**
+   * Streaming execution - spawns or resumes thread and returns async iterator
+   *
+   * NOTE: streaming probably won't make sense in scheduling contexts so spawnStream etc. won't make sense
+   */
+  async *stream(
+    instructions: string,
+    options?: ThreadOptions<TContext>,
+  ): AsyncIterable<ThreadStreamEvent> {
+    if (!this.kernl) {
+      throw new MisconfiguredError(
+        `Agent ${this.id} not bound to kernl. Call kernl.register(agent) first.`,
+      );
+    }
+
+    const m = message({ role: "user", text: instructions });
+    const tid = options?.threadId;
+
+    // NOTE: may end up moving this to the kernl
+    let thread = tid ? this.kernl.threads.get(tid) : null;
+    if (!thread) {
+      thread = new Thread(this.kernl, this, [m], options);
+      yield* this.kernl.spawnStream(thread);
+      return;
+    }
+
+    thread.append(m);
+    yield* this.kernl.scheduleStream(thread);
   }
 
   /**
@@ -167,40 +211,4 @@ export class Agent<
 
     return allTools;
   }
-
-  // async run<TContext>(
-  //   input: string,
-  //   options: SharedRunOptions<TContext>,
-  // ): Promise<RunResult<TContext>> {
-  //   // TODO
-  //   // ...
-  // }
-
-  // async stream<TContext>(
-  //   input: string,
-  //   options: StreamOptions<TContext>,
-  // ): Promise<StreamedRunResult<TContext>> {
-  //   // TODO
-  //   // ...
-  // }
-  //
-
-  // ----------------------
-  // Events
-  // ----------------------
-
-  // on(event: any, handler: Function): void {
-  //   // TODO
-  //   // ...
-  // }
-
-  // once(event: any, handler: Function): void {
-  //   // TODO
-  //   // ...
-  // }
-
-  // off(event: any, handler: Function): void {
-  //   // TODO
-  //   // ...
-  // }
 }

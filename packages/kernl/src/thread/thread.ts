@@ -9,7 +9,6 @@ import {
   ToolCall,
   LanguageModel,
   LanguageModelRequest,
-  LanguageModelResponse,
   LanguageModelItem,
   FAILED,
   RUNNING,
@@ -128,7 +127,14 @@ export class Thread<
   }
 
   /**
-   * Main execution loop - always yields events, wrappers can propagate or discard
+   * Append a new event to the thread history
+   */
+  append(event: ThreadEvent): void {
+    this.history.push(event);
+  }
+
+  /**
+   * Main execution loop - always yields events, callers can propagate or discard (as in execute())
    *
    * NOTE: Streaming structured output deferred for now. Prioritizing correctness + simplicity,
    * and unclear what use cases there would actually be for streaming a structured output (other than maybe gen UI).
@@ -192,7 +198,7 @@ export class Thread<
     this._tick++;
 
     // (TODO): check limits (if this._tick > this.limits.maxTicks)
-    // (TODO): run guardrails on first tick (if this._tick === 1)
+    // (TODO): run input guardrails on first tick (if this._tick === 1)
 
     const req = await this.prepareModelRequest(this.history);
 

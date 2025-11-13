@@ -55,20 +55,6 @@ export interface ActionSet {
 }
 
 /**
- * Result of a single tick of execution
- */
-export interface TickResult {
-  /**
-   * Events to add to thread history
-   */
-  events: ThreadEvent[];
-  /**
-   * Action intentions that need to be performed as a result of this tick
-   */
-  intentions: ActionSet | null;
-}
-
-/**
  * Result of performing actions, including both executed results and pending approvals
  */
 export interface PerformActionsResult {
@@ -100,7 +86,9 @@ export interface ThreadOptions<TContext> {
   context: Context<TContext>;
   model?: LanguageModel;
   task?: Task<TContext>;
-  conversationId?: string;
+  threadId?: string;
   maxTicks?: number;
   abort?: AbortSignal;
+
+  // conversationId?: string;
 }

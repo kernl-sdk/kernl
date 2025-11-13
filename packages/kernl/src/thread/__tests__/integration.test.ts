@@ -9,7 +9,7 @@ import { tool, Toolkit } from "@/tool";
 
 import { Thread } from "../thread";
 
-import type { ThreadEvent } from "@/types/thread";
+import type { ThreadEvent, ThreadStreamEvent } from "@/types/thread";
 
 /**
  * Integration tests for Thread streaming with real AI SDK providers.
@@ -210,7 +210,7 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
       ];
 
       const thread = new Thread(kernl, agent, input);
-      const events = [];
+      const events: ThreadStreamEvent[] = [];
 
       for await (const event of thread.stream()) {
         events.push(event);
@@ -219,12 +219,30 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
       expect(events.length).toBeGreaterThan(0);
 
       // Should have tool calls
-      const toolCalls = events.filter((e) => e.kind === "tool-call");
+      const toolCalls = events.filter(
+        (e): e is Extract<ThreadStreamEvent, { kind: "tool-call" }> =>
+          e.kind === "tool-call",
+      );
       expect(toolCalls.length).toBeGreaterThan(0);
 
+      // Verify tool was called with correct parameters
+      const addToolCall = toolCalls.find((tc) => tc.toolId === "add");
+      expect(addToolCall).toBeDefined();
+      expect(JSON.parse(addToolCall!.arguments)).toEqual({ a: 25, b: 17 });
+
       // Should have tool results
-      const toolResults = events.filter((e) => e.kind === "tool-result");
+      const toolResults = events.filter(
+        (e): e is Extract<ThreadStreamEvent, { kind: "tool-result" }> =>
+          e.kind === "tool-result",
+      );
       expect(toolResults.length).toBeGreaterThan(0);
+
+      // Verify tool result is correct
+      const addToolResult = toolResults.find(
+        (tr) => tr.callId === addToolCall!.callId,
+      );
+      expect(addToolResult).toBeDefined();
+      expect(addToolResult!.result).toBe(42);
 
       // History should contain tool calls and results
       const history = (thread as any).history as ThreadEvent[];
@@ -235,6 +253,16 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
 
       expect(historyToolCalls.length).toBe(toolCalls.length);
       expect(historyToolResults.length).toBe(toolResults.length);
+
+      // Verify the assistant's final response references the correct answer
+      const messages = events.filter((e) => e.kind === "message");
+      const assistantMessage = messages.find((m: any) => m.role === "assistant");
+      expect(assistantMessage).toBeDefined();
+      const textContent = (assistantMessage as any).content.find(
+        (c: any) => c.kind === "text",
+      );
+      expect(textContent).toBeDefined();
+      expect(textContent.text).toContain("42");
         },
         30000,
       );

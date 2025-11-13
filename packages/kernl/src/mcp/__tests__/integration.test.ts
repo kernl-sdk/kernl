@@ -9,8 +9,17 @@ import { tool } from "@/tool";
 import { z } from "zod";
 import { Thread } from "@/thread";
 import { createMCPToolStaticFilter } from "../utils";
+import { createMockModel } from "@/thread/__tests__/fixtures/mock-model";
 
 const TEST_SERVER = path.join(__dirname, "fixtures", "server.ts");
+
+// Mock model for tests that only need toolkit functionality
+const mockModel = createMockModel(async () => ({
+  content: [],
+  finishReason: "stop",
+  usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+  warnings: [],
+}));
 
 describe("MCP Integration Tests", () => {
   describe("MCPToolkit Integration", () => {
@@ -158,6 +167,7 @@ describe("MCP Integration Tests", () => {
         id: "test-agent",
         name: "Test Agent",
         instructions: "Test",
+        model: mockModel,
         toolkits: [toolkit],
       });
 
@@ -194,6 +204,7 @@ describe("MCP Integration Tests", () => {
         id: "test-agent",
         name: "Test Agent",
         instructions: "Test",
+        model: mockModel,
         toolkits: [toolkit],
       });
 
@@ -232,6 +243,7 @@ describe("MCP Integration Tests", () => {
         id: "test-agent",
         name: "Test Agent",
         instructions: "Test",
+        model: mockModel,
         toolkits: [toolkit],
       });
 
@@ -265,6 +277,7 @@ describe("MCP Integration Tests", () => {
         id: "test-agent",
         name: "Test Agent",
         instructions: "Test",
+        model: mockModel,
         toolkits: [mcpToolkit],
       });
 
@@ -294,6 +307,7 @@ describe("MCP Integration Tests", () => {
         id: "test-agent",
         name: "Test Agent",
         instructions: "Test",
+        model: mockModel,
         toolkits: [mcpToolkit],
       });
 
@@ -325,6 +339,7 @@ describe("MCP Integration Tests", () => {
         id: "test-agent",
         name: "Test Agent",
         instructions: "Test",
+        model: mockModel,
         toolkits: [mcpToolkit],
       });
 
@@ -382,6 +397,7 @@ describe("MCP Integration Tests", () => {
         id: "test-agent",
         name: "Test Agent",
         instructions: "Test",
+        model: mockModel,
         toolkits: [mcpToolkit, functionToolkit],
       });
 
@@ -431,6 +447,7 @@ describe("MCP Integration Tests", () => {
         id: "test-agent",
         name: "Test Agent",
         instructions: "Test",
+        model: mockModel,
         toolkits: [mcpToolkit, functionToolkit],
       });
 
