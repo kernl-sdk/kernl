@@ -12,6 +12,8 @@ import {
   LanguageModelResponse,
   LanguageModelItem,
   FAILED,
+  RUNNING,
+  STOPPED,
 } from "@kernl-sdk/protocol";
 import { randomID, filter } from "@kernl-sdk/shared/lib";
 
@@ -21,12 +23,18 @@ import type {
   ThreadOptions,
   ThreadExecuteResult,
   PerformActionsResult,
-  TickResult,
+  ThreadState,
+  ThreadStreamEvent,
 } from "@/types/thread";
 import type { AgentResponseType } from "@/types/agent";
 import type { ResolvedAgentResponse } from "@/guardrail";
 
-import { getFinalResponse, parseFinalResponse } from "./utils";
+import {
+  notDelta,
+  getFinalResponse,
+  getIntentions,
+  parseFinalResponse,
+} from "./utils";
 
 /**
  * A thread drives the execution loop for an agent.
@@ -43,16 +51,19 @@ export class Thread<
   readonly model: LanguageModel; /* inherited from the agent unless specified */
   readonly parent: Task<TContext> | null; /* parent task which spawned this thread */
   readonly mode: "blocking" | "stream"; /* TODO */
+  readonly input: ThreadEvent[]; /* the initial input for the thread */
+  // readonly stats: ThreadMetrics;
 
   /* state */
-  readonly state: ThreadState;
-  readonly input: ThreadEvent[] | string; /* the initial input for the thread */
+  _tick: number;
+  state: ThreadState;
   private history: ThreadEvent[] /* events generated during this thread's execution */;
+  private abort?: AbortController;
 
   constructor(
     kernl: Kernl,
     agent: Agent<TContext, TResponse>,
-    input: ThreadEvent[] | string,
+    input: ThreadEvent[],
     options?: ThreadOptions<TContext>,
   ) {
     this.id = `tid_${randomID()}`;
@@ -61,69 +72,103 @@ export class Thread<
     this.kernl = kernl;
     this.parent = options?.task ?? null;
     this.model = options?.model ?? agent.model;
-    this.state = new ThreadState(); // (TODO): checkpoint ?? new ThreadState()
     this.mode = "blocking"; // (TODO): add streaming
     this.input = input;
 
-    // Convert string input to user message and initialize history
-    if (typeof input === "string") {
-      this.history = [
-        {
-          kind: "message",
-          id: `msg_${randomID()}`,
-          role: "user",
-          content: [
-            {
-              kind: "text",
-              text: input,
-            },
-          ],
-        },
-      ];
-    } else {
-      this.history = input;
-    }
+    this._tick = 0;
+    this.state = STOPPED;
+    this.history = input;
   }
 
   /**
-   * Main thread execution loop - runs until terminal state or interruption
+   * Blocking execution loop - runs until terminal state or interruption
    */
   async execute(): Promise<
     ThreadExecuteResult<ResolvedAgentResponse<TResponse>>
   > {
-    while (true) {
-      const { events, intentions } = await this.tick(); // actions: { syscalls, functions, mcpApprovalRequests }
+    for await (const _event of this.stream()) {
+      // just consume the stream (already in history in _execute())
+    }
 
-      this.history.push(...events);
+    // extract final response from accumulated history
+    const text = getFinalResponse(this.history);
+    assert(text, "_execute continues until text !== null"); // (TODO): consider preventing infinite loops here
 
-      // // priority 1: syscalls first - these override all other actions
-      // if (actions.syscalls.length > 0) {
-      //   switch (actions.syscalls.kind) { // is it possible to have more than one?
-      //     case SYS_WAIT:
-      //       return this.state;
-      //     case SYS_EXIT:
-      //       return { state: this.state, output: this.output }
-      //     default:
-      //   }
-      // }
+    const parsed = parseFinalResponse(text, this.agent.responseType);
 
-      // if model returns a message with no actions intentions -> terminal state
+    return { response: parsed, state: this.state };
+  }
+
+  /**
+   * Streaming execution - returns async iterator of events
+   */
+  async *stream(): AsyncIterable<ThreadStreamEvent> {
+    if (this.state === RUNNING && this.abort) {
+      throw new Error("thread already running");
+    }
+
+    this.state = RUNNING;
+    this.abort = new AbortController();
+
+    try {
+      yield* this._execute();
+    } catch (err) {
+      throw err;
+    } finally {
+      this.state = STOPPED;
+      this.abort = undefined;
+    }
+  }
+
+  /**
+   * Cancel the running thread
+   */
+  cancel() {
+    this.abort?.abort();
+  }
+
+  /**
+   * Main execution loop - always yields events, wrappers can propagate or discard
+   *
+   * NOTE: Streaming structured output deferred for now. Prioritizing correctness + simplicity,
+   * and unclear what use cases there would actually be for streaming a structured output (other than maybe gen UI).
+   */
+  private async *_execute(): AsyncGenerator<ThreadStreamEvent, void> {
+    for (;;) {
+      if (this.abort?.signal.aborted) {
+        return;
+      }
+
+      const events = [];
+      for await (const e of this.tick()) {
+        // we don't want deltas in the history
+        if (notDelta(e)) {
+          events.push(e);
+          this.history.push(e);
+        }
+        yield e;
+      }
+
+      // if model returns a message with no action intentions -> terminal state
+      const intentions = getIntentions(events);
       if (!intentions) {
         const text = getFinalResponse(events);
-        if (!text) continue; // run again, policy-dependent?
-
-        const parsed = parseFinalResponse(text, this.agent.responseType);
+        if (!text) continue; // run again, policy-dependent? (how to ensure no infinite loop here?)
 
         // await this.agent.runOutputGuardails(context, state);
         // this.kernl.emit("thread.terminated", context, output);
-        return { response: parsed, state: this.state };
+        return;
       }
 
-      // perform the actions intended by the model
+      // perform actions intended by the model
       const { actions, pendingApprovals } =
         await this.performActions(intentions);
 
-      this.history.push(...actions);
+      // yield action events
+      for (const a of actions) {
+        this.history.push(a);
+        yield a;
+      }
 
       if (pendingApprovals.length > 0) {
         // publish a batch approval request containing all of them
@@ -137,49 +182,34 @@ export class Thread<
     }
   }
 
-  // ----------------------
-  // Internal helpers
-  // ----------------------
-
   /**
-   * A single tick of the thread's execution.
+   * A single tick - calls model and yields events as they arrive
    *
-   * Prepares the input for the model, gets the response, and then parses into a TickResult
-   * with the events generated and the model's intentions (actions).
+   * NOTE: Streaming structured outputs deferred until concrete use cases emerge.
+   * For now, we stream text-delta and tool events, final validation happens in _execute().
    */
-  private async tick(): Promise<TickResult> {
-    this.state.tick++;
+  private async *tick(): AsyncGenerator<ThreadStreamEvent> {
+    this._tick++;
 
-    // // check limits
-    // if (this.state.tick > this.limits.maxTicks) {
-    //   throw new RuntimeError("resource_limit:max_ticks_exceeded");
-    // }
+    // (TODO): check limits (if this._tick > this.limits.maxTicks)
+    // (TODO): run guardrails on first tick (if this._tick === 1)
 
-    // run guardrails on the first tick
-    if (this.state.tick === 1) {
-      // await this.agent.runInputGuardrails(this.context, ...?);
+    const req = await this.prepareModelRequest(this.history);
+
+    // try to stream if model supports it
+    if (this.model.stream) {
+      const stream = this.model.stream(req);
+      for await (const event of stream) {
+        yield event; // [text-delta, tool-call, message, reasoning, ...]
+      }
+    } else {
+      // fallback: blocking generate, yield events as batch
+      const res = await this.model.generate(req);
+      for (const event of res.content) {
+        yield event;
+      }
+      // (TODO): track usage (this.stats.usage.add(res.usage))
     }
-
-    const req = await this.prepareModelRequest(this.history); // (TODO): how to get input for this tick?
-
-    // if (this.mode === "stream") {
-    // const stream = this.model.stream(input, {
-    //   system: systemPrompt,
-    //   tools: this.agent.tools /* [systools, tools] */,
-    //   settings: this.agent.modelSettings,
-    //   responseSchema: this.agent.responseType,
-    // });
-    // for await (const event of stream) {
-    //   // handle streaming events
-    // }
-    // response = stream.collect(); // something like this
-    // } else {
-    const res = await this.model.generate(req);
-
-    this.state.modelResponses.push(res);
-    // this.stats.usage.add(response.usage);
-
-    return this.parseModelResponse(res);
   }
 
   /**
@@ -188,11 +218,21 @@ export class Thread<
   private async performActions(
     intentions: ActionSet,
   ): Promise<PerformActionsResult> {
+    // // priority 1: syscalls first - these override all other actions
+    // if (actions.syscalls.length > 0) {
+    //   switch (actions.syscalls.kind) { // is it possible to have more than one?
+    //     case SYS_WAIT:
+    //       return this.state;
+    //     case SYS_EXIT:
+    //       return { state: this.state, output: this.output }
+    //     default:
+    //   }
+    // }
+
     // (TODO): refactor into a general actions system - probably shouldn't be handled by Thread
     const toolEvents = await this.executeTools(intentions.toolCalls);
     // const mcpEvents = await this.executeMCPRequests(actions.mcpRequests);
 
-    // Separate events and pending approvals
     const actions: ThreadEvent[] = [];
     const pendingApprovals: ToolCall[] = [];
 
@@ -200,7 +240,7 @@ export class Thread<
     for (const e of toolEvents) {
       if (
         e.kind === "tool-result" &&
-        (e.state as any) === "requires_approval"
+        (e.state as any) === "requires_approval" // (TODO): fix this
       ) {
         // Find the original tool call for this pending approval
         const originalCall = intentions.toolCalls.find(
@@ -315,297 +355,4 @@ export class Thread<
       tools,
     };
   }
-
-  /**
-   * @internal
-   * Parses the model's response into events (for history) and actions (for execution).
-   */
-  private parseModelResponse(res: LanguageModelResponse): TickResult {
-    const events: ThreadEvent[] = [];
-    const toolCalls: ToolCall[] = [];
-
-    for (const event of res.content) {
-      switch (event.kind) {
-        case "tool-call":
-          // Add to both actions (for execution) and events (for history)
-          toolCalls.push(event);
-        // fallthrough
-        default:
-          events.push(event);
-          break;
-      }
-    }
-
-    return {
-      events,
-      intentions: toolCalls.length > 0 ? { toolCalls } : null,
-    };
-  }
 }
-
-/**
- * ThreadState tracks the execution state of a single thread.
- *
- * A thread is created each time a task is scheduled and executes
- * the main tick() loop until terminal state.
- */
-export class ThreadState {
-  tick: number /* current tick number (starts at 0, increments on each model call) */;
-  modelResponses: LanguageModelResponse[] /* all model responses received during this thread's execution */;
-
-  constructor() {
-    this.tick = 0;
-    this.modelResponses = [];
-  }
-
-  // /**
-  //  * Check if the thread is in a terminal state - true when last event is an assistant
-  //  * message with no tool calls
-  //  */
-  // isTerminal(): boolean {
-  //   if (this.history.length === 0) return false;
-
-  //   const lastEvent = this.history[this.history.length - 1];
-  //   return lastEvent.kind === "message" && lastEvent.role === "assistant";
-  // }
-}
-
-/**
- * Common thread options shared between streaming and non-streaming execution pathways.
- */
-type SharedThreadOptions<TContext = undefined> = {
-  context?: TContext | Context<TContext>;
-  maxTurns?: number;
-  abort?: AbortSignal;
-  conversationId?: string;
-  // sessionInputCallback?: SessionInputCallback;
-  // callModelInputFilter?: CallModelInputFilter;
-};
-
-// /**
-//  * The result of an agent run in streaming mode.
-//  */
-// export class StreamedRunResult<
-//     TContext,
-//     TAgent extends Agent<TContext, AgentResponseType>,
-//   >
-//   extends RunResultBase<TContext, TAgent>
-//   implements AsyncIterable<ThreadStreamEvent>
-// {
-//   /**
-//    * The current agent that is running
-//    */
-//   public get currentAgent(): TAgent | undefined {
-//     return this.lastAgent;
-//   }
-
-//   /**
-//    * The current turn number
-//    */
-//   public currentTurn: number = 0;
-
-//   /**
-//    * The maximum number of turns that can be run
-//    */
-//   public maxTurns: number | undefined;
-
-//   #error: unknown = null;
-//   #signal?: AbortSignal;
-//   #readableController:
-//     | ReadableStreamDefaultController<ThreadStreamEvent>
-//     | undefined;
-//   #readableStream: ReadableStream<ThreadStreamEvent>;
-//   #completedPromise: Promise<void>;
-//   #completedPromiseResolve: (() => void) | undefined;
-//   #completedPromiseReject: ((err: unknown) => void) | undefined;
-//   #cancelled: boolean = false;
-//   #streamLoopPromise: Promise<void> | undefined;
-
-//   constructor(
-//     result: {
-//       state: ThreadState<TContext, TAgent>;
-//       signal?: AbortSignal;
-//     } = {} as any,
-//   ) {
-//     super(result.state);
-
-//     this.#signal = result.signal;
-
-//     this.#readableStream = new ReadableStream<ThreadStreamEvent>({
-//       start: (controller) => {
-//         this.#readableController = controller;
-//       },
-//       cancel: () => {
-//         this.#cancelled = true;
-//       },
-//     });
-
-//     this.#completedPromise = new Promise((resolve, reject) => {
-//       this.#completedPromiseResolve = resolve;
-//       this.#completedPromiseReject = reject;
-//     });
-
-//     if (this.#signal) {
-//       const handleAbort = () => {
-//         if (this.#cancelled) {
-//           return;
-//         }
-
-//         this.#cancelled = true;
-
-//         const controller = this.#readableController;
-//         this.#readableController = undefined;
-
-//         if (this.#readableStream.locked) {
-//           if (controller) {
-//             try {
-//               controller.close();
-//             } catch (err) {
-//               logger.debug(`Failed to close readable stream on abort: ${err}`);
-//             }
-//           }
-//         } else {
-//           void this.#readableStream
-//             .cancel(this.#signal?.reason)
-//             .catch((err) => {
-//               logger.debug(`Failed to cancel readable stream on abort: ${err}`);
-//             });
-//         }
-
-//         this.#completedPromiseResolve?.();
-//       };
-
-//       if (this.#signal.aborted) {
-//         handleAbort();
-//       } else {
-//         this.#signal.addEventListener("abort", handleAbort, { once: true });
-//       }
-//     }
-//   }
-
-//   /**
-//    * @internal
-//    * Adds an item to the stream of output items
-//    */
-//   _addItem(item: ThreadStreamEvent) {
-//     if (!this.cancelled) {
-//       this.#readableController?.enqueue(item);
-//     }
-//   }
-
-//   /**
-//    * @internal
-//    * Indicates that the stream has been completed
-//    */
-//   _done() {
-//     if (!this.cancelled && this.#readableController) {
-//       this.#readableController.close();
-//       this.#readableController = undefined;
-//       this.#completedPromiseResolve?.();
-//     }
-//   }
-
-//   /**
-//    * @internal
-//    * Handles an error in the stream loop.
-//    */
-//   _raiseError(err: unknown) {
-//     if (!this.cancelled && this.#readableController) {
-//       this.#readableController.error(err);
-//       this.#readableController = undefined;
-//     }
-//     this.#error = err;
-//     this.#completedPromiseReject?.(err);
-//     this.#completedPromise.catch((e) => {
-//       logger.debug(`Resulted in an error: ${e}`);
-//     });
-//   }
-
-//   /**
-//    * Returns true if the stream has been cancelled.
-//    */
-//   get cancelled(): boolean {
-//     return this.#cancelled;
-//   }
-
-//   /**
-//    * Returns the underlying readable stream.
-//    * @returns A readable stream of the agent run.
-//    */
-//   toStream(): ReadableStream<ThreadStreamEvent> {
-//     return this.#readableStream as ReadableStream<ThreadStreamEvent>;
-//   }
-
-//   /**
-//    * Await this promise to ensure that the stream has been completed if you are not consuming the
-//    * stream directly.
-//    */
-//   get completed() {
-//     return this.#completedPromise;
-//   }
-
-//   /**
-//    * Error thrown during the run, if any.
-//    */
-//   get error() {
-//     return this.#error;
-//   }
-
-//   /**
-//    * Returns a readable stream of the final text output of the agent run.
-//    *
-//    * @returns A readable stream of the final output of the agent run.
-//    * @remarks Pass `{ compatibleWithNodeStreams: true }` to receive a Node.js compatible stream
-//    * instance.
-//    */
-//   toTextStream(): ReadableStream<string>;
-//   toTextStream(options?: { compatibleWithNodeStreams: true }): Readable;
-//   toTextStream(options?: {
-//     compatibleWithNodeStreams?: false;
-//   }): ReadableStream<string>;
-//   toTextStream(
-//     options: { compatibleWithNodeStreams?: boolean } = {},
-//   ): Readable | ReadableStream<string> {
-//     const stream = this.#readableStream.pipeThrough(
-//       new TransformStream<ThreadStreamEvent, string>({
-//         transform(event, controller) {
-//           if (
-//             event.kind === "raw_model_stream_event" && // (TODO): what to do here?
-//             event.data.kind === "text-delta"
-//           ) {
-//             const item = TextDeltaEvent.parse(event); // ??
-//             controller.enqueue(item.text); // (TODO): is it just the text that we want to return here?
-//           }
-//         },
-//       }),
-//     );
-
-//     if (options.compatibleWithNodeStreams) {
-//       return Readable.fromWeb(stream);
-//     }
-
-//     return stream as ReadableStream<string>;
-//   }
-
-//   [Symbol.asyncIterator](): AsyncIterator<ThreadStreamEvent> {
-//     return this.#readableStream[Symbol.asyncIterator]();
-//   }
-
-//   /**
-//    * @internal
-//    * Sets the stream loop promise that completes when the internal stream loop finishes.
-//    * This is used to defer trace end until all agent work is complete.
-//    */
-//   _setStreamLoopPromise(promise: Promise<void>) {
-//     this.#streamLoopPromise = promise;
-//   }
-
-//   /**
-//    * @internal
-//    * Returns a promise that resolves when the stream loop completes.
-//    * This is used by the tracing system to wait for all agent work before ending the trace.
-//    */
-//   _getStreamLoopPromise(): Promise<void> | undefined {
-//     return this.#streamLoopPromise;
-//   }
-// }

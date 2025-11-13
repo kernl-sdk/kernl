@@ -4,11 +4,46 @@ import type { ResolvedAgentResponse } from "@/guardrail";
 
 /* lib */
 import { json } from "@kernl-sdk/shared/lib";
+import { ToolCall } from "@kernl-sdk/protocol";
 import { ModelBehaviorError } from "@/lib/error";
 
 /* types */
 import type { AgentResponseType } from "@/types/agent";
-import type { ThreadEvent } from "@/types/thread";
+import type { ThreadEvent, ThreadStreamEvent, ActionSet } from "@/types/thread";
+
+/**
+ * Check if an event represents an intention (action to be performed)
+ */
+export function isActionIntention(event: ThreadEvent): event is ToolCall {
+  return event.kind === "tool-call";
+}
+
+/**
+ * Extract action intentions from a list of events.
+ * Returns ActionSet if there are any tool calls, null otherwise.
+ */
+export function getIntentions(events: ThreadEvent[]): ActionSet | null {
+  const toolCalls = events.filter(isActionIntention);
+  return toolCalls.length > 0 ? { toolCalls } : null;
+}
+
+/**
+ * Check if an event is NOT a delta/start/end event (i.e., a complete item).
+ * Returns true for complete items: Message, Reasoning, ToolCall, ToolResult
+ */
+export function notDelta(event: ThreadStreamEvent): event is ThreadEvent {
+  switch (event.kind) {
+    case "message":
+    case "reasoning":
+    case "tool-call":
+    case "tool-result":
+      return true;
+
+    // all other events are streaming deltas/control events
+    default:
+      return false;
+  }
+}
 
 /**
  * Extract the final text response from a list of events.

@@ -3,10 +3,29 @@ import {
   LanguageModel,
   LanguageModelItem,
   LanguageModelStreamEvent,
+  RUNNING,
+  STOPPED,
+  INTERRUPTIBLE,
+  UNINTERRUPTIBLE,
+  ZOMBIE,
+  DEAD,
 } from "@kernl-sdk/protocol";
 
 import { Task } from "@/task";
 import { Context } from "@/context";
+
+export type TextResponse = "text";
+
+/**
+ * Thread state discriminated union
+ */
+export type ThreadState =
+  | typeof RUNNING
+  | typeof STOPPED
+  | typeof INTERRUPTIBLE
+  | typeof UNINTERRUPTIBLE
+  | typeof ZOMBIE
+  | typeof DEAD;
 
 /**
  * Thread-specific tool call state for approval workflow.
@@ -79,8 +98,9 @@ export interface ThreadExecuteResult<TResponse = any> {
 
 export interface ThreadOptions<TContext> {
   context: Context<TContext>;
-  task?: Task<TContext>;
   model?: LanguageModel;
+  task?: Task<TContext>;
+  conversationId?: string;
+  maxTicks?: number;
+  abort?: AbortSignal;
 }
-
-export type TextResponse = "text";

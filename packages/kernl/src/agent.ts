@@ -1,9 +1,12 @@
-import { LanguageModel, LanguageModelRequestSettings } from "@kernl-sdk/protocol";
+import {
+  LanguageModel,
+  LanguageModelRequestSettings,
+} from "@kernl-sdk/protocol";
 
 import type { Context, UnknownContext } from "./context";
 import { InputGuardrail, OutputGuardrail } from "./guardrail";
 import { AgentHooks } from "./lifecycle";
-import { Toolkit } from "./tool/toolkit";
+import { BaseToolkit } from "./tool/toolkit";
 import { Tool } from "./tool";
 // import { DEFAULT_LANGUAGE_MODEL } from "@/providers/default";
 
@@ -25,7 +28,7 @@ export class Agent<
 
   model: LanguageModel;
   modelSettings: LanguageModelRequestSettings;
-  toolkits: Toolkit<TContext>[];
+  toolkits: BaseToolkit<TContext>[];
 
   // --- (TODO) ---
   // handoffDescription: string; // ??
