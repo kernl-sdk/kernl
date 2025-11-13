@@ -1,4 +1,4 @@
-# kernl - Examples
+# kernl - Microprojects
 
 ### Running the examples
 
