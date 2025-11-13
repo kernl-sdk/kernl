@@ -62,7 +62,7 @@ export const MODEL_RESPONSE: Codec<LanguageModelResponse, AISdkGenerateResult> =
             callId: item.toolCallId,
             toolId: item.toolName,
             state: "completed",
-            arguments: JSON.stringify(item.input),
+            arguments: item.input,
             providerMetadata: item.providerMetadata,
           });
         } else if (item.type === "file") {

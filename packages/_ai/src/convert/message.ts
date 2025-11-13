@@ -112,7 +112,7 @@ export const MESSAGE: Codec<LanguageModelItem, LanguageModelV3Message> = {
               type: "tool-call",
               toolCallId: item.callId,
               toolName: item.toolId,
-              input: JSON.parse(item.arguments),
+              input: item.arguments,
               providerOptions: item.providerMetadata,
             },
           ],

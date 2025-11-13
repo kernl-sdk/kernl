@@ -466,6 +466,103 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
         );
         expect(toolCalls.length).toBeGreaterThan(0);
       });
+
+      it("should handle multi-turn conversation with tool results", async () => {
+        // First turn: get tool calls from the model
+        const firstResponse = await gpt4omini.generate({
+          input: [
+            {
+              kind: "message",
+              role: "user",
+              id: "msg-1",
+              content: [{ kind: "text", text: "What is 25 + 17?" }],
+            },
+          ],
+          tools: [
+            {
+              kind: "function",
+              name: "calculate",
+              description: "Perform a mathematical calculation",
+              parameters: {
+                type: "object",
+                properties: {
+                  expression: {
+                    type: "string",
+                    description: "The mathematical expression to evaluate",
+                  },
+                },
+                required: ["expression"],
+              },
+            },
+          ],
+          settings: {
+            maxTokens: 200,
+            temperature: 0,
+          },
+        });
+
+        expect(firstResponse.content).toBeDefined();
+
+        // Extract tool calls
+        const toolCalls = firstResponse.content.filter(
+          (item) => item.kind === "tool-call",
+        );
+        expect(toolCalls.length).toBeGreaterThan(0);
+
+        const toolCall = toolCalls[0] as any;
+        expect(toolCall.callId).toBeDefined();
+        expect(toolCall.toolId).toBe("calculate");
+
+        // Second turn: send tool results back to the model
+        const secondResponse = await gpt4omini.generate({
+          input: [
+            {
+              kind: "message",
+              role: "user",
+              id: "msg-1",
+              content: [{ kind: "text", text: "What is 25 + 17?" }],
+            },
+            ...firstResponse.content,
+            {
+              kind: "tool-result",
+              callId: toolCall.callId,
+              toolId: toolCall.toolId,
+              state: "completed",
+              result: { answer: 42 },
+              error: null,
+            },
+          ],
+          tools: [
+            {
+              kind: "function",
+              name: "calculate",
+              description: "Perform a mathematical calculation",
+              parameters: {
+                type: "object",
+                properties: {
+                  expression: {
+                    type: "string",
+                    description: "The mathematical expression to evaluate",
+                  },
+                },
+                required: ["expression"],
+              },
+            },
+          ],
+          settings: {
+            maxTokens: 200,
+            temperature: 0,
+          },
+        });
+
+        expect(secondResponse.content).toBeDefined();
+
+        // Should have an assistant message with the final answer
+        const messages = secondResponse.content.filter(
+          (item) => item.kind === "message" && item.role === "assistant",
+        );
+        expect(messages.length).toBeGreaterThan(0);
+      });
     });
 
     describe("validation", () => {
