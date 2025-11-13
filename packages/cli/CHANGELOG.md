@@ -1,5 +1,12 @@
 # @kernl/cli
 
+## 0.2.2
+
+### Patch Changes
+
+- 91b1285: Update default template to demonstrate agent.run() and agent.stream() API
+- fffa89e: Update default template to use Toolkit instead of FunctionToolkit
+
 ## 0.2.1
 
 ### Patch Changes

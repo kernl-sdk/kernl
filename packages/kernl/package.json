@@ -1,7 +1,7 @@
 {
   "name": "kernl",
-  "version": "0.1.4",
-  "description": "A modern AI agent framework with MCP integration",
+  "version": "0.2.0",
+  "description": "A modern AI agent framework",
   "keywords": [
     "kernl",
     "ai",

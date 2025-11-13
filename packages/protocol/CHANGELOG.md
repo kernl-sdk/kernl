@@ -1,5 +1,11 @@
 # @kernl/protocol
 
+## 0.2.0
+
+### Minor Changes
+
+- fffa89e: Add thread/task state constants and language model helper functions
+
 ## 0.1.1
 
 ### Patch Changes

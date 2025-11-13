@@ -1,7 +1,7 @@
 {
   "name": "@kernl-sdk/protocol",
-  "version": "0.1.1",
-  "description": "kernl Provider Protocol - Standard interfaces for AI model providers",
+  "version": "0.2.0",
+  "description": "Protocol specification for kernl",
   "keywords": [
     "kernl",
     "protocol",

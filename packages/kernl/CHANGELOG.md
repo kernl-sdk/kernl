@@ -1,5 +1,17 @@
 # @kernl/core
 
+## 0.2.0
+
+### Minor Changes
+
+- 91b1285: Add agent.run() and agent.stream() convenience methods for thread execution. Kernl now mediates all thread lifecycle with spawn/schedule methods.
+- fffa89e: Refactor thread execution to support streaming and fix tool schema serialization. Adds new `stream()` method for async iteration over thread events, fixes tool parameter schemas to use JSON Schema instead of raw Zod schemas.
+
+### Patch Changes
+
+- Updated dependencies [fffa89e]
+  - @kernl-sdk/protocol@0.2.0
+
 ## 0.1.4
 
 ### Patch Changes
