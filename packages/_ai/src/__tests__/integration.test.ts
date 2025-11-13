@@ -257,6 +257,70 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
         const finishEvents = events.filter((e) => e.kind === "finish");
         expect(finishEvents.length).toBe(1);
       });
+
+      it("should yield both delta events and complete Message items", async () => {
+        const events = [];
+
+        for await (const event of gpt4omini.stream({
+          input: [
+            {
+              kind: "message",
+              role: "user",
+              id: "msg-1",
+              content: [
+                { kind: "text", text: "Say 'Hello World' and nothing else." },
+              ],
+            },
+          ],
+          settings: {
+            maxTokens: 50,
+            temperature: 0,
+          },
+        })) {
+          events.push(event);
+        }
+
+        expect(events.length).toBeGreaterThan(0);
+
+        // Should have text-delta events (for streaming UX)
+        const textDeltas = events.filter((e) => e.kind === "text-delta");
+        expect(textDeltas.length).toBeGreaterThan(0);
+
+        // Should have text-start event
+        const textStarts = events.filter((e) => e.kind === "text-start");
+        expect(textStarts.length).toBeGreaterThan(0);
+
+        // Should have text-end event
+        const textEnds = events.filter((e) => e.kind === "text-end");
+        expect(textEnds.length).toBeGreaterThan(0);
+
+        // Should have complete Message item (for history)
+        const messages = events.filter((e) => e.kind === "message");
+        expect(messages.length).toBeGreaterThan(0);
+
+        const assistantMessage = messages[0] as any;
+        expect(assistantMessage.role).toBe("assistant");
+        expect(assistantMessage.content).toBeDefined();
+        expect(assistantMessage.content.length).toBeGreaterThan(0);
+
+        // Message should have accumulated text from all deltas
+        const textContent = assistantMessage.content.find(
+          (c: any) => c.kind === "text"
+        );
+        expect(textContent).toBeDefined();
+        expect(textContent.text).toBeDefined();
+        expect(textContent.text.length).toBeGreaterThan(0);
+
+        // Verify accumulated text matches concatenated deltas
+        const accumulatedFromDeltas = textDeltas
+          .map((d: any) => d.text)
+          .join("");
+        expect(textContent.text).toBe(accumulatedFromDeltas);
+
+        // Should have finish event
+        const finishEvents = events.filter((e) => e.kind === "finish");
+        expect(finishEvents.length).toBe(1);
+      });
     });
 
     describe("tools", () => {

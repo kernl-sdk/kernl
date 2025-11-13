@@ -6,6 +6,7 @@ import type {
   LanguageModelResponse,
   LanguageModelStreamEvent,
 } from "@kernl-sdk/protocol";
+import { message, reasoning } from "@kernl-sdk/protocol";
 
 import { MESSAGE } from "./convert/message";
 import { TOOL } from "./convert/tools";
@@ -69,7 +70,73 @@ export class AISDKLanguageModel implements LanguageModel {
         abortSignal: request.abort,
       });
 
-      yield* convertStream(stream.stream);
+      // text and reasoning buffers for delta accumulation
+      const tbuf: Record<string, string> = {};
+      const rbuf: Record<string, string> = {};
+
+      for await (const event of convertStream(stream.stream)) {
+        switch (event.kind) {
+          case "text-start": {
+            tbuf[event.id] = "";
+            yield event;
+            break;
+          }
+
+          case "text-delta": {
+            if (tbuf[event.id] !== undefined) {
+              tbuf[event.id] += event.text;
+            }
+            yield event;
+            break;
+          }
+
+          case "text-end": {
+            const text = tbuf[event.id];
+            if (text !== undefined) {
+              yield message({
+                role: "assistant",
+                text,
+                providerMetadata: event.providerMetadata,
+              });
+              delete tbuf[event.id];
+            }
+            yield event;
+            break;
+          }
+
+          case "reasoning-start": {
+            rbuf[event.id] = "";
+            yield event;
+            break;
+          }
+
+          case "reasoning-delta": {
+            if (rbuf[event.id] !== undefined) {
+              rbuf[event.id] += event.text;
+            }
+            yield event;
+            break;
+          }
+
+          case "reasoning-end": {
+            const text = rbuf[event.id];
+            if (text !== undefined) {
+              yield reasoning({
+                text,
+                providerMetadata: event.providerMetadata,
+              });
+              delete rbuf[event.id];
+            }
+            yield event;
+            break;
+          }
+
+          default:
+            // all other events (tool-call, tool-result, finish, etc.) pass through
+            yield event;
+            break;
+        }
+      }
     } catch (error) {
       throw wrapError(error, "stream");
     }

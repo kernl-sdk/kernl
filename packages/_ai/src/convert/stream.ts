@@ -1,5 +1,6 @@
 import type { Codec, LanguageModelStreamEvent } from "@kernl-sdk/protocol";
 import type { LanguageModelV3StreamPart } from "@ai-sdk/provider";
+import { COMPLETED, FAILED } from "@kernl-sdk/protocol";
 import { WARNING } from "./response";
 
 /**
@@ -109,8 +110,9 @@ export const STREAM_PART: Codec<
       case "tool-call":
         return {
           kind: "tool-call",
-          id: part.toolCallId,
-          toolName: part.toolName,
+          callId: part.toolCallId,
+          toolId: part.toolName,
+          state: COMPLETED,
           arguments: part.input,
           providerMetadata: part.providerMetadata,
         };
@@ -121,7 +123,7 @@ export const STREAM_PART: Codec<
           kind: "tool-result",
           callId: part.toolCallId,
           toolId: part.toolName,
-          state: part.isError ? "failed" : "completed",
+          state: part.isError ? FAILED : COMPLETED,
           result: part.result,
           error: part.isError ? String(part.result) : null,
           providerMetadata: part.providerMetadata,
