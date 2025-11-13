@@ -1,5 +1,11 @@
 # @kernl/ai
 
+## 0.1.3
+
+### Patch Changes
+
+- 19020a1: Fix tool call argument encoding for multi-turn conversations with Anthropic models
+
 ## 0.1.2
 
 ### Patch Changes

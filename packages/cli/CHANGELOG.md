@@ -1,5 +1,11 @@
 # @kernl/cli
 
+## 0.2.4
+
+### Patch Changes
+
+- 19020a1: Simplify default template math tool definitions
+
 ## 0.2.3
 
 ### Patch Changes
