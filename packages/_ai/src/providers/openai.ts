@@ -6,7 +6,7 @@ import { AISDKLanguageModel } from "../language-model";
  *
  * @example
  * ```ts
- * import { openai } from '@kernl-sdk/ai/openai';
+ * import { openai } from '@kernl/ai/openai';
  *
  * const gpt4 = openai('gpt-4-turbo');
  * const response = await gpt4.generate([...], {});

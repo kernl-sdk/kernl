@@ -1,5 +1,5 @@
 {
-  "name": "@kernl-sdk/protocol",
+  "name": "@kernl/protocol",
   "version": "0.2.1",
   "description": "Protocol specification for kernl",
   "keywords": [
@@ -20,6 +20,9 @@
     "url": "https://github.com/dremnik/kernl/issues"
   },
   "type": "module",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -33,7 +36,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@kernl-sdk/shared": "workspace:*"
+    "@kernl/shared": "workspace:*"
   },
   "devDependencies": {
     "@types/json-schema": "^7.0.15",

@@ -9,7 +9,7 @@ import {
   UNINTERRUPTIBLE,
   ZOMBIE,
   DEAD,
-} from "@kernl-sdk/protocol";
+} from "@kernl/protocol";
 
 import { Task } from "@/task";
 import { Context } from "@/context";

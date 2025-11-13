@@ -3,7 +3,7 @@ import { z, type ZodType } from "zod";
 import { Agent } from "@/agent";
 import { Context, UnknownContext } from "@/context";
 import { MCPServer } from "@/mcp/base";
-import type { ToolCallState } from "@kernl-sdk/protocol";
+import type { ToolCallState } from "@kernl/protocol";
 
 import type { FunctionTool, HostedTool } from "./tool";
 

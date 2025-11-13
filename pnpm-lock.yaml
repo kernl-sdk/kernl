@@ -21,34 +21,12 @@ importers:
         specifier: 5.9.2
         version: 5.9.2
 
-  examples/llm-tmp:
-    dependencies:
-      '@ai-sdk/anthropic':
-        specifier: ^3.0.0-beta.53
-        version: 3.0.0-beta.53(zod@4.1.12)
-      '@kernl-sdk/ai':
-        specifier: workspace:*
-        version: link:../../packages/_ai
-      '@kernl-sdk/protocol':
-        specifier: workspace:*
-        version: link:../../packages/protocol
-    devDependencies:
-      '@types/node':
-        specifier: ^24.10.0
-        version: 24.10.0
-      tsx:
-        specifier: ^4.7.0
-        version: 4.20.6
-      typescript:
-        specifier: ^5.9.2
-        version: 5.9.2
-
   packages/_ai:
     dependencies:
-      '@kernl-sdk/protocol':
+      '@kernl/protocol':
         specifier: workspace:*
         version: link:../protocol
-      '@kernl-sdk/shared':
+      '@kernl/shared':
         specifier: workspace:^
         version: link:../shared
     devDependencies:
@@ -104,10 +82,10 @@ importers:
 
   packages/kernl:
     dependencies:
-      '@kernl-sdk/protocol':
+      '@kernl/protocol':
         specifier: workspace:*
         version: link:../protocol
-      '@kernl-sdk/shared':
+      '@kernl/shared':
         specifier: workspace:^
         version: link:../shared
       '@modelcontextprotocol/sdk':
@@ -123,7 +101,7 @@ importers:
       '@ai-sdk/openai':
         specifier: 3.0.0-beta.57
         version: 3.0.0-beta.57(zod@4.1.12)
-      '@kernl-sdk/ai':
+      '@kernl/ai':
         specifier: workspace:*
         version: link:../_ai
       '@types/node':
@@ -141,7 +119,7 @@ importers:
 
   packages/protocol:
     dependencies:
-      '@kernl-sdk/shared':
+      '@kernl/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:
@@ -2787,6 +2765,7 @@ snapshots:
       get-tsconfig: 4.13.0
     optionalDependencies:
       fsevents: 2.3.3
+    optional: true
 
   turbo-darwin-64@2.5.8:
     optional: true

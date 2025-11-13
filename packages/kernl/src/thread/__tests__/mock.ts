@@ -4,7 +4,7 @@ import {
   LanguageModelResponse,
   LanguageModelResponseItem,
   LanguageModelItem,
-} from "@kernl-sdk/protocol";
+} from "@kernl/protocol";
 import type { ThreadStreamEvent } from "@/types/thread";
 
 /**

@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 
 /**
- * Example: Using @kernl-sdk/ai with the AI SDK
+ * Example: Using @kernl/ai with the AI SDK
  *
  * This example demonstrates how to use the AISDKLanguageModel adapter
  * to integrate AI SDK models with the Kernl protocol.
@@ -9,7 +9,7 @@
  * Run with: ANTHROPIC_API_KEY=your-key pnpm start
  */
 
-import { anthropic } from "@kernl-sdk/ai/anthropic";
+import { anthropic } from "@kernl/ai/anthropic";
 
 // Check for API key
 if (!process.env.ANTHROPIC_API_KEY) {
@@ -37,7 +37,7 @@ async function main() {
 
 const model = anthropic("claude-sonnet-4-5");
 
-console.log("Testing @kernl-sdk/ai Language Model Adapter\n");
+console.log("Testing @kernl/ai Language Model Adapter\n");
 console.log(`Provider: ${model.provider}`);
 console.log(`Model ID: ${model.modelId}`);
 console.log(`Spec: ${model.spec}\n`);

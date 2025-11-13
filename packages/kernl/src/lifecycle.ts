@@ -3,7 +3,7 @@ import { EventEmitter } from "node:events";
 import { Agent } from "./agent";
 import { Context, UnknownContext } from "./context";
 import { Tool } from "./tool";
-import type { ToolCall } from "@kernl-sdk/protocol";
+import type { ToolCall } from "@kernl/protocol";
 
 import { AgentResponseType } from "./types/agent";
 import { TextResponse } from "./types/thread";

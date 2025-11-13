@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
 
-import type { LanguageModelRequest } from "@kernl-sdk/protocol";
-import { IN_PROGRESS, COMPLETED, FAILED } from "@kernl-sdk/protocol";
+import type { LanguageModelRequest } from "@kernl/protocol";
+import { IN_PROGRESS, COMPLETED, FAILED } from "@kernl/protocol";
 
 import { Thread } from "../thread";
 import { Agent } from "@/agent";

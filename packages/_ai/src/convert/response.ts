@@ -6,8 +6,8 @@ import type {
   LanguageModelUsage,
   LanguageModelWarning,
   SharedProviderMetadata,
-} from "@kernl-sdk/protocol";
-import { randomID } from "@kernl-sdk/shared/lib";
+} from "@kernl/protocol";
+import { randomID } from "@kernl/shared/lib";
 import type {
   LanguageModelV3Content,
   LanguageModelV3FinishReason,

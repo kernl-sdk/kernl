@@ -1,5 +1,5 @@
 {
-  "name": "kernl",
+  "name": "@kernl/core",
   "version": "0.2.1",
   "description": "A modern AI agent framework",
   "keywords": [
@@ -21,6 +21,9 @@
     "url": "https://github.com/dremnik/kernl/issues"
   },
   "type": "module",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -37,15 +40,15 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@kernl-sdk/protocol": "workspace:*",
-    "@kernl-sdk/shared": "workspace:^",
+    "@kernl/protocol": "workspace:*",
+    "@kernl/shared": "workspace:^",
     "@modelcontextprotocol/sdk": "^1.20.2",
     "pino": "^9.6.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
     "@ai-sdk/openai": "3.0.0-beta.57",
-    "@kernl-sdk/ai": "workspace:*",
+    "@kernl/ai": "workspace:*",
     "@types/node": "^24.10.0",
     "tsc-alias": "^1.8.10",
     "typescript": "5.9.2",

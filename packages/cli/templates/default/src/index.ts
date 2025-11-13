@@ -1,4 +1,4 @@
-import { Kernl } from "kernl";
+import { Kernl } from "@kernl/core";
 
 import { jarvis } from "@/agents/jarvis";
 

@@ -13,8 +13,8 @@ import {
   FAILED,
   RUNNING,
   STOPPED,
-} from "@kernl-sdk/protocol";
-import { randomID, filter } from "@kernl-sdk/shared/lib";
+} from "@kernl/protocol";
+import { randomID, filter } from "@kernl/shared/lib";
 
 import type {
   ActionSet,

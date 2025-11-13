@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { tool } from "kernl";
+import { tool } from "@kernl/core";
 
 /**
  * @tool

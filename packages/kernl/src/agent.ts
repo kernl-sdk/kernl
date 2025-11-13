@@ -2,7 +2,7 @@ import {
   LanguageModel,
   LanguageModelRequestSettings,
   message,
-} from "@kernl-sdk/protocol";
+} from "@kernl/protocol";
 
 import type { Context, UnknownContext } from "./context";
 import { InputGuardrail, OutputGuardrail } from "./guardrail";

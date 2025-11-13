@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { COMPLETED, FAILED } from "@kernl-sdk/protocol";
+import { COMPLETED, FAILED } from "@kernl/protocol";
 import { tool } from "../tool";
 import {
   mockContext,

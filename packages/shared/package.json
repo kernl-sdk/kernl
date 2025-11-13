@@ -1,5 +1,5 @@
 {
-  "name": "@kernl-sdk/shared",
+  "name": "@kernl/shared",
   "version": "0.1.2",
   "description": "Shared utilities for kernl",
   "keywords": [
@@ -19,6 +19,9 @@
     "url": "https://github.com/dremnik/kernl/issues"
   },
   "type": "module",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
