@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { Context, UnknownContext } from "@/context";
 
 import { ModelBehaviorError } from "@/lib/error";
@@ -167,10 +168,11 @@ export class FunctionTool<
       }
     }
 
-    // Check if approval is required
+    // check if approval is required
     const needsApproval = await this.requiresApproval(context, parsed, callId);
     const approvalStatus = callId ? context.approvals.get(callId) : undefined;
 
+    // (TODO): this will become a more detailed action.approval event
     if (needsApproval && approvalStatus !== "approved") {
       return {
         state: INTERRUPTIBLE,
@@ -195,7 +197,9 @@ export class FunctionTool<
       kind: "function",
       name: this.id,
       description: this.description,
-      parameters: this.parameters as any, // TODO: convert Zod to JSON Schema
+      parameters: (this.parameters
+        ? z.toJSONSchema(this.parameters, { target: "draft-7" })
+        : {}) as any, // JSONSchema7 - target: 'draft-7' produces this
     };
   }
 }

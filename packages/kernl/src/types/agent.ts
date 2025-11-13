@@ -3,7 +3,7 @@ import { type ZodType } from "zod";
 import { Context, UnknownContext } from "@/context";
 import { LanguageModel, LanguageModelRequestSettings } from "@kernl-sdk/protocol";
 import { InputGuardrail, OutputGuardrail } from "@/guardrail";
-import { Toolkit } from "@/tool";
+import { ToolkitBase } from "@/tool";
 
 import { TextResponse } from "./thread";
 
@@ -59,11 +59,11 @@ export interface AgentConfig<
 
   /**
    * A list of toolkits the agent can use. Toolkits are collections of related tools
-   * that can be static (FunctionToolkit) or dynamic (MCPToolkit).
+   * that can be static (Toolkit) or dynamic (MCPToolkit).
    *
    * @example
    * ```typescript
-   * const myTools = new FunctionToolkit({
+   * const myTools = new Toolkit({
    *   id: "custom",
    *   tools: [tool1, tool2]
    * });
@@ -80,7 +80,7 @@ export interface AgentConfig<
    * });
    * ```
    */
-  toolkits?: Toolkit<TContext>[];
+  toolkits?: ToolkitBase<TContext>[];
 
   /**
    * A list of checks that run in parallel to the agent's execution on the input + output for the agent,

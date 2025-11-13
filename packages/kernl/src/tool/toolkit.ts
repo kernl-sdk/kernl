@@ -18,7 +18,7 @@ import type {
  * Toolkits can be static (FunctionToolkit) or dynamic (MCPToolkit), and provide
  * a unified interface for tool discovery and management.
  */
-export abstract class Toolkit<TContext = UnknownContext> {
+export abstract class BaseToolkit<TContext = UnknownContext> {
   /**
    * Unique identifier for this toolkit
    */
@@ -82,7 +82,7 @@ export abstract class Toolkit<TContext = UnknownContext> {
  */
 export class FunctionToolkit<
   TContext = UnknownContext,
-> extends Toolkit<TContext> {
+> extends BaseToolkit<TContext> {
   readonly id: string;
   readonly description: string;
   private tools: Map<string, Tool<TContext>>;
@@ -120,6 +120,11 @@ export class FunctionToolkit<
   }
 }
 
+/**
+ * Convenience alias for FunctionToolkit - the default toolkit implementation.
+ */
+export { FunctionToolkit as Toolkit };
+
 /*
  * A toolkit that wraps an MCP server and provides tools from it.
  *
@@ -151,7 +156,9 @@ export class FunctionToolkit<
  * });
  * ```
  */
-export class MCPToolkit<TContext = UnknownContext> extends Toolkit<TContext> {
+export class MCPToolkit<
+  TContext = UnknownContext,
+> extends BaseToolkit<TContext> {
   readonly id: string;
   readonly description: string;
   private server: MCPServer;

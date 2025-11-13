@@ -1,5 +1,5 @@
 export { BaseTool, FunctionTool, HostedTool, tool } from "./tool";
-export { Toolkit, FunctionToolkit, MCPToolkit } from "./toolkit";
+export { BaseToolkit, Toolkit, FunctionToolkit, MCPToolkit } from "./toolkit";
 export type {
   Tool,
   ToolResult,
