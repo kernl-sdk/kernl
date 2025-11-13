@@ -1,13 +1,6 @@
 import { z } from "zod";
 import { Context, tool } from "kernl";
 
-const MultiplyParams = z.object({
-  a: z.number().describe("First number"),
-  b: z.number().describe("Second number"),
-});
-
-type MultiplyParams = z.infer<typeof MultiplyParams>;
-
 /**
  * @tool
  *
@@ -15,11 +8,15 @@ type MultiplyParams = z.infer<typeof MultiplyParams>;
  */
 export const multiply = tool({
   id: "multiply",
-  name: "multiply",
   description: "Multiply two numbers",
-  parameters: MultiplyParams,
+  parameters: z.object({
+    a: z.number().describe("First number"),
+    b: z.number().describe("Second number"),
+  }),
   execute: _multiply,
 });
+
+type MultiplyParams = z.infer<typeof multiply.parameters>;
 
 /**
  * Multiplies two numbers together.

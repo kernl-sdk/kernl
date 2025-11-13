@@ -1,13 +1,6 @@
 import { z } from "zod";
 import { Context, tool } from "kernl";
 
-const AddParams = z.object({
-  a: z.number().describe("First number"),
-  b: z.number().describe("Second number"),
-});
-
-type AddParams = z.infer<typeof AddParams>;
-
 /**
  * @tool
  *
@@ -15,11 +8,15 @@ type AddParams = z.infer<typeof AddParams>;
  */
 export const add = tool({
   id: "add",
-  name: "add",
   description: "Add two numbers",
-  parameters: AddParams,
+  parameters: z.object({
+    a: z.number().describe("First number"),
+    b: z.number().describe("Second number"),
+  }),
   execute: _add,
 });
+
+type AddParams = z.infer<typeof add.parameters>;
 
 /**
  * Adds two numbers together.

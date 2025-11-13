@@ -1,13 +1,6 @@
 import { z } from "zod";
 import { Context, tool } from "kernl";
 
-const SubtractParams = z.object({
-  a: z.number().describe("First number"),
-  b: z.number().describe("Second number"),
-});
-
-type SubtractParams = z.infer<typeof SubtractParams>;
-
 /**
  * @tool
  *
@@ -15,11 +8,15 @@ type SubtractParams = z.infer<typeof SubtractParams>;
  */
 export const subtract = tool({
   id: "subtract",
-  name: "subtract",
   description: "Subtract two numbers",
-  parameters: SubtractParams,
+  parameters: z.object({
+    a: z.number().describe("First number"),
+    b: z.number().describe("Second number"),
+  }),
   execute: _subtract,
 });
+
+type SubtractParams = z.infer<typeof subtract.parameters>;
 
 /**
  * Subtracts two numbers using the fanciest algorithm on earth.

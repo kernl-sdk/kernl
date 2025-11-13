@@ -1,13 +1,6 @@
 import { z } from "zod";
 import { Context, tool } from "kernl";
 
-const DivideParams = z.object({
-  a: z.number().describe("Numerator"),
-  b: z.number().describe("Denominator"),
-});
-
-type DivideParams = z.infer<typeof DivideParams>;
-
 /**
  * @tool
  *
@@ -15,11 +8,15 @@ type DivideParams = z.infer<typeof DivideParams>;
  */
 export const divide = tool({
   id: "divide",
-  name: "divide",
   description: "Divide two numbers",
-  parameters: DivideParams,
+  parameters: z.object({
+    a: z.number().describe("Numerator"),
+    b: z.number().describe("Denominator"),
+  }),
   execute: _divide,
 });
+
+type DivideParams = z.infer<typeof divide.parameters>;
 
 /**
  * Divides one number by another.
