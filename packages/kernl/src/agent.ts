@@ -39,6 +39,8 @@ export class Agent<
   model: LanguageModel;
   modelSettings: LanguageModelRequestSettings;
   toolkits: BaseToolkit<TContext>[];
+  // actions: ActionSet; /* TODO */
+
   guardrails: {
     input: InputGuardrail[];
     output: OutputGuardrail<AgentResponseType>[];

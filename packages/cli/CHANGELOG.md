@@ -1,5 +1,11 @@
 # @kernl/cli
 
+## 0.2.3
+
+### Patch Changes
+
+- Minor bug fixes and improvements
+
 ## 0.2.2
 
 ### Patch Changes
