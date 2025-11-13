@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Context, tool } from "kernl";
+import { tool } from "kernl";
 
 /**
  * @tool
@@ -13,15 +13,8 @@ export const add = tool({
     a: z.number().describe("First number"),
     b: z.number().describe("Second number"),
   }),
-  execute: _add,
+  execute: async (ctx, params) => {
+    const { a, b } = params;
+    return a + b;
+  },
 });
-
-type AddParams = z.infer<typeof add.parameters>;
-
-/**
- * Adds two numbers together.
- */
-async function _add(context: Context, params: AddParams): Promise<number> {
-  const { a, b } = params;
-  return a + b;
-}

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Context, tool } from "kernl";
+import { tool } from "kernl";
 
 /**
  * @tool
@@ -13,18 +13,8 @@ export const multiply = tool({
     a: z.number().describe("First number"),
     b: z.number().describe("Second number"),
   }),
-  execute: _multiply,
+  execute: async (ctx, params) => {
+    const { a, b } = params;
+    return a * b;
+  },
 });
-
-type MultiplyParams = z.infer<typeof multiply.parameters>;
-
-/**
- * Multiplies two numbers together.
- */
-async function _multiply(
-  context: Context,
-  params: MultiplyParams,
-): Promise<number> {
-  const { a, b } = params;
-  return a * b;
-}

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Context, tool } from "kernl";
+import { tool } from "kernl";
 
 /**
  * @tool
@@ -13,18 +13,8 @@ export const subtract = tool({
     a: z.number().describe("First number"),
     b: z.number().describe("Second number"),
   }),
-  execute: _subtract,
+  execute: async (ctx, params) => {
+    const { a, b } = params;
+    return a - b;
+  },
 });
-
-type SubtractParams = z.infer<typeof subtract.parameters>;
-
-/**
- * Subtracts two numbers using the fanciest algorithm on earth.
- */
-async function _subtract(
-  context: Context,
-  params: SubtractParams,
-): Promise<number> {
-  const { a, b } = params;
-  return a - b;
-}
