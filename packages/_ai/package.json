@@ -52,8 +52,7 @@
     "test:run": "vitest run"
   },
   "peerDependencies": {
-    "@ai-sdk/provider": "^3.0.0-beta.15",
-    "@kernl/protocol": "workspace:*"
+    "@ai-sdk/provider": "^3.0.0-beta.15"
   },
   "peerDependenciesMeta": {
     "@ai-sdk/anthropic": {
@@ -77,6 +76,7 @@
     "vitest": "^4.0.8"
   },
   "dependencies": {
+    "@kernl/protocol": "workspace:*",
     "@kernl/shared": "workspace:^"
   }
 }
