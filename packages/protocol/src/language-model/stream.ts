@@ -5,23 +5,25 @@ import type {
   LanguageModelUsage,
   LanguageModelWarning,
 } from "./model";
-import type { ToolCallState } from "./item";
+import type { Message, Reasoning, ToolCall, ToolResult } from "./item";
 
 /**
- * Union of all possible language model stream events.
+ * Union of all language model stream events.
  */
 export type LanguageModelStreamEvent =
   | TextStartEvent
-  | TextEndEvent
   | TextDeltaEvent
+  | TextEndEvent
+  | Message
   | ReasoningStartEvent
-  | ReasoningEndEvent
   | ReasoningDeltaEvent
+  | ReasoningEndEvent
+  | Reasoning
   | ToolInputStartEvent
   | ToolInputEndEvent
   | ToolInputDeltaEvent
-  | ToolCallEvent
-  | ToolResultEvent
+  | ToolCall
+  | ToolResult
   | StartEvent
   | FinishEvent
   | AbortEvent
@@ -138,56 +140,6 @@ export interface ToolInputDeltaEvent extends StreamEventBase {
    * The incremental tool input chunk.
    */
   delta: string;
-}
-
-/**
- * Stream event containing a complete tool call.
- */
-export interface ToolCallEvent extends StreamEventBase {
-  readonly kind: "tool-call";
-  id: string;
-
-  /**
-   * The name of the tool being called.
-   */
-  toolName: string;
-
-  /**
-   * The arguments for the tool call as a JSON string.
-   */
-  arguments: string;
-}
-
-/**
- * Stream event containing a tool result from a provider-executed tool.
- */
-export interface ToolResultEvent extends StreamEventBase {
-  readonly kind: "tool-result";
-
-  /**
-   * The ID of the tool call that this result is associated with.
-   */
-  callId: string;
-
-  /**
-   * Name of the tool that generated this result.
-   */
-  toolId: string;
-
-  /**
-   * The state of the tool call.
-   */
-  state: ToolCallState;
-
-  /**
-   * Result of the tool call. This is a JSON-serializable value.
-   */
-  result: unknown;
-
-  /**
-   * Error message if the tool call failed.
-   */
-  error: string | null;
 }
 
 /**

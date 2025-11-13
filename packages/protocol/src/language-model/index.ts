@@ -3,3 +3,4 @@ export * from "./model";
 export * from "./request";
 export * from "./stream";
 export * from "./tool";
+export * from "./utils";

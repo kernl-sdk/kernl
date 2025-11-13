@@ -120,6 +120,12 @@ importers:
         specifier: ^4.1.12
         version: 4.1.12
     devDependencies:
+      '@ai-sdk/openai':
+        specifier: 3.0.0-beta.57
+        version: 3.0.0-beta.57(zod@4.1.12)
+      '@kernl-sdk/ai':
+        specifier: workspace:*
+        version: link:../_ai
       '@types/node':
         specifier: ^24.10.0
         version: 24.10.0
@@ -134,6 +140,10 @@ importers:
         version: 4.0.8(@types/node@24.10.0)(tsx@4.20.6)
 
   packages/protocol:
+    dependencies:
+      '@kernl-sdk/shared':
+        specifier: workspace:*
+        version: link:../shared
     devDependencies:
       '@types/json-schema':
         specifier: ^7.0.15

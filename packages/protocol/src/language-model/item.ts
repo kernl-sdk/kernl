@@ -8,12 +8,7 @@ import {
   UNINTERRUPTIBLE,
 } from "@/constants";
 
-export type LanguageModelItem =
-  | Message
-  | Reasoning
-  | ToolCall
-  | ToolResult
-  | Unknown;
+export type LanguageModelItem = Message | Reasoning | ToolCall | ToolResult;
 
 /**
  * A subset of LanguageModelItem that excludes items that wouldn't
@@ -23,7 +18,7 @@ export type LanguageModelResponseItem =
   | AssistantMessage
   | Reasoning
   | ToolCall
-  | Unknown;
+  | ToolResult;
 
 export interface SharedBase {
   /**
@@ -116,19 +111,6 @@ export interface Reasoning extends LanguageModelItemBase {
    * The reasoning content
    */
   text: string;
-}
-
-/**
- * This is a catch all for events that are not part of the protocol.
- *
- * For example, a model might return an event that is not part of the protocol using this type.
- *
- * In that case everything returned from the model should be passed in the `providerMetadata` field.
- *
- * This enables new features to be added to be added by a model provider without breaking the protocol.
- */
-export interface Unknown extends LanguageModelItemBase {
-  readonly kind: "unknown";
 }
 
 // ----------------------------

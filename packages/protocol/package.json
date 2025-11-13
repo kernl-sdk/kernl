@@ -32,6 +32,9 @@
     "lint": "eslint src/",
     "check-types": "tsc --noEmit"
   },
+  "dependencies": {
+    "@kernl-sdk/shared": "workspace:*"
+  },
   "devDependencies": {
     "@types/json-schema": "^7.0.15",
     "@types/node": "^24.10.0",
