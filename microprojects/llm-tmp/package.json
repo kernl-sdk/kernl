@@ -7,8 +7,8 @@
     "start": "tsx src/index.ts"
   },
   "dependencies": {
-    "@kernl/ai": "workspace:*",
-    "@kernl/protocol": "workspace:*",
+    "@kernl-sdk/ai": "workspace:*",
+    "@kernl-sdk/protocol": "workspace:*",
     "@ai-sdk/anthropic": "^3.0.0-beta.53"
   },
   "devDependencies": {

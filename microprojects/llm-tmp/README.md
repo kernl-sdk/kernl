@@ -1,6 +1,6 @@
 # Language Model Example
 
-Temporary example demonstrating `@kernl/ai` package with AI SDK models.
+Temporary example demonstrating `@kernl-sdk/ai` package with AI SDK models.
 
 This example will be replaced with a full agent example once the `kernl` package is refactored.
 
