@@ -2,7 +2,7 @@ import type {
   Codec,
   LanguageModelTool,
   LanguageModelToolChoice,
-} from "@kernl/protocol";
+} from "@kernl-sdk/protocol";
 import type {
   LanguageModelV3FunctionTool,
   LanguageModelV3ProviderDefinedTool,

@@ -1,4 +1,4 @@
-import type { Codec, LanguageModelRequestSettings } from "@kernl/protocol";
+import type { Codec, LanguageModelRequestSettings } from "@kernl-sdk/protocol";
 import type {
   LanguageModelV3ToolChoice,
   SharedV3ProviderOptions,

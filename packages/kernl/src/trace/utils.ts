@@ -1,4 +1,4 @@
-import { randomID } from "@kernl/shared/lib";
+import { randomID } from "@kernl-sdk/shared/lib";
 
 /**
  * Generate a trace ID using 16 random bytes (128-bit, 32 hex chars).

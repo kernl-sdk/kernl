@@ -5,8 +5,8 @@ import type {
   LanguageModelRequest,
   LanguageModelResponse,
   LanguageModelStreamEvent,
-} from "@kernl/protocol";
-import { message, reasoning } from "@kernl/protocol";
+} from "@kernl-sdk/protocol";
+import { message, reasoning } from "@kernl-sdk/protocol";
 
 import { MESSAGE } from "./convert/message";
 import { TOOL } from "./convert/tools";

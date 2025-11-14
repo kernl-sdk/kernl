@@ -4,7 +4,7 @@ import type {
   LanguageModelResponse,
   LanguageModelItem,
   LanguageModelStreamEvent,
-} from "@kernl/protocol";
+} from "@kernl-sdk/protocol";
 
 /**
  * Helper to convert LanguageModelResponse content to stream events.

@@ -1,5 +1,5 @@
 {
-  "name": "@kernl/cli",
+  "name": "@kernl-sdk/cli",
   "version": "0.2.4",
   "description": "CLI for managing kernl applications",
   "keywords": [
@@ -14,12 +14,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dremnik/kernl.git",
+    "url": "https://github.com/kernl-sdk/kernl.git",
     "directory": "packages/cli"
   },
-  "homepage": "https://github.com/dremnik/kernl#readme",
+  "homepage": "https://github.com/kernl-sdk/kernl#readme",
   "bugs": {
-    "url": "https://github.com/dremnik/kernl/issues"
+    "url": "https://github.com/kernl-sdk/kernl/issues"
   },
   "bin": {
     "kernl": "./dist/index.js"

@@ -1,5 +1,5 @@
 {
-  "name": "@kernl/ai",
+  "name": "@kernl-sdk/ai",
   "version": "0.1.3",
   "description": "Vercel AI SDK adapter for kernl",
   "keywords": [
@@ -13,12 +13,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dremnik/kernl.git",
+    "url": "https://github.com/kernl-sdk/kernl.git",
     "directory": "packages/_ai"
   },
-  "homepage": "https://github.com/dremnik/kernl#readme",
+  "homepage": "https://github.com/kernl-sdk/kernl#readme",
   "bugs": {
-    "url": "https://github.com/dremnik/kernl/issues"
+    "url": "https://github.com/kernl-sdk/kernl/issues"
   },
   "type": "module",
   "publishConfig": {
@@ -76,7 +76,7 @@
     "vitest": "^4.0.8"
   },
   "dependencies": {
-    "@kernl/protocol": "workspace:*",
-    "@kernl/shared": "workspace:^"
+    "@kernl-sdk/protocol": "workspace:*",
+    "@kernl-sdk/shared": "workspace:^"
   }
 }

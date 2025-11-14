@@ -1,6 +1,6 @@
 import { SharedProviderMetadata } from "@/provider";
 
-import { randomID } from "@kernl/shared/lib";
+import { randomID } from "@kernl-sdk/shared/lib";
 import { Message, Reasoning } from "./item";
 
 /**

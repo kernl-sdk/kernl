@@ -53,8 +53,8 @@ export async function installTemplate({
       start: "tsx src/index.ts",
     },
     dependencies: {
-      "@kernl/core": "latest",
-      "@kernl/ai": "latest",
+      "@kernl-sdk/core": "latest",
+      "@kernl-sdk/ai": "latest",
       zod: "^4.1.12",
     },
     devDependencies: {

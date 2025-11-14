@@ -3,8 +3,8 @@ import { ZodType } from "zod";
 import type { ResolvedAgentResponse } from "@/guardrail";
 
 /* lib */
-import { json } from "@kernl/shared/lib";
-import { ToolCall } from "@kernl/protocol";
+import { json } from "@kernl-sdk/shared/lib";
+import { ToolCall } from "@kernl-sdk/protocol";
 import { ModelBehaviorError } from "@/lib/error";
 
 /* types */

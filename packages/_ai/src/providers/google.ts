@@ -6,7 +6,7 @@ import { AISDKLanguageModel } from "../language-model";
  *
  * @example
  * ```ts
- * import { google } from '@kernl/ai/google';
+ * import { google } from '@kernl-sdk/ai/google';
  *
  * const gemini = google('gemini-2.0-flash-exp');
  * const response = await gemini.generate([...], {});

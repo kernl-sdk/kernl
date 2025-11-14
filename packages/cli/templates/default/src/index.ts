@@ -1,4 +1,5 @@
-import { Kernl } from "@kernl/core";
+import { Kernl } from "@kernl-sdk/core";
+import { anthropic } from "@kernl-sdk/ai/anthropic";
 
 import { jarvis } from "@/agents/jarvis";
 

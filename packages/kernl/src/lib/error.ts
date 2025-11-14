@@ -4,7 +4,7 @@ import {
   OutputGuardrailResult,
 } from "@/guardrail";
 
-import { randomID } from "@kernl/shared/lib";
+import { randomID } from "@kernl-sdk/shared/lib";
 // TODO: implement checkpointing/serialization
 // import { SerializedThread } from "@/lib/serde/thread";
 type SerializedThread = any;

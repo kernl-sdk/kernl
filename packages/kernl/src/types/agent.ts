@@ -4,7 +4,7 @@ import { Context, UnknownContext } from "@/context";
 import {
   LanguageModel,
   LanguageModelRequestSettings,
-} from "@kernl/protocol";
+} from "@kernl-sdk/protocol";
 import { InputGuardrail, OutputGuardrail } from "@/guardrail";
 import { BaseToolkit } from "@/tool";
 

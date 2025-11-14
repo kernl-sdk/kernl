@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { z } from "zod";
 import { openai } from "@ai-sdk/openai";
-import { AISDKLanguageModel } from "@kernl/ai";
+import { AISDKLanguageModel } from "@kernl-sdk/ai";
 
 import { Agent } from "@/agent";
 import { Kernl } from "@/kernl";
