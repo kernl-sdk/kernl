@@ -1,5 +1,16 @@
 # @kernl/protocol
 
+## 0.2.2
+
+### Patch Changes
+
+- 2c62c0a: Migrate from @kernl to @kernl-sdk scope
+
+  All packages have been migrated to the @kernl-sdk scope for publishing to GitHub Packages under the kernl-sdk organization.
+
+- Updated dependencies [2c62c0a]
+  - @kernl-sdk/shared@0.1.3
+
 ## 0.2.1
 
 ### Patch Changes
