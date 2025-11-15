@@ -1,5 +1,28 @@
 # @kernl/ai
 
+## 0.2.0
+
+### Minor Changes
+
+- 0f25713: Add UI message and stream conversion utilities for AI SDK integration
+  - Add `UIMessageCodec` for bidirectional conversion between kernl and AI SDK message formats
+  - Add `toUIMessageStream()` helper to convert kernl streams to AI SDK UIMessageStream format
+  - Add `STREAM_UI_PART` codec for converting LanguageModelStreamEvent to UIMessageChunk
+  - Enable seamless integration with AI SDK's `useChat` hook and `createUIMessageStreamResponse`
+  - Add comprehensive test suites for both UI message and stream conversion
+
+## 0.1.4
+
+### Patch Changes
+
+- 2c62c0a: Migrate from @kernl to @kernl-sdk scope
+
+  All packages have been migrated to the @kernl-sdk scope for publishing to GitHub Packages under the kernl-sdk organization.
+
+- Updated dependencies [2c62c0a]
+  - @kernl-sdk/shared@0.1.3
+  - @kernl-sdk/protocol@0.2.2
+
 ## 0.1.3
 
 ### Patch Changes

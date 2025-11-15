@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/ai",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Vercel AI SDK adapter for kernl",
   "keywords": [
     "kernl",
@@ -71,6 +71,7 @@
     "@ai-sdk/openai": "3.0.0-beta.57",
     "@ai-sdk/provider": "3.0.0-beta.15",
     "@types/node": "^24.10.0",
+    "ai": "^5.0.93",
     "tsc-alias": "^1.8.10",
     "typescript": "5.9.2",
     "vitest": "^4.0.8"

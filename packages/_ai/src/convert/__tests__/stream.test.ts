@@ -223,7 +223,7 @@ describe("STREAM_PART codec", () => {
         callId: "call-123",
         toolId: "get_weather",
         state: "failed",
-        result: "Network error",
+        result: null,
         error: "Network error",
         providerMetadata: undefined,
       });
@@ -312,14 +312,18 @@ describe("STREAM_PART codec", () => {
       });
     });
 
-    it("should return null for response-metadata", () => {
+    it("should decode response-metadata as raw", () => {
       const part = {
         type: "response-metadata",
+        timestamp: new Date("2024-01-01T00:00:00Z"),
       } as LanguageModelV3StreamPart;
 
       const result = STREAM_PART.decode(part);
 
-      expect(result).toBeNull();
+      expect(result).toEqual({
+        kind: "raw",
+        rawValue: part,
+      });
     });
   });
 
@@ -414,8 +418,8 @@ describe("convertStream", () => {
         providerMetadata: undefined,
       },
       {
-        type: "response-metadata",
-      }, // This should be filtered out
+        type: "unknown-type",
+      } as any, // This should be filtered out (returns null from default case)
       {
         type: "finish",
         finishReason: "stop",
