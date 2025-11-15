@@ -1,7 +1,8 @@
 import {
-  LanguageModel,
-  LanguageModelRequestSettings,
   message,
+  LanguageModel,
+  LanguageModelItem,
+  LanguageModelRequestSettings,
 } from "@kernl-sdk/protocol";
 
 import type { Context, UnknownContext } from "./context";
@@ -13,15 +14,15 @@ import { Thread } from "./thread";
 
 import { MisconfiguredError } from "./lib/error";
 
+import type { Kernl } from "./kernl";
 import type { AgentConfig, AgentResponseType } from "./types/agent";
+import type { ResolvedAgentResponse } from "./guardrail";
 import type {
   TextResponse,
   ThreadOptions,
   ThreadExecuteResult,
   ThreadStreamEvent,
 } from "./types/thread";
-import type { Kernl } from "./kernl";
-import type { ResolvedAgentResponse } from "./guardrail";
 
 export class Agent<
     TContext = UnknownContext,
@@ -115,7 +116,7 @@ export class Agent<
    * Blocking execution - spawns or resumes thread and waits for completion
    */
   async run(
-    instructions: string,
+    input: string | LanguageModelItem[],
     options?: ThreadOptions<TContext>,
   ): Promise<ThreadExecuteResult<ResolvedAgentResponse<TResponse>>> {
     if (!this.kernl) {
@@ -124,17 +125,19 @@ export class Agent<
       );
     }
 
-    const m = message({ role: "user", text: instructions });
+    const items = typeof input === "string"
+      ? [message({ role: "user", text: input })]
+      : input;
     const tid = options?.threadId;
 
     // NOTE: may end up moving this to the kernl
     let thread = tid ? this.kernl.threads.get(tid) : null;
     if (!thread) {
-      thread = new Thread(this.kernl, this, [m], options);
+      thread = new Thread(this.kernl, this, items, options);
       return this.kernl.spawn(thread);
     }
 
-    thread.append(m);
+    items.forEach((item) => thread!.append(item));
     return this.kernl.schedule(thread);
   }
 
@@ -144,7 +147,7 @@ export class Agent<
    * NOTE: streaming probably won't make sense in scheduling contexts so spawnStream etc. won't make sense
    */
   async *stream(
-    instructions: string,
+    input: string | LanguageModelItem[],
     options?: ThreadOptions<TContext>,
   ): AsyncIterable<ThreadStreamEvent> {
     if (!this.kernl) {
@@ -153,18 +156,20 @@ export class Agent<
       );
     }
 
-    const m = message({ role: "user", text: instructions });
+    const items = typeof input === "string"
+      ? [message({ role: "user", text: input })]
+      : input;
     const tid = options?.threadId;
 
     // NOTE: may end up moving this to the kernl
     let thread = tid ? this.kernl.threads.get(tid) : null;
     if (!thread) {
-      thread = new Thread(this.kernl, this, [m], options);
+      thread = new Thread(this.kernl, this, items, options);
       yield* this.kernl.spawnStream(thread);
       return;
     }
 
-    thread.append(m);
+    items.forEach((item) => thread!.append(item));
     yield* this.kernl.scheduleStream(thread);
   }
 
