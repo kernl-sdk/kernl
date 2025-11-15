@@ -20,3 +20,5 @@ export { TOOL, TOOL_CHOICE } from "./convert/tools";
 export { MODEL_SETTINGS } from "./convert/settings";
 export { MODEL_RESPONSE, WARNING } from "./convert/response";
 export { convertStream } from "./convert/stream";
+export { UIMessageCodec } from "./convert/ui-message";
+export { STREAM_UI_PART, toUIMessageStream } from "./convert/ui-stream";
