@@ -1,5 +1,26 @@
 # @kernl/core
 
+## 0.3.0
+
+### Minor Changes
+
+- Allow Agent.run() and Agent.stream() to accept LanguageModelItem[] as input
+  - Update run() and stream() methods to accept `string | LanguageModelItem[]`
+  - Convert string inputs to message items internally for backwards compatibility
+  - Enable passing decoded UI messages directly to agent methods for multi-turn conversations
+
+## 0.2.2
+
+### Patch Changes
+
+- 2c62c0a: Migrate from @kernl to @kernl-sdk scope
+
+  All packages have been migrated to the @kernl-sdk scope for publishing to GitHub Packages under the kernl-sdk organization.
+
+- Updated dependencies [2c62c0a]
+  - @kernl-sdk/shared@0.1.3
+  - @kernl-sdk/protocol@0.2.2
+
 ## 0.2.1
 
 ### Patch Changes
