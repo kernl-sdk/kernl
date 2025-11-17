@@ -35,9 +35,11 @@ import {
 export const UIMessageCodec: AsyncCodec<LanguageModelItem, UIMessage> = {
   /**
    * Convert from kernl LanguageModelItem to AI SDK UIMessage.
+   *
+   * NOTE: Leaving unimplemented for now. Unlikely to be necessary since UIs are typically streaming.
    */
-  encode: (_item: LanguageModelItem): UIMessage => {
-    throw new Error("UIMessageCodec.encode: Not yet implemented");
+  encode: (item: LanguageModelItem): UIMessage => {
+    throw new Error("UIMessageCodec.encode: Unimplemented");
   },
 
   /**

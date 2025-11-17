@@ -1155,20 +1155,4 @@ describe("UIMessageCodec", () => {
       }
     });
   });
-
-  // ----------------------------
-  // Encode (not implemented)
-  // ----------------------------
-  describe("encode", () => {
-    it("should throw not implemented error", () => {
-      expect(() =>
-        UIMessageCodec.encode({
-          kind: "message",
-          id: "1",
-          role: "user",
-          content: [{ kind: "text", text: "Hello" }],
-        }),
-      ).toThrow("Not yet implemented");
-    });
-  });
 });
