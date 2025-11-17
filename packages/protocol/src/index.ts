@@ -1,5 +1,5 @@
 /**
- * kernl Provider Protocol
+ * kernl - Protocol
  *
  * Standard interfaces and types for AI model providers.
  */
@@ -9,3 +9,4 @@ export * from "./language-model";
 export * from "./embedding-model";
 export * from "./provider";
 export * from "./codec";
+export * from "./json";

@@ -1,6 +1,11 @@
-import type { Codec, LanguageModelStreamEvent } from "@kernl-sdk/protocol";
+import {
+  type Codec,
+  type LanguageModelStreamEvent,
+  COMPLETED,
+  FAILED,
+} from "@kernl-sdk/protocol";
 import type { LanguageModelV3StreamPart } from "@ai-sdk/provider";
-import { COMPLETED, FAILED } from "@kernl-sdk/protocol";
+
 import { WARNING } from "./response";
 
 /**
@@ -118,24 +123,15 @@ export const STREAM_PART: Codec<
         };
 
       case "tool-result":
-        // Provider-defined tools can stream tool results
+        // provider-defined tools can stream tool results
         return {
           kind: "tool-result",
           callId: part.toolCallId,
           toolId: part.toolName,
           state: part.isError ? FAILED : COMPLETED,
-          result: part.result,
+          result: part.isError ? null : part.result,
           error: part.isError ? String(part.result) : null,
           providerMetadata: part.providerMetadata,
-        };
-
-      case "file":
-      case "source":
-        // These don't have direct Kernl equivalents in streaming
-        // Could be handled as raw events
-        return {
-          kind: "raw",
-          rawValue: part,
         };
 
       case "stream-start":
@@ -170,13 +166,16 @@ export const STREAM_PART: Codec<
           rawValue: part.rawValue,
         };
 
+      // - unknown or no equivalent -
       case "response-metadata":
-        // Kernl doesn't have a specific event for response metadata
-        // Could be passed through as raw or ignored
-        return null;
+      case "file":
+      case "source":
+        return {
+          kind: "raw",
+          rawValue: part,
+        };
 
       default:
-        // Unknown event type
         return null;
     }
   },

@@ -38,10 +38,11 @@ export const MESSAGE: Codec<LanguageModelItem, LanguageModelV3Message> = {
                   providerOptions: part.providerMetadata,
                 });
               } else if (part.kind === "file") {
+                const data = part.data ?? (part.uri ? new URL(part.uri) : "");
                 content.push({
                   type: "file",
                   filename: part.filename,
-                  data: part.data,
+                  data,
                   mediaType: part.mimeType,
                   providerOptions: part.providerMetadata,
                 });
@@ -71,10 +72,11 @@ export const MESSAGE: Codec<LanguageModelItem, LanguageModelV3Message> = {
                   providerOptions: part.providerMetadata,
                 });
               } else if (part.kind === "file") {
+                const data = part.data ?? (part.uri ? new URL(part.uri) : "");
                 content.push({
                   type: "file",
                   filename: part.filename,
-                  data: part.data,
+                  data,
                   mediaType: part.mimeType,
                   providerOptions: part.providerMetadata,
                 });
@@ -88,7 +90,6 @@ export const MESSAGE: Codec<LanguageModelItem, LanguageModelV3Message> = {
             };
           }
         }
-        break;
       }
 
       case "reasoning": {

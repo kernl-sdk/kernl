@@ -226,7 +226,7 @@ describe("MESSAGE codec", () => {
             type: "tool-call",
             toolCallId: "call-123",
             toolName: "get_weather",
-            input: JSON.stringify({ city: "SF" }),
+            input: { city: "SF" },
             providerOptions: undefined,
           },
         ],
