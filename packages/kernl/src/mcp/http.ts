@@ -28,7 +28,7 @@ export class MCPServerStreamableHttp extends BaseMCPServer {
   protected timeout: number;
   protected serverInitializeResult: InitializeResult | null = null;
 
-  params: MCPServerStreamableHttpOptions;
+  options: MCPServerStreamableHttpOptions;
   private transport: any = null;
 
   constructor(options: MCPServerStreamableHttpOptions) {
@@ -40,8 +40,8 @@ export class MCPServerStreamableHttp extends BaseMCPServer {
         getLogger(DEFAULT_STREAMABLE_HTTP_MCP_CLIENT_LOGGER_NAME),
     });
 
-    this.params = options;
-    this.id = options.id || `streamable-http: ${this.params.url}`;
+    this.options = options;
+    this.id = options.id || `streamable-http: ${this.options.url}`;
     this.timeout = options.timeout ?? DEFAULT_REQUEST_TIMEOUT_MSEC;
   }
 
@@ -51,13 +51,13 @@ export class MCPServerStreamableHttp extends BaseMCPServer {
   async connect(): Promise<void> {
     try {
       this.transport = new StreamableHTTPClientTransport(
-        new URL(this.params.url),
+        new URL(this.options.url),
         {
-          authProvider: this.params.authProvider,
-          requestInit: this.params.requestInit,
-          fetch: this.params.fetch,
-          reconnectionOptions: this.params.reconnectionOptions,
-          sessionId: this.params.sessionId,
+          authProvider: this.options.authProvider,
+          requestInit: this.options.requestInit,
+          fetch: this.options.fetch,
+          reconnectionOptions: this.options.reconnectionOptions,
+          sessionId: this.options.sessionId,
         },
       );
 

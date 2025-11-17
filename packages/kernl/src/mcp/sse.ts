@@ -25,7 +25,7 @@ export class MCPServerSSE extends BaseMCPServer {
   protected timeout: number;
   protected serverInitializeResult: InitializeResult | null = null;
 
-  params: MCPServerSSEOptions;
+  options: MCPServerSSEOptions;
   private transport: any = null;
 
   constructor(options: MCPServerSSEOptions) {
@@ -35,8 +35,8 @@ export class MCPServerSSE extends BaseMCPServer {
       logger: options.logger ?? getLogger(DEFAULT_SSE_MCP_CLIENT_LOGGER_NAME),
     });
 
-    this.params = options;
-    this.id = options.id || `sse: ${this.params.url}`;
+    this.options = options;
+    this.id = options.id || `sse: ${this.options.url}`;
     this.timeout = options.timeout ?? DEFAULT_REQUEST_TIMEOUT_MSEC;
   }
 
@@ -45,10 +45,10 @@ export class MCPServerSSE extends BaseMCPServer {
    */
   async connect(): Promise<void> {
     try {
-      this.transport = new SSEClientTransport(new URL(this.params.url), {
-        authProvider: this.params.authProvider,
-        requestInit: this.params.requestInit,
-        eventSourceInit: this.params.eventSourceInit,
+      this.transport = new SSEClientTransport(new URL(this.options.url), {
+        authProvider: this.options.authProvider,
+        requestInit: this.options.requestInit,
+        eventSourceInit: this.options.eventSourceInit,
       });
 
       this.session = new Client({
