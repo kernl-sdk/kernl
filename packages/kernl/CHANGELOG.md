@@ -1,5 +1,13 @@
 # @kernl/core
 
+## 0.3.2
+
+### Patch Changes
+
+- fix: MCP tool schema compatibility with OpenAI
+
+  Fixed MCP tool parameter schema serialization to match AI SDK pattern. Empty-parameter MCP tools now generate schemas with `{ type: "object", properties: {}, additionalProperties: false }` which satisfies OpenAI's strict validation requirements.
+
 ## 0.3.1
 
 ### Patch Changes
