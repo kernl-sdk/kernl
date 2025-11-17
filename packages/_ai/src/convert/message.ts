@@ -128,10 +128,15 @@ export const MESSAGE: Codec<LanguageModelItem, LanguageModelV3Message> = {
               type: "tool-result",
               toolCallId: item.callId,
               toolName: item.toolId,
-              output: {
-                type: "json",
-                value: item.result,
-              },
+              output: item.error
+                ? {
+                    type: "error-text",
+                    value: item.error, // (TODO): add support for 'error-json'
+                  }
+                : {
+                    type: "json",
+                    value: item.result,
+                  },
               providerOptions: item.providerMetadata,
             },
           ],
@@ -139,13 +144,11 @@ export const MESSAGE: Codec<LanguageModelItem, LanguageModelV3Message> = {
       }
 
       default:
-        throw new Error(
-          `Unsupported LanguageModelItem kind: ${(item as any).kind}`,
-        );
+        throw new Error(`Unsupported LanguageModelItem kind`);
     }
   },
 
   decode: () => {
-    throw new Error("codec:unimplemented");
+    throw new Error("MESSAGE.codec:unimplemented");
   },
 };

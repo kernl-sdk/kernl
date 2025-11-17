@@ -277,6 +277,33 @@ describe("MESSAGE codec", () => {
         ],
       });
     });
+
+    it("should encode tool-result item with error", () => {
+      const result = MESSAGE.encode({
+        kind: "tool-result",
+        callId: "call-123",
+        toolId: "get_weather",
+        state: "failed",
+        result: null,
+        error: "Network timeout",
+      });
+
+      expect(result).toEqual({
+        role: "tool",
+        content: [
+          {
+            type: "tool-result",
+            toolCallId: "call-123",
+            toolName: "get_weather",
+            output: {
+              type: "error-text",
+              value: "Network timeout",
+            },
+            providerOptions: undefined,
+          },
+        ],
+      });
+    });
   });
 
   describe("encode - reasoning items", () => {
@@ -322,7 +349,7 @@ describe("MESSAGE codec", () => {
         MESSAGE.encode({
           kind: "unknown-kind",
         } as any),
-      ).toThrow("Unsupported LanguageModelItem kind: unknown-kind");
+      ).toThrow("Unsupported LanguageModelItem kind");
     });
   });
 
