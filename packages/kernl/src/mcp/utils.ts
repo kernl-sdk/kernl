@@ -15,11 +15,12 @@ export function mcpToFunctionTool(server: MCPServer, mcpTool: MCPTool) {
     return content.length === 1 ? content[0] : content;
   }
 
-  // MCP tools accept an object with any properties based on their inputSchema
-  // We use z.record(z.any()) to represent this flexible schema
-  const parameters = mcpTool.inputSchema
-    ? z.record(z.string(), z.any())
-    : undefined;
+  const hasProperties =
+    mcpTool.inputSchema &&
+    Object.keys(mcpTool.inputSchema.properties || {}).length > 0;
+
+  // If tool has properties, use passthrough to accept any object, else empty object (matches AI SDK)
+  const parameters = hasProperties ? z.object({}).passthrough() : z.object({});
 
   return tool({
     id: mcpTool.name,

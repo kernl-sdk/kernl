@@ -197,9 +197,9 @@ export class FunctionTool<
       kind: "function",
       name: this.id,
       description: this.description,
-      parameters: (this.parameters
-        ? z.toJSONSchema(this.parameters, { target: "draft-7" })
-        : {}) as any, // JSONSchema7 - target: 'draft-7' produces this
+      parameters: z.toJSONSchema(this.parameters ?? z.object({}), {
+        target: "draft-7",
+      }) as any, // Use empty object if no parameters (matches AI SDK)
     };
   }
 }
