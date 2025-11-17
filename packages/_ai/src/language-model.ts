@@ -13,7 +13,6 @@ import { TOOL } from "./convert/tools";
 import { MODEL_SETTINGS } from "./convert/settings";
 import { MODEL_RESPONSE } from "./convert/response";
 import { convertStream } from "./convert/stream";
-import { wrapError } from "./error";
 
 /**
  * LanguageModel adapter for the AI SDK LanguageModelV3.
@@ -34,22 +33,18 @@ export class AISDKLanguageModel implements LanguageModel {
   async generate(
     request: LanguageModelRequest,
   ): Promise<LanguageModelResponse> {
-    try {
-      const messages = request.input.map(MESSAGE.encode);
-      const tools = request.tools ? request.tools.map(TOOL.encode) : undefined;
-      const settings = MODEL_SETTINGS.encode(request.settings);
+    const messages = request.input.map(MESSAGE.encode);
+    const tools = request.tools ? request.tools.map(TOOL.encode) : undefined;
+    const settings = MODEL_SETTINGS.encode(request.settings);
 
-      const result = await this.model.doGenerate({
-        prompt: messages,
-        tools,
-        ...settings,
-        abortSignal: request.abort,
-      });
+    const result = await this.model.doGenerate({
+      prompt: messages,
+      tools,
+      ...settings,
+      abortSignal: request.abort,
+    });
 
-      return MODEL_RESPONSE.decode(result);
-    } catch (error) {
-      throw wrapError(error, "generate");
-    }
+    return MODEL_RESPONSE.decode(result);
   }
 
   /**
@@ -58,87 +53,83 @@ export class AISDKLanguageModel implements LanguageModel {
   async *stream(
     request: LanguageModelRequest,
   ): AsyncIterable<LanguageModelStreamEvent> {
-    try {
-      const messages = request.input.map(MESSAGE.encode);
-      const tools = request.tools ? request.tools.map(TOOL.encode) : undefined;
-      const settings = MODEL_SETTINGS.encode(request.settings);
+    const messages = request.input.map(MESSAGE.encode);
+    const tools = request.tools ? request.tools.map(TOOL.encode) : undefined;
+    const settings = MODEL_SETTINGS.encode(request.settings);
 
-      const stream = await this.model.doStream({
-        prompt: messages,
-        tools,
-        ...settings,
-        abortSignal: request.abort,
-      });
+    const stream = await this.model.doStream({
+      prompt: messages,
+      tools,
+      ...settings,
+      abortSignal: request.abort,
+    });
 
-      // text and reasoning buffers for delta accumulation
-      const tbuf: Record<string, string> = {};
-      const rbuf: Record<string, string> = {};
+    // text + reasoning buffers for delta accumulation
+    const tbuf: Record<string, string> = {};
+    const rbuf: Record<string, string> = {};
 
-      for await (const event of convertStream(stream.stream)) {
-        switch (event.kind) {
-          case "text-start": {
-            tbuf[event.id] = "";
-            yield event;
-            break;
-          }
-
-          case "text-delta": {
-            if (tbuf[event.id] !== undefined) {
-              tbuf[event.id] += event.text;
-            }
-            yield event;
-            break;
-          }
-
-          case "text-end": {
-            const text = tbuf[event.id];
-            if (text !== undefined) {
-              yield message({
-                role: "assistant",
-                text,
-                providerMetadata: event.providerMetadata,
-              });
-              delete tbuf[event.id];
-            }
-            yield event;
-            break;
-          }
-
-          case "reasoning-start": {
-            rbuf[event.id] = "";
-            yield event;
-            break;
-          }
-
-          case "reasoning-delta": {
-            if (rbuf[event.id] !== undefined) {
-              rbuf[event.id] += event.text;
-            }
-            yield event;
-            break;
-          }
-
-          case "reasoning-end": {
-            const text = rbuf[event.id];
-            if (text !== undefined) {
-              yield reasoning({
-                text,
-                providerMetadata: event.providerMetadata,
-              });
-              delete rbuf[event.id];
-            }
-            yield event;
-            break;
-          }
-
-          default:
-            // all other events (tool-call, tool-result, finish, etc.) pass through
-            yield event;
-            break;
+    for await (const event of convertStream(stream.stream)) {
+      switch (event.kind) {
+        case "text-start": {
+          tbuf[event.id] = "";
+          yield event;
+          break;
         }
+
+        case "text-delta": {
+          if (tbuf[event.id] !== undefined) {
+            tbuf[event.id] += event.text;
+          }
+          yield event;
+          break;
+        }
+
+        case "text-end": {
+          const text = tbuf[event.id];
+          if (text !== undefined) {
+            yield message({
+              role: "assistant",
+              text,
+              providerMetadata: event.providerMetadata,
+            });
+            delete tbuf[event.id];
+          }
+          yield event;
+          break;
+        }
+
+        case "reasoning-start": {
+          rbuf[event.id] = "";
+          yield event;
+          break;
+        }
+
+        case "reasoning-delta": {
+          if (rbuf[event.id] !== undefined) {
+            rbuf[event.id] += event.text;
+          }
+          yield event;
+          break;
+        }
+
+        case "reasoning-end": {
+          const text = rbuf[event.id];
+          if (text !== undefined) {
+            yield reasoning({
+              text,
+              providerMetadata: event.providerMetadata,
+            });
+            delete rbuf[event.id];
+          }
+          yield event;
+          break;
+        }
+
+        default:
+          // all other events (tool-call, tool-result, finish, etc.) pass through
+          yield event;
+          break;
       }
-    } catch (error) {
-      throw wrapError(error, "stream");
     }
   }
 }

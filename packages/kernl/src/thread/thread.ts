@@ -4,6 +4,9 @@ import { Kernl } from "@/kernl";
 import { Agent } from "@/agent";
 import { Context } from "@/context";
 import type { Task } from "@/task";
+import type { ResolvedAgentResponse } from "@/guardrail";
+
+import { logger } from "@/lib/logger";
 
 import {
   ToolCall,
@@ -26,7 +29,6 @@ import type {
   ThreadStreamEvent,
 } from "@/types/thread";
 import type { AgentResponseType } from "@/types/agent";
-import type { ResolvedAgentResponse } from "@/guardrail";
 
 import {
   notDelta,
@@ -109,6 +111,8 @@ export class Thread<
     this.state = RUNNING;
     this.abort = new AbortController();
 
+    yield { kind: "stream-start" }; // always yield start immediately
+
     try {
       yield* this._execute();
     } catch (err) {
@@ -129,8 +133,8 @@ export class Thread<
   /**
    * Append a new event to the thread history
    */
-  append(event: ThreadEvent): void {
-    this.history.push(event);
+  append(events: ThreadEvent[]): void {
+    this.history.push(...events);
   }
 
   /**
@@ -141,18 +145,29 @@ export class Thread<
    */
   private async *_execute(): AsyncGenerator<ThreadStreamEvent, void> {
     for (;;) {
+      let err = false;
+
       if (this.abort?.signal.aborted) {
         return;
       }
 
       const events = [];
       for await (const e of this.tick()) {
+        if (e.kind === "error") {
+          err = true;
+          logger.error(e.error); // (TODO): onError callback in options
+        }
         // we don't want deltas in the history
         if (notDelta(e)) {
           events.push(e);
           this.history.push(e);
         }
         yield e;
+      }
+
+      // if an error event occurred, terminate
+      if (err) {
+        return;
       }
 
       // if model returns a message with no action intentions -> terminal state
@@ -202,19 +217,27 @@ export class Thread<
 
     const req = await this.prepareModelRequest(this.history);
 
-    // try to stream if model supports it
-    if (this.model.stream) {
-      const stream = this.model.stream(req);
-      for await (const event of stream) {
-        yield event; // [text-delta, tool-call, message, reasoning, ...]
+    try {
+      // try to stream if model supports it
+      if (this.model.stream) {
+        const stream = this.model.stream(req);
+        for await (const event of stream) {
+          yield event; // [text-delta, tool-call, message, reasoning, ...]
+        }
+      } else {
+        // fallback: blocking generate, yield events as batch
+        const res = await this.model.generate(req);
+        for (const event of res.content) {
+          yield event;
+        }
+        // (TODO): track usage (this.stats.usage.add(res.usage))
       }
-    } else {
-      // fallback: blocking generate, yield events as batch
-      const res = await this.model.generate(req);
-      for (const event of res.content) {
-        yield event;
-      }
-      // (TODO): track usage (this.stats.usage.add(res.usage))
+    } catch (error) {
+      // Convert model errors to error events
+      yield {
+        kind: "error",
+        error: error instanceof Error ? error : new Error(String(error)),
+      };
     }
   }
 

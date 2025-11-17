@@ -125,9 +125,10 @@ export class Agent<
       );
     }
 
-    const items = typeof input === "string"
-      ? [message({ role: "user", text: input })]
-      : input;
+    const items =
+      typeof input === "string"
+        ? [message({ role: "user", text: input })]
+        : input;
     const tid = options?.threadId;
 
     // NOTE: may end up moving this to the kernl
@@ -137,7 +138,7 @@ export class Agent<
       return this.kernl.spawn(thread);
     }
 
-    items.forEach((item) => thread!.append(item));
+    thread.append(items);
     return this.kernl.schedule(thread);
   }
 
@@ -156,9 +157,10 @@ export class Agent<
       );
     }
 
-    const items = typeof input === "string"
-      ? [message({ role: "user", text: input })]
-      : input;
+    const items =
+      typeof input === "string"
+        ? [message({ role: "user", text: input })]
+        : input;
     const tid = options?.threadId;
 
     // NOTE: may end up moving this to the kernl
@@ -169,7 +171,7 @@ export class Agent<
       return;
     }
 
-    items.forEach((item) => thread!.append(item));
+    thread.append(items);
     yield* this.kernl.scheduleStream(thread);
   }
 
