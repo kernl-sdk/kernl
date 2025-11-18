@@ -176,8 +176,9 @@ describe("STREAM_PART codec", () => {
 
       expect(result).toEqual({
         kind: "tool-call",
-        id: "call-123",
-        toolName: "get_weather",
+        callId: "call-123",
+        toolId: "get_weather",
+        state: "completed",
         arguments: '{"city":"SF"}',
         providerMetadata: undefined,
       });
