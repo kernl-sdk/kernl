@@ -1,5 +1,11 @@
 # @kernl/ai
 
+## 0.2.3
+
+### Patch Changes
+
+- 8551086: Add historyToUIMessages function to convert thread history to AI SDK UIMessage format for useChat hook. Preserves providerMetadata on all parts (text, file, reasoning, tools) and groups tool calls with results.
+
 ## 0.2.2
 
 ### Patch Changes
