@@ -36,6 +36,12 @@ export function build(): Hono {
     }),
   );
 
+  // --- inject kernl into context ---
+  app.use("/*", async (cx, next) => {
+    cx.set("kernl", kernl);
+    await next();
+  });
+
   app.onError(handleError);
 
   // --- routes ---

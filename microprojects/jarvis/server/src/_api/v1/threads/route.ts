@@ -1,6 +1,7 @@
 import { Hono, type Context } from "hono";
+import type { Kernl } from "@kernl-sdk/core";
 
-import { UnimplementedError } from "@/lib/error";
+import { NotFoundError } from "@/lib/error";
 
 const threads = new Hono();
 
@@ -8,9 +9,7 @@ const threads = new Hono();
  * - Thread routes :: /threads -
  */
 threads.get("/", list);
-threads.post("/", create);
 threads.get("/:tid", get);
-// threads.put("/:tid", update);
 threads.delete("/:tid", del);
 
 export default threads;
@@ -23,16 +22,23 @@ export default threads;
  * List all threads (doesn't return thread events by default).
  */
 async function list(cx: Context) {
-  return cx.json({ threads: [], count: 0 });
-}
+  const kernl = cx.get("kernl") as Kernl;
 
-/**
- * @route POST /v1/threads
- *
- * Create a new thread.
- */
-async function create(cx: Context) {
-  throw new UnimplementedError();
+  const query = cx.req.query();
+  const limit = query.limit ? parseInt(query.limit) : undefined;
+  const agentId = query.agentId;
+
+  const threads = await kernl.threads.list({ agentId, limit });
+
+  return cx.json({
+    threads: threads.map((t) => ({
+      tid: t.tid,
+      agentId: t.agent.id,
+      createdAt: t.createdAt,
+      updatedAt: t.updatedAt,
+    })),
+    count: threads.length,
+  });
 }
 
 /**
@@ -41,8 +47,21 @@ async function create(cx: Context) {
  * Get a thread with all its events.
  */
 async function get(cx: Context) {
+  const kernl = cx.get("kernl") as Kernl;
   const tid = cx.req.param("tid");
-  throw new UnimplementedError();
+
+  const thread = await kernl.threads.get(tid);
+  if (!thread) {
+    throw new NotFoundError("Thread not found");
+  }
+
+  return cx.json({
+    tid: thread.tid,
+    agentId: thread.agent.id,
+    createdAt: thread.createdAt,
+    updatedAt: thread.updatedAt,
+    history: thread.history,
+  });
 }
 
 /**
@@ -51,6 +70,10 @@ async function get(cx: Context) {
  * Delete a thread and all associated events.
  */
 async function del(cx: Context) {
+  const kernl = cx.get("kernl") as Kernl;
   const tid = cx.req.param("tid");
-  throw new UnimplementedError();
+
+  await kernl.threads.delete(tid);
+
+  return cx.json({ success: true });
 }
