@@ -1,5 +1,13 @@
 # @kernl/pg
 
+## 0.1.4
+
+### Patch Changes
+
+- Updated dependencies [ba8119d]
+  - @kernl-sdk/core@0.4.4
+  - @kernl-sdk/storage@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes

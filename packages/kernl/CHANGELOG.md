@@ -1,5 +1,11 @@
 # @kernl/core
 
+## 0.4.4
+
+### Patch Changes
+
+- ba8119d: Fix Kernl type exports - remove duplicate old Kernl definition from dist root that was missing the threads property. The correct Kernl class with ThreadsResource is now properly exported.
+
 ## 0.4.3
 
 ### Patch Changes
