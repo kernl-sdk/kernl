@@ -1,5 +1,11 @@
 # @kernl/core
 
+## 0.4.6
+
+### Patch Changes
+
+- Add PublicThreadEvent type to filter internal system events from client-facing APIs. ThreadResource.history and ThreadsResource.history() now return only public events (messages, tool calls, tool results), excluding internal system events.
+
 ## 0.4.5
 
 ### Patch Changes
