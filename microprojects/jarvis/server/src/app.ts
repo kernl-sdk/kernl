@@ -1,9 +1,11 @@
 import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
 import { Kernl } from "@kernl-sdk/core";
+import { postgres } from "@kernl-sdk/pg";
 
 import { APIError } from "@/lib/error";
 import { logger, logreq } from "@/lib/logger";
+import { env } from "@/lib/env";
 
 import { jarvis } from "@/agents/jarvis";
 
@@ -15,7 +17,9 @@ import threads from "@/_api/v1/threads/route";
  * Hono builder - registers routes, error handler, plugins, etc.
  */
 export function build(): Hono {
-  const kernl = new Kernl();
+  const kernl = new Kernl({
+    storage: { db: postgres({ connstr: env.DATABASE_URL }) },
+  });
   kernl.register(jarvis);
 
   const app = new Hono();

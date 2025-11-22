@@ -3,7 +3,7 @@ import { anthropic } from "@kernl-sdk/ai/anthropic";
 import { openai } from "@kernl-sdk/ai/openai";
 
 import { linear } from "@/toolkits/linear";
-// import { github } from "@/toolkits/github";
+import { github } from "@/toolkits/github";
 
 export const jarvis = new Agent({
   id: "jarvis",
@@ -22,6 +22,6 @@ When asked for updates or status:
 3. Provide a clear, organized summary with actionable next steps
 
 Keep responses focused and avoid unnecessary details.`,
-  model: openai("gpt-4.1"),
+  model: anthropic("claude-sonnet-4-5"),
   toolkits: [linear],
 });

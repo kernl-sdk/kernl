@@ -188,7 +188,7 @@ importers:
 
   packages/storage/libsql:
     dependencies:
-      '@kernl/storage':
+      '@kernl-sdk/storage':
         specifier: workspace:*
         version: link:../core
     devDependencies:
@@ -213,7 +213,7 @@ importers:
       '@kernl-sdk/shared':
         specifier: workspace:^
         version: link:../../shared
-      '@kernl/storage':
+      '@kernl-sdk/storage':
         specifier: workspace:*
         version: link:../core
       pg:

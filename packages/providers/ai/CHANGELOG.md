@@ -1,5 +1,13 @@
 # @kernl/ai
 
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies
+  - @kernl-sdk/shared@0.1.4
+  - @kernl-sdk/protocol@0.2.3
+
 ## 0.2.1
 
 ### Patch Changes

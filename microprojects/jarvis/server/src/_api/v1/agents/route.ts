@@ -37,7 +37,9 @@ async function run(cx: Context) {
 
   const input = await UIMessageCodec.decode(message as UIMessage); // validates and converts
 
-  const result = await jarvis.run(input); // TODO: { threadId: tid }
+  const result = await jarvis.run(input, {
+    threadId: tid,
+  });
 
   return cx.json({
     tid: null, // (TODO)
@@ -55,7 +57,7 @@ async function run(cx: Context) {
 }
 
 /**
- * @route GET /v1/agents/:id/stream
+ * @route POST /v1/agents/:id/stream
  *
  * Stream agent execution with real-time updates.
  */
@@ -72,7 +74,9 @@ async function stream(cx: Context) {
 
   const input = await UIMessageCodec.decode(message); // validates and converts
 
-  const kstream = jarvis.stream(input); // TODO: { threadId: tid }
+  const kstream = jarvis.stream(input, {
+    threadId: tid,
+  });
 
   return createUIMessageStreamResponse({
     stream: toUIMessageStream(kstream),

@@ -15,10 +15,3 @@ A drop-in docs Q&A agent.
 
 - Codex integrates with Mintlify (or any static docs) to answer product and API questions with grounded citations.
 - Showcases retrieval, ranking, and answer generation with zero indexing pipeline.
-
-## 3. Mercy — Support + triage
-
-A lightweight triage helper for handling inbound customer questions.
-
-- Mercy checks docs, scans GitHub issues, interprets errors, and drafts Linear tickets when needed.
-- Demonstrates multi-connector orchestration and real internal support workflows.

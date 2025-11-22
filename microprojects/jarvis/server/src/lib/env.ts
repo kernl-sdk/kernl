@@ -18,6 +18,9 @@ const schema = z.object({
   PORT: z.string().optional().default("8080"),
   HOST: z.string().optional().default("0.0.0.0"),
 
+  // --- database ---
+  DATABASE_URL: z.string(),
+
   // --- providers ---
   ANTHROPIC_API_KEY: z.string(),
   // OPENAI_API_KEY: z.string(),
