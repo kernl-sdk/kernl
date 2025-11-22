@@ -3,18 +3,60 @@ import { ZodType } from "zod";
 import type { ResolvedAgentResponse } from "@/guardrail";
 
 /* lib */
-import { json } from "@kernl-sdk/shared/lib";
-import { ToolCall } from "@kernl-sdk/protocol";
+import { json, randomID } from "@kernl-sdk/shared/lib";
+import { ToolCall, LanguageModelItem } from "@kernl-sdk/protocol";
 import { ModelBehaviorError } from "@/lib/error";
 
 /* types */
 import type { AgentResponseType } from "@/types/agent";
-import type { ThreadEvent, ThreadStreamEvent, ActionSet } from "@/types/thread";
+import type {
+  ThreadEvent,
+  ThreadEventBase,
+  ThreadStreamEvent,
+  ActionSet,
+} from "@/types/thread";
 
 /**
- * Check if an event represents an intention (action to be performed)
+ * Create a ThreadEvent from a LanguageModelItem with thread metadata.
+ *
+ * @example
+ * ```typescript
+ * tevent({
+ *   kind: "message",
+ *   seq: 0,
+ *   tid: "tid_123",
+ *   data: message({role: "user", text: "hello"}),
+ * })
+ * // → {kind: "message", role: "user", content: [...], id: "message:msg_xyz", tid: "tid_123", seq: 0, timestamp: Date}
+ * ```
  */
-export function isActionIntention(event: ThreadEvent): event is ToolCall {
+export function tevent(event: {
+  seq: number;
+  tid: string;
+  kind: ThreadEvent["kind"];
+  data: LanguageModelItem | null; // null for system events
+  id?: string;
+  timestamp?: Date;
+  metadata?: Record<string, unknown>;
+}): ThreadEvent {
+  const iid = event.data ? event.data.id : undefined;
+  const defaultId = iid ? `${event.kind}:${iid}` : randomID();
+
+  return {
+    ...(event.data || {}),
+    kind: event.kind,
+    id: event.id ?? defaultId,
+    tid: event.tid,
+    seq: event.seq,
+    timestamp: event.timestamp ?? new Date(),
+    metadata: event.metadata ?? {},
+  } as ThreadEvent;
+}
+
+/**
+ * Check if an event is a tool call
+ */
+export function isActionIntention(event: LanguageModelItem): event is ToolCall {
   return event.kind === "tool-call";
 }
 
@@ -22,7 +64,7 @@ export function isActionIntention(event: ThreadEvent): event is ToolCall {
  * Extract action intentions from a list of events.
  * Returns ActionSet if there are any tool calls, null otherwise.
  */
-export function getIntentions(events: ThreadEvent[]): ActionSet | null {
+export function getIntentions(events: LanguageModelItem[]): ActionSet | null {
   const toolCalls = events.filter(isActionIntention);
   return toolCalls.length > 0 ? { toolCalls } : null;
 }
@@ -31,7 +73,7 @@ export function getIntentions(events: ThreadEvent[]): ActionSet | null {
  * Check if an event is NOT a delta/start/end event (i.e., a complete item).
  * Returns true for complete items: Message, Reasoning, ToolCall, ToolResult
  */
-export function notDelta(event: ThreadStreamEvent): event is ThreadEvent {
+export function notDelta(event: ThreadStreamEvent): event is LanguageModelItem {
   switch (event.kind) {
     case "message":
     case "reasoning":
@@ -46,16 +88,16 @@ export function notDelta(event: ThreadStreamEvent): event is ThreadEvent {
 }
 
 /**
- * Extract the final text response from a list of events.
+ * Extract the final text response from a list of items.
  * Returns null if no assistant message with text content is found.
  */
-export function getFinalResponse(events: ThreadEvent[]): string | null {
+export function getFinalResponse(items: LanguageModelItem[]): string | null {
   // Scan backwards for the last assistant message
-  for (let i = events.length - 1; i >= 0; i--) {
-    const event = events[i];
-    if (event.kind === "message" && event.role === "assistant") {
+  for (let i = items.length - 1; i >= 0; i--) {
+    const item = items[i];
+    if (item.kind === "message" && item.role === "assistant") {
       // Extract text from content parts
-      for (const part of event.content) {
+      for (const part of item.content) {
         if (part.kind === "text") {
           return part.text;
         }

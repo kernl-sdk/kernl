@@ -1,6 +1,5 @@
 import type { Agent } from "@/agent";
 import type { Context, UnknownContext } from "@/context";
-
 import type { Thread } from "@/thread";
 
 /**
@@ -8,7 +7,7 @@ import type { Thread } from "@/thread";
  * Analogous to task_struct in the Linux kernel.
  */
 export class Task<TContext = UnknownContext, TResult = unknown> {
-  pid: string /* process ID - unique identifier for this task */;
+  id: string /* unique identifier for this task (pid) */;
   // tgid: string | null; /* task groupid */
   // prio: TaskPriority;
   instructions:
@@ -37,18 +36,18 @@ export class Task<TContext = UnknownContext, TResult = unknown> {
   // limits: TaskLimits;        // Resource limits (max ticks, tokens, timeout)
   // nsproxy: NamespaceProxy;   // Namespace isolation
 
-  constructor(init: {
-    pid: string;
+  constructor(options: {
+    id: string;
     instructions: string | ((context: Context<TContext>) => string);
     state: TaskState;
     owner: Agent<TContext>;
     context: Context<TContext>;
   }) {
-    this.pid = init.pid;
-    this.instructions = init.instructions;
-    this.state = init.state;
-    this.owner = init.owner;
-    this.context = init.context;
+    this.id = options.id;
+    this.instructions = options.instructions;
+    this.state = options.state;
+    this.owner = options.owner;
+    this.context = options.context;
     this.threads = [];
     this.current = null;
     this.result = null;

@@ -13,8 +13,24 @@ import {
 
 import { Task } from "@/task";
 import { Context } from "@/context";
+import { Agent } from "@/agent";
+
+import type { AgentResponseType } from "./agent";
+import type { ThreadStore } from "@/storage";
 
 export type TextResponse = "text";
+
+/**
+ * Thread state values as a const array (for zod schemas).
+ */
+export const THREAD_STATES = [
+  RUNNING,
+  STOPPED,
+  INTERRUPTIBLE,
+  UNINTERRUPTIBLE,
+  ZOMBIE,
+  DEAD,
+] as const;
 
 /**
  * Thread state discriminated union
@@ -34,17 +50,123 @@ export type ThreadState =
 export const REQUIRES_APPROVAL = "requires_approval";
 
 /**
- * ThreadEvent uses protocol types directly.
+ * Thread domain interface.
  *
- * (TODO): just an alias for LanguageModelItem for now, but there may be other thread events later
- * which don't go to the model.
+ * Represents the complete state of a Thread that can be stored and restored.
  */
-export type ThreadEvent = LanguageModelItem;
+export interface IThread<
+  TContext = unknown,
+  TResponse extends AgentResponseType = "text",
+> {
+  tid: string;
+  agent: Agent<TContext, TResponse>;
+  model: LanguageModel;
+
+  context: Context<TContext>;
+  input: LanguageModelItem[] /* initial input for the thread */;
+  history: ThreadEvent[];
+  task: Task<TContext> | null /* parent task which spawned this thread (if any) */;
+
+  /* state */
+  tick: number;
+  state: ThreadState /* running | stopped | ... */;
+
+  /* metadata */
+  createdAt: Date;
+  updatedAt: Date;
+  metadata: Record<string, unknown> | null;
+}
+
+export interface CheckpointDelta {
+  state?: ThreadState;
+  tick?: number;
+  seq?: number;
+  events?: ThreadEvent[];
+}
+
+/**
+ * The inner data of a ThreadEvent without the headers
+ */
+export type ThreadEventInner = LanguageModelItem; // ...
+
+/**
+ * Base fields for all thread events - added to every LanguageModelItem when stored in thread.
+ */
+export interface ThreadEventBase {
+  id: string;
+  tid: string;
+  seq: number;
+  timestamp: Date;
+  metadata: Record<string, unknown>;
+}
+
+/**
+ * System event - runtime state changes (not sent to model).
+ */
+export interface ThreadSystemEvent extends ThreadEventBase {
+  readonly kind: "system";
+  // Future: error?, state-change?, etc.
+}
+
+/**
+ * Thread events are append-only log entries ordered by seq.
+ *
+ * Events extend LanguageModelItem types with thread-specific metadata (tid, seq, timestamp).
+ * When sent to the model, we extract the LanguageModelItem by omitting the base fields.
+ */
+export type ThreadEvent =
+  | (LanguageModelItem & ThreadEventBase)
+  | ThreadSystemEvent;
 
 /**
  * Stream events - use protocol definition directly.
  */
 export type ThreadStreamEvent = LanguageModelStreamEvent;
+
+/**
+ * Result of thread execution
+ */
+export interface ThreadExecuteResult<TResponse = any> {
+  /**
+   * The final parsed response from the agent
+   */
+  response: TResponse;
+  /**
+   * The thread state at completion
+   */
+  state: any; // (TODO): Update this
+}
+
+/**
+ * Options for constructing a Thread.
+ */
+export interface ThreadOptions<
+  TContext = unknown,
+  TResponse extends AgentResponseType = "text",
+> {
+  agent: Agent<TContext, TResponse>;
+  input?: LanguageModelItem[];
+  history?: ThreadEvent[];
+  context?: Context<TContext>;
+  model?: LanguageModel;
+  task?: Task<TContext> | null;
+  tid?: string;
+  tick?: number;
+  state?: ThreadState;
+  storage?: ThreadStore;
+}
+
+/**
+ * Options passed to agent.execute() and agent.stream().
+ */
+export interface ThreadExecuteOptions<TContext> {
+  context?: Context<TContext>;
+  model?: LanguageModel;
+  task?: Task<TContext>;
+  threadId?: string;
+  maxTicks?: number;
+  abort?: AbortSignal;
+}
 
 /**
  * Set of actionable items extracted from a model response
@@ -61,34 +183,9 @@ export interface PerformActionsResult {
   /**
    * Action events generated from executing tools (tool results)
    */
-  actions: ThreadEvent[];
+  actions: ThreadEventInner[];
   /**
    * Tool calls that require approval before execution
    */
   pendingApprovals: ToolCall[];
-}
-
-/**
- * Result of thread execution
- */
-export interface ThreadExecuteResult<TResponse = any> {
-  /**
-   * The final parsed response from the agent
-   */
-  response: TResponse;
-  /**
-   * The thread state at completion
-   */
-  state: any; // Will be ThreadState, but avoiding circular dependency
-}
-
-export interface ThreadOptions<TContext> {
-  context: Context<TContext>;
-  model?: LanguageModel;
-  task?: Task<TContext>;
-  threadId?: string;
-  maxTicks?: number;
-  abort?: AbortSignal;
-
-  // conversationId?: string;
 }

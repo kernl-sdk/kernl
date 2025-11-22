@@ -1,21 +1,34 @@
+import type { LanguageModel } from "@kernl-sdk/protocol";
+
 import { Agent } from "./agent";
 import { UnknownContext } from "./context";
 import { KernlHooks } from "./lifecycle";
 import type { Thread } from "./thread";
-
-import type { AgentResponseType } from "./types/agent";
-import type { ThreadExecuteResult, ThreadStreamEvent } from "./types/thread";
 import type { ResolvedAgentResponse } from "./guardrail";
+import { InMemoryStorage, type KernlStorage } from "./storage";
+
+import type { KernlOptions } from "./types/kernl";
+import type { ThreadExecuteResult, ThreadStreamEvent } from "./types/thread";
+import type { AgentResponseType } from "./types/agent";
 
 /**
- * The kernl - manages agent processes, scheduling, and task lifecycle
+ * The kernl - manages agent processes, scheduling, and task lifecycle.
  *
  * Orchestrates agent execution, including guardrails, tool calls, session persistence, and
  * tracing.
  */
 export class Kernl extends KernlHooks<UnknownContext, AgentResponseType> {
   private agents: Map<string, Agent> = new Map();
-  threads: Map<string, Thread<any, any>> = new Map();
+  private models: Map<string, LanguageModel> = new Map();
+  storage: KernlStorage;
+
+  athreads: Map<string, Thread<any, any>> = new Map(); /* active threads */
+
+  constructor(options: KernlOptions = {}) {
+    super();
+    this.storage = options.storage?.db ?? new InMemoryStorage();
+    this.storage.bind({ agents: this.agents, models: this.models });
+  }
 
   /**
    * Registers a new agent with the kernl instance.
@@ -23,6 +36,14 @@ export class Kernl extends KernlHooks<UnknownContext, AgentResponseType> {
   register(agent: Agent): void {
     this.agents.set(agent.id, agent);
     agent.bind(this);
+
+    // (TODO): implement exhaustive model registry in protocol/ package
+    //
+    // auto-populate model registry for storage hydration
+    const key = `${agent.model.provider}/${agent.model.modelId}`;
+    if (!this.models.has(key)) {
+      this.models.set(key, agent.model);
+    }
   }
 
   /**
@@ -31,8 +52,12 @@ export class Kernl extends KernlHooks<UnknownContext, AgentResponseType> {
   async spawn<TContext, TResponse extends AgentResponseType>(
     thread: Thread<TContext, TResponse>,
   ): Promise<ThreadExecuteResult<ResolvedAgentResponse<TResponse>>> {
-    this.threads.set(thread.id, thread);
-    return await thread.execute();
+    this.athreads.set(thread.tid, thread);
+    try {
+      return await thread.execute();
+    } finally {
+      this.athreads.delete(thread.tid);
+    }
   }
 
   /**
@@ -43,29 +68,43 @@ export class Kernl extends KernlHooks<UnknownContext, AgentResponseType> {
   async schedule<TContext, TResponse extends AgentResponseType>(
     thread: Thread<TContext, TResponse>,
   ): Promise<ThreadExecuteResult<ResolvedAgentResponse<TResponse>>> {
-    return await thread.execute();
+    this.athreads.set(thread.tid, thread);
+    try {
+      return await thread.execute();
+    } finally {
+      this.athreads.delete(thread.tid);
+    }
   }
 
   /**
-   * (TMP) - probably won't make sense with assync scheduling contexts
+   * (TMP) - won't make sense in async scheduling contexts
    *
    * Spawn a new thread - streaming execution
    */
   async *spawnStream<TContext, TResponse extends AgentResponseType>(
     thread: Thread<TContext, TResponse>,
   ): AsyncIterable<ThreadStreamEvent> {
-    this.threads.set(thread.id, thread);
-    yield* thread.stream();
+    this.athreads.set(thread.tid, thread);
+    try {
+      yield* thread.stream();
+    } finally {
+      this.athreads.delete(thread.tid);
+    }
   }
 
   /**
-   * (TMP) - probably won't make sense with assync scheduling contexts
+   * (TMP) - won't make sense with async scheduling contexts
    *
    * Schedule an existing thread - streaming execution
    */
   async *scheduleStream<TContext, TResponse extends AgentResponseType>(
     thread: Thread<TContext, TResponse>,
   ): AsyncIterable<ThreadStreamEvent> {
-    yield* thread.stream();
+    this.athreads.set(thread.tid, thread);
+    try {
+      yield* thread.stream();
+    } finally {
+      this.athreads.delete(thread.tid);
+    }
   }
 }
