@@ -13,16 +13,20 @@ import { jarvis } from "@/agents/jarvis";
 import agents from "@/_api/v1/agents/route";
 import threads from "@/_api/v1/threads/route";
 
+type Variables = {
+  kernl: Kernl;
+};
+
 /**
  * Hono builder - registers routes, error handler, plugins, etc.
  */
-export function build(): Hono {
+export function build(): Hono<{ Variables: Variables }> {
   const kernl = new Kernl({
     storage: { db: postgres({ connstr: env.DATABASE_URL }) },
   });
   kernl.register(jarvis);
 
-  const app = new Hono();
+  const app = new Hono<{ Variables: Variables }>();
 
   // --- logging ---
   app.use("/*", logreq);
@@ -58,7 +62,7 @@ export function build(): Hono {
 /**
  * Convert errors to a standard structured response
  */
-function handleError(err: Error, cx: Context) {
+function handleError(err: Error, cx: Context<{ Variables: Variables }>) {
   if (err instanceof APIError) {
     logger.error({ error: err, metadata: err.metadata }, err.message);
     return cx.json(err.json(), err.statusCode);

@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { IN_PROGRESS, COMPLETED, FAILED } from "@kernl-sdk/protocol";
+import type { LanguageModelItem } from "@kernl-sdk/protocol";
 
-import { UIMessageCodec } from "../ui-message";
+import { UIMessageCodec, historyToUIMessages } from "../ui-message";
 
 describe("UIMessageCodec", () => {
   // ----------------------------
@@ -1122,6 +1123,7 @@ describe("UIMessageCodec", () => {
   // ----------------------------
   // Validation tests
   // ----------------------------
+
   describe("decode - validation via AI SDK", () => {
     it("should validate and reject invalid role", async () => {
       await expect(
@@ -1153,6 +1155,854 @@ describe("UIMessageCodec", () => {
           expect(message.role).toBe(role);
         }
       }
+    });
+  });
+});
+
+describe("historyToUIMessages", () => {
+  describe("basic message conversion", () => {
+    it("should convert a simple user message", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "user",
+          content: [{ kind: "text", text: "Hello, AI!" }],
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-1",
+          role: "user",
+          parts: [{ type: "text", text: "Hello, AI!" }],
+        },
+      ]);
+    });
+
+    it("should convert a simple assistant message", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-2",
+          role: "assistant",
+          content: [{ kind: "text", text: "Hello, human!" }],
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-2",
+          role: "assistant",
+          parts: [{ type: "text", text: "Hello, human!" }],
+        },
+      ]);
+    });
+
+    it("should convert a system message", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-3",
+          role: "system",
+          content: [{ kind: "text", text: "System instructions" }],
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-3",
+          role: "system",
+          parts: [{ type: "text", text: "System instructions" }],
+        },
+      ]);
+    });
+
+    it("should handle multiple messages", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "user",
+          content: [{ kind: "text", text: "What's the weather?" }],
+        },
+        {
+          kind: "message",
+          id: "msg-2",
+          role: "assistant",
+          content: [{ kind: "text", text: "I'll check that for you." }],
+        },
+        {
+          kind: "message",
+          id: "msg-3",
+          role: "user",
+          content: [{ kind: "text", text: "Thanks!" }],
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-1",
+          role: "user",
+          parts: [{ type: "text", text: "What's the weather?" }],
+        },
+        {
+          id: "msg-2",
+          role: "assistant",
+          parts: [{ type: "text", text: "I'll check that for you." }],
+        },
+        {
+          id: "msg-3",
+          role: "user",
+          parts: [{ type: "text", text: "Thanks!" }],
+        },
+      ]);
+    });
+  });
+
+  describe("file parts", () => {
+    it("should convert file with base64 data URL", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "user",
+          content: [
+            {
+              kind: "file",
+              mimeType: "image/jpeg",
+              filename: "test.jpg",
+              data: "dGVzdA==",
+            },
+          ],
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-1",
+          role: "user",
+          parts: [
+            {
+              type: "file",
+              url: "data:image/jpeg;base64,dGVzdA==",
+              mediaType: "image/jpeg",
+              filename: "test.jpg",
+            },
+          ],
+        },
+      ]);
+    });
+
+    it("should convert file with URI", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "user",
+          content: [
+            {
+              kind: "file",
+              mimeType: "image/png",
+              filename: "photo.png",
+              uri: "https://example.com/photo.png",
+            },
+          ],
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-1",
+          role: "user",
+          parts: [
+            {
+              type: "file",
+              url: "https://example.com/photo.png",
+              mediaType: "image/png",
+              filename: "photo.png",
+            },
+          ],
+        },
+      ]);
+    });
+
+    it("should handle mixed text and file content", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "user",
+          content: [
+            {
+              kind: "file",
+              mimeType: "image/jpeg",
+              filename: "image.jpg",
+              uri: "https://example.com/image.jpg",
+            },
+            { kind: "text", text: "Check this image" },
+          ],
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-1",
+          role: "user",
+          parts: [
+            {
+              type: "file",
+              url: "https://example.com/image.jpg",
+              mediaType: "image/jpeg",
+              filename: "image.jpg",
+            },
+            { type: "text", text: "Check this image" },
+          ],
+        },
+      ]);
+    });
+  });
+
+  describe("data parts", () => {
+    it("should convert data parts", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "assistant",
+          content: [
+            {
+              kind: "data",
+              data: { temperature: 72, humidity: 60 },
+            },
+          ],
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-1",
+          role: "assistant",
+          parts: [
+            { type: "data-temperature", data: 72 },
+            { type: "data-humidity", data: 60 },
+          ],
+        },
+      ]);
+    });
+
+    it("should handle mixed data and text parts", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "assistant",
+          content: [
+            { kind: "text", text: "Here's the data:" },
+            {
+              kind: "data",
+              data: { count: 5 },
+            },
+          ],
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-1",
+          role: "assistant",
+          parts: [
+            { type: "text", text: "Here's the data:" },
+            { type: "data-count", data: 5 },
+          ],
+        },
+      ]);
+    });
+  });
+
+  describe("tool calls and results", () => {
+    it("should convert tool call with successful result", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "assistant",
+          content: [{ kind: "text", text: "Let me calculate that." }],
+        },
+        {
+          kind: "tool-call",
+          callId: "call-1",
+          toolId: "calculator",
+          state: IN_PROGRESS,
+          arguments: JSON.stringify({ operation: "add", numbers: [1, 2] }),
+        },
+        {
+          kind: "tool-result",
+          callId: "call-1",
+          toolId: "calculator",
+          state: COMPLETED,
+          result: 3,
+          error: null,
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-1",
+          role: "assistant",
+          parts: [
+            { type: "text", text: "Let me calculate that." },
+            {
+              type: "tool-calculator",
+              toolCallId: "call-1",
+              toolName: "calculator",
+              input: { operation: "add", numbers: [1, 2] },
+              state: "output-available",
+              output: 3,
+            },
+          ],
+        },
+      ]);
+    });
+
+    it("should convert tool call with error result", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "assistant",
+          content: [{ kind: "text", text: "Let me try that." }],
+        },
+        {
+          kind: "tool-call",
+          callId: "call-1",
+          toolId: "calculator",
+          state: IN_PROGRESS,
+          arguments: JSON.stringify({ operation: "divide", numbers: [1, 0] }),
+        },
+        {
+          kind: "tool-result",
+          callId: "call-1",
+          toolId: "calculator",
+          state: FAILED,
+          result: null,
+          error: "Division by zero",
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-1",
+          role: "assistant",
+          parts: [
+            { type: "text", text: "Let me try that." },
+            {
+              type: "tool-calculator",
+              toolCallId: "call-1",
+              toolName: "calculator",
+              input: { operation: "divide", numbers: [1, 0] },
+              state: "output-error",
+              errorText: "Division by zero",
+            },
+          ],
+        },
+      ]);
+    });
+
+    it("should convert tool call without result (pending)", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "assistant",
+          content: [{ kind: "text", text: "Processing..." }],
+        },
+        {
+          kind: "tool-call",
+          callId: "call-1",
+          toolId: "search",
+          state: IN_PROGRESS,
+          arguments: JSON.stringify({ query: "weather" }),
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-1",
+          role: "assistant",
+          parts: [
+            { type: "text", text: "Processing..." },
+            {
+              type: "tool-search",
+              toolCallId: "call-1",
+              toolName: "search",
+              input: { query: "weather" },
+              state: "input-available",
+            },
+          ],
+        },
+      ]);
+    });
+
+    it("should handle multiple tool calls with results", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "assistant",
+          content: [{ kind: "text", text: "I'll use multiple tools." }],
+        },
+        {
+          kind: "tool-call",
+          callId: "call-1",
+          toolId: "tool1",
+          state: IN_PROGRESS,
+          arguments: JSON.stringify({ value: "value-1" }),
+        },
+        {
+          kind: "tool-result",
+          callId: "call-1",
+          toolId: "tool1",
+          state: COMPLETED,
+          result: "result-1",
+          error: null,
+        },
+        {
+          kind: "tool-call",
+          callId: "call-2",
+          toolId: "tool2",
+          state: IN_PROGRESS,
+          arguments: JSON.stringify({ value: "value-2" }),
+        },
+        {
+          kind: "tool-result",
+          callId: "call-2",
+          toolId: "tool2",
+          state: COMPLETED,
+          result: "result-2",
+          error: null,
+        },
+        {
+          kind: "tool-call",
+          callId: "call-3",
+          toolId: "tool3",
+          state: IN_PROGRESS,
+          arguments: JSON.stringify({ value: "value-3" }),
+        },
+        {
+          kind: "tool-result",
+          callId: "call-3",
+          toolId: "tool3",
+          state: COMPLETED,
+          result: "result-3",
+          error: null,
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-1",
+          role: "assistant",
+          parts: [
+            { type: "text", text: "I'll use multiple tools." },
+            {
+              type: "tool-tool1",
+              toolCallId: "call-1",
+              toolName: "tool1",
+              input: { value: "value-1" },
+              state: "output-available",
+              output: "result-1",
+            },
+            {
+              type: "tool-tool2",
+              toolCallId: "call-2",
+              toolName: "tool2",
+              input: { value: "value-2" },
+              state: "output-available",
+              output: "result-2",
+            },
+            {
+              type: "tool-tool3",
+              toolCallId: "call-3",
+              toolName: "tool3",
+              input: { value: "value-3" },
+              state: "output-available",
+              output: "result-3",
+            },
+          ],
+        },
+      ]);
+    });
+
+    it("should skip orphaned tool results (result without call)", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "assistant",
+          content: [{ kind: "text", text: "Response" }],
+        },
+        {
+          kind: "tool-result",
+          callId: "orphan-1",
+          toolId: "calculator",
+          state: COMPLETED,
+          result: 42,
+          error: null,
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-1",
+          role: "assistant",
+          parts: [{ type: "text", text: "Response" }],
+        },
+      ]);
+    });
+
+    it("should handle tool calls followed by next message", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "assistant",
+          content: [{ kind: "text", text: "Using tool" }],
+        },
+        {
+          kind: "tool-call",
+          callId: "call-1",
+          toolId: "search",
+          state: IN_PROGRESS,
+          arguments: JSON.stringify({ query: "test" }),
+        },
+        {
+          kind: "tool-result",
+          callId: "call-1",
+          toolId: "search",
+          state: COMPLETED,
+          result: "found it",
+          error: null,
+        },
+        {
+          kind: "message",
+          id: "msg-2",
+          role: "user",
+          content: [{ kind: "text", text: "Thanks!" }],
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-1",
+          role: "assistant",
+          parts: [
+            { type: "text", text: "Using tool" },
+            {
+              type: "tool-search",
+              toolCallId: "call-1",
+              toolName: "search",
+              input: { query: "test" },
+              state: "output-available",
+              output: "found it",
+            },
+          ],
+        },
+        {
+          id: "msg-2",
+          role: "user",
+          parts: [{ type: "text", text: "Thanks!" }],
+        },
+      ]);
+    });
+  });
+
+  describe("reasoning parts", () => {
+    it("should attach reasoning to last assistant message", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "assistant",
+          content: [{ kind: "text", text: "Let me think..." }],
+        },
+        {
+          kind: "reasoning",
+          text: "Analyzing the problem step by step",
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-1",
+          role: "assistant",
+          parts: [
+            { type: "text", text: "Let me think..." },
+            {
+              type: "reasoning",
+              text: "Analyzing the problem step by step",
+            },
+          ],
+        },
+      ]);
+    });
+
+    it("should create new message for standalone reasoning", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "user",
+          content: [{ kind: "text", text: "Solve this problem" }],
+        },
+        {
+          kind: "reasoning",
+          id: "reasoning-1",
+          text: "First, I need to understand the problem",
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-1",
+          role: "user",
+          parts: [{ type: "text", text: "Solve this problem" }],
+        },
+        {
+          id: "reasoning-1",
+          role: "assistant",
+          parts: [
+            {
+              type: "reasoning",
+              text: "First, I need to understand the problem",
+            },
+          ],
+        },
+      ]);
+    });
+
+    it("should generate id for reasoning without id", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "user",
+          content: [{ kind: "text", text: "Question" }],
+        },
+        {
+          kind: "reasoning",
+          text: "Thinking...",
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-1",
+          role: "user",
+          parts: [{ type: "text", text: "Question" }],
+        },
+        {
+          id: "reasoning-1",
+          role: "assistant",
+          parts: [{ type: "reasoning", text: "Thinking..." }],
+        },
+      ]);
+    });
+
+    it("should attach multiple reasoning parts to assistant message", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "assistant",
+          content: [{ kind: "text", text: "Response" }],
+        },
+        {
+          kind: "reasoning",
+          text: "Step 1: analyze",
+        },
+        {
+          kind: "reasoning",
+          text: "Step 2: synthesize",
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-1",
+          role: "assistant",
+          parts: [
+            { type: "text", text: "Response" },
+            { type: "reasoning", text: "Step 1: analyze" },
+            { type: "reasoning", text: "Step 2: synthesize" },
+          ],
+        },
+      ]);
+    });
+  });
+
+  describe("edge cases", () => {
+    it("should handle empty history", () => {
+      const items: LanguageModelItem[] = [];
+      const result = historyToUIMessages(items);
+      expect(result).toEqual([]);
+    });
+
+    it("should handle message with empty content", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "user",
+          content: [],
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-1",
+          role: "user",
+          parts: [],
+        },
+      ]);
+    });
+
+    it("should handle complex conversation with mixed content", () => {
+      const items: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "user",
+          content: [
+            { kind: "text", text: "Check this image and calculate" },
+            {
+              kind: "file",
+              mimeType: "image/png",
+              filename: "chart.png",
+              uri: "https://example.com/chart.png",
+            },
+          ],
+        },
+        {
+          kind: "message",
+          id: "msg-2",
+          role: "assistant",
+          content: [{ kind: "text", text: "I'll analyze the image" }],
+        },
+        {
+          kind: "reasoning",
+          text: "The image shows numerical data",
+        },
+        {
+          kind: "tool-call",
+          callId: "call-1",
+          toolId: "calculator",
+          state: IN_PROGRESS,
+          arguments: JSON.stringify({ operation: "sum", values: [10, 20, 30] }),
+        },
+        {
+          kind: "tool-result",
+          callId: "call-1",
+          toolId: "calculator",
+          state: COMPLETED,
+          result: 60,
+          error: null,
+        },
+        {
+          kind: "message",
+          id: "msg-3",
+          role: "assistant",
+          content: [
+            { kind: "text", text: "The sum is" },
+            { kind: "data", data: { total: 60 } },
+          ],
+        },
+      ];
+
+      const result = historyToUIMessages(items);
+
+      expect(result).toEqual([
+        {
+          id: "msg-1",
+          role: "user",
+          parts: [
+            { type: "text", text: "Check this image and calculate" },
+            {
+              type: "file",
+              url: "https://example.com/chart.png",
+              mediaType: "image/png",
+              filename: "chart.png",
+            },
+          ],
+        },
+        {
+          id: "msg-2",
+          role: "assistant",
+          parts: [
+            { type: "text", text: "I'll analyze the image" },
+            {
+              type: "reasoning",
+              text: "The image shows numerical data",
+            },
+            {
+              type: "tool-calculator",
+              toolCallId: "call-1",
+              toolName: "calculator",
+              input: { operation: "sum", values: [10, 20, 30] },
+              state: "output-available",
+              output: 60,
+            },
+          ],
+        },
+        {
+          id: "msg-3",
+          role: "assistant",
+          parts: [
+            { type: "text", text: "The sum is" },
+            { type: "data-total", data: 60 },
+          ],
+        },
+      ]);
     });
   });
 });

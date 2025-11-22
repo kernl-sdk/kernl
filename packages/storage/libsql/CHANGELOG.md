@@ -1,5 +1,11 @@
 # @kernl/libsql
 
+## 0.1.6
+
+### Patch Changes
+
+- @kernl-sdk/storage@0.1.6
+
 ## 0.1.5
 
 ### Patch Changes

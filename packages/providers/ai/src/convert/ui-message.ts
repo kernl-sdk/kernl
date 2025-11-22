@@ -1,3 +1,13 @@
+import {
+  validateUIMessages,
+  type UIMessage,
+  type UIDataTypes,
+  type UITools,
+  type ToolUIPart,
+  type DynamicToolUIPart,
+  type DataUIPart,
+} from "ai";
+
 import type { Codec } from "@kernl-sdk/shared/lib";
 import {
   type LanguageModelItem,
@@ -10,15 +20,6 @@ import {
   COMPLETED,
   FAILED,
 } from "@kernl-sdk/protocol";
-import {
-  validateUIMessages,
-  type UIMessage,
-  type UIDataTypes,
-  type UITools,
-  type ToolUIPart,
-  type DynamicToolUIPart,
-  type DataUIPart,
-} from "ai";
 
 /**
  * Converter for transforming Vercel AI SDK UIMessage format (used by useChat hook)
@@ -36,7 +37,7 @@ export const UIMessageCodec: AsyncCodec<LanguageModelItem, UIMessage> = {
   /**
    * Convert from kernl LanguageModelItem to AI SDK UIMessage.
    *
-   * NOTE: Leaving unimplemented for now. Unlikely to be necessary since UIs are typically streaming.
+   * NOTE: use historyToUIMessages() instead since the AI SDK groups assistant parts together (must process as a group).
    */
   encode: (item: LanguageModelItem): UIMessage => {
     throw new Error("UIMessageCodec.encode: Unimplemented");
@@ -227,3 +228,182 @@ type AsyncCodec<From, To> = {
     message: To extends UIMessage ? UIMessage<METADATA, DATA_PARTS, TOOLS> : To,
   ) => Promise<From[]>;
 };
+
+/**
+ * Convert thread history events to AI SDK UIMessages for useChat hook.
+ *
+ * Groups tool calls with their results and attaches them to the preceding
+ * assistant message as parts.
+ *
+ * @example
+ * ```ts
+ * import { historyToUIMessages } from '@kernl-sdk/ai';
+ *
+ * const thread = await kernl.threads.get("thread_123");
+ * const messages = historyToUIMessages(thread.history);
+ * ```
+ */
+export function historyToUIMessages(items: LanguageModelItem[]): UIMessage[] {
+  const messages: UIMessage[] = [];
+
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+
+    if (item.kind === "message") {
+      const parts = [];
+
+      // add message content parts
+      for (const part of item.content) {
+        switch (part.kind) {
+          case "text":
+            parts.push({
+              type: "text" as const,
+              text: part.text,
+              ...(part.providerMetadata && {
+                providerMetadata: part.providerMetadata as any,
+              }),
+            });
+            break;
+
+          case "file":
+            parts.push({
+              type: "file" as const,
+              url: part.uri || `data:${part.mimeType};base64,${part.data}`,
+              mediaType: part.mimeType,
+              filename: part.filename,
+              ...(part.providerMetadata && {
+                providerMetadata: part.providerMetadata as any,
+              }),
+            });
+            break;
+
+          case "data":
+            for (const [name, value] of Object.entries(part.data)) {
+              parts.push({ type: `data-${name}` as const, data: value });
+            }
+            break;
+        }
+      }
+
+      // look ahead for tool calls/results and reasoning that belong to this message
+      if (item.role === "assistant") {
+        let j = i + 1;
+        const toolMap = new Map<
+          string,
+          {
+            call?: Extract<LanguageModelItem, { kind: "tool-call" }>;
+            result?: Extract<LanguageModelItem, { kind: "tool-result" }>;
+          }
+        >();
+        const reasoningParts: Extract<
+          LanguageModelItem,
+          { kind: "reasoning" }
+        >[] = [];
+
+        while (j < items.length && items[j].kind !== "message") {
+          const next = items[j];
+
+          if (next.kind === "tool-call") {
+            const existing = toolMap.get(next.callId) || {};
+            toolMap.set(next.callId, { ...existing, call: next });
+          } else if (next.kind === "tool-result") {
+            const existing = toolMap.get(next.callId) || {};
+            toolMap.set(next.callId, { ...existing, result: next });
+          } else if (next.kind === "reasoning") {
+            reasoningParts.push(next);
+          }
+
+          j++;
+        }
+
+        // add reasoning parts first
+        for (const reasoning of reasoningParts) {
+          parts.push({
+            type: "reasoning" as const,
+            text: reasoning.text,
+            ...(reasoning.providerMetadata && {
+              providerMetadata: reasoning.providerMetadata as any,
+            }),
+          });
+        }
+
+        // convert tool pairs to UI parts
+        for (const [callId, { call, result }] of toolMap.entries()) {
+          if (!call) continue; // orphaned result, skip
+
+          const input = JSON.parse(call.arguments);
+
+          if (result) {
+            if (result.state === "failed") {
+              parts.push({
+                type: `tool-${call.toolId}` as const,
+                toolCallId: callId,
+                toolName: call.toolId,
+                input,
+                state: "output-error" as const,
+                errorText: result.error || "",
+                ...(call.providerMetadata && {
+                  callProviderMetadata: call.providerMetadata as any,
+                }),
+              });
+            } else {
+              parts.push({
+                type: `tool-${call.toolId}` as const,
+                toolCallId: callId,
+                toolName: call.toolId,
+                input,
+                state: "output-available" as const,
+                output: result.result,
+                ...(call.providerMetadata && {
+                  callProviderMetadata: call.providerMetadata as any,
+                }),
+              });
+            }
+          } else {
+            parts.push({
+              type: `tool-${call.toolId}` as const,
+              toolCallId: callId,
+              toolName: call.toolId,
+              input,
+              state: "input-available" as const,
+              ...(call.providerMetadata && {
+                callProviderMetadata: call.providerMetadata as any,
+              }),
+            });
+          }
+        }
+
+        // skip over the tool and reasoning events we just processed
+        i = j - 1;
+      }
+
+      messages.push({
+        id: item.id,
+        role: item.role,
+        parts,
+      });
+    } else if (item.kind === "reasoning") {
+      // add reasoning as a part of the last assistant message, or create new message
+      const lastMessage = messages[messages.length - 1];
+      const rpart = {
+        type: "reasoning" as const,
+        text: item.text,
+        ...(item.providerMetadata && {
+          providerMetadata: item.providerMetadata as any,
+        }),
+      };
+
+      if (lastMessage && lastMessage.role === "assistant") {
+        lastMessage.parts.push(rpart);
+      } else {
+        messages.push({
+          id: item.id || `reasoning-${i}`,
+          role: "assistant",
+          parts: [rpart],
+        });
+      }
+    }
+  }
+
+  return messages;
+}
