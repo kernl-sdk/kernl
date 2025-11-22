@@ -1,0 +1,51 @@
+{
+  "name": "@kernl/storage",
+  "version": "0.1.0",
+  "description": "Generic storage abstractions for kernl",
+  "keywords": [
+    "kernl",
+    "storage",
+    "database"
+  ],
+  "author": "dremnik",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kernl-sdk/kernl.git",
+    "directory": "packages/storage/core"
+  },
+  "homepage": "https://github.com/kernl-sdk/kernl#readme",
+  "bugs": {
+    "url": "https://github.com/kernl-sdk/kernl/issues"
+  },
+  "type": "module",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "dev": "tsc --watch",
+    "check-types": "tsc --noEmit",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:run": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "tsc-alias": "^1.8.10",
+    "typescript": "5.9.2",
+    "vitest": "^4.0.8"
+  },
+  "dependencies": {
+    "@kernl-sdk/core": "workspace:*",
+    "@kernl-sdk/protocol": "workspace:*",
+    "@kernl-sdk/shared": "workspace:*",
+    "zod": "^4.1.12"
+  }
+}
