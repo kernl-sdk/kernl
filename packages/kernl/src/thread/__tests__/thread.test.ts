@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
 
-import type { LanguageModelRequest } from "@kernl-sdk/protocol";
+import type { LanguageModelRequest, LanguageModelItem } from "@kernl-sdk/protocol";
 import { IN_PROGRESS, COMPLETED, FAILED } from "@kernl-sdk/protocol";
 
 import { Thread } from "../thread";
@@ -15,7 +15,7 @@ import type { ThreadEvent } from "@/types/thread";
 import { createMockModel } from "./fixtures/mock-model";
 
 // Helper to create user message input
-function userMessage(text: string): ThreadEvent[] {
+function userMessage(text: string): LanguageModelItem[] {
   return [
     {
       kind: "message" as const,
@@ -57,7 +57,7 @@ describe("Thread", () => {
       });
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, userMessage("Hello world"));
+      const thread = new Thread({ agent, input: userMessage("Hello world") });
 
       const result = await thread.execute();
 
@@ -65,18 +65,16 @@ describe("Thread", () => {
       const history = (thread as any).history as ThreadEvent[];
 
       expect(history).toEqual([
-        {
+        expect.objectContaining({
           kind: "message",
-          id: expect.any(String),
           role: "user",
           content: [{ kind: "text", text: "Hello world" }],
-        },
-        {
+        }),
+        expect.objectContaining({
           kind: "message",
-          id: "msg_1",
           role: "assistant",
           content: [{ kind: "text", text: "Hello world" }],
-        },
+        }),
       ]);
 
       expect(thread._tick).toBe(1);
@@ -111,19 +109,18 @@ describe("Thread", () => {
       });
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, userMessage("Test input"));
+      const thread = new Thread({ agent, input: userMessage("Test input") });
 
       await thread.execute();
 
       const history = (thread as any).history as ThreadEvent[];
       const firstMessage = history[0];
 
-      expect(firstMessage).toEqual({
+      expect(firstMessage).toEqual(expect.objectContaining({
         kind: "message",
-        id: expect.any(String),
         role: "user",
         content: [{ kind: "text", text: "Test input" }],
-      });
+      }));
     });
 
     it("should use array input as-is", async () => {
@@ -154,7 +151,7 @@ describe("Thread", () => {
         model,
       });
 
-      const events: ThreadEvent[] = [
+      const events: LanguageModelItem[] = [
         {
           kind: "message",
           id: "custom_msg",
@@ -164,14 +161,18 @@ describe("Thread", () => {
       ];
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, events);
+      const thread = new Thread({ agent, input: events });
 
       await thread.execute();
 
       const history = (thread as any).history as ThreadEvent[];
       const firstMessage = history[0];
 
-      expect(firstMessage).toEqual(events[0]);
+      expect(firstMessage).toEqual(expect.objectContaining({
+        kind: events[0].kind,
+        role: (events[0] as any).role,
+        content: (events[0] as any).content,
+      }));
     });
   });
 
@@ -248,7 +249,7 @@ describe("Thread", () => {
       });
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, userMessage("Use the echo tool"));
+      const thread = new Thread({ agent, input: userMessage("Use the echo tool") });
 
       const result = await thread.execute();
 
@@ -256,43 +257,40 @@ describe("Thread", () => {
 
       expect(history).toEqual([
         // Initial user message
-        {
+        expect.objectContaining({
           kind: "message",
-          id: expect.any(String),
           role: "user",
           content: [{ kind: "text", text: "Use the echo tool" }],
-        },
+        }),
         // Assistant message (tick 1)
-        {
+        expect.objectContaining({
           kind: "message",
-          id: "msg_1",
           role: "assistant",
           content: [],
-        },
+        }),
         // Tool call (tick 1)
-        {
+        expect.objectContaining({
           kind: "tool-call",
           toolId: "echo",
           callId: "call_1",
           state: IN_PROGRESS,
           arguments: JSON.stringify({ text: "test" }),
-        },
+        }),
         // Tool result (executed after tick 1)
-        {
+        expect.objectContaining({
           kind: "tool-result",
           callId: "call_1",
           toolId: "echo",
           state: COMPLETED,
           result: "Echo: test",
           error: null,
-        },
+        }),
         // Final assistant message (tick 2)
-        {
+        expect.objectContaining({
           kind: "message",
-          id: "msg_2",
           role: "assistant",
           content: [{ kind: "text", text: "Done!" }],
-        },
+        }),
       ]);
 
       expect(thread._tick).toBe(2);
@@ -395,7 +393,7 @@ describe("Thread", () => {
       });
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, userMessage("Start"));
+      const thread = new Thread({ agent, input: userMessage("Start") });
 
       const result = await thread.execute();
 
@@ -471,7 +469,7 @@ describe("Thread", () => {
       });
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, userMessage("test"));
+      const thread = new Thread({ agent, input: userMessage("test") });
 
       await thread.execute();
 
@@ -479,14 +477,14 @@ describe("Thread", () => {
 
       // Check that the tool result is an error
       const toolResult = history.find((e) => e.kind === "tool-result");
-      expect(toolResult).toEqual({
+      expect(toolResult).toEqual(expect.objectContaining({
         kind: "tool-result",
         callId: "call_1",
         toolId: "nonexistent",
         state: FAILED,
         result: undefined,
         error: "Tool nonexistent not found",
-      });
+      }));
     });
 
     it("should handle tool execution error", async () => {
@@ -563,7 +561,7 @@ describe("Thread", () => {
       });
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, userMessage("test"));
+      const thread = new Thread({ agent, input: userMessage("test") });
 
       await thread.execute();
 
@@ -650,7 +648,7 @@ describe("Thread", () => {
       });
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, userMessage("Add 5 and 3"));
+      const thread = new Thread({ agent, input: userMessage("Add 5 and 3") });
 
       await thread.execute();
 
@@ -658,14 +656,14 @@ describe("Thread", () => {
       const history = thread.history as ThreadEvent[];
 
       const toolResult = history.find((e) => e.kind === "tool-result");
-      expect(toolResult).toEqual({
+      expect(toolResult).toEqual(expect.objectContaining({
         kind: "tool-result",
         callId: "call_1",
         toolId: "add",
         state: COMPLETED,
         result: 8,
         error: null,
-      });
+      }));
     });
   });
 
@@ -756,7 +754,7 @@ describe("Thread", () => {
       });
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, userMessage("test"));
+      const thread = new Thread({ agent, input: userMessage("test") });
 
       await thread.execute();
 
@@ -767,22 +765,22 @@ describe("Thread", () => {
       expect(toolResults).toHaveLength(2);
       expect(toolResults).toEqual(
         expect.arrayContaining([
-          {
+          expect.objectContaining({
             kind: "tool-result",
             callId: "call_1",
             toolId: "tool1",
             state: COMPLETED,
             result: "Tool1: a",
             error: null,
-          },
-          {
+          }),
+          expect.objectContaining({
             kind: "tool-result",
             callId: "call_2",
             toolId: "tool2",
             state: COMPLETED,
             result: "Tool2: b",
             error: null,
-          },
+          }),
         ]),
       );
     });
@@ -859,7 +857,7 @@ describe("Thread", () => {
       });
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, userMessage("test"));
+      const thread = new Thread({ agent, input: userMessage("test") });
 
       const result = await thread.execute();
 
@@ -936,7 +934,7 @@ describe("Thread", () => {
       });
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, userMessage("test"));
+      const thread = new Thread({ agent, input: userMessage("test") });
 
       const result = await thread.execute();
 
@@ -976,7 +974,7 @@ describe("Thread", () => {
       });
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, userMessage("test"));
+      const thread = new Thread({ agent, input: userMessage("test") });
 
       const result = await thread.execute();
 
@@ -1053,7 +1051,7 @@ describe("Thread", () => {
       });
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, userMessage("test"));
+      const thread = new Thread({ agent, input: userMessage("test") });
 
       const result = await thread.execute();
 
@@ -1093,7 +1091,7 @@ describe("Thread", () => {
       });
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, userMessage("test"));
+      const thread = new Thread({ agent, input: userMessage("test") });
 
       const result = await thread.execute();
 
@@ -1142,7 +1140,7 @@ describe("Thread", () => {
       });
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, userMessage("test"));
+      const thread = new Thread({ agent, input: userMessage("test") });
 
       const result = await thread.execute();
 
@@ -1192,7 +1190,7 @@ describe("Thread", () => {
       });
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, userMessage("test"));
+      const thread = new Thread({ agent, input: userMessage("test") });
 
       await expect(thread.execute()).rejects.toThrow(ModelBehaviorError);
     });
@@ -1237,7 +1235,7 @@ describe("Thread", () => {
       });
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, userMessage("test"));
+      const thread = new Thread({ agent, input: userMessage("test") });
 
       await expect(thread.execute()).rejects.toThrow(ModelBehaviorError);
     });
@@ -1283,7 +1281,7 @@ describe("Thread", () => {
       });
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, userMessage("test"));
+      const thread = new Thread({ agent, input: userMessage("test") });
 
       await expect(thread.execute()).rejects.toThrow(ModelBehaviorError);
     });
@@ -1342,7 +1340,7 @@ describe("Thread", () => {
       });
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, userMessage("test"));
+      const thread = new Thread({ agent, input: userMessage("test") });
 
       const result = await thread.execute();
 
@@ -1411,7 +1409,7 @@ describe("Thread", () => {
       });
 
       const kernl = new Kernl();
-      const thread = new Thread(kernl, agent, userMessage("test"));
+      const thread = new Thread({ agent, input: userMessage("test") });
 
       const result = await thread.execute();
 

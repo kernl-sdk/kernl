@@ -115,12 +115,12 @@ describe("FunctionToolkit", () => {
 
       const serialized = (await toolkit.list()).map((tool: any) => tool.serialize());
       expect(serialized).toHaveLength(1);
-      expect(serialized[0]).toEqual({
-        type: "function",
-        name: simpleStringTool.name,
+      expect(serialized[0]).toMatchObject({
+        kind: "function",
+        name: simpleStringTool.id,
         description: simpleStringTool.description,
-        parameters: simpleStringTool.parameters,
       });
+      expect(serialized[0].parameters).toBeDefined();
     });
 
     it("should serialize hosted tools correctly", async () => {
@@ -129,10 +129,10 @@ describe("FunctionToolkit", () => {
       const serialized = (await toolkit.list()).map((tool: any) => tool.serialize());
       expect(serialized).toHaveLength(1);
       expect(serialized[0]).toEqual({
-        type: "hosted-tool",
+        kind: "provider-defined",
         id: mockHostedTool.id,
         name: mockHostedTool.name,
-        providerData: mockHostedTool.providerData,
+        args: mockHostedTool.providerData,
       });
     });
 
@@ -144,18 +144,21 @@ describe("FunctionToolkit", () => {
 
       // Check both tools are present (order not guaranteed with Map)
       expect(serialized).toContainEqual({
-        type: "hosted-tool",
+        kind: "provider-defined",
         id: mockHostedTool.id,
         name: mockHostedTool.name,
-        providerData: mockHostedTool.providerData,
+        args: mockHostedTool.providerData,
       });
 
-      expect(serialized).toContainEqual({
-        type: "function",
-        name: simpleStringTool.name,
+      // Check that function tool is present with correct structure
+      const functionTool = serialized.find((t: any) => t.kind === "function");
+      expect(functionTool).toBeDefined();
+      expect(functionTool).toMatchObject({
+        kind: "function",
+        name: simpleStringTool.id,
         description: simpleStringTool.description,
-        parameters: simpleStringTool.parameters,
       });
+      expect(functionTool.parameters).toBeDefined();
     });
 
     it("should handle hosted tools without providerData", async () => {

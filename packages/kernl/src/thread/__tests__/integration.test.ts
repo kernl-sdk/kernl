@@ -10,6 +10,7 @@ import { tool, Toolkit } from "@/tool";
 import { Thread } from "../thread";
 
 import type { ThreadEvent, ThreadStreamEvent } from "@/types/thread";
+import type { LanguageModelItem } from "@kernl-sdk/protocol";
 
 /**
  * Integration tests for Thread streaming with real AI SDK providers.
@@ -44,7 +45,7 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
         model,
       });
 
-      const input: ThreadEvent[] = [
+      const input: LanguageModelItem[] = [
         {
           kind: "message",
           id: "msg-1",
@@ -55,7 +56,7 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
         },
       ];
 
-      const thread = new Thread(kernl, agent, input);
+      const thread = new Thread({ agent, input });
       const events = [];
 
       for await (const event of thread.stream()) {
@@ -116,7 +117,7 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
         model,
       });
 
-      const input: ThreadEvent[] = [
+      const input: LanguageModelItem[] = [
         {
           kind: "message",
           id: "msg-1",
@@ -125,7 +126,7 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
         },
       ];
 
-      const thread = new Thread(kernl, agent, input);
+      const thread = new Thread({ agent, input });
       const streamEvents = [];
 
       for await (const event of thread.stream()) {
@@ -200,7 +201,7 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
         toolkits: [toolkit],
       });
 
-      const input: ThreadEvent[] = [
+      const input: LanguageModelItem[] = [
         {
           kind: "message",
           id: "msg-1",
@@ -209,7 +210,7 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
         },
       ];
 
-      const thread = new Thread(kernl, agent, input);
+      const thread = new Thread({ agent, input });
       const events: ThreadStreamEvent[] = [];
 
       for await (const event of thread.stream()) {
@@ -296,7 +297,7 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
             toolkits: [toolkit],
           });
 
-          const input: ThreadEvent[] = [
+          const input: LanguageModelItem[] = [
             {
               kind: "message",
               id: "msg-1",
@@ -305,7 +306,7 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
             },
           ];
 
-          const thread = new Thread(kernl, agent, input);
+          const thread = new Thread({ agent, input });
           const events: ThreadStreamEvent[] = [];
 
           // Collect all events from the stream
@@ -379,7 +380,7 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
         model,
       });
 
-      const input: ThreadEvent[] = [
+      const input: LanguageModelItem[] = [
         {
           kind: "message",
           id: "msg-1",
@@ -388,7 +389,7 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
         },
       ];
 
-      const thread = new Thread(kernl, agent, input);
+      const thread = new Thread({ agent, input });
       const result = await thread.execute();
 
       // Should have a response
@@ -419,7 +420,7 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
         responseType: responseSchema,
       });
 
-      const input: ThreadEvent[] = [
+      const input: LanguageModelItem[] = [
         {
           kind: "message",
           id: "msg-1",
@@ -433,7 +434,7 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
         },
       ];
 
-      const thread = new Thread(kernl, agent, input);
+      const thread = new Thread({ agent, input });
       const result = await thread.execute();
 
       // Response should be validated and parsed

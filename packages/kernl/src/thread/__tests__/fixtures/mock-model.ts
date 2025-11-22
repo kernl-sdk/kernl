@@ -55,15 +55,13 @@ async function* streamFromResponse(
  * Creates a mock LanguageModel that automatically implements streaming
  * based on the generate() implementation.
  */
-export function createMockModel(
-  generateFn: (req: LanguageModelRequest) => Promise<LanguageModelResponse>,
-): LanguageModel {
+export function createMockModel(generateFn: any): any {
   return {
     spec: "1.0" as const,
     provider: "test",
     modelId: "test-model",
     generate: generateFn,
-    stream: async function* (req: LanguageModelRequest) {
+    stream: async function* (req: any) {
       const response = await generateFn(req);
       yield* streamFromResponse(response);
     },
