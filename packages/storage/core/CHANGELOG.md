@@ -1,5 +1,13 @@
 # @kernl/storage
 
+## 0.1.5
+
+### Patch Changes
+
+- 8e3bac1: Add ThreadResource public API type that separates the public thread interface from internal Thread execution primitive. ThreadsResource methods now return ThreadResource with serialized data instead of Thread class instances. Add createdAt/updatedAt timestamps to threads.
+- Updated dependencies [8e3bac1]
+  - @kernl-sdk/core@0.4.5
+
 ## 0.1.4
 
 ### Patch Changes
