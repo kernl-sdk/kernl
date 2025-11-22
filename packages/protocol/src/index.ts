@@ -8,5 +8,4 @@ export * from "./constants";
 export * from "./language-model";
 export * from "./embedding-model";
 export * from "./provider";
-export * from "./codec";
 export * from "./json";

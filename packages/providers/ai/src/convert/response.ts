@@ -1,5 +1,5 @@
+import type { Codec } from "@kernl-sdk/shared/lib";
 import type {
-  Codec,
   LanguageModelResponse,
   LanguageModelResponseItem,
   LanguageModelFinishReason,

@@ -1,10 +1,10 @@
+import type { Codec } from "@kernl-sdk/shared/lib";
 import {
   type LanguageModelItem,
   type MessagePart,
   type Reasoning,
   type ToolCall,
   type ToolResult,
-  type Codec,
   type JSONValue,
   IN_PROGRESS,
   COMPLETED,

@@ -1,4 +1,5 @@
-import type { Codec, LanguageModelItem } from "@kernl-sdk/protocol";
+import type { Codec } from "@kernl-sdk/shared/lib";
+import type { LanguageModelItem } from "@kernl-sdk/protocol";
 import type {
   LanguageModelV3Message,
   LanguageModelV3TextPart,

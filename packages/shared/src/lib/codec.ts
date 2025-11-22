@@ -1,4 +1,52 @@
-import { z } from "zod";
+import { z, type ZodType } from "zod";
+
+/**
+ * Bidirectional codec for converting between types.
+ *
+ * @example
+ * ```typescript
+ * const tools: Codec<LanguageModelTool[], ProviderTool[]> = {
+ *   encode: (tools: Tool[]) => tools.map(convertToProvider),
+ *   decode: () => { throw new Error("codec:unimplemented"); },
+ * };
+ * ```
+ */
+export interface Codec<TFrom, TInto> {
+  /**
+   * Transform from input format to output format.
+   */
+  encode: (val: TFrom) => TInto;
+
+  /**
+   * Transform from output format to input format.
+   */
+  decode: (val: TInto) => TFrom;
+}
+
+/**
+ * Like z.codec() but only a single schema on TInto.
+ *
+ * Generally used for serialization from domain -> record types where we want to leave
+ * the domain definitions as pure TS for clarity.
+ */
+export function neapolitanCodec<TFrom, TInto>({
+  codec,
+  schema,
+}: {
+  codec: Codec<TFrom, TInto>;
+  schema: ZodType<TInto>;
+}): Codec<TFrom, TInto> {
+  return {
+    encode(val: TFrom): TInto {
+      const into = codec.encode(val);
+      return schema.parse(into);
+    },
+    decode(val: TInto): TFrom {
+      const validated = schema.parse(val);
+      return codec.decode(validated as TInto);
+    },
+  };
+}
 
 export const stringToNumber = z.codec(
   z.string().regex(z.regexes.number),
