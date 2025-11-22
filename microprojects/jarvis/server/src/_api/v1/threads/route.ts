@@ -1,5 +1,6 @@
 import { Hono, type Context } from "hono";
 import type { Kernl } from "@kernl-sdk/core";
+import { historyToUIMessages } from "@kernl-sdk/ai";
 
 import { NotFoundError } from "@/lib/error";
 
@@ -14,12 +15,12 @@ threads.delete("/:tid", del);
 
 export default threads;
 
-// --- Handlers ---
+// --- handlers ---
 
 /**
  * @route GET /v1/threads
  *
- * List all threads (doesn't return thread events by default).
+ * List stored threads.
  */
 async function list(cx: Context) {
   const kernl = cx.get("kernl") as Kernl;
@@ -50,7 +51,12 @@ async function get(cx: Context) {
     throw new NotFoundError("Thread not found");
   }
 
-  return cx.json(thread);
+  const history = thread.history ?? [];
+
+  return cx.json({
+    ...thread,
+    history: historyToUIMessages(history), // make sure to convert to UIMessage format
+  });
 }
 
 /**

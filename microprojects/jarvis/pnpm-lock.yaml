@@ -24,8 +24,8 @@ importers:
         specifier: ^1.19.6
         version: 1.19.6(hono@4.10.6)
       '@kernl-sdk/ai':
-        specifier: ^0.2.2
-        version: 0.2.2(@ai-sdk/anthropic@3.0.0-beta.53(zod@4.1.12))(@ai-sdk/openai@2.0.68(zod@4.1.12))(@ai-sdk/provider@2.0.0)
+        specifier: ^0.2.3
+        version: 0.2.3(@ai-sdk/provider@2.0.0)
       '@kernl-sdk/core':
         specifier: ^0.4.6
         version: 0.4.6
@@ -273,20 +273,10 @@ packages:
     peerDependencies:
       hono: ^4
 
-  '@kernl-sdk/ai@0.2.2':
-    resolution: {integrity: sha512-QrfkV+ZR4thIeM7ALEV03DR/HuE8Prsrzq2fa23yAzUoV6Y2INQjTaI75CW19ke6pDzoXULo/9vL6kmAg2w4Tw==, tarball: https://npm.pkg.github.com/download/@kernl-sdk/ai/0.2.2/e5126d347029af804800e5986d73c662289f0c25}
+  '@kernl-sdk/ai@0.2.3':
+    resolution: {integrity: sha512-nMT/ZaK0Ltrgvrge2l3cvfMbMdlB/tgWKUooHkx0qOBLYbTx5zcPyTNmr3H2wqm7vN6rgxiCiqgfAGjIcSc3PA==, tarball: https://npm.pkg.github.com/download/@kernl-sdk/ai/0.2.3/13e7302f48ed34bba5d9276e47440d53366efa02}
     peerDependencies:
-      '@ai-sdk/anthropic': '*'
-      '@ai-sdk/google': '*'
-      '@ai-sdk/openai': '*'
       '@ai-sdk/provider': ^3.0.0-beta.15
-    peerDependenciesMeta:
-      '@ai-sdk/anthropic':
-        optional: true
-      '@ai-sdk/google':
-        optional: true
-      '@ai-sdk/openai':
-        optional: true
 
   '@kernl-sdk/core@0.4.6':
     resolution: {integrity: sha512-bdYlQk8NFaOmWYI5UMdRETpM1vbprTsfS1wsZTOFZW63yzWNqmc1jpYJEZWzz0YZ4eAgT3NoQSpnlEdIYwBzsA==, tarball: https://npm.pkg.github.com/download/@kernl-sdk/core/0.4.6/6d639516dce30cd7c6001e90ac40c290453e661e}
@@ -1027,14 +1017,11 @@ snapshots:
     dependencies:
       hono: 4.10.6
 
-  '@kernl-sdk/ai@0.2.2(@ai-sdk/anthropic@3.0.0-beta.53(zod@4.1.12))(@ai-sdk/openai@2.0.68(zod@4.1.12))(@ai-sdk/provider@2.0.0)':
+  '@kernl-sdk/ai@0.2.3(@ai-sdk/provider@2.0.0)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@kernl-sdk/protocol': 0.2.3
       '@kernl-sdk/shared': 0.1.4
-    optionalDependencies:
-      '@ai-sdk/anthropic': 3.0.0-beta.53(zod@4.1.12)
-      '@ai-sdk/openai': 2.0.68(zod@4.1.12)
 
   '@kernl-sdk/core@0.4.6':
     dependencies:
