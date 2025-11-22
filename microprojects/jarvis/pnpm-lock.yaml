@@ -27,11 +27,11 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2(@ai-sdk/anthropic@3.0.0-beta.53(zod@4.1.12))(@ai-sdk/openai@2.0.68(zod@4.1.12))(@ai-sdk/provider@2.0.0)
       '@kernl-sdk/core':
-        specifier: ^0.4.3
-        version: 0.4.3
+        specifier: ^0.4.5
+        version: 0.4.5
       '@kernl-sdk/pg':
-        specifier: ^0.1.3
-        version: 0.1.3
+        specifier: ^0.1.5
+        version: 0.1.5
       ai:
         specifier: ^5.0.93
         version: 5.0.93(zod@4.1.12)
@@ -288,11 +288,11 @@ packages:
       '@ai-sdk/openai':
         optional: true
 
-  '@kernl-sdk/core@0.4.3':
-    resolution: {integrity: sha512-dHM4bvwgJvWRNRv8GMLtkjYFIvpOEp/MHIillBS7CQXomh+FRTL5s6o69KwiFXuMpAN3ZUUGgOnCt/3pS20oHQ==, tarball: https://npm.pkg.github.com/download/@kernl-sdk/core/0.4.3/bad4cbf86001de1aaf9402e6774826e2b72a05c4}
+  '@kernl-sdk/core@0.4.5':
+    resolution: {integrity: sha512-wqnqIzS1SDs40XhKRBAPfyZzeHssNEy3CBF9vHNQrtMgUNlGtWBMdWyrq0U0tdpPmiXzyoKIRqLOxXuvAyaUOw==, tarball: https://npm.pkg.github.com/download/@kernl-sdk/core/0.4.5/a7090010ab53c168e236c61266114ef53ff30002}
 
-  '@kernl-sdk/pg@0.1.3':
-    resolution: {integrity: sha512-/Buzzi5l+AiwL8c6FZ0xhH5FkH7jnZn548ztNRws8F+USuS7gNJdsLThn8dzyGdEvsh7B6y1LnE1+E0ROXe0Ww==, tarball: https://npm.pkg.github.com/download/@kernl-sdk/pg/0.1.3/d9a90a6359ea7d2ea685ddb577b347fe03d240c2}
+  '@kernl-sdk/pg@0.1.5':
+    resolution: {integrity: sha512-WlEumaoXcI9aCyijnaMG7/uQ0W+5H5QuS46Q6xn763hgDm14K8LwEi1t1Rk57WQcWhfma2+krhWrX66PUc9ciw==, tarball: https://npm.pkg.github.com/download/@kernl-sdk/pg/0.1.5/f3d09e8b0337209b8d65a841c23a25536299c16b}
 
   '@kernl-sdk/protocol@0.2.3':
     resolution: {integrity: sha512-KfhjQ66Jgw7GuAM/GZc24UHclU9YdCNqNmrkIvvFWtrxChDXv38PEH/Eauf3fYggKFR8OomhmTOeCoeCWXiFtg==, tarball: https://npm.pkg.github.com/download/@kernl-sdk/protocol/0.2.3/73f0a80df99301557e38d5cc62bfbc552af734d9}
@@ -300,8 +300,8 @@ packages:
   '@kernl-sdk/shared@0.1.4':
     resolution: {integrity: sha512-kvzzEiXWMRVDzKTKatzzHto+bjm2i63+LfOMEY67PYEUNNsB/XLHdJrKdySTzLbrYULjbSyWjvLHFMuhFoa2uQ==, tarball: https://npm.pkg.github.com/download/@kernl-sdk/shared/0.1.4/8df9258b5353be678cd661ae8e55da1c747f9cfc}
 
-  '@kernl-sdk/storage@0.1.3':
-    resolution: {integrity: sha512-mMTiF7AZbcS5/BEsPAHTQ4h6QVj1Ps4FIEcyB/Rbun/Drn/rv2JGd4xc4d+7iQfI9bPnsc472KrHYkS87m8rVw==, tarball: https://npm.pkg.github.com/download/@kernl-sdk/storage/0.1.3/d9b6e1411e1b35ba44b02c547ad6e07ccb17b63e}
+  '@kernl-sdk/storage@0.1.5':
+    resolution: {integrity: sha512-Lgu6tVmuGle7l0+D7445lojxQSgnl5L4cAn/2NPfwcSCqAzGhROGcakcEyEiuOQN1lw4Iku/W2bpqYxmlPEwdg==, tarball: https://npm.pkg.github.com/download/@kernl-sdk/storage/0.1.5/fd108efce8c457e40ee4115ff77adda83f910ae0}
 
   '@modelcontextprotocol/sdk@1.22.0':
     resolution: {integrity: sha512-VUpl106XVTCpDmTBil2ehgJZjhyLY2QZikzF8NvTXtLRF1CvO5iEE2UNZdVIUer35vFOwMKYeUGbjJtvPWan3g==}
@@ -1036,7 +1036,7 @@ snapshots:
       '@ai-sdk/anthropic': 3.0.0-beta.53(zod@4.1.12)
       '@ai-sdk/openai': 2.0.68(zod@4.1.12)
 
-  '@kernl-sdk/core@0.4.3':
+  '@kernl-sdk/core@0.4.5':
     dependencies:
       '@kernl-sdk/protocol': 0.2.3
       '@kernl-sdk/shared': 0.1.4
@@ -1047,11 +1047,11 @@ snapshots:
       - '@cfworker/json-schema'
       - supports-color
 
-  '@kernl-sdk/pg@0.1.3':
+  '@kernl-sdk/pg@0.1.5':
     dependencies:
-      '@kernl-sdk/core': 0.4.3
+      '@kernl-sdk/core': 0.4.5
       '@kernl-sdk/shared': 0.1.4
-      '@kernl-sdk/storage': 0.1.3
+      '@kernl-sdk/storage': 0.1.5
       pg: 8.16.3
     transitivePeerDependencies:
       - '@cfworker/json-schema'
@@ -1066,9 +1066,9 @@ snapshots:
     dependencies:
       zod: 4.1.12
 
-  '@kernl-sdk/storage@0.1.3':
+  '@kernl-sdk/storage@0.1.5':
     dependencies:
-      '@kernl-sdk/core': 0.4.3
+      '@kernl-sdk/core': 0.4.5
       '@kernl-sdk/protocol': 0.2.3
       '@kernl-sdk/shared': 0.1.4
       zod: 4.1.12

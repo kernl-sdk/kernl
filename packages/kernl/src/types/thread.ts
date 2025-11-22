@@ -18,6 +18,11 @@ import { Agent } from "@/agent";
 import type { AgentResponseType } from "./agent";
 import type { ThreadStore } from "@/storage";
 
+/**
+ * Public/client-facing thread events (excludes internal system events).
+ */
+export type PublicThreadEvent = LanguageModelItem & ThreadEventBase;
+
 export type TextResponse = "text";
 
 /**
@@ -226,6 +231,6 @@ export interface ThreadResource {
   /** Parent task ID (null if no parent) */
   parentTaskId: string | null;
 
-  /** Event history (only included when requested) */
-  history?: ThreadEvent[];
+  /** Event history (only public events, internal system events excluded) */
+  history?: PublicThreadEvent[];
 }

@@ -19,6 +19,7 @@ export type {
   ThreadSystemEvent,
   ThreadState,
   ThreadResource,
+  PublicThreadEvent,
 } from "./types/thread";
 export { THREAD_STATES } from "./types/thread";
 

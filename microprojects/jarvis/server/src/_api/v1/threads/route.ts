@@ -31,12 +31,7 @@ async function list(cx: Context) {
   const threads = await kernl.threads.list({ agentId, limit });
 
   return cx.json({
-    threads: threads.map((t) => ({
-      tid: t.tid,
-      agentId: t.agent.id,
-      createdAt: t.createdAt,
-      updatedAt: t.updatedAt,
-    })),
+    threads: threads,
     count: threads.length,
   });
 }
@@ -55,13 +50,7 @@ async function get(cx: Context) {
     throw new NotFoundError("Thread not found");
   }
 
-  return cx.json({
-    tid: thread.tid,
-    agentId: thread.agent.id,
-    createdAt: thread.createdAt,
-    updatedAt: thread.updatedAt,
-    history: thread.history,
-  });
+  return cx.json(thread);
 }
 
 /**

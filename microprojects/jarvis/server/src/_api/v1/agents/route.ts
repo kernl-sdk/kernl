@@ -12,49 +12,12 @@ const agents = new Hono();
  * - Agent routes :: /agents -
  */
 // agents.get("/", list);
-agents.post("/:id/run", run);
+// agents.post("/:id/run", run);
 agents.post("/:id/stream", stream);
 
 export default agents;
 
 // --- Handlers ---
-
-/**
- * @route POST /v1/agents/:id/run
- *
- * Run an agent and return the complete result.
- */
-async function run(cx: Context) {
-  const id = cx.req.param("id");
-
-  // for now, only support jarvis agent
-  if (id !== "jarvis") {
-    throw new NotFoundError("Agent not found");
-  }
-
-  const body = await cx.req.json();
-  const { tid, message } = body; // { tid: string, message: UIMessage }
-
-  const input = await UIMessageCodec.decode(message as UIMessage); // validates and converts
-
-  const result = await jarvis.run(input, {
-    threadId: tid,
-  });
-
-  return cx.json({
-    tid: null, // (TODO)
-    message: {
-      id: `msg_${Date.now()}`,
-      role: "assistant",
-      parts: [
-        {
-          type: "text",
-          text: result.response,
-        },
-      ],
-    },
-  });
-}
 
 /**
  * @route POST /v1/agents/:id/stream
@@ -70,7 +33,7 @@ async function stream(cx: Context) {
   }
 
   const body = await cx.req.json();
-  const { tid, message } = body; // { tid: string, message: UIMessage }
+  const { tid, message } = body;
 
   const input = await UIMessageCodec.decode(message); // validates and converts
 

@@ -1,6 +1,7 @@
 import type { Thread } from "@/thread";
 import type { ThreadStore, ThreadListOptions } from "@/storage";
-import type { ThreadEvent, ThreadResource } from "@/types/thread";
+import type { ThreadEvent, ThreadResource, PublicThreadEvent } from "@/types/thread";
+import { isPublicEvent } from "@/thread/utils";
 
 /**
  * Threads resource - provides a clean API for managing threads.
@@ -89,8 +90,10 @@ export class ThreadsResource {
   /**
    * Get the event history for a thread.
    *
+   * Returns only public/client-facing events (excludes internal system events).
+   *
    * @param id - Thread ID
-   * @returns Array of thread events
+   * @returns Array of public thread events
    *
    * @example
    * ```ts
@@ -98,8 +101,9 @@ export class ThreadsResource {
    * console.log(events.length); // Number of events in thread
    * ```
    */
-  async history(id: string): Promise<ThreadEvent[]> {
-    return this.store.history(id);
+  async history(id: string): Promise<PublicThreadEvent[]> {
+    const events = await this.store.history(id);
+    return events.filter(isPublicEvent);
   }
 }
 
@@ -159,7 +163,8 @@ const ThreadResourceCodec = {
     };
 
     if (history !== undefined) {
-      resource.history = history;
+      // Filter to only public events (exclude internal system events)
+      resource.history = history.filter(isPublicEvent);
     }
 
     return resource;

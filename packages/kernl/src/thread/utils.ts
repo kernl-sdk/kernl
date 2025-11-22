@@ -14,6 +14,7 @@ import type {
   ThreadEventBase,
   ThreadStreamEvent,
   ActionSet,
+  PublicThreadEvent,
 } from "@/types/thread";
 
 /**
@@ -82,6 +83,26 @@ export function notDelta(event: ThreadStreamEvent): event is LanguageModelItem {
       return true;
 
     // all other events are streaming deltas/control events
+    default:
+      return false;
+  }
+}
+
+/**
+ * Check if an event is public/client-facing (not internal).
+ * Filters out internal system events that clients don't need.
+ */
+export function isPublicEvent(event: ThreadEvent): event is PublicThreadEvent {
+  switch (event.kind) {
+    case "message":
+    case "reasoning":
+    case "tool-call":
+    case "tool-result":
+      return true;
+
+    case "system":
+      return false;
+
     default:
       return false;
   }
