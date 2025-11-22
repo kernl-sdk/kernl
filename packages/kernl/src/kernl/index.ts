@@ -1,2 +1,2 @@
 export { Kernl } from "./kernl";
-export { ThreadsResource, type ThreadsListParams } from "./threads";
+export { ThreadsResource, type ThreadsListParams, type ThreadGetOptions } from "./threads";

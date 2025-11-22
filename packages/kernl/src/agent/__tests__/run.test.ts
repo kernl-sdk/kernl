@@ -369,11 +369,11 @@ describe("Agent.threads helper", () => {
     expect(threadsB.length).toBeGreaterThanOrEqual(2);
 
     for (const thread of threadsA) {
-      expect(thread.agent.id).toBe("agent-a");
+      expect(thread.agentId).toBe("agent-a");
     }
 
     for (const thread of threadsB) {
-      expect(thread.agent.id).toBe("agent-b");
+      expect(thread.agentId).toBe("agent-b");
     }
   });
 

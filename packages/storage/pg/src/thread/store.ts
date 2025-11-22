@@ -434,6 +434,8 @@ export class PGThreadStore implements ThreadStore {
       tid: record.id,
       tick: record.tick,
       state: record.state,
+      createdAt: new Date(record.created_at),
+      updatedAt: new Date(record.updated_at),
       storage: this, // pass storage reference so resumed thread can persist
     });
   }

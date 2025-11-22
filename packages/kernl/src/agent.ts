@@ -6,11 +6,10 @@ import {
 } from "@kernl-sdk/protocol";
 
 import { Thread } from "./thread";
-import type { Kernl, ThreadsListParams } from "./kernl";
+import type { Kernl, ThreadsListParams, ThreadGetOptions } from "./kernl";
 import type { Context, UnknownContext } from "./context";
 import { Tool } from "./tool";
 import { BaseToolkit } from "./tool/toolkit";
-import { ThreadInclude } from "./storage";
 import {
   InputGuardrail,
   OutputGuardrail,
@@ -300,7 +299,7 @@ export class Agent<
     const kthreads = this.kernl.threads;
 
     return {
-      get: (tid: string, options?: ThreadInclude) => kthreads.get(tid, options),
+      get: (tid: string, options?: ThreadGetOptions) => kthreads.get(tid, options),
       list: (params: Omit<ThreadsListParams, "agentId"> = {}) =>
         kthreads.list({ ...params, agentId }),
       delete: (tid: string) => kthreads.delete(tid),

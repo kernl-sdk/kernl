@@ -33,11 +33,11 @@ import type {
 import type { AgentResponseType } from "@/types/agent";
 
 import {
-  notDelta,
-  getFinalResponse,
-  getIntentions,
-  parseFinalResponse,
   tevent,
+  notDelta,
+  getIntentions,
+  getFinalResponse,
+  parseFinalResponse,
 } from "./utils";
 
 /**
@@ -89,6 +89,8 @@ export class Thread<
   readonly context: Context<TContext>;
   readonly model: LanguageModel; /* inherited from the agent unless specified */
   readonly parent: Task<TContext> | null; /* parent task which spawned this thread */
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
   // readonly stats: ThreadMetrics;
 
   /* state */
@@ -109,6 +111,8 @@ export class Thread<
     this.parent = options.task ?? null;
     this.model = options.model ?? options.agent.model;
     this.storage = options.storage;
+    this.createdAt = options.createdAt ?? new Date();
+    this.updatedAt = options.updatedAt ?? new Date();
 
     this._tick = options.tick ?? 0;
     this.state = options.state ?? STOPPED;
@@ -301,7 +305,6 @@ export class Thread<
     const req = await this.prepareModelRequest(this.history);
 
     try {
-      // try to stream if model supports it
       if (this.model.stream) {
         const stream = this.model.stream(req);
         for await (const event of stream) {

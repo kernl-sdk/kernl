@@ -154,6 +154,8 @@ export interface ThreadOptions<
   tick?: number;
   state?: ThreadState;
   storage?: ThreadStore;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 /**
@@ -188,4 +190,42 @@ export interface PerformActionsResult {
    * Tool calls that require approval before execution
    */
   pendingApprovals: ToolCall[];
+}
+
+/**
+ * Public thread resource representation for API consumers.
+ *
+ * This is the user-facing representation of a thread, distinct from
+ * the internal Thread class which is an execution primitive.
+ */
+export interface ThreadResource {
+  /** Thread identifier */
+  tid: string;
+
+  /** Agent that owns this thread */
+  agentId: string;
+
+  /** Current thread state */
+  state: ThreadState;
+
+  /** Thread creation timestamp */
+  createdAt: Date;
+
+  /** Last update timestamp */
+  updatedAt: Date;
+
+  /** Model configuration (serialized) */
+  model: {
+    provider: string;
+    modelId: string;
+  };
+
+  /** User context data */
+  context: Record<string, unknown>;
+
+  /** Parent task ID (null if no parent) */
+  parentTaskId: string | null;
+
+  /** Event history (only included when requested) */
+  history?: ThreadEvent[];
 }

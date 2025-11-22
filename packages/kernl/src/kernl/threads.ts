@@ -1,34 +1,11 @@
 import type { Thread } from "@/thread";
-import type { ThreadStore, ThreadInclude, ThreadListOptions } from "@/storage";
-import type { ThreadEvent } from "@/types/thread";
-
-/**
- * Parameters for listing threads.
- */
-export interface ThreadsListParams {
-  /**
-   * Maximum number of threads to return.
-   */
-  limit?: number;
-
-  /**
-   * Return threads created before this cursor.
-   */
-  before?: string;
-
-  /**
-   * Return threads created after this cursor.
-   */
-  after?: string;
-
-  /**
-   * Filter by agent ID.
-   */
-  agentId?: string;
-}
+import type { ThreadStore, ThreadListOptions } from "@/storage";
+import type { ThreadEvent, ThreadResource } from "@/types/thread";
 
 /**
  * Threads resource - provides a clean API for managing threads.
+ *
+ * Returns public ThreadResource types, not internal Thread class instances.
  */
 export class ThreadsResource {
   constructor(private store: ThreadStore) {}
@@ -37,27 +14,42 @@ export class ThreadsResource {
    * Get a thread by ID.
    *
    * @param id - Thread ID
-   * @param options - Optional include options (defaults to including history)
-   * @returns Thread instance with history, or null if not found
+   * @param options - Include options (history included by default)
+   * @returns Thread resource, or null if not found
    *
    * @example
    * ```ts
+   * // With history (default)
    * const thread = await kernl.threads.get("thread_123");
-   * if (thread) {
-   *   console.log(thread.history); // Array of ThreadEvents
-   * }
+   * console.log(thread?.history); // Array of ThreadEvents
+   *
+   * // Without history
+   * const thread = await kernl.threads.get("thread_123", { includeHistory: false });
    * ```
    */
-  async get(id: string, options?: ThreadInclude): Promise<Thread | null> {
-    const include = options ?? { history: true }; // include history by default
-    return this.store.get(id, include);
+  async get(
+    id: string,
+    options?: ThreadGetOptions,
+  ): Promise<ThreadResource | null> {
+    const includeHistory = options?.includeHistory ?? true; // include history by default
+    const thread = await this.store.get(id, { history: includeHistory });
+
+    if (!thread) {
+      return null;
+    }
+
+    const history = includeHistory ? await this.store.history(id) : undefined;
+    return ThreadResourceCodec.decode(thread, history);
   }
 
   /**
    * List threads with optional filtering and pagination.
    *
+   * Returns thread metadata only (no event history).
+   * Use get() with includeHistory to retrieve full thread details.
+   *
    * @param params - List parameters
-   * @returns Array of threads
+   * @returns Array of thread resources (metadata only)
    *
    * @example
    * ```ts
@@ -68,7 +60,7 @@ export class ThreadsResource {
    * });
    * ```
    */
-  async list(params: ThreadsListParams = {}): Promise<Thread[]> {
+  async list(params: ThreadsListParams = {}): Promise<ThreadResource[]> {
     const options: ThreadListOptions = {
       limit: params.limit,
       filter: params.agentId ? { agentId: params.agentId } : undefined,
@@ -76,8 +68,8 @@ export class ThreadsResource {
     };
 
     // TODO: Implement cursor-based pagination with before/after
-    // For now, just pass through to storage
-    return this.store.list(options);
+    const threads = await this.store.list(options);
+    return threads.map((t) => ThreadResourceCodec.decode(t));
   }
 
   /**
@@ -110,3 +102,66 @@ export class ThreadsResource {
     return this.store.history(id);
   }
 }
+
+/**
+ * Parameters for listing threads.
+ */
+export interface ThreadsListParams {
+  /**
+   * Maximum number of threads to return.
+   */
+  limit?: number;
+
+  /**
+   * Return threads created before this cursor.
+   */
+  before?: string;
+
+  /**
+   * Return threads created after this cursor.
+   */
+  after?: string;
+
+  /**
+   * Filter by agent ID.
+   */
+  agentId?: string;
+}
+
+/**
+ * Options for getting a thread.
+ */
+export interface ThreadGetOptions {
+  /**
+   * Include full event history in the response.
+   * @default true
+   */
+  includeHistory?: boolean;
+}
+
+/**
+ * Codec: Convert internal Thread instance to public ThreadResource.
+ */
+const ThreadResourceCodec = {
+  decode(thread: Thread, history?: ThreadEvent[]): ThreadResource {
+    const resource: ThreadResource = {
+      tid: thread.tid,
+      agentId: thread.agent.id,
+      model: {
+        provider: thread.model.provider,
+        modelId: thread.model.modelId,
+      },
+      context: thread.context.context as Record<string, unknown>,
+      parentTaskId: thread.parent?.id ?? null,
+      state: thread.state,
+      createdAt: thread.createdAt,
+      updatedAt: thread.updatedAt,
+    };
+
+    if (history !== undefined) {
+      resource.history = history;
+    }
+
+    return resource;
+  },
+};

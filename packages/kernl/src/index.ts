@@ -1,4 +1,4 @@
-export { Kernl, ThreadsResource, type ThreadsListParams } from "./kernl";
+export { Kernl, ThreadsResource, type ThreadsListParams, type ThreadGetOptions } from "./kernl";
 export type { KernlOptions, StorageOptions, AgentRegistry, ModelRegistry } from "./types/kernl";
 export { Agent } from "./agent";
 export { Context } from "./context";
@@ -18,6 +18,7 @@ export type {
   ThreadEventInner,
   ThreadSystemEvent,
   ThreadState,
+  ThreadResource,
 } from "./types/thread";
 export { THREAD_STATES } from "./types/thread";
 
