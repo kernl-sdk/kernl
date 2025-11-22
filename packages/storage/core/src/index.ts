@@ -1,5 +1,5 @@
 /**
- * @kernl/storage - Generic storage abstractions for Kernl
+ * @kernl-sdk/storage - Generic storage abstractions for Kernl
  */
 
 export * from "./base";

@@ -2,8 +2,8 @@ import assert from "assert";
 import type { Pool, PoolClient } from "pg";
 
 /* workspace */
-import type { Table, Column, IndexConstraint } from "@kernl/storage";
-import { SCHEMA_NAME, TABLE_MIGRATIONS } from "@kernl/storage";
+import type { Table, Column, IndexConstraint } from "@kernl-sdk/storage";
+import { SCHEMA_NAME, TABLE_MIGRATIONS } from "@kernl-sdk/storage";
 import type {
   AgentRegistry,
   ModelRegistry,

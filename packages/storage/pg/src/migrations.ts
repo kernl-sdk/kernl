@@ -3,8 +3,8 @@
  */
 
 import type { PoolClient } from "pg";
-import type { Table, Column } from "@kernl/storage";
-import { TABLE_THREADS, TABLE_THREAD_EVENTS, SCHEMA_NAME } from "@kernl/storage";
+import type { Table, Column } from "@kernl-sdk/storage";
+import { TABLE_THREADS, TABLE_THREAD_EVENTS, SCHEMA_NAME } from "@kernl-sdk/storage";
 
 /**
  * Migration context with helpers.

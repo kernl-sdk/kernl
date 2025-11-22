@@ -7,7 +7,7 @@ import {
   ThreadEventRecordCodec,
   type ThreadRecord,
   type ThreadEventRecord,
-} from "@kernl/storage";
+} from "@kernl-sdk/storage";
 import {
   Thread,
   Context,

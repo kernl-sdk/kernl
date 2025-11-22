@@ -24,7 +24,7 @@ export type PostgresConfig =
  * @returns KernlStorage instance backed by PostgreSQL
  *
  * @example
- * ```typescript
+ * ```ts
  * // with connection string
  * const storage = postgres({ connstr: "postgresql://localhost/mydb" });
  *

@@ -1,6 +1,6 @@
 {
-  "name": "@kernl/pg",
-  "version": "0.1.0",
+  "name": "@kernl-sdk/pg",
+  "version": "0.1.2",
   "description": "PostgreSQL storage adapter for kernl",
   "keywords": [
     "kernl",
@@ -48,7 +48,7 @@
   "dependencies": {
     "@kernl-sdk/core": "workspace:^",
     "@kernl-sdk/shared": "workspace:^",
-    "@kernl/storage": "workspace:*",
+    "@kernl-sdk/storage": "workspace:*",
     "pg": "^8.16.3"
   }
 }
