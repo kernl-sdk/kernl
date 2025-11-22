@@ -5,18 +5,21 @@ import {
   LanguageModelRequestSettings,
 } from "@kernl-sdk/protocol";
 
-import type { Context, UnknownContext } from "./context";
-import { InputGuardrail, OutputGuardrail } from "./guardrail";
-import { AgentHooks } from "./lifecycle";
-import { BaseToolkit } from "./tool/toolkit";
-import { Tool } from "./tool";
 import { Thread } from "./thread";
+import type { Kernl, ThreadsListParams } from "./kernl";
+import type { Context, UnknownContext } from "./context";
+import { Tool } from "./tool";
+import { BaseToolkit } from "./tool/toolkit";
+import { ThreadInclude } from "./storage";
+import {
+  InputGuardrail,
+  OutputGuardrail,
+  type ResolvedAgentResponse,
+} from "./guardrail";
+import { AgentHooks } from "./lifecycle";
 
 import { MisconfiguredError, RuntimeError } from "./lib/error";
-
-import type { Kernl } from "./kernl";
 import type { AgentConfig, AgentResponseType } from "./types/agent";
-import type { ResolvedAgentResponse } from "./guardrail";
 import type {
   TextResponse,
   ThreadExecuteOptions,
@@ -232,6 +235,8 @@ export class Agent<
   }
 
   /**
+   * @internal
+   *
    * Get a specific tool by ID from all toolkits.
    *
    * @param id The tool ID to look up
@@ -246,6 +251,8 @@ export class Agent<
   }
 
   /**
+   * @internal
+   *
    * Get all tools available from all toolkits for the given context.
    * Checks for duplicate tool IDs across toolkits and throws an error if found.
    *
@@ -275,5 +282,29 @@ export class Agent<
     }
 
     return allTools;
+  }
+
+  /**
+   * Thread management scoped to this agent.
+   *
+   * Convenience wrapper around kernl.threads that automatically filters to this agent's threads.
+   */
+  get threads() {
+    if (!this.kernl) {
+      throw new MisconfiguredError(
+        `Agent ${this.id} not bound to kernl. Call kernl.register(agent) first.`,
+      );
+    }
+
+    const agentId = this.id;
+    const kthreads = this.kernl.threads;
+
+    return {
+      get: (tid: string, options?: ThreadInclude) => kthreads.get(tid, options),
+      list: (params: Omit<ThreadsListParams, "agentId"> = {}) =>
+        kthreads.list({ ...params, agentId }),
+      delete: (tid: string) => kthreads.delete(tid),
+      history: (tid: string) => kthreads.history(tid),
+    };
   }
 }

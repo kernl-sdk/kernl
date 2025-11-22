@@ -1,4 +1,4 @@
-export { Kernl } from "./kernl";
+export { Kernl, ThreadsResource, type ThreadsListParams } from "./kernl";
 export type { KernlOptions, StorageOptions, AgentRegistry, ModelRegistry } from "./types/kernl";
 export { Agent } from "./agent";
 export { Context } from "./context";

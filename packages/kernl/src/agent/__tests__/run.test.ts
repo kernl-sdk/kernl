@@ -311,3 +311,127 @@ describe("Agent.stream() lifecycle", () => {
     );
   });
 });
+
+describe("Agent.threads helper", () => {
+  it("should throw MisconfiguredError when agent is not bound to kernl", () => {
+    const model = createMockModel(async () => ({
+      content: [message({ role: "assistant", text: "Done" })],
+      finishReason: "stop",
+      usage: { inputTokens: 2, outputTokens: 2, totalTokens: 4 },
+      warnings: [],
+    }));
+
+    const agent = new Agent({
+      id: "test-agent",
+      name: "Test",
+      instructions: "Test",
+      model,
+    });
+
+    expect(() => agent.threads).toThrow(MisconfiguredError);
+  });
+
+  it("should list only threads for this agent", async () => {
+    const storage = new InMemoryStorage();
+    const model = createMockModel(async () => ({
+      content: [message({ role: "assistant", text: "Done" })],
+      finishReason: "stop",
+      usage: { inputTokens: 2, outputTokens: 2, totalTokens: 4 },
+      warnings: [],
+    }));
+
+    const agentA = new Agent({
+      id: "agent-a",
+      name: "Agent A",
+      instructions: "Test",
+      model,
+    });
+
+    const agentB = new Agent({
+      id: "agent-b",
+      name: "Agent B",
+      instructions: "Test",
+      model,
+    });
+
+    const kernl = new Kernl({ storage: { db: storage } });
+    kernl.register(agentA);
+    kernl.register(agentB);
+
+    await agentA.run("Hello from A");
+    await agentB.run("Hello from B");
+    await agentB.run("Another from B");
+
+    const threadsA = await agentA.threads.list();
+    const threadsB = await agentB.threads.list();
+
+    expect(threadsA).toHaveLength(1);
+    expect(threadsB.length).toBeGreaterThanOrEqual(2);
+
+    for (const thread of threadsA) {
+      expect(thread.agent.id).toBe("agent-a");
+    }
+
+    for (const thread of threadsB) {
+      expect(thread.agent.id).toBe("agent-b");
+    }
+  });
+
+  it("should expose thread history via threads.history()", async () => {
+    const storage = new InMemoryStorage();
+    const model = createMockModel(async () => ({
+      content: [message({ role: "assistant", text: "Done" })],
+      finishReason: "stop",
+      usage: { inputTokens: 2, outputTokens: 2, totalTokens: 4 },
+      warnings: [],
+    }));
+
+    const agent = new Agent({
+      id: "test-agent",
+      name: "Test",
+      instructions: "Test",
+      model,
+    });
+
+    const kernl = new Kernl({ storage: { db: storage } });
+    kernl.register(agent);
+
+    await agent.run("Hello");
+
+    const threads = await agent.threads.list();
+    expect(threads).toHaveLength(1);
+
+    const tid = threads[0].tid;
+    const events = await agent.threads.history(tid);
+
+    // Expect exactly two events: user message then assistant message
+    expect(events).toHaveLength(2);
+
+    const [userEvent, assistantEvent] = events;
+
+    // Common headers
+    expect(userEvent.tid).toBe(tid);
+    expect(assistantEvent.tid).toBe(tid);
+    expect(userEvent.seq).toBe(0);
+    expect(assistantEvent.seq).toBe(1);
+
+    // User message
+    expect(userEvent.kind).toBe("message");
+    // @ts-expect-error ThreadEvent extends LanguageModelItem at runtime
+    expect(userEvent.role).toBe("user");
+    // @ts-expect-error ThreadEvent extends LanguageModelItem at runtime
+    expect(userEvent.content).toEqual([
+      { kind: "text", text: "Hello" },
+    ]);
+
+    // Assistant message
+    expect(assistantEvent.kind).toBe("message");
+    // @ts-expect-error ThreadEvent extends LanguageModelItem at runtime
+    expect(assistantEvent.role).toBe("assistant");
+    // @ts-expect-error ThreadEvent extends LanguageModelItem at runtime
+    expect(assistantEvent.content).toEqual([
+      { kind: "text", text: "Done" },
+    ]);
+  });
+});
+
