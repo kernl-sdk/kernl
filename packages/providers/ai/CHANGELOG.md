@@ -1,5 +1,11 @@
 # @kernl/ai
 
+## 0.2.4
+
+### Patch Changes
+
+- 7946b16: Fix handling of tool calls with no required parameters. When AI providers (particularly Anthropic) send empty string arguments for tools with all optional parameters, convert to valid JSON "{}" to prevent parsing errors. Also fix tool-call state to use IN_PROGRESS instead of COMPLETED.
+
 ## 0.2.3
 
 ### Patch Changes
