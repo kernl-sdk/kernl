@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { LanguageModelV3StreamPart } from "@ai-sdk/provider";
+import { IN_PROGRESS } from "@kernl-sdk/protocol";
 
 import { STREAM_PART, convertStream } from "../stream";
 
@@ -178,8 +179,29 @@ describe("STREAM_PART codec", () => {
         kind: "tool-call",
         callId: "call-123",
         toolId: "get_weather",
-        state: "completed",
+        state: IN_PROGRESS,
         arguments: '{"city":"SF"}',
+        providerMetadata: undefined,
+      });
+    });
+
+    it("should decode tool-call event with empty input string", () => {
+      const part: LanguageModelV3StreamPart = {
+        type: "tool-call",
+        toolCallId: "call-empty",
+        toolName: "list_issues",
+        input: "", // AI SDK documents stringified JSON but doesn't actually enforce this
+        providerMetadata: undefined,
+      };
+
+      const result = STREAM_PART.decode(part);
+
+      expect(result).toEqual({
+        kind: "tool-call",
+        callId: "call-empty",
+        toolId: "list_issues",
+        state: IN_PROGRESS,
+        arguments: "{}", // Empty string is converted to "{}" to ensure valid JSON
         providerMetadata: undefined,
       });
     });

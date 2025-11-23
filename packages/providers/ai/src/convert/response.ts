@@ -1,11 +1,14 @@
 import type { Codec } from "@kernl-sdk/shared/lib";
-import type {
-  LanguageModelResponse,
-  LanguageModelResponseItem,
-  LanguageModelFinishReason,
-  LanguageModelUsage,
-  LanguageModelWarning,
-  SharedProviderMetadata,
+import {
+  IN_PROGRESS,
+  COMPLETED,
+  FAILED,
+  type LanguageModelResponse,
+  type LanguageModelResponseItem,
+  type LanguageModelFinishReason,
+  type LanguageModelUsage,
+  type LanguageModelWarning,
+  type SharedProviderMetadata,
 } from "@kernl-sdk/protocol";
 import { randomID } from "@kernl-sdk/shared/lib";
 import type {
@@ -32,54 +35,81 @@ export const MODEL_RESPONSE: Codec<LanguageModelResponse, AISdkGenerateResult> =
       throw new Error("codec:unimplemented");
     },
 
-    decode: (result: AISdkGenerateResult) => {
+    decode: (result: AISdkGenerateResult): LanguageModelResponse => {
       const content: LanguageModelResponseItem[] = [];
 
       for (const item of result.content) {
-        if (item.type === "text") {
-          content.push({
-            kind: "message",
-            role: "assistant",
-            id: randomID(),
-            content: [
-              {
-                kind: "text",
-                text: item.text,
-                providerMetadata: item.providerMetadata,
-              },
-            ],
-            providerMetadata: item.providerMetadata,
-          });
-        } else if (item.type === "reasoning") {
-          content.push({
-            kind: "reasoning",
-            text: item.text,
-            providerMetadata: item.providerMetadata,
-          });
-        } else if (item.type === "tool-call") {
-          content.push({
-            kind: "tool-call",
-            callId: item.toolCallId,
-            toolId: item.toolName,
-            state: "completed",
-            arguments: item.input,
-            providerMetadata: item.providerMetadata,
-          });
-        } else if (item.type === "file") {
-          content.push({
-            kind: "message",
-            role: "assistant",
-            id: randomID(),
-            content: [
-              {
-                kind: "file",
-                mimeType: item.mediaType,
-                data: item.data,
-              },
-            ],
-          });
+        switch (item.type) {
+          case "text":
+            content.push({
+              kind: "message",
+              role: "assistant",
+              id: randomID(),
+              content: [
+                {
+                  kind: "text",
+                  text: item.text,
+                  providerMetadata: item.providerMetadata,
+                },
+              ],
+              providerMetadata: item.providerMetadata,
+            });
+            break;
+
+          case "reasoning":
+            content.push({
+              kind: "reasoning",
+              text: item.text,
+              providerMetadata: item.providerMetadata,
+            });
+            break;
+
+          case "tool-call":
+            content.push({
+              kind: "tool-call",
+              callId: item.toolCallId,
+              toolId: item.toolName,
+              state: IN_PROGRESS,
+              arguments: item.input || "{}",
+              providerMetadata: item.providerMetadata,
+            });
+            break;
+
+          case "tool-result":
+            content.push({
+              kind: "tool-result",
+              callId: item.toolCallId,
+              toolId: item.toolName,
+              state: item.isError ? FAILED : COMPLETED,
+              result: item.isError ? null : item.result,
+              error: item.isError
+                ? typeof item.result === "string"
+                  ? item.result
+                  : JSON.stringify(item.result)
+                : null,
+              providerMetadata: item.providerMetadata,
+            });
+            break;
+
+          case "file":
+            content.push({
+              kind: "message",
+              role: "assistant",
+              id: randomID(),
+              content: [
+                {
+                  kind: "file",
+                  mimeType: item.mediaType,
+                  data: item.data,
+                },
+              ],
+            });
+            break;
+
+          case "source":
+            // Source type is intentionally not handled
+            break;
         }
-        // TODO: Handle other content types (source, tool-result)
       }
 
       const finishReason = FINISH_REASON.decode(result.finishReason);

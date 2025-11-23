@@ -3,6 +3,7 @@ import type {
   LanguageModelV3,
   LanguageModelV3StreamPart,
 } from "@ai-sdk/provider";
+import { IN_PROGRESS } from "@kernl-sdk/protocol";
 
 import { AISDKLanguageModel } from "../language-model";
 
@@ -455,7 +456,7 @@ describe("AISDKLanguageModel", () => {
         kind: "tool-call",
         callId: "call-123",
         toolId: "calculator",
-        state: "completed",
+        state: IN_PROGRESS,
         arguments: '{"expression":"2+2"}',
       });
 

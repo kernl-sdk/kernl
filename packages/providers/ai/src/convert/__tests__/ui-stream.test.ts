@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import type { UIMessageChunk } from "ai";
 import type { LanguageModelStreamEvent } from "@kernl-sdk/protocol";
-import { COMPLETED, FAILED } from "@kernl-sdk/protocol";
+import { COMPLETED, FAILED, IN_PROGRESS } from "@kernl-sdk/protocol";
 
 import { STREAM_UI_PART, toUIMessageStream } from "../ui-stream";
 
@@ -178,6 +178,25 @@ describe("STREAM_UI_PART codec", () => {
         toolCallId: "call-123",
         toolName: "calculator",
         input: { a: 5, b: 3 },
+      });
+    });
+
+    it("should handle tool-call with empty arguments string", () => {
+      const event: LanguageModelStreamEvent = {
+        kind: "tool-call",
+        callId: "call-empty",
+        toolId: "list_issues",
+        state: IN_PROGRESS,
+        arguments: "{}",
+      };
+
+      const result = STREAM_UI_PART.encode(event);
+
+      expect(result).toEqual({
+        type: "tool-input-available",
+        toolCallId: "call-empty",
+        toolName: "list_issues",
+        input: {},
       });
     });
 

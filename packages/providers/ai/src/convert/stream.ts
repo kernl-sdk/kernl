@@ -3,6 +3,7 @@ import {
   type LanguageModelStreamEvent,
   COMPLETED,
   FAILED,
+  IN_PROGRESS,
 } from "@kernl-sdk/protocol";
 import type { LanguageModelV3StreamPart } from "@ai-sdk/provider";
 
@@ -42,7 +43,9 @@ export const STREAM_PART: Codec<
     throw new Error("codec:unimplemented");
   },
 
-  decode: (part) => {
+  decode: (
+    part: LanguageModelV3StreamPart,
+  ): LanguageModelStreamEvent | null => {
     switch (part.type) {
       case "text-start":
         return {
@@ -117,8 +120,8 @@ export const STREAM_PART: Codec<
           kind: "tool-call",
           callId: part.toolCallId,
           toolId: part.toolName,
-          state: COMPLETED,
-          arguments: part.input,
+          state: IN_PROGRESS,
+          arguments: part.input || "{}",
           providerMetadata: part.providerMetadata,
         };
 
