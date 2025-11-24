@@ -1,6 +1,6 @@
 import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
-import { Kernl } from "@kernl-sdk/core";
+import { Kernl } from "kernl";
 import { postgres } from "@kernl-sdk/pg";
 
 import { APIError } from "@/lib/error";

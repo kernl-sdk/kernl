@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/ai",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Vercel AI SDK adapter for kernl",
   "keywords": [
     "kernl",
@@ -22,7 +22,7 @@
   },
   "type": "module",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   },
   "exports": {
     ".": {

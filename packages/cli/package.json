@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/cli",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "CLI for managing kernl applications",
   "keywords": [
     "kernl",
@@ -25,7 +25,7 @@
     "kernl": "./dist/index.js"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   },
   "files": [
     "dist",

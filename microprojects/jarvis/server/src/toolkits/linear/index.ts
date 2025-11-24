@@ -1,4 +1,4 @@
-import { MCPToolkit, MCPServerStreamableHttp } from "@kernl-sdk/core";
+import { MCPToolkit, MCPServerStreamableHttp } from "kernl";
 
 import { env } from "@/lib/env";
 

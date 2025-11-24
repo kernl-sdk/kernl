@@ -160,15 +160,15 @@ importers:
 
   packages/storage/core:
     dependencies:
-      '@kernl-sdk/core':
-        specifier: workspace:*
-        version: link:../../kernl
       '@kernl-sdk/protocol':
         specifier: workspace:*
         version: link:../../protocol
       '@kernl-sdk/shared':
         specifier: workspace:*
         version: link:../../shared
+      kernl:
+        specifier: workspace:*
+        version: link:../../kernl
       zod:
         specifier: ^4.1.12
         version: 4.1.12
@@ -207,15 +207,15 @@ importers:
 
   packages/storage/pg:
     dependencies:
-      '@kernl-sdk/core':
-        specifier: workspace:^
-        version: link:../../kernl
       '@kernl-sdk/shared':
         specifier: workspace:^
         version: link:../../shared
       '@kernl-sdk/storage':
         specifier: workspace:*
         version: link:../core
+      kernl:
+        specifier: workspace:^
+        version: link:../../kernl
       pg:
         specifier: ^8.16.3
         version: 8.16.3

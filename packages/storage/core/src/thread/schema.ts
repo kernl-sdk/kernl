@@ -3,7 +3,7 @@
  */
 
 import { z } from "zod";
-import { THREAD_STATES } from "@kernl-sdk/core";
+import { THREAD_STATES } from "kernl";
 import { text, jsonb, bigint, integer, timestamps, defineTable } from "@/table";
 
 /* ---- Table Definitions ---- */

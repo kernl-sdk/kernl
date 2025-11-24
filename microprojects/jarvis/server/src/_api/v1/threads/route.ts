@@ -1,5 +1,5 @@
 import { Hono, type Context } from "hono";
-import { Kernl } from "@kernl-sdk/core";
+import { Kernl } from "kernl";
 import { historyToUIMessages } from "@kernl-sdk/ai";
 
 import { NotFoundError } from "@/lib/error";

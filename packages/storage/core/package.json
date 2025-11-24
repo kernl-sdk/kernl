@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/storage",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Core storage abstractions for kernl",
   "keywords": [
     "kernl",
@@ -20,7 +20,7 @@
   },
   "type": "module",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   },
   "exports": {
     ".": {
@@ -43,7 +43,7 @@
     "vitest": "^4.0.8"
   },
   "dependencies": {
-    "@kernl-sdk/core": "workspace:*",
+    "kernl": "workspace:*",
     "@kernl-sdk/protocol": "workspace:*",
     "@kernl-sdk/shared": "workspace:*",
     "zod": "^4.1.12"

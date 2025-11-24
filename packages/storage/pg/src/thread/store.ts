@@ -8,7 +8,7 @@ import {
   type ThreadRecord,
   type ThreadEventRecord,
 } from "@kernl-sdk/storage";
-import { Thread, type ThreadEvent } from "@kernl-sdk/core/internal";
+import { Thread, type ThreadEvent } from "kernl/internal";
 import {
   Context,
   type AgentRegistry,
@@ -19,7 +19,7 @@ import {
   type ThreadInclude,
   type ThreadListOptions,
   type ThreadHistoryOptions,
-} from "@kernl-sdk/core";
+} from "kernl";
 
 /**
  * PostgreSQL Thread store implementation.

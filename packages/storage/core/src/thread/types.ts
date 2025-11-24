@@ -1,5 +1,5 @@
 /**
- * Thread storage DTOs are now defined in @kernl-sdk/core.
+ * Thread storage DTOs are now defined in kernl.
  * Re-export them here for convenience.
  */
 export type {
@@ -10,4 +10,4 @@ export type {
   SortOrder,
   ThreadListOptions,
   ThreadHistoryOptions,
-} from "@kernl-sdk/core";
+} from "kernl";

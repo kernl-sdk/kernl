@@ -3,7 +3,7 @@
  */
 
 import { type Codec, neapolitanCodec } from "@kernl-sdk/shared/lib";
-import type { IThread, ThreadEvent } from "@kernl-sdk/core/internal";
+import type { IThread, ThreadEvent } from "kernl/internal";
 import { STOPPED } from "@kernl-sdk/protocol";
 
 import type { ThreadRecord, ThreadEventRecord } from "@/thread/schema";

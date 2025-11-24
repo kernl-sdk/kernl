@@ -1,5 +1,5 @@
 /**
- * ThreadStore interface is now defined in @kernl-sdk/core.
+ * ThreadStore interface is now defined in kernl.
  * Re-export it here for convenience.
  */
-export type { ThreadStore } from "@kernl-sdk/core";
+export type { ThreadStore } from "kernl";

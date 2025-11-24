@@ -8,8 +8,8 @@ import {
   Context,
   type AgentRegistry,
   type ModelRegistry,
-} from "@kernl-sdk/core";
-import { Thread } from "@kernl-sdk/core/internal";
+} from "kernl";
+import { Thread } from "kernl/internal";
 
 const TEST_DB_URL = process.env.KERNL_PG_TEST_URL;
 

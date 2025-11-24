@@ -7,7 +7,7 @@ import {
   tool,
   FunctionToolkit,
   KernlStorage,
-} from "@kernl-sdk/core";
+} from "kernl";
 import { STOPPED, message, IN_PROGRESS } from "@kernl-sdk/protocol";
 
 import { postgres } from "@/postgres";

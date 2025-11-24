@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/shared",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Shared utilities for kernl",
   "keywords": [
     "kernl",
@@ -20,7 +20,7 @@
   },
   "type": "module",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   },
   "exports": {
     ".": {

@@ -1,5 +1,26 @@
 # @kernl/ai
 
+## 0.2.5
+
+### Patch Changes
+
+- Migrate packages from GitHub Packages to npm registry.
+
+  **Breaking change for `kernl` (formerly `@kernl-sdk/core`):**
+
+  The core package has been renamed from `@kernl-sdk/core` to `kernl`. Update your imports:
+
+  ```diff
+  - import { Agent, Kernl } from "@kernl-sdk/core";
+  + import { Agent, Kernl } from "kernl";
+  ```
+
+  All other packages remain under the `@kernl-sdk` scope and are now publicly available on npm.
+
+- Updated dependencies
+  - @kernl-sdk/shared@0.1.5
+  - @kernl-sdk/protocol@0.2.4
+
 ## 0.2.4
 
 ### Patch Changes

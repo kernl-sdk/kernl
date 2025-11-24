@@ -1,4 +1,4 @@
-import { Toolkit } from "@kernl-sdk/core";
+import { Toolkit } from "kernl";
 
 import { add } from "./add";
 import { subtract } from "./subtract";

@@ -1,5 +1,5 @@
 import { Pool } from "pg";
-import type { KernlStorage } from "@kernl-sdk/core";
+import type { KernlStorage } from "kernl";
 
 import { PGStorage } from "./storage";
 

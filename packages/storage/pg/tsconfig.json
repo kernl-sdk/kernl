@@ -6,8 +6,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@kernl-sdk/core": ["../kernl/src/index.ts"],
-      "@kernl-sdk/core/internal": ["../kernl/src/internal.ts"]
+      "kernl": ["../kernl/src/index.ts"],
+      "kernl/internal": ["../kernl/src/internal.ts"]
     }
   },
   "include": ["src/**/*"],

@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/libsql",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "LibSQL storage adapter for kernl",
   "keywords": [
     "kernl",
@@ -21,7 +21,7 @@
   },
   "type": "module",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   },
   "exports": {
     ".": {

@@ -9,7 +9,7 @@ import type {
   ModelRegistry,
   KernlStorage,
   Transaction,
-} from "@kernl-sdk/core";
+} from "kernl";
 import { UnimplementedError } from "@kernl-sdk/shared/lib";
 
 /* pg */
