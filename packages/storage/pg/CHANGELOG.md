@@ -1,5 +1,16 @@
 # @kernl/pg
 
+## 0.1.8
+
+### Patch Changes
+
+- 08ab8a0: Fix duplicate thread inserts when streaming from hydrated threads by making
+  storage-backed Thread instances explicitly marked as persisted, and ensure
+  Postgres integration tests cover the no-double-insert behavior.
+- Updated dependencies [08ab8a0]
+  - @kernl-sdk/core@0.5.1
+  - @kernl-sdk/storage@0.1.8
+
 ## 0.1.7
 
 ### Patch Changes
