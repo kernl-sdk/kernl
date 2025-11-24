@@ -9,6 +9,11 @@ export type ApprovalStatus = "approved" | "rejected" | "pending";
  */
 export class Context<TContext = UnknownContext> {
   /**
+   * The namespace that this context belongs to.
+   */
+  namespace: string;
+  
+  /**
    * The inner context object.
    */
   context: TContext;
@@ -59,7 +64,11 @@ export class Context<TContext = UnknownContext> {
   //  */
   // #approvals: Map<string, ApprovalRecord>;
 
-  constructor(context: TContext = {} as TContext) {
+  constructor(
+    namespace: string = "kernl",
+    context: TContext = {} as TContext,
+  ) {
+    this.namespace = namespace;
     this.context = context;
     this.approvals = new Map();
     // this.format = format; // (TODO): configure()

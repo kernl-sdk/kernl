@@ -362,8 +362,11 @@ describe("Agent.threads helper", () => {
     await agentB.run("Hello from B");
     await agentB.run("Another from B");
 
-    const threadsA = await agentA.threads.list();
-    const threadsB = await agentB.threads.list();
+    const threadsAPage = await agentA.threads.list();
+    const threadsBPage = await agentB.threads.list();
+
+    const threadsA = await threadsAPage.collect();
+    const threadsB = await threadsBPage.collect();
 
     expect(threadsA).toHaveLength(1);
     expect(threadsB.length).toBeGreaterThanOrEqual(2);
@@ -398,11 +401,12 @@ describe("Agent.threads helper", () => {
 
     await agent.run("Hello");
 
-    const threads = await agent.threads.list();
+    const threadsPage = await agent.threads.list();
+    const threads = await threadsPage.collect();
     expect(threads).toHaveLength(1);
 
     const tid = threads[0].tid;
-    const events = await agent.threads.history(tid);
+    const events = await agent.threads.history(tid, { order: "asc" });
 
     // Expect exactly two events: user message then assistant message
     expect(events).toHaveLength(2);

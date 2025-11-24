@@ -75,6 +75,7 @@ export interface IThread<
   /* state */
   tick: number;
   state: ThreadState /* running | stopped | ... */;
+  namespace: string;
 
   /* metadata */
   createdAt: Date;
@@ -131,7 +132,7 @@ export type ThreadStreamEvent = LanguageModelStreamEvent;
 /**
  * Result of thread execution
  */
-export interface ThreadExecuteResult<TResponse = any> {
+export interface ThreadExecuteResult<TResponse = unknown> {
   /**
    * The final parsed response from the agent
    */
@@ -155,12 +156,14 @@ export interface ThreadOptions<
   context?: Context<TContext>;
   model?: LanguageModel;
   task?: Task<TContext> | null;
+  namespace?: string;
   tid?: string;
   tick?: number;
   state?: ThreadState;
   storage?: ThreadStore;
   createdAt?: Date;
   updatedAt?: Date;
+  metadata?: Record<string, unknown> | null;
 }
 
 /**
@@ -171,6 +174,7 @@ export interface ThreadExecuteOptions<TContext> {
   model?: LanguageModel;
   task?: Task<TContext>;
   threadId?: string;
+  namespace?: string;
   maxTicks?: number;
   abort?: AbortSignal;
 }
@@ -195,42 +199,4 @@ export interface PerformActionsResult {
    * Tool calls that require approval before execution
    */
   pendingApprovals: ToolCall[];
-}
-
-/**
- * Public thread resource representation for API consumers.
- *
- * This is the user-facing representation of a thread, distinct from
- * the internal Thread class which is an execution primitive.
- */
-export interface ThreadResource {
-  /** Thread identifier */
-  tid: string;
-
-  /** Agent that owns this thread */
-  agentId: string;
-
-  /** Current thread state */
-  state: ThreadState;
-
-  /** Thread creation timestamp */
-  createdAt: Date;
-
-  /** Last update timestamp */
-  updatedAt: Date;
-
-  /** Model configuration (serialized) */
-  model: {
-    provider: string;
-    modelId: string;
-  };
-
-  /** User context data */
-  context: Record<string, unknown>;
-
-  /** Parent task ID (null if no parent) */
-  parentTaskId: string | null;
-
-  /** Event history (only public events, internal system events excluded) */
-  history?: PublicThreadEvent[];
 }

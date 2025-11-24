@@ -6,7 +6,7 @@ import { tool, HostedTool } from "../tool";
  * Create a minimal mock context for testing
  */
 export const mockContext = <T = any>(data?: T): Context<T> => {
-  return new Context<T>(data ?? ({} as T));
+  return new Context<T>("test-namespace", data ?? ({} as T));
 };
 
 /**

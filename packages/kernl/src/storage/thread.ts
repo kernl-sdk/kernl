@@ -67,6 +67,7 @@ export interface ThreadStore {
  */
 export interface NewThread {
   id: string;
+  namespace: string;
   agentId: string;
   model: string; // composite key: '{provider}/{modelId}'
   context?: unknown; // becomes a Context instance in a Thread
@@ -94,6 +95,7 @@ export interface ThreadUpdate {
  * Filter for listing threads.
  */
 export interface ThreadFilter {
+  namespace?: string;
   state?: ThreadState | ThreadState[];
   agentId?: string;
   parentTaskId?: string;

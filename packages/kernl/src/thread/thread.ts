@@ -15,20 +15,20 @@ import {
   message,
   ToolCall,
   LanguageModel,
-  LanguageModelRequest,
   LanguageModelItem,
+  LanguageModelRequest,
 } from "@kernl-sdk/protocol";
 import { randomID, filter } from "@kernl-sdk/shared/lib";
 
 import type {
   ActionSet,
   ThreadEvent,
-  ThreadEventInner,
+  ThreadState,
   ThreadOptions,
+  ThreadEventInner,
+  ThreadStreamEvent,
   ThreadExecuteResult,
   PerformActionsResult,
-  ThreadState,
-  ThreadStreamEvent,
 } from "@/types/thread";
 import type { AgentResponseType } from "@/types/agent";
 
@@ -85,37 +85,43 @@ export class Thread<
   TResponse extends AgentResponseType = "text",
 > {
   readonly tid: string;
+  readonly namespace: string;
   readonly agent: Agent<TContext, TResponse>;
   readonly context: Context<TContext>;
   readonly model: LanguageModel; /* inherited from the agent unless specified */
   readonly parent: Task<TContext> | null; /* parent task which spawned this thread */
   readonly createdAt: Date;
   readonly updatedAt: Date;
+  readonly metadata: Record<string, unknown> | null;
   // readonly stats: ThreadMetrics;
 
   /* state */
   _tick: number; /* number of LLM roundtrips */
   _seq: number; /* monotonic event sequence */
   state: ThreadState;
+  private cpbuf: ThreadEvent[]; /* checkpoint buffer - events pending persistence */
+  private persisted: boolean;
   private history: ThreadEvent[] /* history representing the event log for the thread */;
 
   private abort?: AbortController;
   private storage?: ThreadStore;
-  private persisted: boolean;
-  private cpbuf: ThreadEvent[]; /* checkpoint buffer - events pending persistence */
 
   constructor(options: ThreadOptions<TContext, TResponse>) {
     this.tid = options.tid ?? `tid_${randomID()}`;
+    this.namespace = options.namespace ?? "kernl";
     this.agent = options.agent;
-    this.context = options.context ?? new Context<TContext>();
+    this.context =
+      options.context ?? new Context<TContext>(this.namespace, {} as TContext);
     this.parent = options.task ?? null;
     this.model = options.model ?? options.agent.model;
     this.storage = options.storage;
     this.createdAt = options.createdAt ?? new Date();
     this.updatedAt = options.updatedAt ?? new Date();
+    this.metadata = options.metadata ?? null;
 
     this._tick = options.tick ?? 0;
     this.state = options.state ?? STOPPED;
+    this.cpbuf = [];
 
     // if hydrating from storage with history, restore _seq from last event
     if (options.history && options.history.length > 0) {
@@ -128,9 +134,6 @@ export class Thread<
       this._seq = -1;
       this.persisted = false; // new thread, needs insert on first persist
     }
-
-    // initialize checkpoint buffer (events pending persistence)
-    this.cpbuf = [];
 
     // append initial input if provided (for new threads)
     if (options.input && options.input.length > 0) {
@@ -190,37 +193,6 @@ export class Thread<
   }
 
   /**
-   * Cancel the running thread
-   */
-  cancel() {
-    this.abort?.abort();
-  }
-
-  /**
-   * Append one or more items to history + enrich w/ runtime headers.
-   *
-   * Core rule:
-   *
-   * > An event becomes a ThreadEvent (and gets seq/timestamp) exactly when it is appended to history. <
-   */
-  append(...items: ThreadEventInner[]): ThreadEvent[] {
-    const events: ThreadEvent[] = [];
-    for (const item of items) {
-      const seq = ++this._seq;
-      const e = tevent({
-        tid: this.tid,
-        seq,
-        kind: item.kind,
-        data: item,
-      });
-      this.history.push(e);
-      this.cpbuf.push(e);
-      events.push(e);
-    }
-    return events;
-  }
-
-  /**
    * Main execution loop - always yields events, callers can propagate or discard.
    *
    * NOTE: Streaming structured output deferred for now. Prioritizing correctness + simplicity,
@@ -248,7 +220,7 @@ export class Thread<
         yield e;
       }
 
-      // if an error event occurred, terminate
+      // if an error event occurred → terminate
       if (err) {
         return;
       }
@@ -266,11 +238,11 @@ export class Thread<
         return;
       }
 
-      // perform actions intended by the model
+      // perform intended actions
       const { actions, pendingApprovals } =
         await this.performActions(intentions);
 
-      // append and yield action events
+      // append + yield action events
       for (const a of actions) {
         this.append(a);
         yield a;
@@ -319,13 +291,92 @@ export class Thread<
         // (TODO): this.stats.usage.add(res.usage)
       }
     } catch (error) {
-      // Convert model errors to error events
       yield {
         kind: "error",
         error: error instanceof Error ? error : new Error(String(error)),
       };
     }
   }
+
+  /**
+   * Persist current thread state to storage.
+   *
+   * - If storage is configured, it is authoritative - failures throw and halt execution.
+   * - No-op if storage is not configured.
+   */
+  private async checkpoint(): Promise<void> {
+    if (!this.storage) {
+      logger.warn(
+        "thread: storage is not configured, thread will not be persisted",
+      );
+      return;
+    }
+
+    // insert thread record on first persist for new threads
+    if (!this.persisted) {
+      await this.storage.insert({
+        id: this.tid,
+        namespace: this.namespace,
+        agentId: this.agent.id,
+        model: `${this.model.provider}/${this.model.modelId}`,
+        context: this.context.context,
+        tick: this._tick,
+        state: this.state,
+        parentTaskId: this.parent?.id ?? null,
+        metadata: this.metadata,
+      });
+      this.persisted = true;
+    }
+
+    // append events from checkpoint buffer
+    if (this.cpbuf.length > 0) {
+      await this.storage.append(this.cpbuf);
+      this.cpbuf = []; // drain buffer after successful persist
+    }
+
+    // update thread state
+    await this.storage.update(this.tid, {
+      state: this.state,
+      tick: this._tick,
+      context: this.context,
+      metadata: this.metadata,
+    });
+  }
+
+  /**
+   * Append one or more items to history + enrich w/ runtime headers.
+   *
+   * Core rule:
+   *
+   * > An event becomes a ThreadEvent (and gets seq/timestamp) exactly when it is appended to history. <
+   */
+  append(...items: ThreadEventInner[]): ThreadEvent[] {
+    const events: ThreadEvent[] = [];
+    for (const item of items) {
+      const seq = ++this._seq;
+      const e = tevent({
+        tid: this.tid,
+        seq,
+        kind: item.kind,
+        data: item,
+      });
+      this.history.push(e);
+      this.cpbuf.push(e);
+      events.push(e);
+    }
+    return events;
+  }
+
+  /**
+   * Cancel the running thread
+   */
+  cancel() {
+    this.abort?.abort();
+  }
+
+  // ----------------------------
+  // utils
+  // ----------------------------
 
   /**
    * Perform the actions returned by the model
@@ -393,7 +444,7 @@ export class Thread<
 
           // (TMP) - passing the approval status through the context until actions system
           // is refined
-          const ctx = new Context(this.context.context);
+          const ctx = new Context(this.namespace, this.context.context);
           ctx.approve(call.callId); // mark this call as approved
           const res = await tool.invoke(ctx, call.arguments, call.callId);
 
@@ -464,48 +515,5 @@ export class Thread<
       settings,
       tools,
     };
-  }
-
-  /**
-   * Persist current thread state to storage.
-   *
-   * - If storage is configured, it is authoritative - failures throw and halt execution.
-   * - No-op if storage is not configured.
-   */
-  private async checkpoint(): Promise<void> {
-    if (!this.storage) {
-      logger.warn(
-        "thread: storage is not configured, thread state will not be persisted",
-      );
-      return;
-    }
-
-    // insert thread record on first persist for new threads
-    if (!this.persisted) {
-      await this.storage.insert({
-        id: this.tid,
-        agentId: this.agent.id,
-        model: `${this.model.provider}/${this.model.modelId}`,
-        context: this.context.context,
-        tick: this._tick,
-        state: this.state,
-        parentTaskId: this.parent?.id ?? null,
-        metadata: null,
-      });
-      this.persisted = true;
-    }
-
-    // append events from checkpoint buffer
-    if (this.cpbuf.length > 0) {
-      await this.storage.append(this.cpbuf);
-      this.cpbuf = []; // drain buffer after successful persist
-    }
-
-    // update thread state
-    await this.storage.update(this.tid, {
-      state: this.state,
-      tick: this._tick,
-      context: this.context,
-    });
   }
 }

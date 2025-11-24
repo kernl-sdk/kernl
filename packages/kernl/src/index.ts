@@ -1,5 +1,10 @@
-export { Kernl, ThreadsResource, type ThreadsListParams, type ThreadGetOptions } from "./kernl";
-export type { KernlOptions, StorageOptions, AgentRegistry, ModelRegistry } from "./types/kernl";
+export { Kernl } from "./kernl";
+export type {
+  KernlOptions,
+  StorageOptions,
+  AgentRegistry,
+  ModelRegistry,
+} from "./types/kernl";
 export { Agent } from "./agent";
 export { Context } from "./context";
 
@@ -9,21 +14,30 @@ export { MCPServerSSE } from "./mcp/sse";
 export { MCPServerStdio } from "./mcp/stdio";
 export { MCPServerStreamableHttp } from "./mcp/http";
 
-// --- threads ---
-export { Thread } from "./thread/thread";
+// --- thread models ---
 export type {
-  IThread,
-  ThreadEvent,
-  ThreadEventBase,
-  ThreadEventInner,
-  ThreadSystemEvent,
-  ThreadState,
-  ThreadResource,
-  PublicThreadEvent,
-} from "./types/thread";
-export { THREAD_STATES } from "./types/thread";
+  MThread as Thread,
+  MThreadEvent as ThreadEvent,
+  MThreadEventBase as ThreadEventBase,
+} from "./api/models";
 
-// --- storage ---
+// --- thread resource types ---
+export type {
+  RThreadsListParams as ThreadsListParams,
+  RThreadGetOptions as ThreadGetOptions,
+  RThreadHistoryParams as ThreadHistoryParams,
+  RThreadCreateParams as ThreadCreateParams,
+  RThreadUpdateParams as ThreadUpdateParams,
+} from "./api/resources/threads";
+
+// --- thread state enums ---
+export {
+  THREAD_STATES,
+  type ThreadState,
+  type PublicThreadEvent,
+} from "./types/thread";
+
+// --- storage types ---
 export type {
   ThreadStore,
   NewThread,

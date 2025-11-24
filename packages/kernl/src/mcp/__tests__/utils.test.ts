@@ -95,7 +95,7 @@ describe("mcpToFunctionTool", () => {
     };
 
     const functionTool = mcpToFunctionTool(server, mcpTool);
-    const ctx = new Context({});
+    const ctx = new Context("test-namespace", {});
     const input = { arg1: "value1" };
 
     await functionTool.invoke(ctx, JSON.stringify(input));
@@ -119,7 +119,7 @@ describe("mcpToFunctionTool", () => {
     };
 
     const functionTool = mcpToFunctionTool(server, mcpTool);
-    const ctx = new Context({});
+    const ctx = new Context("test-namespace", {});
     const toolResult = await functionTool.invoke(ctx, JSON.stringify({}));
 
     expect(toolResult.state).toBe("completed");
@@ -144,7 +144,7 @@ describe("mcpToFunctionTool", () => {
     };
 
     const functionTool = mcpToFunctionTool(server, mcpTool);
-    const ctx = new Context({});
+    const ctx = new Context("test-namespace", {});
     const toolResult = await functionTool.invoke(ctx, JSON.stringify({}));
 
     expect(toolResult.state).toBe("completed");
@@ -171,7 +171,7 @@ describe("mcpToFunctionTool", () => {
     const functionTool1 = mcpToFunctionTool(server, tool1);
     const functionTool2 = mcpToFunctionTool(server, tool2);
 
-    const ctx = new Context({});
+    const ctx = new Context("test-namespace", {});
 
     await functionTool1.invoke(ctx, JSON.stringify({}));
     expect(server.callTool).toHaveBeenCalledWith("tool1", {});
@@ -199,7 +199,7 @@ describe("mcpToFunctionTool", () => {
     const functionTool = mcpToFunctionTool(server, mcpTool);
 
     // Invoke takes (context, params as JSON string) in that order
-    const ctx = new Context({});
+    const ctx = new Context("test-namespace", {});
     const params = { foo: "bar" };
     await functionTool.invoke(ctx, JSON.stringify(params));
 
@@ -211,7 +211,7 @@ describe("mcpToFunctionTool", () => {
 describe("createMCPToolStaticFilter", () => {
   // Helper to create mock filter context
   const createMockFilterContext = (): MCPToolFilterContext => ({
-    context: new Context({}),
+    context: new Context("test-namespace", {}),
     agent: {} as Agent,
     serverId: "test-server",
   });

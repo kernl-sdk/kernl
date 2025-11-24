@@ -46,6 +46,7 @@ describe("InMemoryThreadStore", () => {
     it("should insert a new thread", async () => {
       const newThread: NewThread = {
         id: "thread-1",
+        namespace: "test",
         agentId: agent.id,
         model: `${model.provider}/${model.modelId}`,
         context: { foo: "bar" },
@@ -63,6 +64,7 @@ describe("InMemoryThreadStore", () => {
       const createdAt = new Date("2024-01-01");
       const newThread: NewThread = {
         id: "thread-2",
+        namespace: "test",
         agentId: agent.id,
         model: `${model.provider}/${model.modelId}`,
         tick: 5,
@@ -81,6 +83,7 @@ describe("InMemoryThreadStore", () => {
     it("should get a thread by id", async () => {
       const newThread: NewThread = {
         id: "thread-1",
+        namespace: "test",
         agentId: agent.id,
         model: `${model.provider}/${model.modelId}`,
       };
@@ -100,6 +103,7 @@ describe("InMemoryThreadStore", () => {
     it("should include history when requested", async () => {
       const newThread: NewThread = {
         id: "thread-1",
+        namespace: "test",
         agentId: agent.id,
         model: `${model.provider}/${model.modelId}`,
       };
@@ -135,6 +139,7 @@ describe("InMemoryThreadStore", () => {
     it("should update thread state", async () => {
       const newThread: NewThread = {
         id: "thread-1",
+        namespace: "test",
         agentId: agent.id,
         model: `${model.provider}/${model.modelId}`,
       };
@@ -160,6 +165,7 @@ describe("InMemoryThreadStore", () => {
     it("should delete a thread and its events", async () => {
       const newThread: NewThread = {
         id: "thread-1",
+        namespace: "test",
         agentId: agent.id,
         model: `${model.provider}/${model.modelId}`,
       };
@@ -192,6 +198,7 @@ describe("InMemoryThreadStore", () => {
     it("should append events to thread history", async () => {
       const newThread: NewThread = {
         id: "thread-1",
+        namespace: "test",
         agentId: agent.id,
         model: `${model.provider}/${model.modelId}`,
       };
@@ -232,6 +239,7 @@ describe("InMemoryThreadStore", () => {
     it("should be idempotent on event.id", async () => {
       const newThread: NewThread = {
         id: "thread-1",
+        namespace: "test",
         agentId: agent.id,
         model: `${model.provider}/${model.modelId}`,
       };
@@ -259,6 +267,7 @@ describe("InMemoryThreadStore", () => {
     it("should maintain seq ordering", async () => {
       const newThread: NewThread = {
         id: "thread-1",
+        namespace: "test",
         agentId: agent.id,
         model: `${model.provider}/${model.modelId}`,
       };
@@ -303,6 +312,7 @@ describe("InMemoryThreadStore", () => {
     beforeEach(async () => {
       const newThread: NewThread = {
         id: "thread-1",
+        namespace: "test",
         agentId: agent.id,
         model: `${model.provider}/${model.modelId}`,
       };
@@ -394,6 +404,7 @@ describe("InMemoryThreadStore", () => {
     beforeEach(async () => {
       await store.insert({
         id: "thread-1",
+        namespace: "test",
         agentId: agent.id,
         model: `${model.provider}/${model.modelId}`,
         state: STOPPED,
@@ -402,6 +413,7 @@ describe("InMemoryThreadStore", () => {
 
       await store.insert({
         id: "thread-2",
+        namespace: "test",
         agentId: agent.id,
         model: `${model.provider}/${model.modelId}`,
         state: RUNNING,
@@ -410,6 +422,7 @@ describe("InMemoryThreadStore", () => {
 
       await store.insert({
         id: "thread-3",
+        namespace: "test",
         agentId: agent.id,
         model: `${model.provider}/${model.modelId}`,
         state: DEAD,

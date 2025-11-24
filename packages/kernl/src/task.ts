@@ -16,6 +16,7 @@ export class Task<TContext = UnknownContext, TResult = unknown> {
   // sched: TaskSched; /* scheduling (timers, timeouts, deadlines) */
   state: TaskState /* current state of the task */;
   owner: Agent<TContext> /* agent that currently owns this task */;
+  namespace: string;
 
   context: Context<TContext> /* execution context propagated throughout call graph */;
   // cred: Credentials; /* Effective (overridable) subjective task credentials (COW): */
@@ -34,7 +35,7 @@ export class Task<TContext = UnknownContext, TResult = unknown> {
   // TODO: Deferred fields for later implementation
   // tgid: string;              // Thread group ID
   // limits: TaskLimits;        // Resource limits (max ticks, tokens, timeout)
-  // nsproxy: NamespaceProxy;   // Namespace isolation
+  // nsproxy: NamespaceProxy;   // Namespace isolation (partially implemented via namespace string)
 
   constructor(options: {
     id: string;
@@ -42,12 +43,14 @@ export class Task<TContext = UnknownContext, TResult = unknown> {
     state: TaskState;
     owner: Agent<TContext>;
     context: Context<TContext>;
+    namespace?: string;
   }) {
     this.id = options.id;
     this.instructions = options.instructions;
     this.state = options.state;
     this.owner = options.owner;
     this.context = options.context;
+    this.namespace = options.namespace ?? "kernl";
     this.threads = [];
     this.current = null;
     this.result = null;

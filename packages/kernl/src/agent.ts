@@ -6,7 +6,14 @@ import {
 } from "@kernl-sdk/protocol";
 
 import { Thread } from "./thread";
-import type { Kernl, ThreadsListParams, ThreadGetOptions } from "./kernl";
+import type { Kernl } from "./kernl";
+import type {
+  RThreadsListParams,
+  RThreadCreateParams,
+  RThreadGetOptions,
+  RThreadHistoryParams,
+  RThreadUpdateParams,
+} from "@/api/resources/threads/types";
 import type { Context, UnknownContext } from "./context";
 import { Tool } from "./tool";
 import { BaseToolkit } from "./tool/toolkit";
@@ -162,6 +169,7 @@ export class Agent<
         model: options?.model,
         task: options?.task,
         tid: options?.threadId,
+        namespace: options?.namespace,
         storage: this.kernl.storage?.threads,
       });
       return this.kernl.spawn(thread);
@@ -222,6 +230,7 @@ export class Agent<
         model: options?.model,
         task: options?.task,
         tid: options?.threadId,
+        namespace: options?.namespace,
         storage: this.kernl.storage?.threads,
       });
       yield* this.kernl.spawnStream(thread);
@@ -299,11 +308,26 @@ export class Agent<
     const kthreads = this.kernl.threads;
 
     return {
-      get: (tid: string, options?: ThreadGetOptions) => kthreads.get(tid, options),
-      list: (params: Omit<ThreadsListParams, "agentId"> = {}) =>
+      get: (tid: string, options?: RThreadGetOptions) =>
+        kthreads.get(tid, options),
+      list: (params: Omit<RThreadsListParams, "agentId"> = {}) =>
         kthreads.list({ ...params, agentId }),
       delete: (tid: string) => kthreads.delete(tid),
-      history: (tid: string) => kthreads.history(tid),
+      history: (tid: string, params?: RThreadHistoryParams) =>
+        kthreads.history(tid, params),
+      create: (
+        params: Omit<RThreadCreateParams, "agentId" | "model">,
+      ) =>
+        kthreads.create({
+          ...params,
+          agentId,
+          model: {
+            provider: this.model.provider,
+            modelId: this.model.modelId,
+          },
+        }),
+      update: (tid: string, patch: RThreadUpdateParams) =>
+        kthreads.update(tid, patch),
     };
   }
 }

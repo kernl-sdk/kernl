@@ -64,6 +64,7 @@ export class InMemoryStorage implements KernlStorage {
  */
 interface ThreadData {
   tid: string;
+  namespace: string;
   agentId: string;
   model: string; // "provider/modelId"
   context: unknown;
@@ -134,6 +135,7 @@ export class InMemoryThreadStore implements ThreadStore {
     const now = new Date();
     const data: ThreadData = {
       tid: thread.id,
+      namespace: thread.namespace,
       agentId: thread.agentId,
       model: thread.model,
       context: thread.context ?? {},
@@ -157,7 +159,10 @@ export class InMemoryThreadStore implements ThreadStore {
 
     if (patch.tick !== undefined) data.tick = patch.tick;
     if (patch.state !== undefined) data.state = patch.state;
-    if (patch.context !== undefined) data.context = patch.context;
+    if (patch.context !== undefined) {
+      // Store raw context value, not the Context wrapper.
+      data.context = patch.context.context;
+    }
     if (patch.metadata !== undefined) data.metadata = patch.metadata;
     data.updatedAt = new Date();
 
@@ -229,12 +234,14 @@ export class InMemoryThreadStore implements ThreadStore {
     return new Thread({
       agent,
       tid: data.tid,
-      context: new Context(data.context),
+      context: new Context(data.namespace, data.context),
       model,
       history,
       tick: data.tick,
       state: data.state,
+      namespace: data.namespace,
       task: null, // TODO: load from TaskStore when it exists
+      metadata: data.metadata,
       storage: this, // pass storage reference so resumed thread can persist
     });
   }
@@ -291,6 +298,11 @@ export class InMemoryThreadStore implements ThreadStore {
     filter: ThreadFilter,
   ): ThreadData[] {
     return threads.filter((thread) => {
+      // Filter by namespace
+      if (filter.namespace !== undefined) {
+        if (thread.namespace !== filter.namespace) return false;
+      }
+
       // Filter by state
       if (filter.state !== undefined) {
         if (Array.isArray(filter.state)) {

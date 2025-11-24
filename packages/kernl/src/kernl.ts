@@ -6,12 +6,11 @@ import { KernlHooks } from "@/lifecycle";
 import type { Thread } from "@/thread";
 import type { ResolvedAgentResponse } from "@/guardrail";
 import { InMemoryStorage, type KernlStorage } from "@/storage";
+import { RThreads } from "@/api/resources/threads";
 
 import type { KernlOptions } from "@/types/kernl";
 import type { ThreadExecuteResult, ThreadStreamEvent } from "@/types/thread";
 import type { AgentResponseType } from "@/types/agent";
-
-import { ThreadsResource } from "./threads";
 
 /**
  * The kernl - manages agent processes, scheduling, and task lifecycle.
@@ -28,17 +27,14 @@ export class Kernl extends KernlHooks<UnknownContext, AgentResponseType> {
 
   private initPromise: Promise<void> | null = null;
 
-  /**
-   * Thread management API.
-   * Provides methods to get, list, and delete threads.
-   */
-  readonly threads: ThreadsResource;
+  // --- public API ---
+  readonly threads: RThreads; /* Threads resource */
 
   constructor(options: KernlOptions = {}) {
     super();
     this.storage = options.storage?.db ?? new InMemoryStorage();
     this.storage.bind({ agents: this.agents, models: this.models });
-    this.threads = new ThreadsResource(this.storage.threads);
+    this.threads = new RThreads(this.storage.threads);
   }
 
   /**
@@ -133,7 +129,7 @@ export class Kernl extends KernlHooks<UnknownContext, AgentResponseType> {
   private async ensureInitialized(): Promise<void> {
     if (!this.initPromise) {
       this.initPromise = this.storage.init().catch((error) => {
-        // Allow a retry if initialization fails.
+        // allow a retry if initialization fails.
         this.initPromise = null;
         throw error;
       });

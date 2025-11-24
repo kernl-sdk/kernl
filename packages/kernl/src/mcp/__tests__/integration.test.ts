@@ -7,7 +7,6 @@ import { Agent } from "@/agent";
 import { Context } from "@/context";
 import { tool } from "@/tool";
 import { z } from "zod";
-import { Thread } from "@/thread";
 import { createMCPToolStaticFilter } from "../utils";
 import { createMockModel } from "@/thread/__tests__/fixtures/mock-model";
 
@@ -171,7 +170,7 @@ describe("MCP Integration Tests", () => {
         toolkits: [toolkit],
       });
 
-      const context = new Context({});
+      const context = new Context("test-namespace", {});
       const tools = await toolkit.list(context);
 
       // Should have 3 math tools only
@@ -208,7 +207,7 @@ describe("MCP Integration Tests", () => {
         toolkits: [toolkit],
       });
 
-      const context = new Context({});
+      const context = new Context("test-namespace", {});
       const tools = await toolkit.list(context);
 
       // Should have only add and divide (multiply blocked by toolkit filter)
@@ -247,7 +246,7 @@ describe("MCP Integration Tests", () => {
         toolkits: [toolkit],
       });
 
-      const context = new Context({ userId: "test-user" });
+      const context = new Context("test-namespace", { userId: "test-user" });
       await toolkit.list(context);
 
       // Verify context was passed correctly
@@ -281,7 +280,7 @@ describe("MCP Integration Tests", () => {
         toolkits: [mcpToolkit],
       });
 
-      const context = new Context({});
+      const context = new Context("test-namespace", {});
       const tools = await agent.tools(context);
 
       expect(tools.length).toBe(6);
@@ -312,7 +311,7 @@ describe("MCP Integration Tests", () => {
       });
 
       // Populate toolkit cache
-      const context = new Context({});
+      const context = new Context("test-namespace", {});
       await agent.tools(context);
 
       // Now get specific tool
@@ -343,7 +342,7 @@ describe("MCP Integration Tests", () => {
         toolkits: [mcpToolkit],
       });
 
-      const context = new Context({});
+      const context = new Context("test-namespace", {});
       await agent.tools(context);
 
       const addTool = agent.tool("add");
@@ -401,7 +400,7 @@ describe("MCP Integration Tests", () => {
         toolkits: [mcpToolkit, functionToolkit],
       });
 
-      const context = new Context({});
+      const context = new Context("test-namespace", {});
       const tools = await agent.tools(context);
 
       // Should have 7 tools (6 MCP + 1 local)
@@ -451,7 +450,7 @@ describe("MCP Integration Tests", () => {
         toolkits: [mcpToolkit, functionToolkit],
       });
 
-      const context = new Context({});
+      const context = new Context("test-namespace", {});
 
       // Should throw error about duplicate tool IDs
       await expect(agent.tools(context)).rejects.toThrow(
