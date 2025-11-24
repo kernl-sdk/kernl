@@ -7,7 +7,9 @@ import { APIError } from "@/lib/error";
 import { logger, logreq } from "@/lib/logger";
 import { env } from "@/lib/env";
 
+/* agents */
 import { jarvis } from "@/agents/jarvis";
+import { titler } from "@/agents/title-agent";
 
 /* routes */
 import agents from "@/_api/v1/agents/route";
@@ -25,10 +27,10 @@ export function build(): Hono<{ Variables: Variables }> {
     storage: { db: postgres({ connstr: env.DATABASE_URL }) },
   });
   kernl.register(jarvis);
+  kernl.register(titler);
 
   const app = new Hono<{ Variables: Variables }>();
 
-  // --- logging ---
   app.use("/*", logreq);
 
   // --- CORS ---
@@ -48,10 +50,9 @@ export function build(): Hono<{ Variables: Variables }> {
 
   app.onError(handleError);
 
-  // --- routes ---
+  // --- ROUTES ---
   app.route("/v1/agents", agents);
   app.route("/v1/threads", threads);
-
   app.get("/health", (cx) => {
     return cx.json({ status: "ok" });
   });
@@ -62,7 +63,10 @@ export function build(): Hono<{ Variables: Variables }> {
 /**
  * Convert errors to a standard structured response
  */
-function handleError(err: Error, cx: Context<{ Variables: Variables }>) {
+function handleError(
+  err: Error,
+  cx: Context<{ Variables: Variables }>,
+): Response {
   if (err instanceof APIError) {
     logger.error({ error: err, metadata: err.metadata }, err.message);
     return cx.json(err.json(), err.statusCode);
