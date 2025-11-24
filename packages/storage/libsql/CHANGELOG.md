@@ -1,5 +1,12 @@
 # @kernl/libsql
 
+## 0.1.7
+
+### Patch Changes
+
+- Updated dependencies [ad56b86]
+  - @kernl-sdk/storage@0.1.7
+
 ## 0.1.6
 
 ### Patch Changes
