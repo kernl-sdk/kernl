@@ -5,7 +5,9 @@
     "rootDir": "./src",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@kernl-sdk/core": ["../kernl/src/index.ts"],
+      "@kernl-sdk/core/internal": ["../kernl/src/internal.ts"]
     }
   },
   "include": ["src/**/*"],

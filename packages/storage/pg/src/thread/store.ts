@@ -8,10 +8,9 @@ import {
   type ThreadRecord,
   type ThreadEventRecord,
 } from "@kernl-sdk/storage";
+import { Thread, type ThreadEvent } from "@kernl-sdk/core/internal";
 import {
-  Thread,
   Context,
-  type ThreadEvent,
   type AgentRegistry,
   type ModelRegistry,
   type ThreadStore,
@@ -96,6 +95,7 @@ export class PGThreadStore implements ThreadStore {
       const first = result.rows[0];
       const record: ThreadRecord = {
         id: first.id,
+        namespace: first.namespace,
         agent_id: first.agent_id,
         model: first.model,
         context: first.context,
@@ -157,8 +157,19 @@ export class PGThreadStore implements ThreadStore {
     // build WHERE clause
     const conditions: string[] = [];
     if (options?.filter) {
-      const { state, agentId, parentTaskId, createdAfter, createdBefore } =
-        options.filter;
+      const {
+        state,
+        agentId,
+        parentTaskId,
+        createdAfter,
+        createdBefore,
+        namespace,
+      } = options.filter;
+
+      if (namespace) {
+        conditions.push(`namespace = $${paramIndex++}`);
+        values.push(namespace);
+      }
 
       if (state) {
         if (Array.isArray(state)) {
@@ -243,11 +254,12 @@ export class PGThreadStore implements ThreadStore {
 
     const result = await this.db.query<ThreadRecord>(
       `INSERT INTO ${SCHEMA_NAME}.threads
-       (id, agent_id, model, context, tick, state, parent_task_id, metadata, created_at, updated_at)
-       VALUES ($1, $2, $3, $4::jsonb, $5, $6, $7, $8::jsonb, $9, $10)
+       (id, namespace, agent_id, model, context, tick, state, parent_task_id, metadata, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7, $8, $9::jsonb, $10, $11)
        RETURNING *`,
       [
         record.id,
+        record.namespace,
         record.agent_id,
         record.model,
         record.context,
@@ -283,7 +295,10 @@ export class PGThreadStore implements ThreadStore {
 
     if (patch.context !== undefined) {
       updates.push(`context = $${paramIndex++}`);
-      values.push(JSON.stringify(patch.context));
+      // NOTE: Store the raw context value, not the Context wrapper. 
+      //
+      // THis may change in the future depending on Context implementation.
+      values.push(JSON.stringify(patch.context.context));
     }
 
     if (patch.metadata !== undefined) {
@@ -428,12 +443,14 @@ export class PGThreadStore implements ThreadStore {
     return new Thread({
       agent,
       history: events,
-      context: new Context(record.context),
+      context: new Context(record.namespace, record.context),
       model,
       task: null, // TODO: load from TaskStore when it exists
       tid: record.id,
+      namespace: record.namespace,
       tick: record.tick,
       state: record.state,
+      metadata: record.metadata,
       createdAt: new Date(record.created_at),
       updatedAt: new Date(record.updated_at),
       storage: this, // pass storage reference so resumed thread can persist

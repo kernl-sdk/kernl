@@ -5,17 +5,18 @@ import { PGStorage } from "../storage";
 import { PGThreadStore } from "../thread/store";
 import {
   Agent,
-  Thread,
+  Context,
   type AgentRegistry,
   type ModelRegistry,
 } from "@kernl-sdk/core";
+import { Thread } from "@kernl-sdk/core/internal";
 
 const TEST_DB_URL = process.env.KERNL_PG_TEST_URL;
 
 type TestLanguageModel =
   ModelRegistry extends { get(key: string): infer T | undefined } ? T : never;
 
-describe("PGStorage integration", () => {
+describe.sequential("PGStorage integration", () => {
   if (!TEST_DB_URL) {
     it.skip("requires KERNL_PG_TEST_URL to be set", () => {
       // Intentionally empty - environment not configured for integration tests.
@@ -88,6 +89,7 @@ describe("PGStorage integration", () => {
     expect(indexNames).toEqual(
       expect.arrayContaining([
         "idx_threads_state",
+        "idx_threads_namespace",
         "idx_threads_agent_id",
         "idx_threads_parent_task_id",
         "idx_threads_created_at",
@@ -226,6 +228,7 @@ describe("PGStorage integration", () => {
     // Insert a new thread (no explicit context/metadata) and verify defaults.
     await store.insert({
       id: tid,
+      namespace: "kernl",
       agentId: "agent-1",
       model: "provider/model",
     });
@@ -263,14 +266,13 @@ describe("PGStorage integration", () => {
 
     await store.insert({
       id: tidWithContext,
+      namespace: "kernl",
       agentId: "agent-1",
       model: "provider/model",
       context: complexContext as unknown as never,
     });
 
-    const ctxResult = await pool.query<{
-      context: unknown;
-    }>(
+    const ctxResult = await pool.query<{ context: unknown }>(
       `
         SELECT context
         FROM "kernl"."threads"
@@ -282,11 +284,30 @@ describe("PGStorage integration", () => {
     expect(ctxResult.rows).toHaveLength(1);
     expect(ctxResult.rows[0]?.context).toEqual(complexContext);
 
-    // Update the original thread with full patch.
+    // Update context via ThreadStore.update and verify JSONB is replaced.
+    const updatedContext = { foo: "baz", nested: { a: 2, b: [4, 5, 6] } };
+
+    await store.update(tidWithContext, {
+      context: new Context("kernl", updatedContext as unknown),
+    });
+
+    const ctxUpdatedResult = await pool.query<{ context: unknown }>(
+      `
+        SELECT context
+        FROM "kernl"."threads"
+        WHERE id = $1
+      `,
+      [tidWithContext],
+    );
+
+    expect(ctxUpdatedResult.rows).toHaveLength(1);
+    expect(ctxUpdatedResult.rows[0]?.context).toEqual(updatedContext);
+
+    // Update the original thread with full patch, including a title in metadata.
     await store.update(tid, {
       tick: 5,
       state: "running",
-      metadata: { source: "integration-test" },
+      metadata: { source: "integration-test", title: "Test Thread" },
     });
 
     const updatedFull = await pool.query<{
@@ -307,6 +328,7 @@ describe("PGStorage integration", () => {
     expect(updatedFull.rows[0]?.state).toBe("running");
     expect(updatedFull.rows[0]?.metadata).toEqual({
       source: "integration-test",
+      title: "Test Thread",
     });
 
     // Partial update: only tick should change; state/metadata should stay the same.
@@ -332,6 +354,7 @@ describe("PGStorage integration", () => {
     expect(updatedPartial.rows[0]?.state).toBe("running");
     expect(updatedPartial.rows[0]?.metadata).toEqual({
       source: "integration-test",
+      title: "Test Thread",
     });
 
     // Update with metadata explicitly null to verify JSONB nulling.
@@ -400,6 +423,7 @@ describe("PGStorage integration", () => {
 
     await store.insert({
       id: tid,
+      namespace: "kernl",
       agentId: "agent-1",
       model: "provider/model",
     });
@@ -469,6 +493,7 @@ describe("PGStorage integration", () => {
 
     await store.insert({
       id: tid,
+      namespace: "kernl",
       agentId: "agent-1",
       model: "provider/model",
     });
@@ -543,6 +568,7 @@ describe("PGStorage integration", () => {
 
     await store.insert({
       id: "list-1",
+      namespace: "kernl",
       agentId: "agent-1",
       model: "provider/model",
       state: "running" as any,
@@ -553,6 +579,7 @@ describe("PGStorage integration", () => {
 
     await store.insert({
       id: "list-2",
+      namespace: "kernl",
       agentId: "agent-1",
       model: "provider/model",
       state: "stopped" as any,
@@ -563,6 +590,7 @@ describe("PGStorage integration", () => {
 
     await store.insert({
       id: "list-3",
+      namespace: "kernl",
       agentId: "agent-2",
       model: "provider/model",
       state: "running" as any,
@@ -618,6 +646,68 @@ describe("PGStorage integration", () => {
       offset: 1,
     });
     expect(page.map((t) => t.tid)).toEqual(["list-2", "list-3"]);
+  });
+
+  it("persists namespace and filters by namespace", async () => {
+    await storage.init();
+
+    await pool.query('DELETE FROM "kernl"."thread_events"');
+    await pool.query('DELETE FROM "kernl"."threads"');
+
+    const model = {
+      spec: "1.0" as const,
+      provider: "test",
+      modelId: "test-model",
+    } as unknown as TestLanguageModel;
+
+    const agent = new Agent({
+      id: "agent-1",
+      name: "Test Agent",
+      instructions: () => "test",
+      model,
+    });
+
+    const agents: AgentRegistry = new Map<string, Agent>([["agent-1", agent]]);
+    const models: ModelRegistry = new Map<string, TestLanguageModel>([
+      ["provider/model", model],
+    ]) as unknown as ModelRegistry;
+
+    storage.bind({ agents, models });
+    const store = storage.threads;
+
+    await store.insert({
+      id: "ns-1a",
+      namespace: "ns-a",
+      agentId: "agent-1",
+      model: "provider/model",
+    });
+    await store.insert({
+      id: "ns-2b",
+      namespace: "ns-b",
+      agentId: "agent-1",
+      model: "provider/model",
+    });
+    await store.insert({
+      id: "ns-3a",
+      namespace: "ns-a",
+      agentId: "agent-1",
+      model: "provider/model",
+    });
+
+    const a = await store.list({ filter: { namespace: "ns-a" } });
+    expect(a.map((t) => t.tid)).toEqual(
+      expect.arrayContaining(["ns-1a", "ns-3a"]),
+    );
+    expect(a.every((t) => t.namespace === "ns-a")).toBe(true);
+
+    const b = await store.list({ filter: { namespace: "ns-b" } });
+    expect(b.map((t) => t.tid)).toEqual(["ns-2b"]);
+    expect(b[0]?.namespace).toBe("ns-b");
+
+    // get with history should hydrate namespace properly
+    const loaded = await store.get("ns-1a", { history: true });
+    expect(loaded?.namespace).toBe("ns-a");
+    expect(loaded?.context.namespace).toBe("ns-a");
   });
 });
 

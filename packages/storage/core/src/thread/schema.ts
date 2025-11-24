@@ -15,6 +15,7 @@ export const TABLE_THREADS = defineTable(
   "threads",
   {
     id: text().primaryKey(),
+    namespace: text().default("kernl"),
     agent_id: text(),
     model: text(),
     context: jsonb(),
@@ -26,6 +27,7 @@ export const TABLE_THREADS = defineTable(
   },
   [
     { kind: "index", columns: ["state"] },
+    { kind: "index", columns: ["namespace"] },
     { kind: "index", columns: ["agent_id"] },
     { kind: "index", columns: ["parent_task_id"] },
     { kind: "index", columns: ["created_at"] },
@@ -74,6 +76,7 @@ export const TABLE_MIGRATIONS = defineTable("migrations", {
  */
 export const ThreadRecordSchema = z.object({
   id: z.string(),
+  namespace: z.string(),
   agent_id: z.string(),
   model: z.string(), // composite: "provider/modelId"
   context: z.unknown(), // JSONB - Context<TContext>

@@ -35,7 +35,7 @@ function createMockModel(generateFn: any): any {
 
 const TEST_DB_URL = process.env.KERNL_PG_TEST_URL;
 
-describe("PG Thread Lifecycle", () => {
+describe.sequential("PG Thread Lifecycle", () => {
   if (!TEST_DB_URL) {
     it.skip("requires KERNL_PG_TEST_URL environment variable", () => {});
     return;

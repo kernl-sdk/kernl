@@ -13,6 +13,7 @@ describe("NewThreadCodec", () => {
     it("should apply default values (tick=0, state='stopped')", () => {
       const newThread = {
         id: "thread-1",
+        namespace: "kernl",
         agentId: "agent-1",
         model: "openai/gpt-4",
       };
@@ -28,6 +29,7 @@ describe("NewThreadCodec", () => {
     it("should preserve provided values", () => {
       const newThread = {
         id: "thread-2",
+        namespace: "kernl",
         agentId: "agent-2",
         model: "openai/gpt-4",
         tick: 5,
@@ -47,6 +49,7 @@ describe("NewThreadCodec", () => {
 
       const newThread = {
         id: "thread-3",
+        namespace: "kernl",
         agentId: "agent-3",
         model: "anthropic/claude-3",
       };
@@ -63,6 +66,7 @@ describe("NewThreadCodec", () => {
 
       const newThread = {
         id: "thread-4",
+        namespace: "kernl",
         agentId: "agent-4",
         model: "openai/gpt-4",
         createdAt,
@@ -80,6 +84,7 @@ describe("NewThreadCodec", () => {
 
       const newThread = {
         id: "thread-5",
+        namespace: "kernl",
         agentId: "agent-5",
         model: "openai/gpt-4",
         context: context as any,
@@ -93,6 +98,7 @@ describe("NewThreadCodec", () => {
     it("should apply empty object as default context", () => {
       const newThread = {
         id: "thread-6",
+        namespace: "kernl",
         agentId: "agent-6",
         model: "openai/gpt-4",
       };
@@ -105,6 +111,7 @@ describe("NewThreadCodec", () => {
     it("should map model field correctly", () => {
       const newThread = {
         id: "thread-7",
+        namespace: "kernl",
         agentId: "agent-7",
         model: "provider/model-name",
       };
@@ -117,6 +124,7 @@ describe("NewThreadCodec", () => {
     it("should handle parentTaskId", () => {
       const newThread = {
         id: "thread-8",
+        namespace: "kernl",
         agentId: "agent-8",
         model: "openai/gpt-4",
         parentTaskId: "task-123",
@@ -132,6 +140,7 @@ describe("NewThreadCodec", () => {
     it("should decode ThreadRecord to NewThread", () => {
       const record = {
         id: "thread-1",
+        namespace: "kernl",
         agent_id: "agent-1",
         model: "openai/gpt-4",
         context: { foo: "bar" },
@@ -160,6 +169,7 @@ describe("NewThreadCodec", () => {
     it("should handle null values", () => {
       const record = {
         id: "thread-2",
+        namespace: "kernl",
         agent_id: "agent-2",
         model: "openai/gpt-4",
         context: {},
@@ -182,6 +192,7 @@ describe("NewThreadCodec", () => {
     it("should preserve data through encode -> decode cycle", () => {
       const original = {
         id: "thread-rt",
+        namespace: "kernl",
         agentId: "agent-rt",
         model: "openai/gpt-4",
         tick: 10,

@@ -3,7 +3,7 @@
  */
 
 import { type Codec, neapolitanCodec } from "@kernl-sdk/shared/lib";
-import type { IThread, ThreadEvent } from "@kernl-sdk/core";
+import type { IThread, ThreadEvent } from "@kernl-sdk/core/internal";
 import { STOPPED } from "@kernl-sdk/protocol";
 
 import type { ThreadRecord, ThreadEventRecord } from "@/thread/schema";
@@ -22,6 +22,7 @@ export type DecodedThread = Omit<
   IThread,
   "agent" | "model" | "input" | "history" | "task" | "context"
 > & {
+  namespace: string;
   agentId: string;
   model: string; // composite: "provider/modelId"
   parentTaskId: string | null; // stored task reference
@@ -37,6 +38,7 @@ const rawThreadCodec: Codec<DecodedThread, ThreadRecord> = {
   encode(decoded: DecodedThread): ThreadRecord {
     return {
       id: decoded.tid,
+      namespace: decoded.namespace,
       agent_id: decoded.agentId,
       model: decoded.model,
       parent_task_id: decoded.parentTaskId,
@@ -52,6 +54,7 @@ const rawThreadCodec: Codec<DecodedThread, ThreadRecord> = {
   decode(record: ThreadRecord): DecodedThread {
     return {
       tid: record.id,
+      namespace: record.namespace,
       agentId: record.agent_id,
       model: record.model,
       parentTaskId: record.parent_task_id,
@@ -139,6 +142,7 @@ const rawNewThreadCodec: Codec<NewThread, ThreadRecord> = {
     const now = Date.now();
     return {
       id: thread.id,
+      namespace: thread.namespace,
       agent_id: thread.agentId,
       model: thread.model,
       context: thread.context ?? {},
@@ -154,6 +158,7 @@ const rawNewThreadCodec: Codec<NewThread, ThreadRecord> = {
   decode(record: ThreadRecord): NewThread {
     return {
       id: record.id,
+      namespace: record.namespace,
       agentId: record.agent_id,
       model: record.model,
       context: record.context,
