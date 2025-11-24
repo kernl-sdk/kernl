@@ -315,9 +315,7 @@ export class Agent<
       delete: (tid: string) => kthreads.delete(tid),
       history: (tid: string, params?: RThreadHistoryParams) =>
         kthreads.history(tid, params),
-      create: (
-        params: Omit<RThreadCreateParams, "agentId" | "model">,
-      ) =>
+      create: (params: Omit<RThreadCreateParams, "agentId" | "model">) =>
         kthreads.create({
           ...params,
           agentId,

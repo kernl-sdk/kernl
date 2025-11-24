@@ -100,7 +100,7 @@ export class Thread<
   _seq: number; /* monotonic event sequence */
   state: ThreadState;
   private cpbuf: ThreadEvent[]; /* checkpoint buffer - events pending persistence */
-  private persisted: boolean;
+  private persisted: boolean; /* indicates thread was hydrated from storage */
   private history: ThreadEvent[] /* history representing the event log for the thread */;
 
   private abort?: AbortController;
@@ -120,19 +120,15 @@ export class Thread<
     this.metadata = options.metadata ?? null;
 
     this._tick = options.tick ?? 0;
+    this._seq = -1;
     this.state = options.state ?? STOPPED;
     this.cpbuf = [];
+    this.persisted = options.persisted ?? false;
+    this.history = options.history ?? [];
 
-    // if hydrating from storage with history, restore _seq from last event
-    if (options.history && options.history.length > 0) {
-      this.history = options.history;
-      const seq = Math.max(...options.history.map((e) => e.seq));
-      this._seq = seq;
-      this.persisted = true; // hydrated from storage, record already exists
-    } else {
-      this.history = [];
-      this._seq = -1;
-      this.persisted = false; // new thread, needs insert on first persist
+    // seek to latest seq (not persisted)
+    if (this.history.length > 0) {
+      this._seq = Math.max(...this.history.map((e) => e.seq));
     }
 
     // append initial input if provided (for new threads)
@@ -142,7 +138,7 @@ export class Thread<
   }
 
   /**
-   * Blocking execution loop - runs until terminal state or interruption
+   * Blocking execution - runs until terminal state or interruption
    */
   async execute(): Promise<
     ThreadExecuteResult<ResolvedAgentResponse<TResponse>>
@@ -225,7 +221,7 @@ export class Thread<
         return;
       }
 
-      // if model returns a message with no action intentions -> terminal state
+      // if model returns a message with no action intentions → terminal state
       const intentions = getIntentions(events);
       if (!intentions) {
         const text = getFinalResponse(events);
@@ -318,20 +314,20 @@ export class Thread<
         id: this.tid,
         namespace: this.namespace,
         agentId: this.agent.id,
+        parentTaskId: this.parent?.id ?? null,
         model: `${this.model.provider}/${this.model.modelId}`,
         context: this.context.context,
         tick: this._tick,
         state: this.state,
-        parentTaskId: this.parent?.id ?? null,
         metadata: this.metadata,
       });
       this.persisted = true;
     }
 
-    // append events from checkpoint buffer
+    // append + drain events from checkpoint buffer
     if (this.cpbuf.length > 0) {
       await this.storage.append(this.cpbuf);
-      this.cpbuf = []; // drain buffer after successful persist
+      this.cpbuf = [];
     }
 
     // update thread state

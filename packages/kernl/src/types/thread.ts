@@ -164,6 +164,12 @@ export interface ThreadOptions<
   createdAt?: Date;
   updatedAt?: Date;
   metadata?: Record<string, unknown> | null;
+  /**
+   * Internal flag indicating whether this thread already has a persisted
+   * row in storage. Storage implementations MUST set this to true when
+   * hydrating from a store. Callers creating new threads should omit it.
+   */
+  persisted?: boolean;
 }
 
 /**

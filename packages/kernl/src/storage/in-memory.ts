@@ -243,6 +243,7 @@ export class InMemoryThreadStore implements ThreadStore {
       task: null, // TODO: load from TaskStore when it exists
       metadata: data.metadata,
       storage: this, // pass storage reference so resumed thread can persist
+      persisted: true,
     });
   }
 

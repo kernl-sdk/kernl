@@ -462,6 +462,67 @@ describe.sequential("PGStorage integration", () => {
     expect(lastDesc[0]?.id).toBe(event3.id);
   });
 
+  it("does not re-insert an existing thread when streaming from a hydrated instance", async () => {
+    await storage.init();
+
+    // Reset tables for this test
+    await pool.query('DELETE FROM "kernl"."thread_events"');
+    await pool.query('DELETE FROM "kernl"."threads"');
+
+    const model = {
+      spec: "1.0" as const,
+      provider: "test",
+      modelId: "test-model",
+      // generate/stream are not used in this test - we only advance stream
+      // far enough to trigger the first checkpoint.
+    } as unknown as TestLanguageModel;
+
+    const agent = new Agent({
+      id: "agent-1",
+      name: "Test Agent",
+      instructions: () => "test",
+      model,
+    });
+
+    const agents: AgentRegistry = new Map<string, Agent>([["agent-1", agent]]);
+    const models: ModelRegistry = new Map<string, TestLanguageModel>([
+      ["provider/model", model],
+    ]) as unknown as ModelRegistry;
+
+    storage.bind({ agents, models });
+    const store = storage.threads;
+
+    const tid = "thread-stream-checkpoint-1";
+
+    // Create the thread row once via the store.
+    await store.insert({
+      id: tid,
+      namespace: "kernl",
+      agentId: "agent-1",
+      model: "provider/model",
+    });
+
+    // Hydrate a Thread instance from storage.
+    const hydrated = await store.get(tid);
+    expect(hydrated).not.toBeNull();
+
+    // Advance the stream once to trigger the initial checkpoint().
+    const iterator = hydrated!.stream()[Symbol.asyncIterator]();
+    await iterator.next();
+
+    // Ensure only one row exists for this tid (no duplicate INSERT).
+    const countResult = await pool.query<{ count: string }>(
+      `
+        SELECT COUNT(*)::text AS count
+        FROM "kernl"."threads"
+        WHERE id = $1
+      `,
+      [tid],
+    );
+
+    expect(countResult.rows[0]?.count).toBe("1");
+  });
+
   it("gets a thread with joined history via include.history", async () => {
     await storage.init();
 
