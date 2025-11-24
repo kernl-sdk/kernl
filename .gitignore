@@ -1,5 +1,6 @@
 .notes/
 .plan/
+.tmp/
 
 # Dependencies
 node_modules
