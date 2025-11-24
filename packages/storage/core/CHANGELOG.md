@@ -1,5 +1,12 @@
 # @kernl/storage
 
+## 0.1.8
+
+### Patch Changes
+
+- Updated dependencies [08ab8a0]
+  - @kernl-sdk/core@0.5.1
+
 ## 0.1.7
 
 ### Patch Changes
