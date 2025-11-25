@@ -37,7 +37,7 @@ export function build(): Hono<{ Variables: Variables }> {
   app.use(
     "/*",
     cors({
-      origin: ["http://localhost:3000"], // env.CLIENT_DOMAIN
+      origin: [env.NEXTJS_DOMAIN],
       credentials: true,
     }),
   );
