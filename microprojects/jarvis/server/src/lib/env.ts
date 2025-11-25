@@ -17,7 +17,7 @@ const schema = z.object({
     .default("development"),
   PORT: z.string().optional().default("8080"),
   HOST: z.string().optional().default("0.0.0.0"),
-  NEXTJS_DOMAIN: z.string().optional().default("http://localhost:3000"),
+  NEXTJS_DOMAIN: z.string(),
 
   // --- database ---
   DATABASE_URL: z.string(),
