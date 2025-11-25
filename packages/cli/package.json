@@ -33,7 +33,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc && tsc-alias -f",
+    "build": "tsc && tsc-alias --resolve-full-paths -f",
     "prepublishOnly": "pnpm build",
     "dev": "tsc --watch",
     "lint": "eslint src/",

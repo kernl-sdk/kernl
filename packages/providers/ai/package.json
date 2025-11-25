@@ -43,7 +43,7 @@
     }
   },
   "scripts": {
-    "build": "tsc && tsc-alias",
+    "build": "tsc && tsc-alias --resolve-full-paths",
     "dev": "tsc --watch",
     "lint": "eslint src/",
     "check-types": "tsc --noEmit",

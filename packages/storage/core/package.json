@@ -29,7 +29,7 @@
     }
   },
   "scripts": {
-    "build": "tsc && tsc-alias",
+    "build": "tsc && tsc-alias --resolve-full-paths",
     "dev": "tsc --watch",
     "check-types": "tsc --noEmit",
     "test": "vitest",
