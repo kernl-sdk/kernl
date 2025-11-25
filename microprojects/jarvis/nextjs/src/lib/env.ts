@@ -9,7 +9,7 @@ import { z } from "zod";
  */
 const schema = z.object({
   // --- api ---
-  API_BASE_URL: z.string().optional().default("http://localhost:8080"),
+  NEXT_PUBLIC_API_BASE_URL: z.string().optional().default("http://localhost:8080"),
 });
 
 /**
