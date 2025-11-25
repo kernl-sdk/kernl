@@ -6,16 +6,16 @@
   "scripts": {
     "dev": "tsx watch --env-file=.env.local src/index.ts",
     "build": "tsc",
-    "start": "node --env-file=.env.local dist/index.js"
+    "start": "node dist/index.js"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.0-beta.53",
     "@ai-sdk/openai": "^3.0.0-beta.15",
     "@ai-sdk/provider": "^3.0.0-beta.15",
     "@hono/node-server": "^1.19.6",
-    "@kernl-sdk/ai": "^0.2.4",
-    "kernl": "^0.5.1",
-    "@kernl-sdk/pg": "^0.1.8",
+    "@kernl-sdk/ai": "^0.2.5",
+    "kernl": "^0.6.0",
+    "@kernl-sdk/pg": "^0.1.9",
     "ai": "^5.0.93",
     "dotenv": "^16.6.1",
     "hono": "^4.10.6",
