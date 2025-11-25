@@ -1,5 +1,11 @@
 # @kernl/core
 
+## 0.6.2
+
+### Patch Changes
+
+- c5a5fcf: Storage now auto-initializes on first operation - no need to call init() manually
+
 ## 0.6.1
 
 ### Patch Changes

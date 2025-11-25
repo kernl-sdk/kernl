@@ -1,5 +1,14 @@
 # @kernl/pg
 
+## 0.1.11
+
+### Patch Changes
+
+- c5a5fcf: Storage now auto-initializes on first operation - no need to call init() manually
+- Updated dependencies [c5a5fcf]
+  - kernl@0.6.2
+  - @kernl-sdk/storage@0.1.11
+
 ## 0.1.10
 
 ### Patch Changes
