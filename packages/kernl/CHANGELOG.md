@@ -1,5 +1,14 @@
 # @kernl/core
 
+## 0.6.1
+
+### Patch Changes
+
+- Fix ESM compatibility by adding --resolve-full-paths to tsc-alias build
+- Updated dependencies
+  - @kernl-sdk/shared@0.1.6
+  - @kernl-sdk/protocol@0.2.5
+
 ## 0.6.0
 
 ### Minor Changes

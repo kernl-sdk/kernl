@@ -26,6 +26,8 @@ export function build(): Hono<{ Variables: Variables }> {
   const kernl = new Kernl({
     storage: { db: postgres({ connstr: env.DATABASE_URL }) },
   });
+
+  // --- agents ---
   kernl.register(jarvis);
   kernl.register(titler);
 

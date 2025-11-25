@@ -1,5 +1,11 @@
 # @kernl/cli
 
+## 0.2.7
+
+### Patch Changes
+
+- Fix ESM compatibility by adding --resolve-full-paths to tsc-alias build
+
 ## 0.2.6
 
 ### Patch Changes

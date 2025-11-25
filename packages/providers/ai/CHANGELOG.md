@@ -1,5 +1,14 @@
 # @kernl/ai
 
+## 0.2.6
+
+### Patch Changes
+
+- Fix ESM compatibility by adding --resolve-full-paths to tsc-alias build
+- Updated dependencies
+  - @kernl-sdk/shared@0.1.6
+  - @kernl-sdk/protocol@0.2.5
+
 ## 0.2.5
 
 ### Patch Changes

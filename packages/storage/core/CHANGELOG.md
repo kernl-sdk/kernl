@@ -1,5 +1,15 @@
 # @kernl/storage
 
+## 0.1.10
+
+### Patch Changes
+
+- Fix ESM compatibility by adding --resolve-full-paths to tsc-alias build
+- Updated dependencies
+  - kernl@0.6.1
+  - @kernl-sdk/shared@0.1.6
+  - @kernl-sdk/protocol@0.2.5
+
 ## 0.1.9
 
 ### Patch Changes

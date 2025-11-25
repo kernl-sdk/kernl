@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/shared",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Shared utilities for kernl",
   "keywords": [
     "kernl",
