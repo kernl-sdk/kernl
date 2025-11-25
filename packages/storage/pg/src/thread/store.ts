@@ -23,13 +23,18 @@ import {
 
 /**
  * PostgreSQL Thread store implementation.
+ *
+ * IMPORTANT: All async methods must call `await this.ensureInit()` before
+ * any database operations. This ensures schema/tables exist.
  */
 export class PGThreadStore implements ThreadStore {
   private db: Pool | PoolClient;
   private registries: { agents: AgentRegistry; models: ModelRegistry } | null;
+  private ensureInit: () => Promise<void>;
 
-  constructor(db: Pool | PoolClient) {
+  constructor(db: Pool | PoolClient, ensureInit: () => Promise<void>) {
     this.db = db;
+    this.ensureInit = ensureInit;
     this.registries = null;
   }
 
@@ -46,6 +51,8 @@ export class PGThreadStore implements ThreadStore {
    * Get a thread by id.
    */
   async get(tid: string, include?: ThreadInclude): Promise<Thread | null> {
+    await this.ensureInit();
+
     // JOIN with thread_events if include.history
     if (include?.history) {
       const opts =
@@ -150,6 +157,8 @@ export class PGThreadStore implements ThreadStore {
    * List threads matching the filter.
    */
   async list(options?: ThreadListOptions): Promise<Thread[]> {
+    await this.ensureInit();
+
     let query = `SELECT * FROM ${SCHEMA_NAME}.threads`;
     const values: any[] = [];
     let paramIndex = 1;
@@ -250,6 +259,8 @@ export class PGThreadStore implements ThreadStore {
    * Insert a new thread into the store.
    */
   async insert(thread: NewThread): Promise<Thread> {
+    await this.ensureInit();
+
     const record = NewThreadCodec.encode(thread);
 
     const result = await this.db.query<ThreadRecord>(
@@ -279,6 +290,8 @@ export class PGThreadStore implements ThreadStore {
    * Update thread runtime state.
    */
   async update(tid: string, patch: ThreadUpdate): Promise<Thread> {
+    await this.ensureInit();
+
     const updates: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
@@ -295,7 +308,7 @@ export class PGThreadStore implements ThreadStore {
 
     if (patch.context !== undefined) {
       updates.push(`context = $${paramIndex++}`);
-      // NOTE: Store the raw context value, not the Context wrapper. 
+      // NOTE: Store the raw context value, not the Context wrapper.
       //
       // THis may change in the future depending on Context implementation.
       values.push(JSON.stringify(patch.context.context));
@@ -327,6 +340,8 @@ export class PGThreadStore implements ThreadStore {
    * Delete a thread and cascade to thread_events.
    */
   async delete(tid: string): Promise<void> {
+    await this.ensureInit();
+
     await this.db.query(`DELETE FROM ${SCHEMA_NAME}.threads WHERE id = $1`, [
       tid,
     ]);
@@ -339,6 +354,8 @@ export class PGThreadStore implements ThreadStore {
     tid: string,
     opts?: ThreadHistoryOptions,
   ): Promise<ThreadEvent[]> {
+    await this.ensureInit();
+
     let query = `SELECT * FROM ${SCHEMA_NAME}.thread_events WHERE tid = $1`;
     const values: any[] = [tid];
     let paramIndex = 2;
@@ -370,8 +387,7 @@ export class PGThreadStore implements ThreadStore {
     return result.rows.map((record) =>
       ThreadEventRecordCodec.decode({
         ...record,
-        // Normalize BIGINT (string) to number for zod schema
-        timestamp: Number(record.timestamp),
+        timestamp: Number(record.timestamp), // normalize BIGINT (string) to number for zod schema
       } as ThreadEventRecord),
     );
   }
@@ -388,6 +404,7 @@ export class PGThreadStore implements ThreadStore {
    */
   async append(events: ThreadEvent[]): Promise<void> {
     if (events.length === 0) return;
+    await this.ensureInit();
 
     const records = events.map((e) => ThreadEventRecordCodec.encode(e));
 
@@ -434,6 +451,7 @@ export class PGThreadStore implements ThreadStore {
     const agent = this.registries.agents.get(record.agent_id);
     const model = this.registries.models.get(record.model);
 
+    // (TODO): we might want to allow this in the future, unclear how it would look though..
     if (!agent || !model) {
       throw new Error(
         `Thread ${record.id} references non-existent agent/model (agent: ${record.agent_id}, model: ${record.model})`,

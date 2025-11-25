@@ -16,6 +16,107 @@ const TEST_DB_URL = process.env.KERNL_PG_TEST_URL;
 type TestLanguageModel =
   ModelRegistry extends { get(key: string): infer T | undefined } ? T : never;
 
+describe.sequential("PGStorage auto-initialization", () => {
+  if (!TEST_DB_URL) {
+    it.skip("requires KERNL_PG_TEST_URL to be set", () => {});
+    return;
+  }
+
+  /**
+   * Verifies that ALL store methods auto-initialize without explicit init() call.
+   *
+   * This is critical for DX - users should not need to remember to call init().
+   * Each method must internally call ensureInit() before any DB operation.
+   *
+   * Methods covered: get, list, insert, update, delete, history, append
+   */
+  it("auto-initializes on first store operation (no explicit init required)", async () => {
+    const pool = new Pool({ connectionString: TEST_DB_URL });
+    const storage = new PGStorage({ pool });
+
+    // Clean slate - drop schema to prove init runs automatically
+    await pool.query('DROP SCHEMA IF EXISTS "kernl" CASCADE');
+
+    // Bind minimal registries
+    const model = {
+      spec: "1.0" as const,
+      provider: "test",
+      modelId: "auto-init-model",
+    } as unknown as TestLanguageModel;
+
+    const agent = new Agent({
+      id: "auto-init-agent",
+      name: "Auto Init Agent",
+      instructions: () => "test",
+      model,
+    });
+
+    const agents: AgentRegistry = new Map([["auto-init-agent", agent]]);
+    const models: ModelRegistry = new Map([
+      ["test/auto-init-model", model],
+    ]) as unknown as ModelRegistry;
+
+    storage.bind({ agents, models });
+    const store = storage.threads;
+    const tid = "auto-init-thread";
+
+    // 1) list() - should auto-init
+    const threads = await store.list();
+    expect(threads).toEqual([]);
+
+    // 2) get() - should work (returns null for non-existent)
+    const got = await store.get(tid);
+    expect(got).toBeNull();
+
+    // 3) insert() - should work
+    const inserted = await store.insert({
+      id: tid,
+      namespace: "kernl",
+      agentId: "auto-init-agent",
+      model: "test/auto-init-model",
+    });
+    expect(inserted.tid).toBe(tid);
+
+    // 4) update() - should work
+    await store.update(tid, { tick: 1 });
+    const tickResult = await pool.query<{ tick: number }>(
+      `SELECT tick FROM "kernl"."threads" WHERE id = $1`,
+      [tid],
+    );
+    expect(tickResult.rows[0]?.tick).toBe(1);
+
+    // 5) history() - should work (empty)
+    const hist = await store.history(tid);
+    expect(hist).toEqual([]);
+
+    // 6) append() - should work
+    await store.append([
+      {
+        id: "evt-1",
+        tid,
+        seq: 0,
+        kind: "message",
+        timestamp: new Date(),
+        data: { role: "user", text: "test" },
+        metadata: null,
+      } as any,
+    ]);
+
+    // 7) delete() - should work
+    await store.delete(tid);
+    const afterDelete = await store.get(tid);
+    expect(afterDelete).toBeNull();
+
+    // Verify schema was created
+    const schemaResult = await pool.query(
+      `SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'kernl'`,
+    );
+    expect(schemaResult.rows).toHaveLength(1);
+
+    await storage.close();
+  });
+});
+
 describe.sequential("PGStorage integration", () => {
   if (!TEST_DB_URL) {
     it.skip("requires KERNL_PG_TEST_URL to be set", () => {

@@ -25,8 +25,6 @@ export class Kernl extends KernlHooks<UnknownContext, AgentResponseType> {
   readonly storage: KernlStorage;
   athreads: Map<string, Thread<any, any>> = new Map(); /* active threads */
 
-  private initPromise: Promise<void> | null = null;
-
   // --- public API ---
   readonly threads: RThreads; /* Threads resource */
 
@@ -59,7 +57,6 @@ export class Kernl extends KernlHooks<UnknownContext, AgentResponseType> {
   async spawn<TContext, TResponse extends AgentResponseType>(
     thread: Thread<TContext, TResponse>,
   ): Promise<ThreadExecuteResult<ResolvedAgentResponse<TResponse>>> {
-    await this.ensureInitialized();
     this.athreads.set(thread.tid, thread);
     try {
       return await thread.execute();
@@ -76,7 +73,6 @@ export class Kernl extends KernlHooks<UnknownContext, AgentResponseType> {
   async schedule<TContext, TResponse extends AgentResponseType>(
     thread: Thread<TContext, TResponse>,
   ): Promise<ThreadExecuteResult<ResolvedAgentResponse<TResponse>>> {
-    await this.ensureInitialized();
     this.athreads.set(thread.tid, thread);
     try {
       return await thread.execute();
@@ -93,7 +89,6 @@ export class Kernl extends KernlHooks<UnknownContext, AgentResponseType> {
   async *spawnStream<TContext, TResponse extends AgentResponseType>(
     thread: Thread<TContext, TResponse>,
   ): AsyncIterable<ThreadStreamEvent> {
-    await this.ensureInitialized();
     this.athreads.set(thread.tid, thread);
     try {
       yield* thread.stream();
@@ -110,31 +105,11 @@ export class Kernl extends KernlHooks<UnknownContext, AgentResponseType> {
   async *scheduleStream<TContext, TResponse extends AgentResponseType>(
     thread: Thread<TContext, TResponse>,
   ): AsyncIterable<ThreadStreamEvent> {
-    await this.ensureInitialized();
     this.athreads.set(thread.tid, thread);
     try {
       yield* thread.stream();
     } finally {
       this.athreads.delete(thread.tid);
     }
-  }
-
-  /**
-   * Ensure the underlying storage backend has been initialized.
-   *
-   * This is called lazily on first use so that callers do not need to worry
-   * about calling storage.init() themselves. Safe and idempotent to call
-   * multiple times; concurrent calls share the same initialization promise.
-   */
-  private async ensureInitialized(): Promise<void> {
-    if (!this.initPromise) {
-      this.initPromise = this.storage.init().catch((error) => {
-        // allow a retry if initialization fails.
-        this.initPromise = null;
-        throw error;
-      });
-    }
-
-    await this.initPromise;
   }
 }

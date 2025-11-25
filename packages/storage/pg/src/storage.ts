@@ -2,20 +2,20 @@ import assert from "assert";
 import type { Pool, PoolClient } from "pg";
 
 /* workspace */
-import type { Table, Column, IndexConstraint } from "@kernl-sdk/storage";
-import { SCHEMA_NAME, TABLE_MIGRATIONS } from "@kernl-sdk/storage";
 import type {
   AgentRegistry,
   ModelRegistry,
   KernlStorage,
   Transaction,
 } from "kernl";
+import type { Table, Column, IndexConstraint } from "@kernl-sdk/storage";
+import { SCHEMA_NAME, TABLE_MIGRATIONS } from "@kernl-sdk/storage";
 import { UnimplementedError } from "@kernl-sdk/shared/lib";
 
 /* pg */
 import { PGThreadStore } from "./thread/store";
-import { SQL_IDENTIFIER_REGEX } from "./sql";
 import { migrations } from "./migrations";
+import { SQL_IDENTIFIER_REGEX } from "./sql";
 
 /**
  * PostgreSQL storage configuration.
@@ -29,15 +29,38 @@ export interface PGStorageConfig {
 
 /**
  * PostgreSQL storage adapter.
+ *
+ * Storage is lazily initialized on first use via `ensureInit()`. This means
+ * callers don't need to explicitly call `init()` - it happens automatically.
+ *
+ * NOTE: If the number of store methods grows significantly, consider replacing
+ * the manual `ensureInit()` calls with a Proxy-based wrapper for foolproof
+ * auto-initialization.
  */
 export class PGStorage implements KernlStorage {
   private pool: Pool;
+  private initPromise: Promise<void> | null = null;
 
   threads: PGThreadStore;
 
   constructor(config: PGStorageConfig) {
     this.pool = config.pool;
-    this.threads = new PGThreadStore(this.pool);
+    this.threads = new PGThreadStore(this.pool, () => this.ensureInit());
+  }
+
+  /**
+   * Ensure storage is initialized before any operation.
+   *
+   * Safe to call multiple times - initialization only runs once.
+   */
+  private async ensureInit(): Promise<void> {
+    if (!this.initPromise) {
+      this.initPromise = this.init().catch((err) => {
+        this.initPromise = null;
+        throw err;
+      });
+    }
+    return this.initPromise;
   }
 
   /**
