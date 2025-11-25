@@ -163,11 +163,11 @@ importers:
         specifier: ^1.19.6
         version: 1.19.6(hono@4.10.6)
       '@kernl-sdk/ai':
-        specifier: ^0.2.5
-        version: 0.2.5(@ai-sdk/anthropic@3.0.0-beta.59(zod@4.1.13))(@ai-sdk/openai@3.0.0-beta.66(zod@4.1.13))(@ai-sdk/provider@3.0.0-beta.17)
+        specifier: ^0.2.6
+        version: 0.2.6(@ai-sdk/anthropic@3.0.0-beta.59(zod@4.1.13))(@ai-sdk/openai@3.0.0-beta.66(zod@4.1.13))(@ai-sdk/provider@3.0.0-beta.17)
       '@kernl-sdk/pg':
-        specifier: ^0.1.9
-        version: 0.1.9
+        specifier: ^0.1.10
+        version: 0.1.10
       ai:
         specifier: ^5.0.93
         version: 5.0.101(zod@4.1.13)
@@ -178,8 +178,8 @@ importers:
         specifier: ^4.10.6
         version: 4.10.6
       kernl:
-        specifier: ^0.6.0
-        version: 0.6.0
+        specifier: ^0.6.1
+        version: 0.6.1
       pino:
         specifier: ^10.1.0
         version: 10.1.0
@@ -763,8 +763,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@kernl-sdk/ai@0.2.5':
-    resolution: {integrity: sha512-GJYucF6GwF1KjvxYRiInEBj4tTgqVd+U87Se7jNkbjeMlw6h03H+2EnPV7wOYAEB6eqJT01SblxT88IM4wr1Uw==}
+  '@kernl-sdk/ai@0.2.6':
+    resolution: {integrity: sha512-dI5RzVPdFtxVHYAiLSMumqHNsv8TURFMf7GS6kpDV3a48HeJlBJNJG/lV4E2RTG0rjE+Xcg0D2/V0cmz9BGA1g==}
     peerDependencies:
       '@ai-sdk/anthropic': '*'
       '@ai-sdk/google': '*'
@@ -778,17 +778,17 @@ packages:
       '@ai-sdk/openai':
         optional: true
 
-  '@kernl-sdk/pg@0.1.9':
-    resolution: {integrity: sha512-OSLL0WETZaqsiSns7RbC+zVcKwW+1ZxePY8ONrbN0W503mLxBDdsrfk5k3xXQRUxC4ckuE2/BUnvALEoco5uUQ==}
+  '@kernl-sdk/pg@0.1.10':
+    resolution: {integrity: sha512-YbiNdIwelCtshDK2XDi15WKd0VgFM5XkmzKwuDQakbOZsACcnao8ST7cRvxSlW+8aLVpypYJoyN8VACGiQQRIA==}
 
-  '@kernl-sdk/protocol@0.2.4':
-    resolution: {integrity: sha512-GIlNvfgR4JxsjSX6EPrZ63olAJD4AULjkujFJU1zCLEOCjGeMgkaVzWOWDoARwNzglRkY8ZJjFWHpP85AmC+pg==}
+  '@kernl-sdk/protocol@0.2.5':
+    resolution: {integrity: sha512-3AcnYl57H7ti5g/7QbpVKxzWjH/OEGCHkofoBZc/VC+sW1NFif8tgtbQ1ebProEy+XWHZD6rF+tKyBaMrrgtDg==}
 
-  '@kernl-sdk/shared@0.1.5':
-    resolution: {integrity: sha512-7xUUR00lDBYR34jMRkNm7Z0uR1CBckIRy4OzNhk0Sd7d/84u95fUyyClvJBTE2ZyN27yLcP10LsRaEep+0ySow==}
+  '@kernl-sdk/shared@0.1.6':
+    resolution: {integrity: sha512-ul0+nPvaEoLqL+B3pOcojDnbd0uK8xs7i0WOgSpF309hj5MFT0+OV6vw3KVGUNjHQmFmkT4ayNR4DDvAhTFhfw==}
 
-  '@kernl-sdk/storage@0.1.9':
-    resolution: {integrity: sha512-v1SC48JVOJZQIyz4z7VYSYVUmxJxEOQDs7ILibt0+ue6wgMJZq860Bb4U+RwJy2FvuilXsre+LU0gyguPlRaOA==}
+  '@kernl-sdk/storage@0.1.10':
+    resolution: {integrity: sha512-oxjkV5OsyBvJawN51nPQ2BAozLhsxsGPwbkDo3fk0FMV63KrfgQf9iRBAxdLInYcyelcjMQeDRbtxjg4SZBLCA==}
 
   '@mermaid-js/parser@0.6.3':
     resolution: {integrity: sha512-lnjOhe7zyHjc+If7yT4zoedx2vo4sHaTmtkl1+or8BRTnCtDmcTpAjpzDSfCZrshM5bCoz0GyidzadJAH1xobA==}
@@ -3025,8 +3025,8 @@ packages:
     resolution: {integrity: sha512-woHRUZ/iF23GBP1dkDQMh1QBad9dmr8/PAwNA54VrSOVYgI12MAcE14TqnDdQOdzyEonGzMepYnqBMYdsoAr8Q==}
     hasBin: true
 
-  kernl@0.6.0:
-    resolution: {integrity: sha512-5twOZtxRQNcq4JGLizNY+NCeX4KdEt6fBm6Hdd3xGYzgj+PeaiMhdAb4ZHRuIPQfxfs7ilB0hEoUtajg4zIiow==}
+  kernl@0.6.1:
+    resolution: {integrity: sha512-nJYaZqHK55QNSba9P7pr5Gp83gBlZ++5+ye3aULRLwv6VWQqT08xwpWB1I/kO1ZSa8trsbQ5bGKyc9FcLudwPg==}
 
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
@@ -4924,39 +4924,39 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@kernl-sdk/ai@0.2.5(@ai-sdk/anthropic@3.0.0-beta.59(zod@4.1.13))(@ai-sdk/openai@3.0.0-beta.66(zod@4.1.13))(@ai-sdk/provider@3.0.0-beta.17)':
+  '@kernl-sdk/ai@0.2.6(@ai-sdk/anthropic@3.0.0-beta.59(zod@4.1.13))(@ai-sdk/openai@3.0.0-beta.66(zod@4.1.13))(@ai-sdk/provider@3.0.0-beta.17)':
     dependencies:
       '@ai-sdk/provider': 3.0.0-beta.17
-      '@kernl-sdk/protocol': 0.2.4
-      '@kernl-sdk/shared': 0.1.5
+      '@kernl-sdk/protocol': 0.2.5
+      '@kernl-sdk/shared': 0.1.6
     optionalDependencies:
       '@ai-sdk/anthropic': 3.0.0-beta.59(zod@4.1.13)
       '@ai-sdk/openai': 3.0.0-beta.66(zod@4.1.13)
 
-  '@kernl-sdk/pg@0.1.9':
+  '@kernl-sdk/pg@0.1.10':
     dependencies:
-      '@kernl-sdk/shared': 0.1.5
-      '@kernl-sdk/storage': 0.1.9
-      kernl: 0.6.0
+      '@kernl-sdk/shared': 0.1.6
+      '@kernl-sdk/storage': 0.1.10
+      kernl: 0.6.1
       pg: 8.16.3
     transitivePeerDependencies:
       - '@cfworker/json-schema'
       - pg-native
       - supports-color
 
-  '@kernl-sdk/protocol@0.2.4':
+  '@kernl-sdk/protocol@0.2.5':
     dependencies:
-      '@kernl-sdk/shared': 0.1.5
+      '@kernl-sdk/shared': 0.1.6
 
-  '@kernl-sdk/shared@0.1.5':
+  '@kernl-sdk/shared@0.1.6':
     dependencies:
       zod: 4.1.13
 
-  '@kernl-sdk/storage@0.1.9':
+  '@kernl-sdk/storage@0.1.10':
     dependencies:
-      '@kernl-sdk/protocol': 0.2.4
-      '@kernl-sdk/shared': 0.1.5
-      kernl: 0.6.0
+      '@kernl-sdk/protocol': 0.2.5
+      '@kernl-sdk/shared': 0.1.6
+      kernl: 0.6.1
       zod: 4.1.13
     transitivePeerDependencies:
       - '@cfworker/json-schema'
@@ -7493,10 +7493,10 @@ snapshots:
     dependencies:
       commander: 8.3.0
 
-  kernl@0.6.0:
+  kernl@0.6.1:
     dependencies:
-      '@kernl-sdk/protocol': 0.2.4
-      '@kernl-sdk/shared': 0.1.5
+      '@kernl-sdk/protocol': 0.2.5
+      '@kernl-sdk/shared': 0.1.6
       '@modelcontextprotocol/sdk': 1.22.0
       pino: 9.14.0
       zod: 4.1.13
