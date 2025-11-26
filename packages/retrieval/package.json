@@ -1,0 +1,46 @@
+{
+  "name": "@kernl-sdk/retrieval",
+  "version": "0.0.1",
+  "description": "Generic search and retrieval abstractions for kernl",
+  "keywords": [
+    "kernl",
+    "retrieval",
+    "search",
+    "vector",
+    "embeddings"
+  ],
+  "author": "dremnik",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kernl-sdk/kernl.git",
+    "directory": "packages/retrieval"
+  },
+  "homepage": "https://github.com/kernl-sdk/kernl#readme",
+  "bugs": {
+    "url": "https://github.com/kernl-sdk/kernl/issues"
+  },
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc && tsc-alias --resolve-full-paths",
+    "dev": "tsc --watch",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kernl-sdk/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "tsc-alias": "^1.8.10",
+    "typescript": "5.9.2"
+  }
+}
