@@ -2,6 +2,10 @@ import { SharedProviderMetadata } from "@/provider";
 
 import { EmbeddingModelRequest } from "./request";
 
+/**
+ * An embedding is a vector, i.e. an array of numbers.
+ * It is e.g. used to represent a text as a vector of word embeddings.
+ */
 export type Embedding = number[];
 
 /**
@@ -42,7 +46,9 @@ export interface EmbeddingModel<TValue = string> {
    *
    * @param request - The embedding request.
    */
-  embed(request: EmbeddingModelRequest<TValue>): Promise<EmbeddingModelResponse>;
+  embed(
+    request: EmbeddingModelRequest<TValue>,
+  ): Promise<EmbeddingModelResponse>;
 }
 
 /**

@@ -1,0 +1,51 @@
+{
+  "name": "@kernl-sdk/turbopuffer",
+  "version": "0.0.1",
+  "description": "Turbopuffer search index adapter for kernl",
+  "keywords": [
+    "kernl",
+    "turbopuffer",
+    "vector",
+    "search"
+  ],
+  "author": "dremnik",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kernl-sdk/kernl.git",
+    "directory": "packages/storage/turbopuffer"
+  },
+  "homepage": "https://github.com/kernl-sdk/kernl#readme",
+  "bugs": {
+    "url": "https://github.com/kernl-sdk/kernl/issues"
+  },
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc && tsc-alias --resolve-full-paths",
+    "dev": "tsc --watch",
+    "check-types": "tsc --noEmit",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:run": "vitest run"
+  },
+  "dependencies": {
+    "@kernl-sdk/retrieval": "workspace:*",
+    "@kernl-sdk/shared": "workspace:*",
+    "@turbopuffer/turbopuffer": "^0.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "tsc-alias": "^1.8.10",
+    "typescript": "5.9.2",
+    "vitest": "^4.0.8"
+  }
+}

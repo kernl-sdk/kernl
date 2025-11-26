@@ -139,6 +139,22 @@ importers:
         specifier: ^4.0.8
         version: 4.0.9(@types/node@24.10.1)
 
+  packages/retrieval:
+    dependencies:
+      '@kernl-sdk/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      '@types/node':
+        specifier: ^24.10.0
+        version: 24.10.1
+      tsc-alias:
+        specifier: ^1.8.10
+        version: 1.8.16
+      typescript:
+        specifier: 5.9.2
+        version: 5.9.2
+
   packages/shared:
     dependencies:
       zod:
@@ -229,6 +245,31 @@ importers:
       '@types/pg':
         specifier: ^8.15.6
         version: 8.15.6
+      tsc-alias:
+        specifier: ^1.8.10
+        version: 1.8.16
+      typescript:
+        specifier: 5.9.2
+        version: 5.9.2
+      vitest:
+        specifier: ^4.0.8
+        version: 4.0.9(@types/node@24.10.1)
+
+  packages/storage/turbopuffer:
+    dependencies:
+      '@kernl-sdk/retrieval':
+        specifier: workspace:*
+        version: link:../../retrieval
+      '@kernl-sdk/shared':
+        specifier: workspace:*
+        version: link:../../shared
+      '@turbopuffer/turbopuffer':
+        specifier: ^0.10.0
+        version: 0.10.18
+    devDependencies:
+      '@types/node':
+        specifier: ^24.10.0
+        version: 24.10.1
       tsc-alias:
         specifier: ^1.8.10
         version: 1.8.16
@@ -672,6 +713,9 @@ packages:
 
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
+
+  '@turbopuffer/turbopuffer@0.10.18':
+    resolution: {integrity: sha512-3AuyjumzcQ0iLNU6hRTbOt8OeZoVJaHqNQOzIMzM6h290OGEtdCJ6L0L5Hs9gmrpANlaTPN1kUC2fe+/BMpRDw==}
 
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
@@ -1222,6 +1266,9 @@ packages:
   package-manager-detector@0.2.11:
     resolution: {integrity: sha512-BEnLolu+yuz22S56CU1SUKq3XC3PkwD5wv4ikR4MfGvnRVcmzXR9DwSlW2fEamyTPyXHomBJRzgapeuBvRNzJQ==}
 
+  pako@2.1.0:
+    resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
+
   parseurl@1.3.3:
     resolution: {integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==}
     engines: {node: '>= 0.8'}
@@ -1598,6 +1645,10 @@ packages:
 
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
+
+  undici@7.16.0:
+    resolution: {integrity: sha512-QEg3HPMll0o3t2ourKwOeUAZ159Kn9mx5pnzHRQO8+Wixmh88YdZRiIwat0iNzNNXn0yoEtXJqFpyW7eM8BV7g==}
+    engines: {node: '>=20.18.1'}
 
   universalify@0.1.2:
     resolution: {integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==}
@@ -2128,6 +2179,11 @@ snapshots:
     optional: true
 
   '@standard-schema/spec@1.0.0': {}
+
+  '@turbopuffer/turbopuffer@0.10.18':
+    dependencies:
+      pako: 2.1.0
+      undici: 7.16.0
 
   '@types/chai@5.2.3':
     dependencies:
@@ -2686,6 +2742,8 @@ snapshots:
     dependencies:
       quansync: 0.2.11
 
+  pako@2.1.0: {}
+
   parseurl@1.3.3: {}
 
   path-exists@4.0.0: {}
@@ -3058,6 +3116,8 @@ snapshots:
   typescript@5.9.2: {}
 
   undici-types@7.16.0: {}
+
+  undici@7.16.0: {}
 
   universalify@0.1.2: {}
 
