@@ -2,14 +2,6 @@ import assert from "assert";
 import type { Pool, PoolClient } from "pg";
 
 import {
-  SCHEMA_NAME,
-  NewThreadCodec,
-  ThreadEventRecordCodec,
-  type ThreadRecord,
-  type ThreadEventRecord,
-} from "@kernl-sdk/storage";
-import { Thread, type ThreadEvent } from "kernl/internal";
-import {
   Context,
   type AgentRegistry,
   type ModelRegistry,
@@ -20,6 +12,16 @@ import {
   type ThreadListOptions,
   type ThreadHistoryOptions,
 } from "kernl";
+import { Thread, type ThreadEvent } from "kernl/internal";
+import {
+  SCHEMA_NAME,
+  NewThreadCodec,
+  ThreadEventRecordCodec,
+  type ThreadRecord,
+  type ThreadEventRecord,
+} from "@kernl-sdk/storage";
+
+import { SQL_WHERE, SQL_ORDER, SQL_UPDATE } from "./sql";
 
 /**
  * PostgreSQL Thread store implementation.
@@ -159,88 +161,28 @@ export class PGThreadStore implements ThreadStore {
   async list(options?: ThreadListOptions): Promise<Thread[]> {
     await this.ensureInit();
 
+    const { sql: where, params } = SQL_WHERE.encode({
+      filter: options?.filter,
+      startIdx: 1,
+    });
+
+    let idx = params.length + 1;
     let query = `SELECT * FROM ${SCHEMA_NAME}.threads`;
-    const values: any[] = [];
-    let paramIndex = 1;
 
-    // build WHERE clause
-    const conditions: string[] = [];
-    if (options?.filter) {
-      const {
-        state,
-        agentId,
-        parentTaskId,
-        createdAfter,
-        createdBefore,
-        namespace,
-      } = options.filter;
-
-      if (namespace) {
-        conditions.push(`namespace = $${paramIndex++}`);
-        values.push(namespace);
-      }
-
-      if (state) {
-        if (Array.isArray(state)) {
-          conditions.push(`state = ANY($${paramIndex++})`);
-          values.push(state);
-        } else {
-          conditions.push(`state = $${paramIndex++}`);
-          values.push(state);
-        }
-      }
-
-      if (agentId) {
-        conditions.push(`agent_id = $${paramIndex++}`);
-        values.push(agentId);
-      }
-
-      if (parentTaskId) {
-        conditions.push(`parent_task_id = $${paramIndex++}`);
-        values.push(parentTaskId);
-      }
-
-      if (createdAfter) {
-        conditions.push(`created_at > $${paramIndex++}`);
-        values.push(createdAfter.getTime());
-      }
-
-      if (createdBefore) {
-        conditions.push(`created_at < $${paramIndex++}`);
-        values.push(createdBefore.getTime());
-      }
-    }
-
-    if (conditions.length > 0) {
-      query += ` WHERE ${conditions.join(" AND ")}`;
-    }
-
-    // build ORDER BY clause
-    const orderClauses: string[] = [];
-    if (options?.order?.createdAt) {
-      orderClauses.push(`created_at ${options.order.createdAt.toUpperCase()}`);
-    }
-    if (options?.order?.updatedAt) {
-      orderClauses.push(`updated_at ${options.order.updatedAt.toUpperCase()}`);
-    }
-    if (orderClauses.length > 0) {
-      query += ` ORDER BY ${orderClauses.join(", ")}`;
-    } else {
-      // default: most recent first
-      query += ` ORDER BY created_at DESC`;
-    }
+    if (where) query += ` WHERE ${where}`;
+    query += ` ORDER BY ${SQL_ORDER.encode({ order: options?.order })}`;
 
     if (options?.limit) {
-      query += ` LIMIT $${paramIndex++}`;
-      values.push(options.limit);
+      query += ` LIMIT $${idx++}`;
+      params.push(options.limit);
     }
 
     if (options?.offset) {
-      query += ` OFFSET $${paramIndex++}`;
-      values.push(options.offset);
+      query += ` OFFSET $${idx++}`;
+      params.push(options.offset);
     }
 
-    const result = await this.db.query<ThreadRecord>(query, values);
+    const result = await this.db.query<ThreadRecord>(query, params);
     return result.rows
       .map((record) => {
         try {
@@ -292,45 +234,16 @@ export class PGThreadStore implements ThreadStore {
   async update(tid: string, patch: ThreadUpdate): Promise<Thread> {
     await this.ensureInit();
 
-    const updates: string[] = [];
-    const values: any[] = [];
-    let paramIndex = 1;
-
-    if (patch.tick !== undefined) {
-      updates.push(`tick = $${paramIndex++}`);
-      values.push(patch.tick);
-    }
-
-    if (patch.state !== undefined) {
-      updates.push(`state = $${paramIndex++}`);
-      values.push(patch.state);
-    }
-
-    if (patch.context !== undefined) {
-      updates.push(`context = $${paramIndex++}`);
-      // NOTE: Store the raw context value, not the Context wrapper.
-      //
-      // THis may change in the future depending on Context implementation.
-      values.push(JSON.stringify(patch.context.context));
-    }
-
-    if (patch.metadata !== undefined) {
-      updates.push(`metadata = $${paramIndex++}`);
-      values.push(patch.metadata ? JSON.stringify(patch.metadata) : null);
-    }
-
-    // always update `updated_at`
-    updates.push(`updated_at = $${paramIndex++}`);
-    values.push(Date.now());
-
-    values.push(tid); // WHERE id = $N
+    const { sql: updates, params } = SQL_UPDATE.encode({ patch, startIdx: 1 });
+    const idx = params.length + 1;
+    params.push(tid);
 
     const result = await this.db.query<ThreadRecord>(
       `UPDATE ${SCHEMA_NAME}.threads
-       SET ${updates.join(", ")}
-       WHERE id = $${paramIndex}
+       SET ${updates}
+       WHERE id = $${idx}
        RETURNING *`,
-      values,
+      params,
     );
 
     return this.hydrate({ record: result.rows[0] });
@@ -341,7 +254,6 @@ export class PGThreadStore implements ThreadStore {
    */
   async delete(tid: string): Promise<void> {
     await this.ensureInit();
-
     await this.db.query(`DELETE FROM ${SCHEMA_NAME}.threads WHERE id = $1`, [
       tid,
     ]);
