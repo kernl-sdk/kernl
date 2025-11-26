@@ -1,3 +1,7 @@
+/**
+ * Cursor-based pagination.
+ */
+
 import { AbstractPage, type PageParamsBase } from "./base";
 
 export interface CursorPageParams extends PageParamsBase {

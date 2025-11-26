@@ -3,7 +3,7 @@ import {
   OffsetPage,
   type OffsetPageResponse,
   type OffsetPageParams,
-} from "../pagination/offset";
+} from "../offset";
 
 describe("OffsetPage", () => {
   describe("construction", () => {

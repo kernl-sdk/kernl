@@ -1,3 +1,7 @@
+/**
+ * Offset-based pagination.
+ */
+
 import { AbstractPage, type PageParamsBase } from "./base";
 
 export interface OffsetPageParams extends PageParamsBase {

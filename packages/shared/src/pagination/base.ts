@@ -1,3 +1,7 @@
+/**
+ * Base pagination abstractions.
+ */
+
 export interface PageParamsBase {
   /**
    * Maximum number of items to return in a single page.

@@ -4,7 +4,7 @@ import {
   CursorPage,
   type CursorPageResponse,
   type CursorPageParams,
-} from "../pagination/cursor";
+} from "../cursor";
 
 describe("CursorPage", () => {
   describe("construction", () => {
