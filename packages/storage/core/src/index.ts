@@ -4,5 +4,7 @@
 
 export * from "./base";
 export * from "./thread";
+export * from "./memory";
 export * from "./serde/thread";
+export * from "./serde/memory";
 export * from "./table";

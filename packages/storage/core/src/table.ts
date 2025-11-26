@@ -37,7 +37,7 @@ export function defineTable<
 
 /* ---- Column Types ---- */
 
-export type ColumnType = "text" | "integer" | "bigint" | "jsonb";
+export type ColumnType = "text" | "integer" | "bigint" | "boolean" | "jsonb";
 export type OnDeleteAction = "CASCADE" | "SET NULL" | "RESTRICT";
 
 /**
@@ -78,6 +78,7 @@ export interface Column<T = unknown> {
 export const text = (): Column<string> => col("text");
 export const integer = (): Column<number> => col("integer");
 export const bigint = (): Column<number> => col("bigint");
+export const boolean = (): Column<boolean> => col("boolean");
 export const jsonb = <T = unknown>(): Column<T> => col("jsonb");
 
 export const timestamps = {
@@ -130,6 +131,8 @@ function col<T>(type: ColumnType): Column<T> {
         case "integer":
         case "bigint":
           return String(val);
+        case "boolean":
+          return val ? "TRUE" : "FALSE";
         case "jsonb":
           return `'${JSON.stringify(val)}'`;
       }
@@ -142,6 +145,8 @@ function col<T>(type: ColumnType): Column<T> {
         case "integer":
         case "bigint":
           return Number.parseInt(val, 10) as T;
+        case "boolean":
+          return (val === "t" || val === "true" || val === "TRUE") as T;
         case "jsonb":
           return JSON.parse(val) as T;
       }
