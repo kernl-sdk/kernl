@@ -9,19 +9,20 @@ export { Agent } from "./agent";
 export { Context } from "./context";
 
 // --- tools --
+
 export { tool, Toolkit, FunctionToolkit, MCPToolkit } from "./tool";
 export { MCPServerSSE } from "./mcp/sse";
 export { MCPServerStdio } from "./mcp/stdio";
 export { MCPServerStreamableHttp } from "./mcp/http";
 
-// --- thread models ---
+// --- threads ---
+
 export type {
   MThread as Thread,
   MThreadEvent as ThreadEvent,
   MThreadEventBase as ThreadEventBase,
 } from "./api/models";
 
-// --- thread resource types ---
 export type {
   RThreadsListParams as ThreadsListParams,
   RThreadGetOptions as ThreadGetOptions,
@@ -30,14 +31,14 @@ export type {
   RThreadUpdateParams as ThreadUpdateParams,
 } from "./api/resources/threads";
 
-// --- thread state enums ---
 export {
   THREAD_STATES,
   type ThreadState,
   type PublicThreadEvent,
 } from "./types/thread";
 
-// --- storage types ---
+// --- storage ---
+
 export type {
   ThreadStore,
   NewThread,
@@ -50,3 +51,33 @@ export type {
   KernlStorage,
   Transaction,
 } from "./storage";
+
+// --- memory ---
+export { Memory } from "./memory";
+export type {
+  MemoryStore,
+  MemoryScope,
+  NewMemory,
+  MemoryConfig,
+  MemoryReindexParams,
+  MemoryRecord,
+  MemoryUpdate,
+  MemoryFilter,
+  MemoryListOptions,
+  MemorySearchQuery,
+  MemorySearchHit,
+  WorkingMemorySnapshot,
+  ShortTermMemorySnapshot,
+  MemoryIndexBase,
+  MemorySearchIndex,
+  MemoryGraphIndex,
+  MemoryArchiveIndex,
+  GraphTraversalQuery,
+  GraphTraversalResult,
+  ArchiveQuery,
+  ArchiveResult,
+  MemoryByte,
+  MemoryByteKind,
+  MemoryByteCodec,
+} from "./memory";
+export { defaultMemoryByteCodec } from "./memory";

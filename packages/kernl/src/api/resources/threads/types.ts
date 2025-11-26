@@ -1,6 +1,6 @@
 import type { ThreadState } from "@/types/thread";
 import type { SortOrder } from "@/storage";
-import type { CursorPageParams } from "@/api/pagination/cursor";
+import type { CursorPageParams } from "@kernl-sdk/shared";
 
 export interface RThreadHistoryParams {
   /**

@@ -10,7 +10,7 @@ import { randomID } from "@kernl-sdk/shared/lib";
 import { RUNNING } from "@kernl-sdk/protocol";
 
 import type { MThread, MThreadEvent } from "@/api/models";
-import { CursorPage, type CursorPageResponse } from "@/api/pagination/cursor";
+import { CursorPage, type CursorPageResponse } from "@kernl-sdk/shared";
 
 import { RThreadEvents } from "./events";
 import type {
