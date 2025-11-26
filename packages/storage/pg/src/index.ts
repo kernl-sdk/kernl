@@ -3,5 +3,6 @@
  */
 
 export { PGStorage, type PGStorageConfig } from "./storage";
+export { PGMemoryStore } from "./memory/store";
 export { postgres, type PostgresConfig } from "./postgres";
-export { migrations, REQUIRED_SCHEMA_VERSION } from "./migrations";
+export { MIGRATIONS, REQUIRED_SCHEMA_VERSION } from "./migrations";

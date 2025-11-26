@@ -14,7 +14,8 @@ import { UnimplementedError } from "@kernl-sdk/shared/lib";
 
 /* pg */
 import { PGThreadStore } from "./thread/store";
-import { migrations } from "./migrations";
+import { PGMemoryStore } from "./memory/store";
+import { MIGRATIONS } from "./migrations";
 import { SQL_IDENTIFIER_REGEX } from "./sql";
 
 /**
@@ -42,10 +43,12 @@ export class PGStorage implements KernlStorage {
   private initPromise: Promise<void> | null = null;
 
   threads: PGThreadStore;
+  memories: PGMemoryStore;
 
   constructor(config: PGStorageConfig) {
     this.pool = config.pool;
     this.threads = new PGThreadStore(this.pool, () => this.ensureInit());
+    this.memories = new PGMemoryStore(this.pool, () => this.ensureInit());
   }
 
   /**
@@ -108,7 +111,7 @@ export class PGStorage implements KernlStorage {
       const applied = new Set(result.rows.map((row) => row.id));
 
       // filter pending migrations
-      const pending = migrations.filter((m) => !applied.has(m.id));
+      const pending = MIGRATIONS.filter((m) => !applied.has(m.id));
       if (pending.length === 0) {
         await client.query("COMMIT");
         return;

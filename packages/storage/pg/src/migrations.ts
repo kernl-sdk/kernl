@@ -4,7 +4,11 @@
 
 import type { PoolClient } from "pg";
 import type { Table, Column } from "@kernl-sdk/storage";
-import { TABLE_THREADS, TABLE_THREAD_EVENTS, SCHEMA_NAME } from "@kernl-sdk/storage";
+import {
+  TABLE_THREADS,
+  TABLE_THREAD_EVENTS,
+  TABLE_MEMORIES,
+} from "@kernl-sdk/storage";
 
 /**
  * Migration context with helpers.
@@ -22,12 +26,18 @@ export interface Migration {
 /**
  * List of all migrations in order.
  */
-export const migrations: Migration[] = [
+export const MIGRATIONS: Migration[] = [
   {
-    id: "0001_initial",
+    id: "001_threads",
     async up(ctx) {
       await ctx.createTable(TABLE_THREADS);
       await ctx.createTable(TABLE_THREAD_EVENTS);
+    },
+  },
+  {
+    id: "002_memories",
+    async up(ctx) {
+      await ctx.createTable(TABLE_MEMORIES);
     },
   },
 ];

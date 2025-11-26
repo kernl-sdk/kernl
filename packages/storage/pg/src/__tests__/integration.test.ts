@@ -172,7 +172,7 @@ describe.sequential("PGStorage integration", () => {
       `SELECT id FROM "kernl".migrations ORDER BY applied_at ASC`,
     );
     const appliedMigrationIds = migrationsResult.rows.map((row) => row.id);
-    expect(appliedMigrationIds).toEqual(["0001_initial"]);
+    expect(appliedMigrationIds).toEqual(["001_threads", "002_memories"]);
 
     // ---- verify indexes created by table definitions ----
     const indexesResult = await pool.query<{
