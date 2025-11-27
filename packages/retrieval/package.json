@@ -33,14 +33,19 @@
   "scripts": {
     "build": "tsc && tsc-alias --resolve-full-paths",
     "dev": "tsc --watch",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:run": "vitest run"
   },
   "dependencies": {
+    "@kernl-sdk/protocol": "workspace:*",
     "@kernl-sdk/shared": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.10.0",
     "tsc-alias": "^1.8.10",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "vitest": "^4.0.8"
   }
 }

@@ -1,12 +1,29 @@
 import { Pool } from "pg";
 import type { KernlStorage } from "kernl";
 
-import { PGStorage } from "./storage";
+import { PGStorage, type PGVectorConfig } from "./storage";
+import { PGSearchIndex } from "./pgvector/search";
 
 /**
- * PostgreSQL connection configuration.
+ * Create a PostgreSQL storage adapter for Kernl.
  */
-export type PostgresConfig =
+export function postgres(config: PostgresConfig): KernlStorage {
+  const p = pool(config);
+  return new PGStorage({ pool: p, vector: config.vector });
+}
+
+/**
+ * Create a pgvector-backed search index.
+ */
+export function pgvector(config: ConnectionConfig) {
+  const p = pool(config);
+  return new PGSearchIndex({ pool: p });
+}
+
+/**
+ * Connection options for PostgreSQL.
+ */
+export type ConnectionConfig =
   | { pool: Pool }
   | { connstr: string }
   | {
@@ -18,39 +35,22 @@ export type PostgresConfig =
     };
 
 /**
- * Create a PostgreSQL storage adapter for Kernl.
- *
- * @param config - Connection configuration (pool, connection string, or credentials)
- * @returns KernlStorage instance backed by PostgreSQL
- *
- * @example
- * ```ts
- * // with connection string
- * const storage = postgres({ connstr: "postgresql://localhost/mydb" });
- *
- * // with connection options
- * const storage = postgres({
- *   host: "localhost",
- *   port: 5432,
- *   database: "mydb",
- *   user: "user",
- *   password: "password"
- * });
- *
- * // existing pool
- * const pool = new Pool({ ... });
- * const storage = postgres({ pool });
- * ```
+ * PostgreSQL storage configuration.
  */
-export function postgres(config: PostgresConfig): KernlStorage {
-  let pool: Pool;
+export type PostgresConfig = ConnectionConfig & {
+  /**
+   * Enable pgvector support for semantic search.
+   */
+  vector?: boolean | PGVectorConfig;
+};
 
+function pool(config: ConnectionConfig): Pool {
   if ("pool" in config) {
-    pool = config.pool;
+    return config.pool;
   } else if ("connstr" in config) {
-    pool = new Pool({ connectionString: config.connstr });
+    return new Pool({ connectionString: config.connstr });
   } else {
-    pool = new Pool({
+    return new Pool({
       host: config.host,
       port: config.port,
       database: config.database,
@@ -58,6 +58,4 @@ export function postgres(config: PostgresConfig): KernlStorage {
       password: config.password,
     });
   }
-
-  return new PGStorage({ pool });
 }

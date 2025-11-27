@@ -1,7 +1,7 @@
 /**
  * Schema name for all kernl tables.
  */
-export const SCHEMA_NAME = "kernl";
+export const KERNL_SCHEMA_NAME = "kernl";
 
 /**
  * Table definition with name, columns, and optional constraints.

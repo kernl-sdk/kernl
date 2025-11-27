@@ -14,6 +14,7 @@ export const TABLE_MEMORIES = defineTable(
     namespace: text().nullable(),
     entity_id: text().nullable(),
     agent_id: text().nullable(),
+    kind: text(), // "episodic" | "semantic"
     collection: text(),
     content: jsonb(),
     wmem: boolean().default(false),
@@ -26,6 +27,7 @@ export const TABLE_MEMORIES = defineTable(
     { kind: "index", columns: ["namespace"] },
     { kind: "index", columns: ["entity_id"] },
     { kind: "index", columns: ["agent_id"] },
+    { kind: "index", columns: ["kind"] },
     { kind: "index", columns: ["collection"] },
     { kind: "index", columns: ["wmem"] },
     { kind: "index", columns: ["timestamp"] },
@@ -35,14 +37,39 @@ export const TABLE_MEMORIES = defineTable(
 
 /* ---- Record Schema ---- */
 
-const MemoryByteSchema = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("text"), text: z.string() }),
-  z.object({
-    kind: z.literal("object"),
-    value: z.record(z.string(), z.unknown()),
-    summary: z.string().optional(),
-  }),
+const TextByteSchema = z.object({ value: z.string() });
+
+// Binary data can be Uint8Array or base64/URI string
+const BinaryDataSchema = z.union([
+  z.custom<Uint8Array>((val) => val instanceof Uint8Array),
+  z.string(),
 ]);
+
+const ImageByteSchema = z.object({
+  data: BinaryDataSchema,
+  mime: z.string(),
+  alt: z.string().optional(),
+});
+
+const AudioByteSchema = z.object({
+  data: BinaryDataSchema,
+  mime: z.string(),
+});
+
+const VideoByteSchema = z.object({
+  data: BinaryDataSchema,
+  mime: z.string(),
+});
+
+const MemoryByteSchema = z.object({
+  text: TextByteSchema.optional(),
+  image: ImageByteSchema.optional(),
+  audio: AudioByteSchema.optional(),
+  video: VideoByteSchema.optional(),
+  object: z.record(z.string(), z.unknown()).optional(),
+});
+
+const MemoryKindSchema = z.enum(["episodic", "semantic"]);
 
 // pg returns BIGINT as string, so we coerce to number
 const pgBigint = z.coerce.number().int();
@@ -52,6 +79,7 @@ export const MemoryDBRecordSchema = z.object({
   namespace: z.string().nullable(),
   entity_id: z.string().nullable(),
   agent_id: z.string().nullable(),
+  kind: MemoryKindSchema,
   collection: z.string(),
   content: MemoryByteSchema,
   wmem: z.boolean(),

@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "kernl": "workspace:^",
+    "@kernl-sdk/retrieval": "workspace:^",
     "@kernl-sdk/shared": "workspace:^",
     "@kernl-sdk/storage": "workspace:*",
     "pg": "^8.16.3"

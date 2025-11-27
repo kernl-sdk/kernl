@@ -6,26 +6,25 @@
  */
 
 export * from "./types";
+export * from "./query";
+export * from "./handle";
+export * from "./embed";
 
 import type { CursorPage } from "@kernl-sdk/shared";
 
 import type {
-  SearchDocument,
-  SearchDocumentPatch,
-  SearchQuery,
-  SearchHit,
   NewIndexParams,
   ListIndexesParams,
   IndexSummary,
-  DescribeIndexParams,
-  DeleteIndexParams,
-  DeleteDocParams,
-  DeleteManyParams,
   IndexStats,
+  UnknownDocument,
 } from "./types";
+import type { IndexHandle } from "./handle";
 
 /**
  * Generic search index interface.
+ *
+ * @typeParam TBindConfig - Provider-specific binding configuration type.
  *
  * Implementations can be backed by various vector databases:
  * - pgvector (Postgres)
@@ -34,7 +33,7 @@ import type {
  * - Elasticsearch
  * - etc.
  */
-export interface SearchIndex {
+export interface SearchIndex<TBindConfig = unknown> {
   /**
    * Identifier for this search backend.
    * e.g. "pgvector" | "turbopuffer" | "pinecone"
@@ -56,57 +55,48 @@ export interface SearchIndex {
   /**
    * Get statistics about an index.
    */
-  describeIndex(params: DescribeIndexParams): Promise<IndexStats>;
+  describeIndex(id: string): Promise<IndexStats>;
 
   /**
    * Delete an index and all its documents.
    */
-  deleteIndex(params: DeleteIndexParams): Promise<void>;
+  deleteIndex(id: string): Promise<void>;
 
-  /* ---- Document operations ---- */
-
-  /**
-   * Upsert a single document.
-   */
-  upsert(document: SearchDocument): Promise<void>;
+  /* ---- Index handle ---- */
 
   /**
-   * Upsert multiple documents.
+   * Get a handle for operating on a specific index.
+   *
+   * @typeParam TDocument - Shape of the document fields for typed results.
+   *
+   * @example
+   * ```ts
+   * // untyped (default)
+   * const docs = search.index("docs");
+   * await docs.query({ content: "quick fox" });
+   *
+   * // typed documents
+   * interface Document { title: string; content: string; }
+   * const docs = search.index<Document>("docs");
+   * const hits = await docs.query({ content: "fox" });
+   * hits[0].document?.title; // string | undefined
+   * ```
    */
-  mupsert(documents: SearchDocument[]): Promise<void>;
+  index<TDocument = UnknownDocument>(id: string): IndexHandle<TDocument>;
 
   /**
-   * Update a document's fields.
-   * null values unset the field.
+   * Bind an existing resource as an index.
+   *
+   * Not all backends support binding. Throws if unsupported.
    */
-  update(patch: SearchDocumentPatch): Promise<void>;
+  bindIndex(id: string, config: TBindConfig): Promise<void>;
 
-  /**
-   * Update multiple documents.
-   */
-  mupdate(patches: SearchDocumentPatch[]): Promise<void>;
-
-  /**
-   * Delete a document.
-   */
-  delete(params: DeleteDocParams): Promise<void>;
-
-  /**
-   * Delete multiple documents (by IDs or filter).
-   */
-  mdelete(params: DeleteManyParams): Promise<void>;
-
-  /* ---- Query ---- */
-
-  /**
-   * Search for documents.
-   */
-  query(query: SearchQuery): Promise<SearchHit[]>;
-
-  /* ---- Optional ---- */
+  /* ---- Utility ---- */
 
   /**
    * Warm/preload an index for faster queries.
+   *
+   * Not all backends support warming. Throws if unsupported.
    */
-  warm?(index: string): Promise<void>;
+  warm(id: string): Promise<void>;
 }

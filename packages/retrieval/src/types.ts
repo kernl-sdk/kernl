@@ -51,6 +51,19 @@ type ScalarValue = string | number | boolean | null;
 
 /**
  * Field value - the actual data stored in a field.
+ *
+ * A field is in one of two states:
+ * - *Has a value*: any non-null value
+ * - *No value*: `null`, `undefined`, or omitted entirely
+ *
+ * The system treats `null` and `undefined` (or missing) as equivalent.
+ * Adapters normalize "no value" internally (e.g., storing as SQL NULL).
+ *
+ * For filter semantics:
+ * - `{ field: value }` matches docs where field has that non-null value
+ * - `{ field: null }` matches docs where field has no value (null or missing)
+ * - `{ field: { $exists: true } }` matches docs where field has a value
+ * - `{ field: { $exists: false } }` matches docs where field has no value
  */
 export type FieldValue =
   | ScalarValue
@@ -60,7 +73,8 @@ export type FieldValue =
   | DenseVector
   | SparseVector
   | { [key: string]: FieldValue }
-  | { [key: string]: FieldValue }[];
+  | { [key: string]: FieldValue }[]
+  | undefined; // normalized to null
 
 // ---------------------
 // Field Schema
@@ -75,6 +89,7 @@ export interface FTSOptions {
 }
 
 interface BaseFieldSchema {
+  pk?: boolean;
   filterable?: boolean;
   sortable?: boolean;
   optional?: boolean;
@@ -103,36 +118,6 @@ export interface VectorFieldSchema extends BaseFieldSchema {
  */
 export type FieldSchema = ScalarFieldSchema | VectorFieldSchema;
 
-// ---------------------
-// Documents
-// ---------------------
-
-/**
- * Base document identity.
- */
-export interface BaseDocument {
-  id: string;
-  index: string;
-  namespace?: string;
-}
-
-/**
- * A document to be indexed.
- */
-export interface SearchDocument extends BaseDocument {
-  fields: Record<string, FieldValue>;
-}
-
-/**
- * A document patch for updates.
- * null values unset the field.
- */
-export interface SearchDocumentPatch {
-  id: string;
-  index: string;
-  namespace?: string;
-  fields: Record<string, FieldValue | null>;
-}
 
 // ---------------------
 // Index Lifecycle
@@ -211,116 +196,27 @@ export interface DeleteManyParams {
   ids?: string[];
   index: string;
   namespace?: string;
-  filter?: FilterExpression;
+  // filter uses the new Filter type from query.ts
 }
 
 // ---------------------
-// Query & Filtering
+// Search Results
 // ---------------------
 
-type OpComparison = "eq" | "neq" | "gt" | "gte" | "lt" | "lte";
-type OpSet = "in" | "nin";
-type OpString = "contains" | "starts_with" | "ends_with";
-type OpArray = "contains_all" | "contains_any";
-type OpExistence = "exists" | "not_exists";
-
-/**
- * Field comparison operators.
- */
-export type FieldOp = OpComparison | OpSet | OpString | OpArray;
-
-/**
- * Existence operators.
- */
-export type ExistenceOp = OpExistence;
-
-/**
- * Filter on a field value.
- */
-export interface FieldFilter {
-  field: string;
-  op: FieldOp;
-  value: ScalarValue | ScalarValue[];
-}
-
-/**
- * Filter on field existence.
- */
-export interface ExistsFilter {
-  field: string;
-  op: ExistenceOp;
-}
-
-/**
- * Logical AND of filters.
- */
-export interface AndFilter {
-  and: FilterExpression[];
-}
-
-/**
- * Logical OR of filters.
- */
-export interface OrFilter {
-  or: FilterExpression[];
-}
-
-/**
- * Logical NOT of a filter.
- */
-export interface NotFilter {
-  not: FilterExpression;
-}
-
-/**
- * Filter expression - composable filter tree.
- */
-export type FilterExpression =
-  | FieldFilter
-  | ExistsFilter
-  | AndFilter
-  | OrFilter
-  | NotFilter;
-
-/**
- * Search query parameters.
- */
-export interface SearchQuery {
-  index: string;
-  namespace?: string;
-
-  // Vector search
-  vector?: number[];
-  sparseVector?: SparseVector;
-
-  // Full-text search
-  text?: string;
-  textFields?: string[];
-
-  // Hybrid weighting (0 = pure FTS, 1 = pure vector)
-  alpha?: number;
-
-  // Filtering
-  filter?: FilterExpression;
-
-  // Pagination
-  topK?: number;
-  offset?: number;
-
-  // Score threshold
-  minScore?: number;
-
-  // Response shaping
-  include?: string[] | boolean;
-  includeVectors?: boolean;
-}
+export type UnknownDocument = Record<string, FieldValue>;
 
 /**
  * A search result hit.
  */
-export interface SearchHit extends BaseDocument {
+export interface SearchHit<TDocument = UnknownDocument> {
+  /** Document identifier */
+  id: string;
+  /** Index the document belongs to */
+  index: string;
+  /** Optional namespace within the index */
+  namespace?: string;
+  /** Relevance score for the hit */
   score: number;
-  fields?: Record<string, FieldValue>;
-  vector?: number[];
-  sparseVector?: SparseVector;
+  /** Projected document fields (can be partial due to `include`/`exclude`) */
+  document?: Partial<TDocument>;
 }

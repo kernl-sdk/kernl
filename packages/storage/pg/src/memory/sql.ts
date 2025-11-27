@@ -5,7 +5,7 @@
  */
 
 import type { Codec } from "@kernl-sdk/shared/lib";
-import type { MemoryFilter, MemoryUpdate } from "kernl";
+import type { MemoryFilter, MemoryRecordUpdate } from "kernl";
 
 export interface SQLClause {
   sql: string;
@@ -98,7 +98,7 @@ export const ORDER: Codec<OrderInput, string> = {
 };
 
 export interface PatchInput {
-  patch: MemoryUpdate;
+  patch: MemoryRecordUpdate;
   startIdx: number;
 }
 
@@ -116,9 +116,9 @@ export const SQL_UPDATE: Codec<PatchInput, SQLClause> = {
       sets.push(`wmem = $${idx++}`);
       params.push(patch.wmem);
     }
-    if (patch.smemExpiresAt !== undefined) {
+    if (patch.smem !== undefined) {
       sets.push(`smem_expires_at = $${idx++}`);
-      params.push(patch.smemExpiresAt);
+      params.push(patch.smem.expiresAt);
     }
     if (patch.metadata !== undefined) {
       sets.push(`metadata = $${idx++}::jsonb`);

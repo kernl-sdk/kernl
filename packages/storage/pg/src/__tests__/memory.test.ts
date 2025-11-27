@@ -35,17 +35,18 @@ describe.sequential("PGMemoryStore", () => {
       const memory = await storage.memories.create({
         id: "mem-1",
         scope: { namespace: "test", entityId: "user-1" },
+        kind: "semantic",
         collection: "facts",
-        content: { kind: "text", text: "The user likes coffee" },
+        content: { text: { value: "The user likes coffee" } },
       });
 
       expect(memory.id).toBe("mem-1");
       expect(memory.scope.namespace).toBe("test");
       expect(memory.scope.entityId).toBe("user-1");
       expect(memory.collection).toBe("facts");
-      expect(memory.content).toEqual({ kind: "text", text: "The user likes coffee" });
+      expect(memory.content).toEqual({ text: { value: "The user likes coffee" } });
       expect(memory.wmem).toBe(false);
-      expect(memory.smemExpiresAt).toBeNull();
+      expect(memory.smem.expiresAt).toBeNull();
       expect(memory.createdAt).toBeTypeOf("number");
       expect(memory.updatedAt).toBeTypeOf("number");
     });
@@ -54,19 +55,16 @@ describe.sequential("PGMemoryStore", () => {
       const memory = await storage.memories.create({
         id: "mem-2",
         scope: { namespace: "test" },
+        kind: "semantic",
         collection: "preferences",
         content: {
-          kind: "object",
-          value: { theme: "dark", language: "en" },
-          summary: "User preferences",
+          object: { theme: "dark", language: "en" },
         },
         metadata: { source: "settings" },
       });
 
       expect(memory.content).toEqual({
-        kind: "object",
-        value: { theme: "dark", language: "en" },
-        summary: "User preferences",
+        object: { theme: "dark", language: "en" },
       });
       expect(memory.metadata).toEqual({ source: "settings" });
     });
@@ -75,8 +73,9 @@ describe.sequential("PGMemoryStore", () => {
       const memory = await storage.memories.create({
         id: "mem-3",
         scope: { namespace: "test" },
+        kind: "episodic",
         collection: "working",
-        content: { kind: "text", text: "Current task context" },
+        content: { text: { value: "Current task context" } },
         wmem: true,
       });
 
@@ -89,12 +88,13 @@ describe.sequential("PGMemoryStore", () => {
       const memory = await storage.memories.create({
         id: "mem-4",
         scope: { namespace: "test" },
+        kind: "episodic",
         collection: "short-term",
-        content: { kind: "text", text: "Temporary information" },
-        smemExpiresAt: expiresAt,
+        content: { text: { value: "Temporary information" } },
+        smem: { expiresAt },
       });
 
-      expect(memory.smemExpiresAt).toBe(expiresAt);
+      expect(memory.smem.expiresAt).toBe(expiresAt);
     });
   });
 
@@ -103,15 +103,16 @@ describe.sequential("PGMemoryStore", () => {
       await storage.memories.create({
         id: "mem-get-1",
         scope: { namespace: "test" },
+        kind: "semantic",
         collection: "facts",
-        content: { kind: "text", text: "Test memory" },
+        content: { text: { value: "Test memory" } },
       });
 
       const memory = await storage.memories.get("mem-get-1");
 
       expect(memory).not.toBeNull();
       expect(memory!.id).toBe("mem-get-1");
-      expect(memory!.content).toEqual({ kind: "text", text: "Test memory" });
+      expect(memory!.content).toEqual({ text: { value: "Test memory" } });
     });
 
     it("should return null for non-existent memory", async () => {
@@ -126,24 +127,27 @@ describe.sequential("PGMemoryStore", () => {
       await storage.memories.create({
         id: "list-1",
         scope: { namespace: "ns1", entityId: "user-1" },
+        kind: "semantic",
         collection: "facts",
-        content: { kind: "text", text: "Fact 1" },
+        content: { text: { value: "Fact 1" } },
         wmem: true,
         timestamp: 1000,
       });
       await storage.memories.create({
         id: "list-2",
         scope: { namespace: "ns1", entityId: "user-1" },
+        kind: "semantic",
         collection: "preferences",
-        content: { kind: "text", text: "Pref 1" },
+        content: { text: { value: "Pref 1" } },
         wmem: false,
         timestamp: 2000,
       });
       await storage.memories.create({
         id: "list-3",
         scope: { namespace: "ns2", entityId: "user-2" },
+        kind: "semantic",
         collection: "facts",
-        content: { kind: "text", text: "Fact 2" },
+        content: { text: { value: "Fact 2" } },
         wmem: false,
         timestamp: 3000,
       });
@@ -233,15 +237,20 @@ describe.sequential("PGMemoryStore", () => {
       await storage.memories.create({
         id: "update-1",
         scope: { namespace: "test" },
+        kind: "semantic",
         collection: "facts",
-        content: { kind: "text", text: "Original" },
+        content: { text: { value: "Original" } },
       });
+
+      // Small delay to ensure timestamp changes
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       const updated = await storage.memories.update("update-1", {
-        content: { kind: "text", text: "Updated" },
+        id: "update-1",
+        content: { text: { value: "Updated" } },
       });
 
-      expect(updated.content).toEqual({ kind: "text", text: "Updated" });
+      expect(updated.content).toEqual({ text: { value: "Updated" } });
       expect(updated.updatedAt).toBeGreaterThan(updated.createdAt);
     });
 
@@ -249,40 +258,48 @@ describe.sequential("PGMemoryStore", () => {
       await storage.memories.create({
         id: "update-2",
         scope: { namespace: "test" },
+        kind: "semantic",
         collection: "facts",
-        content: { kind: "text", text: "Test" },
+        content: { text: { value: "Test" } },
         wmem: false,
       });
 
-      const updated = await storage.memories.update("update-2", { wmem: true });
+      const updated = await storage.memories.update("update-2", {
+        id: "update-2",
+        wmem: true,
+      });
       expect(updated.wmem).toBe(true);
     });
 
-    it("should update smemExpiresAt", async () => {
+    it("should update smem expiration", async () => {
       await storage.memories.create({
         id: "update-3",
         scope: { namespace: "test" },
+        kind: "episodic",
         collection: "facts",
-        content: { kind: "text", text: "Test" },
+        content: { text: { value: "Test" } },
       });
 
       const expiresAt = Date.now() + 7200000;
       const updated = await storage.memories.update("update-3", {
-        smemExpiresAt: expiresAt,
+        id: "update-3",
+        smem: { expiresAt },
       });
 
-      expect(updated.smemExpiresAt).toBe(expiresAt);
+      expect(updated.smem.expiresAt).toBe(expiresAt);
     });
 
     it("should update metadata", async () => {
       await storage.memories.create({
         id: "update-4",
         scope: { namespace: "test" },
+        kind: "semantic",
         collection: "facts",
-        content: { kind: "text", text: "Test" },
+        content: { text: { value: "Test" } },
       });
 
       const updated = await storage.memories.update("update-4", {
+        id: "update-4",
         metadata: { updated: true, count: 1 },
       });
 
@@ -291,7 +308,7 @@ describe.sequential("PGMemoryStore", () => {
 
     it("should throw for non-existent memory", async () => {
       await expect(
-        storage.memories.update("non-existent", { wmem: true }),
+        storage.memories.update("non-existent", { id: "non-existent", wmem: true }),
       ).rejects.toThrow("memory not found");
     });
   });
@@ -301,8 +318,9 @@ describe.sequential("PGMemoryStore", () => {
       await storage.memories.create({
         id: "delete-1",
         scope: { namespace: "test" },
+        kind: "semantic",
         collection: "facts",
-        content: { kind: "text", text: "To be deleted" },
+        content: { text: { value: "To be deleted" } },
       });
 
       await storage.memories.delete("delete-1");
@@ -321,20 +339,23 @@ describe.sequential("PGMemoryStore", () => {
       await storage.memories.create({
         id: "mdelete-1",
         scope: { namespace: "test" },
+        kind: "semantic",
         collection: "facts",
-        content: { kind: "text", text: "Memory 1" },
+        content: { text: { value: "Memory 1" } },
       });
       await storage.memories.create({
         id: "mdelete-2",
         scope: { namespace: "test" },
+        kind: "semantic",
         collection: "facts",
-        content: { kind: "text", text: "Memory 2" },
+        content: { text: { value: "Memory 2" } },
       });
       await storage.memories.create({
         id: "mdelete-3",
         scope: { namespace: "test" },
+        kind: "semantic",
         collection: "facts",
-        content: { kind: "text", text: "Memory 3" },
+        content: { text: { value: "Memory 3" } },
       });
 
       await storage.memories.mdelete(["mdelete-1", "mdelete-2"]);
@@ -357,27 +378,30 @@ describe.sequential("PGMemoryStore", () => {
       await storage.memories.create({
         id: "smem-active",
         scope: { namespace: "test" },
+        kind: "episodic",
         collection: "short-term",
-        content: { kind: "text", text: "Active" },
-        smemExpiresAt: now + 3600000, // expires in 1 hour
+        content: { text: { value: "Active" } },
+        smem: { expiresAt: now + 3600000 }, // expires in 1 hour
       });
 
       // expired short-term memory
       await storage.memories.create({
         id: "smem-expired",
         scope: { namespace: "test" },
+        kind: "episodic",
         collection: "short-term",
-        content: { kind: "text", text: "Expired" },
-        smemExpiresAt: now - 3600000, // expired 1 hour ago
+        content: { text: { value: "Expired" } },
+        smem: { expiresAt: now - 3600000 }, // expired 1 hour ago
       });
 
       // long-term memory (no expiration)
       await storage.memories.create({
         id: "lmem",
         scope: { namespace: "test" },
+        kind: "semantic",
         collection: "long-term",
-        content: { kind: "text", text: "Long term" },
-        smemExpiresAt: null,
+        content: { text: { value: "Long term" } },
+        smem: { expiresAt: null },
       });
     });
 

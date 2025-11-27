@@ -8,11 +8,11 @@ import type {
   MemoryStore,
   MemoryRecord,
   NewMemory,
-  MemoryUpdate,
+  MemoryRecordUpdate,
   MemoryListOptions,
 } from "kernl";
 import {
-  SCHEMA_NAME,
+  KERNL_SCHEMA_NAME,
   MemoryRecordCodec,
   NewMemoryCodec,
   type MemoryDBRecord,
@@ -42,7 +42,7 @@ export class PGMemoryStore implements MemoryStore {
     await this.ensureInit();
 
     const result = await this.db.query<MemoryDBRecord>(
-      `SELECT * FROM ${SCHEMA_NAME}.memories WHERE id = $1`,
+      `SELECT * FROM ${KERNL_SCHEMA_NAME}.memories WHERE id = $1`,
       [id],
     );
 
@@ -65,7 +65,7 @@ export class PGMemoryStore implements MemoryStore {
     });
 
     let idx = params.length + 1;
-    let query = `SELECT * FROM ${SCHEMA_NAME}.memories`;
+    let query = `SELECT * FROM ${KERNL_SCHEMA_NAME}.memories`;
 
     // build where + order by
     if (where) query += ` WHERE ${where}`;
@@ -94,17 +94,18 @@ export class PGMemoryStore implements MemoryStore {
     const row = NewMemoryCodec.encode(memory);
 
     const result = await this.db.query<MemoryDBRecord>(
-      `INSERT INTO ${SCHEMA_NAME}.memories
-       (id, namespace, entity_id, agent_id, collection, content, wmem, smem_expires_at, timestamp, created_at, updated_at, metadata)
-       VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7, $8, $9, $10, $11, $12::jsonb)
+      `INSERT INTO ${KERNL_SCHEMA_NAME}.memories
+       (id, namespace, entity_id, agent_id, kind, collection, content, wmem, smem_expires_at, timestamp, created_at, updated_at, metadata)
+       VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11, $12, $13::jsonb)
        RETURNING *`,
       [
         row.id,
         row.namespace,
         row.entity_id,
         row.agent_id,
+        row.kind,
         row.collection,
-        JSON.stringify(row.content),
+        JSON.stringify(row.content), // ??
         row.wmem,
         row.smem_expires_at,
         row.timestamp,
@@ -120,7 +121,7 @@ export class PGMemoryStore implements MemoryStore {
   /**
    * Update a memory record.
    */
-  async update(id: string, patch: MemoryUpdate): Promise<MemoryRecord> {
+  async update(id: string, patch: MemoryRecordUpdate): Promise<MemoryRecord> {
     await this.ensureInit();
 
     const { sql: updates, params } = SQL_UPDATE.encode({ patch, startIdx: 1 });
@@ -129,7 +130,7 @@ export class PGMemoryStore implements MemoryStore {
 
     // (TODO): might we not want to return the whole record sometimes?
     const result = await this.db.query<MemoryDBRecord>(
-      `UPDATE ${SCHEMA_NAME}.memories SET ${updates} WHERE id = $${idx} RETURNING *`,
+      `UPDATE ${KERNL_SCHEMA_NAME}.memories SET ${updates} WHERE id = $${idx} RETURNING *`,
       params,
     );
 
@@ -145,9 +146,10 @@ export class PGMemoryStore implements MemoryStore {
    */
   async delete(id: string): Promise<void> {
     await this.ensureInit();
-    await this.db.query(`DELETE FROM ${SCHEMA_NAME}.memories WHERE id = $1`, [
-      id,
-    ]);
+    await this.db.query(
+      `DELETE FROM ${KERNL_SCHEMA_NAME}.memories WHERE id = $1`,
+      [id],
+    );
   }
 
   /**
@@ -157,7 +159,7 @@ export class PGMemoryStore implements MemoryStore {
     if (ids.length === 0) return;
     await this.ensureInit();
     await this.db.query(
-      `DELETE FROM ${SCHEMA_NAME}.memories WHERE id = ANY($1)`,
+      `DELETE FROM ${KERNL_SCHEMA_NAME}.memories WHERE id = ANY($1)`,
       [ids],
     );
   }

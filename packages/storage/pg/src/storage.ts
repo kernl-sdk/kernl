@@ -9,7 +9,7 @@ import type {
   Transaction,
 } from "kernl";
 import type { Table, Column, IndexConstraint } from "@kernl-sdk/storage";
-import { SCHEMA_NAME, TABLE_MIGRATIONS } from "@kernl-sdk/storage";
+import { KERNL_SCHEMA_NAME, TABLE_MIGRATIONS } from "@kernl-sdk/storage";
 import { UnimplementedError } from "@kernl-sdk/shared/lib";
 
 /* pg */
@@ -19,6 +19,58 @@ import { MIGRATIONS } from "./migrations";
 import { SQL_IDENTIFIER_REGEX } from "./sql";
 
 /**
+ * Vector similarity metric for pgvector.
+ */
+export type VectorSimilarity = "cosine" | "euclidean" | "dot_product";
+
+/**
+ * pgvector configuration options.
+ */
+export interface PGVectorConfig {
+  /**
+   * Vector dimensions.
+   * @default 1536 (OpenAI text-embedding-3-small)
+   */
+  dimensions?: number;
+
+  /**
+   * Distance metric for similarity search.
+   * @default "cosine"
+   */
+  similarity?: VectorSimilarity;
+}
+
+/**
+ * Resolved vector configuration with defaults applied.
+ */
+export interface ResolvedVectorConfig {
+  dimensions: number;
+  similarity: VectorSimilarity;
+}
+
+/**
+ * Default vector configuration.
+ */
+export const DEFAULT_VECTOR_CONFIG: ResolvedVectorConfig = {
+  dimensions: 1536,
+  similarity: "cosine",
+};
+
+/**
+ * Resolve vector config, applying defaults.
+ */
+export function resolveVectorConfig(
+  config: boolean | PGVectorConfig | undefined,
+): ResolvedVectorConfig | undefined {
+  if (!config) return undefined;
+  if (config === true) return DEFAULT_VECTOR_CONFIG;
+  return {
+    dimensions: config.dimensions ?? DEFAULT_VECTOR_CONFIG.dimensions,
+    similarity: config.similarity ?? DEFAULT_VECTOR_CONFIG.similarity,
+  };
+}
+
+/**
  * PostgreSQL storage configuration.
  */
 export interface PGStorageConfig {
@@ -26,6 +78,19 @@ export interface PGStorageConfig {
    * Pool instance for database connections.
    */
   pool: Pool;
+
+  /**
+   * Enable pgvector support for semantic search.
+   *
+   * - `true`: Use default config (1536 dimensions, cosine similarity)
+   * - `PGVectorConfig`: Custom dimensions and similarity metric
+   *
+   * Requires pgvector extension to be installed by superuser:
+   * ```sql
+   * CREATE EXTENSION IF NOT EXISTS vector;
+   * ```
+   */
+  vector?: boolean | PGVectorConfig;
 }
 
 /**
@@ -84,7 +149,7 @@ export class PGStorage implements KernlStorage {
    * Initialize the storage backend.
    */
   async init(): Promise<void> {
-    await this.pool.query(`CREATE SCHEMA IF NOT EXISTS "${SCHEMA_NAME}"`);
+    await this.pool.query(`CREATE SCHEMA IF NOT EXISTS "${KERNL_SCHEMA_NAME}"`);
     await this.createTable(TABLE_MIGRATIONS);
     await this.migrate();
   }
@@ -106,7 +171,7 @@ export class PGStorage implements KernlStorage {
 
       // read applied migration IDs
       const result = await client.query<{ id: string }>(
-        `SELECT id FROM "${SCHEMA_NAME}".migrations ORDER BY applied_at ASC`,
+        `SELECT id FROM "${KERNL_SCHEMA_NAME}".migrations ORDER BY applied_at ASC`,
       );
       const applied = new Set(result.rows.map((row) => row.id));
 
@@ -126,7 +191,7 @@ export class PGStorage implements KernlStorage {
           },
         });
         await client.query(
-          `INSERT INTO "${SCHEMA_NAME}".migrations (id, applied_at) VALUES ($1, $2)`,
+          `INSERT INTO "${KERNL_SCHEMA_NAME}".migrations (id, applied_at) VALUES ($1, $2)`,
           [migration.id, Date.now()],
         );
       }
@@ -177,7 +242,7 @@ export class PGStorage implements KernlStorage {
 
       // foreign key reference
       if (col._fk) {
-        let ref = `REFERENCES "${SCHEMA_NAME}"."${col._fk.table}" ("${col._fk.column}")`;
+        let ref = `REFERENCES "${KERNL_SCHEMA_NAME}"."${col._fk.table}" ("${col._fk.column}")`;
         if (col._onDelete) {
           ref += ` ON DELETE ${col._onDelete}`;
         }
@@ -236,7 +301,7 @@ export class PGStorage implements KernlStorage {
     const constraints = [...columns, ...tableConstraints];
 
     const sql = `
-      CREATE TABLE IF NOT EXISTS "${SCHEMA_NAME}"."${table.name}" (
+      CREATE TABLE IF NOT EXISTS "${KERNL_SCHEMA_NAME}"."${table.name}" (
         ${constraints.join(",\n  ")}
       )
     `.trim();
@@ -288,7 +353,7 @@ export class PGStorage implements KernlStorage {
 
     const sql = `
       CREATE ${uniqueKeyword} INDEX IF NOT EXISTS "${indexName}"
-      ON "${SCHEMA_NAME}"."${tableName}" (${columns})
+      ON "${KERNL_SCHEMA_NAME}"."${tableName}" (${columns})
     `.trim();
 
     await client.query(sql);

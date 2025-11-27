@@ -24,6 +24,23 @@ export interface Codec<TFrom, TInto> {
 }
 
 /**
+ * Async bidirectional codec for converting between types.
+ *
+ * Use when encoding/decoding requires async operations (e.g., embedding models).
+ */
+export interface AsyncCodec<TFrom, TInto> {
+  /**
+   * Transform from input format to output format.
+   */
+  encode: (val: TFrom) => Promise<TInto>;
+
+  /**
+   * Transform from output format to input format.
+   */
+  decode: (val: TInto) => Promise<TFrom>;
+}
+
+/**
  * Like z.codec() but only a single schema on TInto.
  *
  * Generally used for serialization from domain -> record types where we want to leave

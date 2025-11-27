@@ -10,11 +10,9 @@ import {
   type ModelRegistry,
 } from "kernl";
 import { Thread } from "kernl/internal";
+import type { LanguageModel } from "@kernl-sdk/protocol";
 
 const TEST_DB_URL = process.env.KERNL_PG_TEST_URL;
-
-type TestLanguageModel =
-  ModelRegistry extends { get(key: string): infer T | undefined } ? T : never;
 
 describe.sequential("PGStorage auto-initialization", () => {
   if (!TEST_DB_URL) {
@@ -42,7 +40,7 @@ describe.sequential("PGStorage auto-initialization", () => {
       spec: "1.0" as const,
       provider: "test",
       modelId: "auto-init-model",
-    } as unknown as TestLanguageModel;
+    } as unknown as LanguageModel;
 
     const agent = new Agent({
       id: "auto-init-agent",
@@ -307,7 +305,7 @@ describe.sequential("PGStorage integration", () => {
       spec: "1.0" as const,
       provider: "test",
       modelId: "test-model",
-    } as unknown as TestLanguageModel;
+    } as unknown as LanguageModel;
 
     const agent = new Agent({
       id: "agent-1",
@@ -317,7 +315,7 @@ describe.sequential("PGStorage integration", () => {
     });
 
     const agents: AgentRegistry = new Map<string, Agent>([["agent-1", agent]]);
-    const models: ModelRegistry = new Map<string, TestLanguageModel>([
+    const models: ModelRegistry = new Map<string, LanguageModel>([
       ["provider/model", model],
     ]) as unknown as ModelRegistry;
 
@@ -503,7 +501,7 @@ describe.sequential("PGStorage integration", () => {
       spec: "1.0" as const,
       provider: "test",
       modelId: "test-model",
-    } as unknown as TestLanguageModel;
+    } as unknown as LanguageModel;
 
     const agent = new Agent({
       id: "agent-1",
@@ -513,7 +511,7 @@ describe.sequential("PGStorage integration", () => {
     });
 
     const agents: AgentRegistry = new Map<string, Agent>([["agent-1", agent]]);
-    const models: ModelRegistry = new Map<string, TestLanguageModel>([
+    const models: ModelRegistry = new Map<string, LanguageModel>([
       ["provider/model", model],
     ]) as unknown as ModelRegistry;
 
@@ -576,7 +574,7 @@ describe.sequential("PGStorage integration", () => {
       modelId: "test-model",
       // generate/stream are not used in this test - we only advance stream
       // far enough to trigger the first checkpoint.
-    } as unknown as TestLanguageModel;
+    } as unknown as LanguageModel;
 
     const agent = new Agent({
       id: "agent-1",
@@ -586,7 +584,7 @@ describe.sequential("PGStorage integration", () => {
     });
 
     const agents: AgentRegistry = new Map<string, Agent>([["agent-1", agent]]);
-    const models: ModelRegistry = new Map<string, TestLanguageModel>([
+    const models: ModelRegistry = new Map<string, LanguageModel>([
       ["provider/model", model],
     ]) as unknown as ModelRegistry;
 
@@ -634,7 +632,7 @@ describe.sequential("PGStorage integration", () => {
       spec: "1.0" as const,
       provider: "test",
       modelId: "test-model",
-    } as unknown as TestLanguageModel;
+    } as unknown as LanguageModel;
 
     const agent = new Agent({
       id: "agent-1",
@@ -644,7 +642,7 @@ describe.sequential("PGStorage integration", () => {
     });
 
     const agents: AgentRegistry = new Map<string, Agent>([["agent-1", agent]]);
-    const models: ModelRegistry = new Map<string, TestLanguageModel>([
+    const models: ModelRegistry = new Map<string, LanguageModel>([
       ["provider/model", model],
     ]) as unknown as ModelRegistry;
 
@@ -696,7 +694,7 @@ describe.sequential("PGStorage integration", () => {
       spec: "1.0" as const,
       provider: "test",
       modelId: "test-model",
-    } as unknown as TestLanguageModel;
+    } as unknown as LanguageModel;
 
     const agent1 = new Agent({
       id: "agent-1",
@@ -716,7 +714,7 @@ describe.sequential("PGStorage integration", () => {
       ["agent-1", agent1],
       ["agent-2", agent2],
     ]);
-    const models: ModelRegistry = new Map<string, TestLanguageModel>([
+    const models: ModelRegistry = new Map<string, LanguageModel>([
       ["provider/model", model],
     ]) as unknown as ModelRegistry;
 
@@ -820,7 +818,7 @@ describe.sequential("PGStorage integration", () => {
       spec: "1.0" as const,
       provider: "test",
       modelId: "test-model",
-    } as unknown as TestLanguageModel;
+    } as unknown as LanguageModel;
 
     const agent = new Agent({
       id: "agent-1",
@@ -830,7 +828,7 @@ describe.sequential("PGStorage integration", () => {
     });
 
     const agents: AgentRegistry = new Map<string, Agent>([["agent-1", agent]]);
-    const models: ModelRegistry = new Map<string, TestLanguageModel>([
+    const models: ModelRegistry = new Map<string, LanguageModel>([
       ["provider/model", model],
     ]) as unknown as ModelRegistry;
 

@@ -1,8 +1,15 @@
 /**
  * Query conversion codecs.
+ *
+ * Converts the new RankingSignal-based query format to Turbopuffer params.
  */
 
-import type { SearchQuery, SearchHit, FieldValue } from "@kernl-sdk/retrieval";
+import type {
+  SearchQuery,
+  SearchHit,
+  RankingSignal,
+  UnknownDocument,
+} from "@kernl-sdk/retrieval";
 import type {
   Row,
   NamespaceQueryParams,
@@ -13,19 +20,15 @@ import { FILTER } from "./filter";
 
 /**
  * Codec for converting SearchQuery to Turbopuffer NamespaceQueryParams.
- *
- * Note: Hybrid search (vector + text) requires multi-query which is
- * handled separately.
  */
 export const QUERY = {
   encode: (query: SearchQuery): NamespaceQueryParams => {
     const params: NamespaceQueryParams = {};
 
-    // determine ranking method
-    if (query.vector) {
-      params.rank_by = buildVectorRankBy(query.vector);
-    } else if (query.text) {
-      params.rank_by = buildTextRankBy(query.text, query.textFields);
+    // Build rank_by from query signals
+    const signals = query.query ?? query.max;
+    if (signals && signals.length > 0) {
+      params.rank_by = buildRankBy(signals, query.max !== undefined);
     }
 
     // top K
@@ -43,14 +46,8 @@ export const QUERY = {
       if (typeof query.include === "boolean") {
         params.include_attributes = query.include;
       } else {
-        const attrs = [...query.include];
-        if (query.includeVectors && !attrs.includes("vector")) {
-          attrs.push("vector");
-        }
-        params.include_attributes = attrs;
+        params.include_attributes = [...query.include];
       }
-    } else if (query.includeVectors) {
-      params.include_attributes = true; // include all to get vector
     }
 
     return params;
@@ -65,27 +62,27 @@ export const QUERY = {
  * Codec for converting Turbopuffer Row to SearchHit.
  */
 export const SEARCH_HIT = {
-  encode: (_hit: SearchHit): Row => {
+  encode: <TDocument = UnknownDocument>(_hit: SearchHit<TDocument>): Row => {
     throw new Error("SEARCH_HIT.encode: not implemented");
   },
 
-  decode: (row: Row, index: string): SearchHit => {
-    const { id, $dist, vector, ...rest } = row;
+  decode: <TDocument = UnknownDocument>(
+    row: Row,
+    index: string,
+  ): SearchHit<TDocument> => {
+    const { id, $dist, ...rest } = row;
 
-    const hit: SearchHit = {
+    const dist = typeof $dist === "number" ? $dist : 0;
+
+    const hit: SearchHit<TDocument> = {
       id: String(id),
       index,
-      score: typeof $dist === "number" ? $dist : 0,
+      score: dist === 0 ? 0 : -dist, // convert distance to similarity (negate so higher = better)
     };
 
-    // Include vector if present
-    if (vector !== undefined) {
-      hit.vector = vector as number[];
-    }
-
-    // Include other fields
+    // include document fields if present
     if (Object.keys(rest).length > 0) {
-      hit.fields = rest as Record<string, FieldValue>;
+      hit.document = rest as Partial<TDocument>;
     }
 
     return hit;
@@ -93,25 +90,64 @@ export const SEARCH_HIT = {
 };
 
 /**
- * Build rank_by for vector search.
+ * Build rank_by from ranking signals.
+ *
+ * Turbopuffer constraints:
+ * - Sum/Max fusion only works with BM25 (text) signals
+ * - Vector search must be a single ANN query
+ * - Hybrid (text + vector) fusion is not supported in a single query
  */
-function buildVectorRankBy(vector: number[]): RankBy {
-  return ["vector", "ANN", vector];
-}
+function buildRankBy(signals: RankingSignal[], useMax: boolean): RankBy {
+  const textRankBys: RankBy[] = [];
+  const vectorRankBys: RankBy[] = [];
 
-/**
- * Build rank_by for full-text search.
- */
-function buildTextRankBy(text: string, fields?: string[]): RankBy {
-  if (!fields || fields.length === 0) {
-    throw new Error("textFields required for full-text search");
+  for (const signal of signals) {
+    const { weight, ...fields } = signal;
+    for (const [field, value] of Object.entries(fields)) {
+      if (value === undefined) continue;
+
+      if (Array.isArray(value)) {
+        vectorRankBys.push(["vector", "ANN", value as number[]]);
+      } else if (typeof value === "string") {
+        textRankBys.push([field, "BM25", value]);
+      }
+    }
   }
 
-  if (fields.length === 1) {
-    return [fields[0], "BM25", text];
+  const hasVector = vectorRankBys.length > 0;
+  const hasText = textRankBys.length > 0;
+
+  if (!hasVector && !hasText) {
+    throw new Error("No ranking signals provided");
   }
 
-  // multiple fields: combine with Sum
-  const subq = fields.map((field) => [field, "BM25", text] as RankBy);
-  return ["Sum", subq as never];
+  // hybrid fusion not supported
+  if (hasVector && hasText) {
+    throw new Error(
+      "Turbopuffer does not support hybrid (vector + text) fusion in a single query. " +
+        "Use separate queries and merge results client-side.",
+    );
+  }
+
+  // multi-vector fusion not supported
+  if (vectorRankBys.length > 1) {
+    throw new Error(
+      "Turbopuffer does not support multi-vector fusion. " +
+        "Use separate queries and merge results client-side.",
+    );
+  }
+
+  // single vector query
+  if (hasVector) {
+    return vectorRankBys[0];
+  }
+
+  // single text query
+  if (textRankBys.length === 1) {
+    return textRankBys[0];
+  }
+
+  // multiple text signals: use Sum or Max fusion
+  const fusion = useMax ? "Max" : "Sum";
+  return [fusion, textRankBys] as RankBy;
 }

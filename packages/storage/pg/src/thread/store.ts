@@ -14,7 +14,7 @@ import {
 } from "kernl";
 import { Thread, type ThreadEvent } from "kernl/internal";
 import {
-  SCHEMA_NAME,
+  KERNL_SCHEMA_NAME,
   NewThreadCodec,
   ThreadEventRecordCodec,
   type ThreadRecord,
@@ -87,8 +87,8 @@ export class PGThreadStore implements ThreadStore {
           e.timestamp,
           e.data,
           e.metadata as event_metadata
-        FROM ${SCHEMA_NAME}.threads t
-        LEFT JOIN ${SCHEMA_NAME}.thread_events e ON t.id = e.tid${eventFilter}
+        FROM ${KERNL_SCHEMA_NAME}.threads t
+        LEFT JOIN ${KERNL_SCHEMA_NAME}.thread_events e ON t.id = e.tid${eventFilter}
         WHERE t.id = $1
         ORDER BY e.seq ${order.toUpperCase()}
         ${limit}
@@ -140,7 +140,7 @@ export class PGThreadStore implements ThreadStore {
 
     // simple query without events
     const result = await this.db.query<ThreadRecord>(
-      `SELECT * FROM ${SCHEMA_NAME}.threads WHERE id = $1`,
+      `SELECT * FROM ${KERNL_SCHEMA_NAME}.threads WHERE id = $1`,
       [tid],
     );
 
@@ -167,7 +167,7 @@ export class PGThreadStore implements ThreadStore {
     });
 
     let idx = params.length + 1;
-    let query = `SELECT * FROM ${SCHEMA_NAME}.threads`;
+    let query = `SELECT * FROM ${KERNL_SCHEMA_NAME}.threads`;
 
     if (where) query += ` WHERE ${where}`;
     query += ` ORDER BY ${SQL_ORDER.encode({ order: options?.order })}`;
@@ -206,7 +206,7 @@ export class PGThreadStore implements ThreadStore {
     const record = NewThreadCodec.encode(thread);
 
     const result = await this.db.query<ThreadRecord>(
-      `INSERT INTO ${SCHEMA_NAME}.threads
+      `INSERT INTO ${KERNL_SCHEMA_NAME}.threads
        (id, namespace, agent_id, model, context, tick, state, parent_task_id, metadata, created_at, updated_at)
        VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7, $8, $9::jsonb, $10, $11)
        RETURNING *`,
@@ -239,7 +239,7 @@ export class PGThreadStore implements ThreadStore {
     params.push(tid);
 
     const result = await this.db.query<ThreadRecord>(
-      `UPDATE ${SCHEMA_NAME}.threads
+      `UPDATE ${KERNL_SCHEMA_NAME}.threads
        SET ${updates}
        WHERE id = $${idx}
        RETURNING *`,
@@ -254,9 +254,10 @@ export class PGThreadStore implements ThreadStore {
    */
   async delete(tid: string): Promise<void> {
     await this.ensureInit();
-    await this.db.query(`DELETE FROM ${SCHEMA_NAME}.threads WHERE id = $1`, [
-      tid,
-    ]);
+    await this.db.query(
+      `DELETE FROM ${KERNL_SCHEMA_NAME}.threads WHERE id = $1`,
+      [tid],
+    );
   }
 
   /**
@@ -268,7 +269,7 @@ export class PGThreadStore implements ThreadStore {
   ): Promise<ThreadEvent[]> {
     await this.ensureInit();
 
-    let query = `SELECT * FROM ${SCHEMA_NAME}.thread_events WHERE tid = $1`;
+    let query = `SELECT * FROM ${KERNL_SCHEMA_NAME}.thread_events WHERE tid = $1`;
     const values: any[] = [tid];
     let paramIndex = 2;
 
@@ -341,7 +342,7 @@ export class PGThreadStore implements ThreadStore {
 
     // insert with ON CONFLICT DO NOTHING for idempotency
     await this.db.query(
-      `INSERT INTO ${SCHEMA_NAME}.thread_events
+      `INSERT INTO ${KERNL_SCHEMA_NAME}.thread_events
        (id, tid, seq, kind, timestamp, data, metadata)
        VALUES ${placeholders.join(", ")}
        ON CONFLICT (tid, id) DO NOTHING`,

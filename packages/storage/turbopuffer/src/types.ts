@@ -4,13 +4,11 @@
 export interface TurbopufferConfig {
   /**
    * Turbopuffer API key.
-   * Falls back to TURBOPUFFER_API_KEY environment variable.
    */
-  apiKey?: string;
+  apiKey: string;
 
   /**
-   * Turbopuffer region (e.g. "us-east-1").
-   * Falls back to TURBOPUFFER_REGION environment variable.
+   * Turbopuffer region (e.g. "us-east-1", "eu-west-1").
    */
-  region?: string;
+  region: string;
 }

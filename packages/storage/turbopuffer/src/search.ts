@@ -11,31 +11,18 @@ import Turbopuffer from "@turbopuffer/turbopuffer";
 
 import type {
   SearchIndex,
-  SearchDocument,
-  SearchDocumentPatch,
-  SearchQuery,
-  SearchHit,
+  IndexHandle,
   NewIndexParams,
   ListIndexesParams,
   IndexSummary,
-  DescribeIndexParams,
-  DeleteIndexParams,
-  DeleteDocParams,
-  DeleteManyParams,
   IndexStats,
+  UnknownDocument,
 } from "@kernl-sdk/retrieval";
 import { CursorPage, type CursorPageResponse } from "@kernl-sdk/shared";
 
 import { TurbopufferConfig } from "./types";
-import {
-  INDEX_SCHEMA,
-  SIMILARITY,
-  DOCUMENT,
-  PATCH,
-  QUERY,
-  FILTER,
-  SEARCH_HIT,
-} from "./convert";
+import { TurbopufferIndexHandle } from "./handle";
+import { INDEX_SCHEMA, SIMILARITY } from "./convert";
 
 /**
  * Turbopuffer search index adapter.
@@ -46,23 +33,21 @@ import {
  *
  * @example
  * ```ts
- * const tpuf = new TurbopufferSearchIndex({
+ * const tpuf = turbopuffer({
  *   apiKey: "your-api-key",
  *   region: "us-east-1",
  * });
  *
- * await tpuf.upsert({
+ * const docs = tpuf.index("my-index");
+ *
+ * await docs.upsert({
  *   id: "doc-1",
- *   index: "my-index",
- *   fields: {
- *     text: "Hello world",
- *     vector: { kind: "vector", values: [0.1, 0.2, ...] },
- *   },
+ *   text: "Hello world",
+ *   vector: [0.1, 0.2, ...],
  * });
  *
- * const hits = await tpuf.query({
- *   index: "my-index",
- *   vector: [0.1, 0.2, ...],
+ * const hits = await docs.query({
+ *   query: [{ vector: [0.1, 0.2, ...] }],
  *   topK: 10,
  * });
  * ```
@@ -75,7 +60,7 @@ export class TurbopufferSearchIndex implements SearchIndex {
   /**
    * Create a new Turbopuffer search index.
    */
-  constructor(config: TurbopufferConfig = {}) {
+  constructor(config: TurbopufferConfig) {
     this.client = new Turbopuffer({
       apiKey: config.apiKey,
       region: config.region,
@@ -130,6 +115,9 @@ export class TurbopufferSearchIndex implements SearchIndex {
       const indexes: IndexSummary[] = [];
       for await (const ns of page) {
         indexes.push({ id: ns.id });
+        if (p.limit !== undefined && indexes.length >= p.limit) {
+          break; // respect limit if specified
+        }
       }
 
       return {
@@ -151,12 +139,12 @@ export class TurbopufferSearchIndex implements SearchIndex {
   /**
    * Get metadata and statistics about an index (namespace).
    */
-  async describeIndex(params: DescribeIndexParams): Promise<IndexStats> {
-    const ns = this.client.namespace(params.id);
+  async describeIndex(id: string): Promise<IndexStats> {
+    const ns = this.client.namespace(id);
     const metadata = await ns.metadata();
 
     return {
-      id: params.id,
+      id,
       count: metadata.approx_row_count,
       sizeb: metadata.approx_logical_bytes,
       status: "ready",
@@ -166,108 +154,36 @@ export class TurbopufferSearchIndex implements SearchIndex {
   /**
    * Delete an index (namespace) and all its documents.
    */
-  async deleteIndex(params: DeleteIndexParams): Promise<void> {
-    const ns = this.client.namespace(params.id);
+  async deleteIndex(id: string): Promise<void> {
+    const ns = this.client.namespace(id);
     await ns.deleteAll();
   }
 
-  /* ---- Document operations ---- */
+  /* ---- Index handle ---- */
 
   /**
-   * Search for documents using vector search, full-text search, or filters.
+   * Get a handle for operating on a specific index.
    */
-  async query(query: SearchQuery): Promise<SearchHit[]> {
-    const ns = this.client.namespace(query.index);
-    const params = QUERY.encode(query);
-
-    const res = await ns.query(params);
-    if (!res.rows) {
-      return [];
-    }
-
-    return res.rows.map((row) => SEARCH_HIT.decode(row, query.index));
+  index<TDocument = UnknownDocument>(id: string): IndexHandle<TDocument> {
+    return new TurbopufferIndexHandle<TDocument>(this.client, id);
   }
 
   /**
-   * Upsert a single document.
+   * Bind an existing resource as an index.
+   *
+   * Not supported by Turbopuffer - indexes are created implicitly.
    */
-  async upsert(document: SearchDocument): Promise<void> {
-    const ns = this.client.namespace(document.index);
-    await ns.write({ upsert_rows: [DOCUMENT.encode(document)] });
+  async bindIndex(_id: string, _config: unknown): Promise<void> {
+    throw new Error("bindIndex not supported by Turbopuffer");
   }
 
-  /**
-   * Upsert multiple documents.
-   */
-  async mupsert(documents: SearchDocument[]): Promise<void> {
-    if (documents.length === 0) return;
-
-    // group by index
-    const byindex = new Map<string, SearchDocument[]>();
-    for (const doc of documents) {
-      const list = byindex.get(doc.index) ?? [];
-      list.push(doc);
-      byindex.set(doc.index, list);
-    }
-
-    // (TODO): consider parallelizing here ..
-    //
-    // write to each index
-    for (const [index, docs] of byindex) {
-      const ns = this.client.namespace(index);
-      await ns.write({ upsert_rows: docs.map(DOCUMENT.encode) });
-    }
-  }
+  /* ---- Utility ---- */
 
   /**
-   * Update a document's fields (partial update).
-   * null values unset the field.
+   * Warm/preload an index for faster queries.
    */
-  async update(patch: SearchDocumentPatch): Promise<void> {
-    const ns = this.client.namespace(patch.index);
-    await ns.write({ patch_rows: [PATCH.encode(patch)] });
-  }
-
-  /**
-   * Update multiple documents.
-   */
-  async mupdate(patches: SearchDocumentPatch[]): Promise<void> {
-    if (patches.length === 0) return;
-
-    // group by index
-    const byindex = new Map<string, SearchDocumentPatch[]>();
-    for (const patch of patches) {
-      const list = byindex.get(patch.index) ?? [];
-      list.push(patch);
-      byindex.set(patch.index, list);
-    }
-
-    for (const [index, ps] of byindex) {
-      const ns = this.client.namespace(index);
-      await ns.write({ patch_rows: ps.map(PATCH.encode) });
-    }
-  }
-
-  /**
-   * Delete a single document by ID.
-   */
-  async delete(params: DeleteDocParams): Promise<void> {
-    const ns = this.client.namespace(params.index);
-    await ns.write({ deletes: [params.id] });
-  }
-
-  /**
-   * Delete multiple documents by IDs or filter.
-   */
-  async mdelete(params: DeleteManyParams): Promise<void> {
-    const ns = this.client.namespace(params.index);
-
-    if (params.ids && params.ids.length > 0) {
-      await ns.write({ deletes: params.ids });
-    }
-
-    if (params.filter) {
-      await ns.write({ delete_by_filter: FILTER.encode(params.filter) });
-    }
+  async warm(id: string): Promise<void> {
+    const ns = this.client.namespace(id);
+    await ns.hintCacheWarm();
   }
 }

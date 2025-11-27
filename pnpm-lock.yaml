@@ -51,6 +51,9 @@ importers:
       '@kernl-sdk/protocol':
         specifier: workspace:*
         version: link:../protocol
+      '@kernl-sdk/retrieval':
+        specifier: workspace:*
+        version: link:../retrieval
       '@kernl-sdk/shared':
         specifier: workspace:^
         version: link:../shared
@@ -107,6 +110,9 @@ importers:
       '@kernl-sdk/protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@kernl-sdk/retrieval':
+        specifier: workspace:*
+        version: link:../../retrieval
       '@kernl-sdk/shared':
         specifier: workspace:^
         version: link:../../shared
@@ -141,10 +147,16 @@ importers:
 
   packages/retrieval:
     dependencies:
+      '@kernl-sdk/protocol':
+        specifier: workspace:*
+        version: link:../protocol
       '@kernl-sdk/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:
+      '@kernl-sdk/ai':
+        specifier: workspace:*
+        version: link:../providers/ai
       '@types/node':
         specifier: ^24.10.0
         version: 24.10.1
@@ -154,6 +166,9 @@ importers:
       typescript:
         specifier: 5.9.2
         version: 5.9.2
+      vitest:
+        specifier: ^4.0.8
+        version: 4.0.9(@types/node@24.10.1)
 
   packages/shared:
     dependencies:
@@ -223,6 +238,9 @@ importers:
 
   packages/storage/pg:
     dependencies:
+      '@kernl-sdk/retrieval':
+        specifier: workspace:^
+        version: link:../../retrieval
       '@kernl-sdk/shared':
         specifier: workspace:^
         version: link:../../shared

@@ -2,7 +2,7 @@
  * Memory serialization - codecs for converting between domain types and database records.
  */
 
-import type { MemoryRecord, NewMemory, MemoryByte } from "kernl";
+import type { MemoryRecord, NewMemory, MemoryByte, MemoryKind } from "kernl";
 import type { JSONObject } from "@kernl-sdk/protocol";
 import { type Codec, neapolitanCodec } from "@kernl-sdk/shared/lib";
 
@@ -20,10 +20,11 @@ const rawMemoryRecordCodec: Codec<MemoryRecord, MemoryDBRecord> = {
       namespace: record.scope.namespace ?? null,
       entity_id: record.scope.entityId ?? null,
       agent_id: record.scope.agentId ?? null,
+      kind: record.kind,
       collection: record.collection,
       content: record.content,
       wmem: record.wmem,
-      smem_expires_at: record.smemExpiresAt,
+      smem_expires_at: record.smem.expiresAt,
       timestamp: record.timestamp,
       created_at: record.createdAt,
       updated_at: record.updatedAt,
@@ -32,7 +33,7 @@ const rawMemoryRecordCodec: Codec<MemoryRecord, MemoryDBRecord> = {
   },
 
   decode(row: MemoryDBRecord): MemoryRecord {
-    return {
+    const base = {
       id: row.id,
       scope: {
         namespace: row.namespace ?? undefined,
@@ -42,12 +43,16 @@ const rawMemoryRecordCodec: Codec<MemoryRecord, MemoryDBRecord> = {
       collection: row.collection,
       content: row.content as MemoryByte,
       wmem: row.wmem,
-      smemExpiresAt: row.smem_expires_at ? Number(row.smem_expires_at) : null, // pg returns BIGINT as string
-      timestamp: Number(row.timestamp), // pg returns BIGINT as string
-      createdAt: Number(row.created_at), // pg returns BIGINT as string
-      updatedAt: Number(row.updated_at), // pg returns BIGINT as string
+      smem: {
+        expiresAt: row.smem_expires_at ? Number(row.smem_expires_at) : null,
+      },
+      timestamp: Number(row.timestamp),
+      createdAt: Number(row.created_at),
+      updatedAt: Number(row.updated_at),
       metadata: row.metadata as JSONObject | null,
     };
+
+    return { ...base, kind: row.kind as MemoryKind } as MemoryRecord;
   },
 };
 
@@ -67,10 +72,11 @@ const rawNewMemoryCodec: Codec<NewMemory, MemoryDBRecord> = {
       namespace: memory.scope.namespace ?? null,
       entity_id: memory.scope.entityId ?? null,
       agent_id: memory.scope.agentId ?? null,
+      kind: memory.kind,
       collection: memory.collection,
       content: memory.content,
       wmem: memory.wmem ?? false,
-      smem_expires_at: memory.smemExpiresAt ?? null,
+      smem_expires_at: memory.smem?.expiresAt ?? null,
       timestamp: memory.timestamp ?? now,
       created_at: now,
       updated_at: now,
@@ -86,11 +92,14 @@ const rawNewMemoryCodec: Codec<NewMemory, MemoryDBRecord> = {
         entityId: row.entity_id ?? undefined,
         agentId: row.agent_id ?? undefined,
       },
+      kind: row.kind as MemoryKind,
       collection: row.collection,
       content: row.content as MemoryByte,
       wmem: row.wmem,
-      smemExpiresAt: row.smem_expires_at ? Number(row.smem_expires_at) : null, // pg returns BIGINT as string
-      timestamp: Number(row.timestamp), // pg returns BIGINT as string
+      smem: row.smem_expires_at
+        ? { expiresAt: Number(row.smem_expires_at) }
+        : undefined,
+      timestamp: Number(row.timestamp),
       metadata: row.metadata as JSONObject | null | undefined,
     };
   },

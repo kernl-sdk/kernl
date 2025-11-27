@@ -13,8 +13,9 @@ describe("NewMemoryCodec", () => {
       const memory = {
         id: "mem-1",
         scope: { namespace: "test" },
+        kind: "episodic" as const,
         collection: "facts",
-        content: { kind: "text" as const, text: "Hello world" },
+        content: { text: { value: "Hello world" } },
       };
 
       const record = NewMemoryCodec.encode(memory);
@@ -28,10 +29,11 @@ describe("NewMemoryCodec", () => {
       const memory = {
         id: "mem-2",
         scope: { namespace: "test", entityId: "user-1", agentId: "agent-1" },
+        kind: "semantic" as const,
         collection: "preferences",
-        content: { kind: "object" as const, value: { key: "value" }, summary: "A preference" },
+        content: { object: { key: "value" } },
         wmem: true,
-        smemExpiresAt: 1704153600000,
+        smem: { expiresAt: 1704153600000 },
         timestamp: 1704067200000,
         metadata: { source: "user" },
       };
@@ -41,8 +43,9 @@ describe("NewMemoryCodec", () => {
       expect(record.namespace).toBe("test");
       expect(record.entity_id).toBe("user-1");
       expect(record.agent_id).toBe("agent-1");
+      expect(record.kind).toBe("semantic");
       expect(record.collection).toBe("preferences");
-      expect(record.content).toEqual({ kind: "object", value: { key: "value" }, summary: "A preference" });
+      expect(record.content).toEqual({ object: { key: "value" } });
       expect(record.wmem).toBe(true);
       expect(record.smem_expires_at).toBe(1704153600000);
       expect(record.timestamp).toBe(1704067200000);
@@ -55,8 +58,9 @@ describe("NewMemoryCodec", () => {
       const memory = {
         id: "mem-3",
         scope: { namespace: "test" },
+        kind: "episodic" as const,
         collection: "facts",
-        content: { kind: "text" as const, text: "Test" },
+        content: { text: { value: "Test" } },
       };
 
       const record = NewMemoryCodec.encode(memory);
@@ -70,8 +74,9 @@ describe("NewMemoryCodec", () => {
       const memory = {
         id: "mem-4",
         scope: {},
+        kind: "episodic" as const,
         collection: "facts",
-        content: { kind: "text" as const, text: "Test" },
+        content: { text: { value: "Test" } },
       };
 
       const record = NewMemoryCodec.encode(memory);
@@ -89,8 +94,9 @@ describe("NewMemoryCodec", () => {
         namespace: "test",
         entity_id: "user-1",
         agent_id: "agent-1",
+        kind: "episodic" as const,
         collection: "facts",
-        content: { kind: "text" as const, text: "Hello" },
+        content: { text: { value: "Hello" } },
         wmem: true,
         smem_expires_at: 1704153600000,
         timestamp: 1704067200000,
@@ -105,10 +111,11 @@ describe("NewMemoryCodec", () => {
       expect(memory.scope.namespace).toBe("test");
       expect(memory.scope.entityId).toBe("user-1");
       expect(memory.scope.agentId).toBe("agent-1");
+      expect(memory.kind).toBe("episodic");
       expect(memory.collection).toBe("facts");
-      expect(memory.content).toEqual({ kind: "text", text: "Hello" });
+      expect(memory.content).toEqual({ text: { value: "Hello" } });
       expect(memory.wmem).toBe(true);
-      expect(memory.smemExpiresAt).toBe(1704153600000);
+      expect(memory.smem?.expiresAt).toBe(1704153600000);
       expect(memory.timestamp).toBe(1704067200000);
       expect(memory.metadata).toEqual({ key: "value" });
     });
@@ -119,8 +126,9 @@ describe("NewMemoryCodec", () => {
         namespace: null,
         entity_id: null,
         agent_id: null,
+        kind: "semantic" as const,
         collection: "facts",
-        content: { kind: "text" as const, text: "Test" },
+        content: { text: { value: "Test" } },
         wmem: false,
         smem_expires_at: null,
         timestamp: 1704067200000,
@@ -134,7 +142,7 @@ describe("NewMemoryCodec", () => {
       expect(memory.scope.namespace).toBeUndefined();
       expect(memory.scope.entityId).toBeUndefined();
       expect(memory.scope.agentId).toBeUndefined();
-      expect(memory.smemExpiresAt).toBeNull();
+      expect(memory.smem).toBeUndefined();
       expect(memory.metadata).toBeNull();
     });
   });
@@ -146,10 +154,11 @@ describe("MemoryRecordCodec", () => {
       const record = {
         id: "mem-1",
         scope: { namespace: "test", entityId: "user-1", agentId: "agent-1" },
+        kind: "episodic" as const,
         collection: "facts",
-        content: { kind: "text" as const, text: "Hello" },
+        content: { text: { value: "Hello" } },
         wmem: true,
-        smemExpiresAt: 1704153600000,
+        smem: { expiresAt: 1704153600000 },
         timestamp: 1704067200000,
         createdAt: 1704067200000,
         updatedAt: 1704070800000,
@@ -162,8 +171,9 @@ describe("MemoryRecordCodec", () => {
       expect(dbRecord.namespace).toBe("test");
       expect(dbRecord.entity_id).toBe("user-1");
       expect(dbRecord.agent_id).toBe("agent-1");
+      expect(dbRecord.kind).toBe("episodic");
       expect(dbRecord.collection).toBe("facts");
-      expect(dbRecord.content).toEqual({ kind: "text", text: "Hello" });
+      expect(dbRecord.content).toEqual({ text: { value: "Hello" } });
       expect(dbRecord.wmem).toBe(true);
       expect(dbRecord.smem_expires_at).toBe(1704153600000);
       expect(dbRecord.timestamp).toBe(1704067200000);
@@ -176,10 +186,11 @@ describe("MemoryRecordCodec", () => {
       const record = {
         id: "mem-2",
         scope: {},
+        kind: "semantic" as const,
         collection: "facts",
-        content: { kind: "text" as const, text: "Test" },
+        content: { text: { value: "Test" } },
         wmem: false,
-        smemExpiresAt: null,
+        smem: { expiresAt: null },
         timestamp: 1704067200000,
         createdAt: 1704067200000,
         updatedAt: 1704067200000,
@@ -201,8 +212,9 @@ describe("MemoryRecordCodec", () => {
         namespace: "test",
         entity_id: "user-1",
         agent_id: "agent-1",
+        kind: "semantic" as const,
         collection: "facts",
-        content: { kind: "object" as const, value: { foo: "bar" } },
+        content: { object: { foo: "bar" } },
         wmem: false,
         smem_expires_at: null,
         timestamp: 1704067200000,
@@ -217,10 +229,11 @@ describe("MemoryRecordCodec", () => {
       expect(record.scope.namespace).toBe("test");
       expect(record.scope.entityId).toBe("user-1");
       expect(record.scope.agentId).toBe("agent-1");
+      expect(record.kind).toBe("semantic");
       expect(record.collection).toBe("facts");
-      expect(record.content).toEqual({ kind: "object", value: { foo: "bar" } });
+      expect(record.content).toEqual({ object: { foo: "bar" } });
       expect(record.wmem).toBe(false);
-      expect(record.smemExpiresAt).toBeNull();
+      expect(record.smem.expiresAt).toBeNull();
       expect(record.timestamp).toBe(1704067200000);
       expect(record.createdAt).toBe(1704067200000);
       expect(record.updatedAt).toBe(1704070800000);
@@ -233,10 +246,11 @@ describe("MemoryRecordCodec", () => {
       const original = {
         id: "mem-rt",
         scope: { namespace: "test", entityId: "user-1" },
+        kind: "episodic" as const,
         collection: "conversations",
-        content: { kind: "text" as const, text: "Round trip test" },
+        content: { text: { value: "Round trip test" } },
         wmem: true,
-        smemExpiresAt: 1704153600000,
+        smem: { expiresAt: 1704153600000 },
         timestamp: 1704067200000,
         createdAt: 1704067200000,
         updatedAt: 1704070800000,
@@ -249,10 +263,11 @@ describe("MemoryRecordCodec", () => {
       expect(decoded.id).toBe(original.id);
       expect(decoded.scope.namespace).toBe(original.scope.namespace);
       expect(decoded.scope.entityId).toBe(original.scope.entityId);
+      expect(decoded.kind).toBe(original.kind);
       expect(decoded.collection).toBe(original.collection);
       expect(decoded.content).toEqual(original.content);
       expect(decoded.wmem).toBe(original.wmem);
-      expect(decoded.smemExpiresAt).toBe(original.smemExpiresAt);
+      expect(decoded.smem.expiresAt).toBe(original.smem.expiresAt);
       expect(decoded.timestamp).toBe(original.timestamp);
       expect(decoded.createdAt).toBe(original.createdAt);
       expect(decoded.updatedAt).toBe(original.updatedAt);

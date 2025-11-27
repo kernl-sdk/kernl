@@ -80,15 +80,12 @@ describe("convert", () => {
   });
 
   describe("DOCUMENT", () => {
-    it("encodes document with scalar fields", () => {
+    it("encodes flat document with scalar fields", () => {
       const result = DOCUMENT.encode({
         id: "doc-1",
-        index: "my-index",
-        fields: {
-          title: "Hello",
-          count: 42,
-          active: true,
-        },
+        title: "Hello",
+        count: 42,
+        active: true,
       });
 
       expect(result).toEqual({
@@ -99,13 +96,10 @@ describe("convert", () => {
       });
     });
 
-    it("encodes document with vector field", () => {
+    it("encodes flat document with vector field", () => {
       const result = DOCUMENT.encode({
         id: "doc-2",
-        index: "my-index",
-        fields: {
-          vector: { kind: "vector", values: [0.1, 0.2, 0.3] },
-        },
+        vector: [0.1, 0.2, 0.3],
       });
 
       expect(result).toEqual({
@@ -113,17 +107,20 @@ describe("convert", () => {
         vector: [0.1, 0.2, 0.3],
       });
     });
+
+    it("throws if id is missing", () => {
+      expect(() => DOCUMENT.encode({ title: "No ID" })).toThrow(
+        'Document must have a string "id" field',
+      );
+    });
   });
 
   describe("PATCH", () => {
-    it("encodes patch with field updates", () => {
+    it("encodes flat patch with field updates", () => {
       const result = PATCH.encode({
         id: "doc-1",
-        index: "my-index",
-        fields: {
-          title: "Updated",
-          count: 100,
-        },
+        title: "Updated",
+        count: 100,
       });
 
       expect(result).toEqual({
@@ -136,11 +133,8 @@ describe("convert", () => {
     it("encodes null values to unset fields", () => {
       const result = PATCH.encode({
         id: "doc-1",
-        index: "my-index",
-        fields: {
-          title: "Keep this",
-          description: null,
-        },
+        title: "Keep this",
+        description: null,
       });
 
       expect(result).toEqual({
@@ -153,10 +147,7 @@ describe("convert", () => {
     it("encodes vector updates", () => {
       const result = PATCH.encode({
         id: "doc-1",
-        index: "my-index",
-        fields: {
-          vector: { kind: "vector", values: [0.5, 0.6] },
-        },
+        vector: [0.5, 0.6],
       });
 
       expect(result).toEqual({
@@ -164,65 +155,62 @@ describe("convert", () => {
         vector: [0.5, 0.6],
       });
     });
+
+    it("throws if id is missing", () => {
+      expect(() => PATCH.encode({ title: "No ID" })).toThrow(
+        'Patch must have a string "id" field',
+      );
+    });
   });
 
   describe("FILTER", () => {
-    // Table-driven tests for all field operators
-    const fieldOpCases: Array<{
-      name: string;
-      input: { field: string; op: string; value: unknown };
-      expected: unknown[];
-    }> = [
-      // Equality
-      { name: "eq string", input: { field: "f", op: "eq", value: "x" }, expected: ["f", "Eq", "x"] },
-      { name: "eq number", input: { field: "f", op: "eq", value: 42 }, expected: ["f", "Eq", 42] },
-      { name: "eq boolean", input: { field: "f", op: "eq", value: true }, expected: ["f", "Eq", true] },
-      { name: "eq null", input: { field: "f", op: "eq", value: null }, expected: ["f", "Eq", null] },
-      { name: "neq", input: { field: "f", op: "neq", value: "x" }, expected: ["f", "NotEq", "x"] },
-
-      // Comparison
-      { name: "gt", input: { field: "f", op: "gt", value: 10 }, expected: ["f", "Gt", 10] },
-      { name: "gte", input: { field: "f", op: "gte", value: 10 }, expected: ["f", "Gte", 10] },
-      { name: "lt", input: { field: "f", op: "lt", value: 10 }, expected: ["f", "Lt", 10] },
-      { name: "lte", input: { field: "f", op: "lte", value: 10 }, expected: ["f", "Lte", 10] },
-
-      // Set membership
-      { name: "in", input: { field: "f", op: "in", value: ["a", "b"] }, expected: ["f", "In", ["a", "b"]] },
-      { name: "nin", input: { field: "f", op: "nin", value: ["a", "b"] }, expected: ["f", "NotIn", ["a", "b"]] },
-
-      // Array operations
-      { name: "contains", input: { field: "f", op: "contains", value: "x" }, expected: ["f", "Contains", "x"] },
-      { name: "contains_any", input: { field: "f", op: "contains_any", value: ["a", "b"] }, expected: ["f", "ContainsAny", ["a", "b"]] },
-      { name: "contains_all", input: { field: "f", op: "contains_all", value: ["a", "b"] }, expected: ["f", "ContainsAny", ["a", "b"]] },
-
-      // String patterns (converted to Glob)
-      { name: "starts_with", input: { field: "f", op: "starts_with", value: "pre" }, expected: ["f", "Glob", "pre*"] },
-      { name: "ends_with", input: { field: "f", op: "ends_with", value: "suf" }, expected: ["f", "Glob", "*suf"] },
-    ];
-
-    it.each(fieldOpCases)("encodes $name filter", ({ input, expected }) => {
-      const result = FILTER.encode(input as never);
-      expect(result).toEqual(expected);
+    // Simple equality (shorthand)
+    it("encodes simple equality filter", () => {
+      expect(FILTER.encode({ f: "x" })).toEqual(["f", "Eq", "x"]);
+      expect(FILTER.encode({ f: 42 })).toEqual(["f", "Eq", 42]);
+      expect(FILTER.encode({ f: true })).toEqual(["f", "Eq", true]);
+      expect(FILTER.encode({ f: null })).toEqual(["f", "Eq", null]);
     });
 
-    // Existence filters
-    const existsCases = [
-      { name: "exists", op: "exists", expected: ["f", "NotEq", null] },
-      { name: "not_exists", op: "not_exists", expected: ["f", "Eq", null] },
-    ];
+    // Field operators
+    it("encodes $eq operator", () => {
+      expect(FILTER.encode({ f: { $eq: "x" } })).toEqual(["f", "Eq", "x"]);
+    });
 
-    it.each(existsCases)("encodes $name filter", ({ op, expected }) => {
-      const result = FILTER.encode({ field: "f", op } as never);
-      expect(result).toEqual(expected);
+    it("encodes $neq operator", () => {
+      expect(FILTER.encode({ f: { $neq: "x" } })).toEqual(["f", "NotEq", "x"]);
+    });
+
+    it("encodes comparison operators", () => {
+      expect(FILTER.encode({ f: { $gt: 10 } })).toEqual(["f", "Gt", 10]);
+      expect(FILTER.encode({ f: { $gte: 10 } })).toEqual(["f", "Gte", 10]);
+      expect(FILTER.encode({ f: { $lt: 10 } })).toEqual(["f", "Lt", 10]);
+      expect(FILTER.encode({ f: { $lte: 10 } })).toEqual(["f", "Lte", 10]);
+    });
+
+    it("encodes set membership operators", () => {
+      expect(FILTER.encode({ f: { $in: ["a", "b"] } })).toEqual(["f", "In", ["a", "b"]]);
+      expect(FILTER.encode({ f: { $nin: ["a", "b"] } })).toEqual(["f", "NotIn", ["a", "b"]]);
+    });
+
+    it("encodes $contains operator", () => {
+      expect(FILTER.encode({ f: { $contains: "x" } })).toEqual(["f", "Contains", "x"]);
+    });
+
+    it("encodes string pattern operators as Glob", () => {
+      expect(FILTER.encode({ f: { $startsWith: "pre" } })).toEqual(["f", "Glob", "pre*"]);
+      expect(FILTER.encode({ f: { $endsWith: "suf" } })).toEqual(["f", "Glob", "*suf"]);
+    });
+
+    it("encodes $exists operator", () => {
+      expect(FILTER.encode({ f: { $exists: true } })).toEqual(["f", "NotEq", null]);
+      expect(FILTER.encode({ f: { $exists: false } })).toEqual(["f", "Eq", null]);
     });
 
     // Logical operators
-    it("encodes AND filter", () => {
+    it("encodes $and filter", () => {
       const result = FILTER.encode({
-        and: [
-          { field: "a", op: "eq", value: 1 },
-          { field: "b", op: "eq", value: 2 },
-        ],
+        $and: [{ a: 1 }, { b: 2 }],
       });
 
       expect(result).toEqual([
@@ -234,12 +222,9 @@ describe("convert", () => {
       ]);
     });
 
-    it("encodes OR filter", () => {
+    it("encodes $or filter", () => {
       const result = FILTER.encode({
-        or: [
-          { field: "status", op: "eq", value: "active" },
-          { field: "status", op: "eq", value: "pending" },
-        ],
+        $or: [{ status: "active" }, { status: "pending" }],
       });
 
       expect(result).toEqual([
@@ -251,9 +236,9 @@ describe("convert", () => {
       ]);
     });
 
-    it("encodes NOT filter", () => {
+    it("encodes $not filter", () => {
       const result = FILTER.encode({
-        not: { field: "deleted", op: "eq", value: true },
+        $not: { deleted: true },
       });
 
       expect(result).toEqual(["Not", ["deleted", "Eq", true]]);
@@ -261,16 +246,13 @@ describe("convert", () => {
 
     it("encodes deeply nested filters", () => {
       const result = FILTER.encode({
-        and: [
-          { field: "active", op: "eq", value: true },
+        $and: [
+          { active: true },
           {
-            or: [
-              { field: "role", op: "eq", value: "admin" },
+            $or: [
+              { role: "admin" },
               {
-                and: [
-                  { field: "role", op: "eq", value: "user" },
-                  { field: "verified", op: "eq", value: true },
-                ],
+                $and: [{ role: "user" }, { verified: true }],
               },
             ],
           },
@@ -298,22 +280,22 @@ describe("convert", () => {
       ]);
     });
 
-    it("encodes empty AND filter", () => {
-      const result = FILTER.encode({ and: [] });
-      expect(result).toEqual(["And", []]);
-    });
-
-    it("encodes empty OR filter", () => {
-      const result = FILTER.encode({ or: [] });
-      expect(result).toEqual(["Or", []]);
+    it("encodes multiple fields as implicit AND", () => {
+      const result = FILTER.encode({ a: 1, b: 2 });
+      expect(result).toEqual([
+        "And",
+        [
+          ["a", "Eq", 1],
+          ["b", "Eq", 2],
+        ],
+      ]);
     });
   });
 
   describe("QUERY", () => {
     it("encodes vector search query", () => {
       const result = QUERY.encode({
-        index: "test",
-        vector: [0.1, 0.2, 0.3],
+        query: [{ vector: [0.1, 0.2, 0.3] }],
         topK: 10,
       });
 
@@ -323,9 +305,7 @@ describe("convert", () => {
 
     it("encodes text search query", () => {
       const result = QUERY.encode({
-        index: "test",
-        text: "hello world",
-        textFields: ["content"],
+        query: [{ content: "hello world" }],
         topK: 5,
       });
 
@@ -335,9 +315,7 @@ describe("convert", () => {
 
     it("encodes multi-field text search as Sum", () => {
       const result = QUERY.encode({
-        index: "test",
-        text: "search term",
-        textFields: ["title", "body"],
+        query: [{ title: "search term" }, { body: "search term" }],
         topK: 10,
       });
 
@@ -352,10 +330,9 @@ describe("convert", () => {
 
     it("encodes filter", () => {
       const result = QUERY.encode({
-        index: "test",
-        vector: [0.1],
+        query: [{ vector: [0.1] }],
         topK: 5,
-        filter: { field: "category", op: "eq", value: "news" },
+        filter: { category: { $eq: "news" } },
       });
 
       expect(result.filters).toEqual(["category", "Eq", "news"]);
@@ -363,8 +340,7 @@ describe("convert", () => {
 
     it("encodes include fields array", () => {
       const result = QUERY.encode({
-        index: "test",
-        vector: [0.1],
+        query: [{ vector: [0.1] }],
         topK: 5,
         include: ["title", "content"],
       });
@@ -374,25 +350,12 @@ describe("convert", () => {
 
     it("encodes include as boolean", () => {
       const result = QUERY.encode({
-        index: "test",
-        vector: [0.1],
+        query: [{ vector: [0.1] }],
         topK: 5,
         include: true,
       });
 
       expect(result.include_attributes).toBe(true);
-    });
-
-    it("adds vector to include when includeVectors is true", () => {
-      const result = QUERY.encode({
-        index: "test",
-        vector: [0.1],
-        topK: 5,
-        include: ["title"],
-        includeVectors: true,
-      });
-
-      expect(result.include_attributes).toEqual(["title", "vector"]);
     });
   });
 
@@ -411,8 +374,8 @@ describe("convert", () => {
       expect(result).toEqual({
         id: "doc-1",
         index: "my-index",
-        score: 0.5,
-        fields: {
+        score: -0.5, // negated: distance → similarity
+        document: {
           title: "Test",
           category: "news",
         },
@@ -429,7 +392,7 @@ describe("convert", () => {
         "my-index",
       );
 
-      expect(result.vector).toEqual([0.1, 0.2, 0.3]);
+      expect(result.document?.vector).toEqual([0.1, 0.2, 0.3]);
     });
 
     it("handles missing score", () => {
