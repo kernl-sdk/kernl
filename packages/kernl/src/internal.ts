@@ -8,8 +8,8 @@ export type {
   ThreadSystemEvent,
   ThreadState,
   PublicThreadEvent,
-} from "./types/thread";
+} from "@/thread/types";
 
-export { THREAD_STATES } from "./types/thread";
+export { THREAD_STATES } from "@/thread/types";
 
 

@@ -3,18 +3,30 @@
  */
 
 export { Memory } from "./memory";
+export { MemoryByteEncoder } from "./encoder";
 
 export type {
+  // Byte types
+  TextByte,
+  ImageByte,
+  AudioByte,
+  VideoByte,
+  MemoryByte,
+  IndexableByte,
+  MemoryByteCodec,
+  // Core types
   MemoryScope,
+  MemoryKind,
   NewMemory,
   MemoryConfig,
   MemoryReindexParams,
   MemoryRecord,
-  MemoryUpdate,
+  MemoryRecordUpdate,
   MemoryFilter,
   MemoryListOptions,
   MemorySearchQuery,
-  MemorySearchHit,
+  IndexMemoryRecord,
+  IndexMemoryRecordPatch,
   WorkingMemorySnapshot,
   ShortTermMemorySnapshot,
 } from "./types";
@@ -31,10 +43,3 @@ export type {
   ArchiveQuery,
   ArchiveResult,
 } from "./indexes";
-
-export {
-  type MemoryByte,
-  type MemoryByteKind,
-  type MemoryByteCodec,
-  defaultMemoryByteCodec,
-} from "./byte";

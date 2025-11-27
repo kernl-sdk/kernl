@@ -5,7 +5,7 @@ import { InMemoryStorage, InMemoryThreadStore } from "../in-memory";
 import { Agent } from "@/agent";
 import { Thread } from "@/thread";
 import type { NewThread } from "@/storage";
-import type { ThreadEvent } from "@/types/thread";
+import type { ThreadEvent } from "@/thread/types";
 import { createMockModel } from "@/thread/__tests__/fixtures/mock-model";
 
 describe("InMemoryThreadStore", () => {

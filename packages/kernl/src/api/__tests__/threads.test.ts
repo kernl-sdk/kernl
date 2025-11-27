@@ -4,10 +4,10 @@ import { message, RUNNING } from "@kernl-sdk/protocol";
 
 import { Agent } from "@/agent";
 import { InMemoryThreadStore } from "@/storage/in-memory";
-import type { AgentRegistry, ModelRegistry } from "@/types/kernl";
+import type { AgentRegistry, ModelRegistry } from "@/kernl/types";
 import type { NewThread } from "@/storage";
 import { tevent } from "@/thread/utils";
-import type { ThreadEvent } from "@/types/thread";
+import type { ThreadEvent } from "@/thread/types";
 import { RThreads } from "@/api/resources/threads";
 import type { MThread } from "@/api/models";
 

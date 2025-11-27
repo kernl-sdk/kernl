@@ -4,8 +4,8 @@ import { LanguageModelResponse } from "@kernl-sdk/protocol";
 
 import { Agent } from "./agent";
 import { Context, UnknownContext } from "./context";
-import type { AgentResponseType } from "./types/agent";
-import type { TextResponse, ThreadEvent } from "./types/thread";
+import type { AgentResponseType } from "@/agent/types";
+import type { TextResponse, ThreadEvent } from "@/thread/types";
 
 /**
  * Resolves the agent output type based on the response type.

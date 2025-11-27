@@ -5,7 +5,7 @@ import {
   LanguageModelResponseItem,
   LanguageModelItem,
 } from "@kernl-sdk/protocol";
-import type { ThreadStreamEvent } from "@/types/thread";
+import type { ThreadStreamEvent } from "@/thread/types";
 
 /**
  * A mock language model that echoes the user input back as an assistant message.

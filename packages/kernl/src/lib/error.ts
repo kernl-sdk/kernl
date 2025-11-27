@@ -9,8 +9,8 @@ import { randomID } from "@kernl-sdk/shared/lib";
 // import { SerializedThread } from "@/lib/serde/thread";
 type SerializedThread = any;
 
-import { AgentResponseType } from "@/types/agent";
-import { TextResponse } from "@/types/thread";
+import { AgentResponseType } from "@/agent/types";
+import { TextResponse } from "@/thread/types";
 
 /**
  * Abstract base class for all `kernl` errors

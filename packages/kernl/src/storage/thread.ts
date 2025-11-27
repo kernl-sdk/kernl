@@ -4,7 +4,7 @@
 
 import type { Thread } from "@/thread";
 import type { Context } from "@/context";
-import type { ThreadEvent, ThreadState } from "@/types/thread";
+import type { ThreadEvent, ThreadState } from "@/thread/types";
 
 /* ---- Store ---- */
 

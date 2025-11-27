@@ -1,4 +1,4 @@
-import type { ThreadState } from "@/types/thread";
+import type { ThreadState } from "@/thread/types";
 import type { SortOrder } from "@/storage";
 import type { CursorPageParams } from "@kernl-sdk/shared";
 

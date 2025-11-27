@@ -1,16 +1,21 @@
+import type { IndexHandle, SearchHit } from "@kernl-sdk/retrieval";
+import type { AsyncCodec } from "@kernl-sdk/shared/lib";
+
 import type { MemoryStore } from "./store";
-import type { MemorySearchIndex } from "./indexes";
 import type {
   NewMemory,
   MemoryRecord,
+  MemoryRecordUpdate,
   MemoryScope,
   MemoryConfig,
-  MemorySearchHit,
   MemorySearchQuery,
+  MemoryByteCodec,
+  IndexMemoryRecord,
   WorkingMemorySnapshot,
   ShortTermMemorySnapshot,
   MemoryReindexParams,
 } from "./types";
+import { MEMORY_FILTER, PATCH_CODEC, recordCodec } from "./codec";
 
 /**
  * Memory is the primary memory abstraction for agents.
@@ -21,16 +26,23 @@ import type {
  *  - L2 / smem: bounded recent context that can refill working memory
  *  - L3 / lmem: durable, structured long-term store
  *
- * Delegates persistence to storage adapters and optional indexes as _projections_ of the primary
- * memory store.
+ * Delegates persistence to storage adapters and optional indexes as
+ * _projections_ of the primary memory store.
  */
 export class Memory {
   private readonly store: MemoryStore;
-  private readonly _search: MemorySearchIndex | null;
+  private readonly _search: IndexHandle<IndexMemoryRecord> | null;
+
+  private readonly encoder: MemoryByteCodec;
+  private readonly rcodec: AsyncCodec<MemoryRecord, IndexMemoryRecord>;
 
   constructor(config: MemoryConfig) {
     this.store = config.store;
     this._search = config.search ?? null;
+
+    // TODO: default encoder using text-embedding-3-small
+    this.encoder = config.encoder;
+    this.rcodec = recordCodec(config.encoder);
   }
 
   /**
@@ -41,7 +53,27 @@ export class Memory {
     const record = await this.store.create(memory);
 
     if (this._search) {
-      await this._search.index(record); // no-op for pgvector
+      const indexed = await this.rcodec.encode(record);
+      await this._search.upsert(indexed);
+    }
+
+    return record;
+  }
+
+  /**
+   * Update an existing memory record.
+   * Updates primary store, then re-indexes or patches search index.
+   */
+  async update(update: MemoryRecordUpdate): Promise<MemoryRecord> {
+    const record = await this.store.update(update.id, update);
+    if (!this._search) return record;
+
+    if (update.content) {
+      const indexed = await this.rcodec.encode(record); // content changed → full re-index with new embeddings
+      await this._search.upsert(indexed);
+    } else {
+      const patch = PATCH_CODEC.encode(update); // metadata only → cheap patch
+      await this._search.patch(patch);
     }
 
     return record;
@@ -50,11 +82,18 @@ export class Memory {
   /**
    * Semantic/metadata search across memories.
    */
-  async search(query: MemorySearchQuery): Promise<MemorySearchHit[]> {
+  async search(q: MemorySearchQuery): Promise<SearchHit<IndexMemoryRecord>[]> {
     if (!this._search) {
       throw new Error("search index not configured");
     }
-    return this._search.query(query);
+
+    const tvec = await this.encoder.embed(q.query);
+
+    return this._search.query({
+      query: [{ text: q.query, tvec }],
+      filter: q.filter ? MEMORY_FILTER.encode(q.filter) : undefined,
+      topK: q.limit ?? 20,
+    });
   }
 
   /**
@@ -69,7 +108,8 @@ export class Memory {
     const indexes = params.indexes ?? ["search", "graph", "archive"];
 
     if (indexes.includes("search") && this._search) {
-      await this._search.index(record);
+      const indexed = await this.rcodec.encode(record);
+      await this._search.upsert(indexed);
     }
   }
 

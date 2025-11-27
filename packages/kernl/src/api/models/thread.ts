@@ -1,5 +1,5 @@
 import type { LanguageModelItem } from "@kernl-sdk/protocol";
-import type { ThreadState } from "@/types/thread";
+import type { ThreadState } from "@/thread/types";
 
 /**
  * Model metadata for the language model used by a thread.

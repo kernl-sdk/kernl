@@ -5,7 +5,14 @@
  * specialized query patterns (vector search, graph traversal, archival).
  */
 
-import type { MemoryRecord, MemorySearchQuery, MemorySearchHit } from "./types";
+import type { SearchHit } from "@kernl-sdk/retrieval";
+
+import type {
+  MemoryRecord,
+  MemoryRecordUpdate,
+  MemorySearchQuery,
+  IndexMemoryRecord,
+} from "./types";
 
 /**
  * Base interface for memory indexes.
@@ -14,10 +21,7 @@ import type { MemoryRecord, MemorySearchQuery, MemorySearchHit } from "./types";
  * but differ in their query interface.
  */
 export interface MemoryIndexBase<TQuery, TResult> {
-  /**
-   * Backend identifier (e.g. "pgvector", "turbopuffer", "neo4j", "s3").
-   */
-  readonly id: string;
+  readonly id: string /* provider id - "pgvector" | "turbopuffer", ... */;
 
   /**
    * Query the index.
@@ -25,46 +29,31 @@ export interface MemoryIndexBase<TQuery, TResult> {
   query(query: TQuery): Promise<TResult>;
 
   /**
-   * Index a memory record (idempotent upsert).
+   * Index one or more memory records (idempotent upsert).
    */
-  index(record: MemoryRecord): Promise<void>;
+  index(memories: MemoryRecord | MemoryRecord[]): Promise<void>;
 
   /**
-   * Index multiple memory records.
+   * Partially update one or more records' projections.
    */
-  mindex(records: MemoryRecord[]): Promise<void>;
+  update(updates: MemoryRecordUpdate | MemoryRecordUpdate[]): Promise<void>;
 
   /**
-   * Partially update a record's projection.
+   * Remove one or more records from this index (DB row remains).
    */
-  patch(record: MemoryRecord): Promise<void>;
+  delete(ids: string | string[]): Promise<void>;
 
   /**
-   * Partially update multiple records.
+   * Index warming (optional).
    */
-  mpatch(records: MemoryRecord[]): Promise<void>;
-
-  /**
-   * Remove a record from this index (DB row remains).
-   */
-  delete(id: string): Promise<void>;
-
-  /**
-   * Remove multiple records from this index.
-   */
-  mdelete(ids: string[]): Promise<void>;
-
-  /**
-   * Namespace warming / cache priming (optional).
-   */
-  warm?(ns: string): Promise<void>;
+  warm(index: string): Promise<void>;
 }
 
 /**
  * Memory search index - vector/semantic search over memories.
  */
 export interface MemorySearchIndex
-  extends MemoryIndexBase<MemorySearchQuery, MemorySearchHit[]> {}
+  extends MemoryIndexBase<MemorySearchQuery, SearchHit<IndexMemoryRecord>[]> {}
 
 /**
  * Graph traversal query (stub).

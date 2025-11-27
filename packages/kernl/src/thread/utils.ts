@@ -8,14 +8,14 @@ import { ToolCall, LanguageModelItem } from "@kernl-sdk/protocol";
 import { ModelBehaviorError } from "@/lib/error";
 
 /* types */
-import type { AgentResponseType } from "@/types/agent";
+import type { AgentResponseType } from "@/agent/types";
 import type {
   ThreadEvent,
   ThreadEventBase,
   ThreadStreamEvent,
   ActionSet,
   PublicThreadEvent,
-} from "@/types/thread";
+} from "./types";
 
 /**
  * Create a ThreadEvent from a LanguageModelItem with thread metadata.

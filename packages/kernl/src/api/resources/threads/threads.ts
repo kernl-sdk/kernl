@@ -3,7 +3,7 @@ import type {
   ThreadListOptions,
   ThreadHistoryOptions,
 } from "@/storage";
-import type { ThreadEvent } from "@/types/thread";
+import type { ThreadEvent } from "@/thread/types";
 import { isPublicEvent } from "@/thread/utils";
 import { Context } from "@/context";
 import { randomID } from "@kernl-sdk/shared/lib";

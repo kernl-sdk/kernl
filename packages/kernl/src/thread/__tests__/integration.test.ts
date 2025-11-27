@@ -9,7 +9,7 @@ import { tool, Toolkit } from "@/tool";
 
 import { Thread } from "../thread";
 
-import type { ThreadEvent, ThreadStreamEvent } from "@/types/thread";
+import type { ThreadEvent, ThreadStreamEvent } from "@/thread/types";
 import type { LanguageModelItem } from "@kernl-sdk/protocol";
 
 /**

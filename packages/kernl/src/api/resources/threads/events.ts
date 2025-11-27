@@ -1,7 +1,7 @@
 import type { ThreadStore } from "@/storage";
 import { isPublicEvent } from "@/thread/utils";
 import type { MThreadEvent } from "@/api/models";
-import type { ThreadEvent } from "@/types/thread";
+import type { ThreadEvent } from "@/thread/types";
 
 /**
  * Events subresource for threads.

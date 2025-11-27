@@ -2,7 +2,7 @@
  * Core storage contracts.
  */
 
-import type { AgentRegistry, ModelRegistry } from "@/types/kernl";
+import type { AgentRegistry, ModelRegistry } from "@/kernl/types";
 import type { ThreadStore } from "./thread";
 
 /**

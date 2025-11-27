@@ -5,7 +5,7 @@
 import type {
   MemoryRecord,
   NewMemory,
-  MemoryUpdate,
+  MemoryRecordUpdate,
   MemoryListOptions,
 } from "./types";
 
@@ -33,7 +33,7 @@ export interface MemoryStore {
   /**
    * Update an existing memory.
    */
-  update(id: string, patch: MemoryUpdate): Promise<MemoryRecord>;
+  update(id: string, patch: MemoryRecordUpdate): Promise<MemoryRecord>;
 
   /**
    * Delete a memory.

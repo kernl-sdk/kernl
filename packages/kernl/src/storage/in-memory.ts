@@ -23,8 +23,8 @@ import type {
   ThreadFilter,
   SortOrder,
 } from "@/storage";
-import type { ThreadEvent, ThreadState } from "@/types/thread";
-import type { AgentRegistry, ModelRegistry } from "@/types/kernl";
+import type { ThreadEvent, ThreadState } from "@/thread/types";
+import type { AgentRegistry, ModelRegistry } from "@/kernl/types";
 
 /**
  * In-memory storage implementation.

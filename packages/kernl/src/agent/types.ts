@@ -8,7 +8,7 @@ import {
 import { InputGuardrail, OutputGuardrail } from "@/guardrail";
 import { BaseToolkit } from "@/tool";
 
-import { TextResponse } from "./thread";
+import { TextResponse } from "@/thread/types";
 
 /**
  * Configuration for an agent.

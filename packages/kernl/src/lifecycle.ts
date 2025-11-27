@@ -5,8 +5,8 @@ import { Context, UnknownContext } from "./context";
 import { Tool } from "./tool";
 import type { ToolCall } from "@kernl-sdk/protocol";
 
-import { AgentResponseType } from "./types/agent";
-import { TextResponse } from "./types/thread";
+import { AgentResponseType } from "@/agent/types";
+import { TextResponse } from "@/thread/types";
 
 export type EventEmitterEvents = Record<string, any[]>;
 

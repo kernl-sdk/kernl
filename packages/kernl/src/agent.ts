@@ -25,13 +25,13 @@ import {
 import { AgentHooks } from "./lifecycle";
 
 import { MisconfiguredError, RuntimeError } from "./lib/error";
-import type { AgentConfig, AgentResponseType } from "./types/agent";
+import type { AgentConfig, AgentResponseType } from "@/agent/types";
 import type {
   TextResponse,
   ThreadExecuteOptions,
   ThreadExecuteResult,
   ThreadStreamEvent,
-} from "./types/thread";
+} from "@/thread/types";
 
 export class Agent<
     TContext = UnknownContext,

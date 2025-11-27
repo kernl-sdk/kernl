@@ -4,7 +4,7 @@ export type {
   StorageOptions,
   AgentRegistry,
   ModelRegistry,
-} from "./types/kernl";
+} from "./kernl";
 export { Agent } from "./agent";
 export { Context } from "./context";
 
@@ -35,7 +35,7 @@ export {
   THREAD_STATES,
   type ThreadState,
   type PublicThreadEvent,
-} from "./types/thread";
+} from "./thread/types";
 
 // --- storage ---
 
@@ -53,7 +53,7 @@ export type {
 } from "./storage";
 
 // --- memory ---
-export { Memory } from "./memory";
+export { Memory, MemoryByteEncoder } from "./memory";
 export type {
   MemoryStore,
   MemoryScope,
@@ -61,11 +61,11 @@ export type {
   MemoryConfig,
   MemoryReindexParams,
   MemoryRecord,
-  MemoryUpdate,
+  MemoryKind,
+  MemoryRecordUpdate,
   MemoryFilter,
   MemoryListOptions,
   MemorySearchQuery,
-  MemorySearchHit,
   WorkingMemorySnapshot,
   ShortTermMemorySnapshot,
   MemoryIndexBase,
@@ -77,7 +77,5 @@ export type {
   ArchiveQuery,
   ArchiveResult,
   MemoryByte,
-  MemoryByteKind,
   MemoryByteCodec,
 } from "./memory";
-export { defaultMemoryByteCodec } from "./memory";

@@ -8,6 +8,8 @@
 - Never promote yourself in commits (no "Generated with Claude" messages)
 - If we refactor something and are no longer using an old file, clean up after yourself
 
+`pnpm build` is the build command - not `pnpm build:_` or anything else.
+
 ---
 
 # Rule: Read the Docs First

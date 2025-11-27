@@ -11,7 +11,7 @@ import { Context } from "@/context";
 import { tool, FunctionToolkit } from "@/tool";
 import { ModelBehaviorError } from "@/lib/error";
 
-import type { ThreadEvent } from "@/types/thread";
+import type { ThreadEvent } from "@/thread/types";
 import { createMockModel } from "./fixtures/mock-model";
 
 // Helper to create user message input

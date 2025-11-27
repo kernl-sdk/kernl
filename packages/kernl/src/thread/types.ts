@@ -15,7 +15,7 @@ import { Task } from "@/task";
 import { Context } from "@/context";
 import { Agent } from "@/agent";
 
-import type { AgentResponseType } from "./agent";
+import type { AgentResponseType } from "@/agent/types";
 import type { ThreadStore } from "@/storage";
 
 /**

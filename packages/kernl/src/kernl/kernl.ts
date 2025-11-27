@@ -8,9 +8,9 @@ import type { ResolvedAgentResponse } from "@/guardrail";
 import { InMemoryStorage, type KernlStorage } from "@/storage";
 import { RThreads } from "@/api/resources/threads";
 
-import type { KernlOptions } from "@/types/kernl";
-import type { ThreadExecuteResult, ThreadStreamEvent } from "@/types/thread";
-import type { AgentResponseType } from "@/types/agent";
+import type { KernlOptions } from "./types";
+import type { ThreadExecuteResult, ThreadStreamEvent } from "@/thread/types";
+import type { AgentResponseType } from "@/agent/types";
 
 /**
  * The kernl - manages agent processes, scheduling, and task lifecycle.

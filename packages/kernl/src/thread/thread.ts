@@ -29,8 +29,8 @@ import type {
   ThreadStreamEvent,
   ThreadExecuteResult,
   PerformActionsResult,
-} from "@/types/thread";
-import type { AgentResponseType } from "@/types/agent";
+} from "./types";
+import type { AgentResponseType } from "@/agent/types";
 
 import {
   tevent,
