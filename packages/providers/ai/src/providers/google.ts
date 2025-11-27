@@ -1,5 +1,7 @@
 import { google as createGoogleModel } from "@ai-sdk/google";
 import { AISDKLanguageModel } from "../language-model";
+import { AISDKEmbeddingModel } from "../embedding-model";
+import { registerEmbeddingProvider } from "@kernl-sdk/retrieval";
 
 /**
  * Create a kernl-compatible Google Generative AI language model.
@@ -16,3 +18,8 @@ export function google(modelId: string) {
   const model = createGoogleModel(modelId);
   return new AISDKLanguageModel(model);
 }
+
+// Auto-register Google embedding provider
+registerEmbeddingProvider("google", (id) =>
+  new AISDKEmbeddingModel(createGoogleModel.textEmbedding(id)),
+);

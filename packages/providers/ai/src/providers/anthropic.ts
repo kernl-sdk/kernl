@@ -16,3 +16,5 @@ export function anthropic(modelId: string) {
   const model = createAnthropicModel(modelId);
   return new AISDKLanguageModel(model);
 }
+
+// Note: Anthropic does not currently support embeddings

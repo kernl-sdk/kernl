@@ -1,5 +1,7 @@
 import { openai as createOpenAIModel } from "@ai-sdk/openai";
 import { AISDKLanguageModel } from "../language-model";
+import { AISDKEmbeddingModel } from "../embedding-model";
+import { registerEmbeddingProvider } from "@kernl-sdk/retrieval";
 
 /**
  * Create a kernl-compatible OpenAI language model.
@@ -16,3 +18,8 @@ export function openai(modelId: string) {
   const model = createOpenAIModel(modelId);
   return new AISDKLanguageModel(model);
 }
+
+// Auto-register OpenAI embedding provider
+registerEmbeddingProvider("openai", (id) =>
+  new AISDKEmbeddingModel(createOpenAIModel.embedding(id)),
+);

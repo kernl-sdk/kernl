@@ -78,6 +78,7 @@
   },
   "dependencies": {
     "@kernl-sdk/protocol": "workspace:*",
+    "@kernl-sdk/retrieval": "workspace:*",
     "@kernl-sdk/shared": "workspace:^"
   }
 }
