@@ -43,7 +43,13 @@
     "@turbopuffer/turbopuffer": "^0.10.0"
   },
   "devDependencies": {
+    "@kernl-sdk/ai": "workspace:*",
+    "@kernl-sdk/pg": "workspace:*",
+    "@kernl-sdk/protocol": "workspace:*",
     "@types/node": "^24.10.0",
+    "@types/pg": "^8.15.2",
+    "kernl": "workspace:*",
+    "pg": "^8.16.0",
     "tsc-alias": "^1.8.10",
     "typescript": "5.9.2",
     "vitest": "^4.0.8"

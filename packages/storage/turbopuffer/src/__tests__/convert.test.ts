@@ -376,6 +376,7 @@ describe("convert", () => {
         index: "my-index",
         score: -0.5, // negated: distance → similarity
         document: {
+          id: "doc-1",
           title: "Test",
           category: "news",
         },
@@ -392,6 +393,7 @@ describe("convert", () => {
         "my-index",
       );
 
+      expect(result.document?.id).toBe("doc-2");
       expect(result.document?.vector).toEqual([0.1, 0.2, 0.3]);
     });
 
@@ -404,6 +406,7 @@ describe("convert", () => {
       );
 
       expect(result.score).toBe(0);
+      expect(result.document).toEqual({ id: "doc-3" });
     });
 
     it("converts numeric id to string", () => {
@@ -416,6 +419,7 @@ describe("convert", () => {
       );
 
       expect(result.id).toBe("123");
+      expect(result.document?.id).toBe(123); // document keeps original type
     });
   });
 });

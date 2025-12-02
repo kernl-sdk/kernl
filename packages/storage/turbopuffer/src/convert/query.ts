@@ -80,10 +80,8 @@ export const SEARCH_HIT = {
       score: dist === 0 ? 0 : -dist, // convert distance to similarity (negate so higher = better)
     };
 
-    // include document fields if present
-    if (Object.keys(rest).length > 0) {
-      hit.document = rest as Partial<TDocument>;
-    }
+    // include document fields with id
+    hit.document = { id, ...rest } as unknown as Partial<TDocument>;
 
     return hit;
   },

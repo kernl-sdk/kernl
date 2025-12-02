@@ -24,6 +24,7 @@ type TpufType = string;
 const SCALAR_TO_TPUF: Record<string, TpufType> = {
   string: "string",
   int: "int",
+  bigint: "uint", // Unix epoch timestamps in ms
   float: "int", // tpuf doesn't have float
   boolean: "bool",
   date: "datetime",
@@ -38,6 +39,7 @@ const SCALAR_TO_TPUF: Record<string, TpufType> = {
 const TPUF_TO_SCALAR: Record<string, ScalarType> = {
   string: "string",
   int: "int",
+  uint: "bigint",
   bool: "boolean",
   datetime: "date",
   "[]string": "string[]",

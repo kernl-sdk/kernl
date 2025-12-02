@@ -17,6 +17,7 @@ import type {
   IndexSummary,
   IndexStats,
   UnknownDocument,
+  SearchCapabilities,
 } from "@kernl-sdk/retrieval";
 import { CursorPage, type CursorPageResponse } from "@kernl-sdk/shared";
 
@@ -185,5 +186,22 @@ export class TurbopufferSearchIndex implements SearchIndex {
   async warm(id: string): Promise<void> {
     const ns = this.client.namespace(id);
     await ns.hintCacheWarm();
+  }
+
+  /**
+   * Turbopuffer capabilities.
+   *
+   * Note: Turbopuffer supports text (BM25) and vector (ANN) separately,
+   * but not hybrid fusion (text + vector in the same query).
+   */
+  capabilities(): SearchCapabilities {
+    return {
+      modes: new Set(["vector", "text"]),
+      multiSignal: false, // Can't mix text + vector signals
+      multiVector: false, // Only one ANN query per request
+      multiText: true, // Can fuse multiple BM25 queries
+      filters: true,
+      orderBy: true,
+    };
   }
 }

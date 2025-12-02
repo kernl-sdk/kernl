@@ -472,6 +472,7 @@ describe("SEARCH_HIT", () => {
         id: "doc-1",
         index: "my-index",
         score: -0.5, // negated: distance → similarity
+        document: { id: "doc-1" },
       });
     });
 
@@ -491,6 +492,7 @@ describe("SEARCH_HIT", () => {
         index: "my-index",
         score: -0.25, // negated: distance → similarity
         document: {
+          id: "doc-1",
           title: "Hello World",
           category: "greeting",
         },
@@ -507,6 +509,7 @@ describe("SEARCH_HIT", () => {
         "my-index",
       );
 
+      expect(result.document?.id).toBe("doc-1");
       expect(result.document?.vector).toEqual([0.1, 0.2, 0.3]);
     });
 
@@ -518,12 +521,14 @@ describe("SEARCH_HIT", () => {
 
       expect(result.id).toBe("12345");
       expect(typeof result.id).toBe("string");
+      expect(result.document?.id).toBe(12345); // document keeps original type
     });
 
     it("handles missing $dist (defaults to 0)", () => {
       const result = SEARCH_HIT.decode({ id: "doc-1" }, "my-index");
 
       expect(result.score).toBe(0);
+      expect(result.document).toEqual({ id: "doc-1" });
     });
 
     it("handles $dist of 0", () => {
@@ -553,13 +558,13 @@ describe("SEARCH_HIT", () => {
       expect(result.score).toBe(-999999.99); // negated: distance → similarity
     });
 
-    it("does not include document when no extra attributes", () => {
+    it("includes id in document even when no extra attributes", () => {
       const result = SEARCH_HIT.decode(
         { id: "doc-1", $dist: 0.5 },
         "my-index",
       );
 
-      expect(result.document).toBeUndefined();
+      expect(result.document).toEqual({ id: "doc-1" });
     });
 
     it("preserves attribute types", () => {
@@ -577,6 +582,7 @@ describe("SEARCH_HIT", () => {
       );
 
       expect(result.document).toEqual({
+        id: "doc-1",
         count: 42,
         enabled: true,
         rating: 4.5,
