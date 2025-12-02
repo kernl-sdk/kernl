@@ -32,6 +32,7 @@
     }
   },
   "scripts": {
+    "clean": "rm -rf dist",
     "build": "tsc && tsc-alias --resolve-full-paths",
     "dev": "tsc --watch",
     "lint": "eslint src/",

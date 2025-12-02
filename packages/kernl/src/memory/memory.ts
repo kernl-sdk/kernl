@@ -15,7 +15,7 @@ import type {
   ShortTermMemorySnapshot,
   MemoryReindexParams,
 } from "./types";
-import { MEMORY_FILTER, PATCH_CODEC, recordCodec } from "./codec";
+import { MEMORY_FILTER, PATCH_CODEC, recordCodec } from "./codecs";
 
 /**
  * Memory is the primary memory abstraction for agents.
@@ -23,7 +23,7 @@ import { MEMORY_FILTER, PATCH_CODEC, recordCodec } from "./codec";
  * Sits above storage/index layers + owns cognitive policy, eviction/TTL, consolidation.
  *
  *  - L1 / wmem: active working set exposed to the model
- *  - L2 / smem: bounded recent context that can refill working memory
+ *  - L2 / smem: bounded recent context with a TTL
  *  - L3 / lmem: durable, structured long-term store
  *
  * Delegates persistence to storage adapters and optional indexes as
@@ -52,6 +52,7 @@ export class Memory {
   async create(memory: NewMemory): Promise<MemoryRecord> {
     const record = await this.store.create(memory);
 
+    // index into search if avail
     if (this._search) {
       const indexed = await this.rcodec.encode(record);
       await this._search.upsert(indexed);
@@ -81,6 +82,9 @@ export class Memory {
 
   /**
    * Semantic/metadata search across memories.
+   *
+   * Sends rich query with both text and vector - the index handle
+   * adapts based on backend capabilities (e.g. drops text for pgvector).
    */
   async search(q: MemorySearchQuery): Promise<SearchHit<IndexMemoryRecord>[]> {
     if (!this._search) {

@@ -25,15 +25,25 @@ import type {
 } from "@/storage";
 import type { ThreadEvent, ThreadState } from "@/thread/types";
 import type { AgentRegistry, ModelRegistry } from "@/kernl/types";
+import type {
+  MemoryStore,
+  MemoryRecord,
+  NewMemory,
+  MemoryRecordUpdate,
+  MemoryListOptions,
+  MemoryFilter,
+} from "@/memory";
 
 /**
  * In-memory storage implementation.
  */
 export class InMemoryStorage implements KernlStorage {
   threads: InMemoryThreadStore;
+  memories: InMemoryMemoryStore;
 
   constructor() {
     this.threads = new InMemoryThreadStore();
+    this.memories = new InMemoryMemoryStore();
   }
 
   bind(registries: { agents: AgentRegistry; models: ModelRegistry }): void {
@@ -367,6 +377,164 @@ export class InMemoryThreadStore implements ThreadStore {
       }
 
       return 0;
+    });
+  }
+}
+
+/**
+ * In-memory memory store implementation.
+ */
+export class InMemoryMemoryStore implements MemoryStore {
+  private memories = new Map<string, MemoryRecord>();
+
+  async get(id: string): Promise<MemoryRecord | null> {
+    return this.memories.get(id) ?? null;
+  }
+
+  async list(options?: MemoryListOptions): Promise<MemoryRecord[]> {
+    let records = Array.from(this.memories.values());
+
+    // Apply filters
+    if (options?.filter) {
+      records = this.applyFilters(records, options.filter);
+    }
+
+    // Apply sorting
+    records = this.applySorting(records, options?.order);
+
+    // Apply pagination
+    if (options?.offset) records = records.slice(options.offset);
+    if (options?.limit) records = records.slice(0, options.limit);
+
+    return records;
+  }
+
+  async create(memory: NewMemory): Promise<MemoryRecord> {
+    const now = Date.now();
+    const record: MemoryRecord = {
+      id: memory.id,
+      scope: memory.scope,
+      kind: memory.kind,
+      collection: memory.collection,
+      content: memory.content,
+      wmem: memory.wmem ?? false,
+      smem: memory.smem ?? { expiresAt: null },
+      timestamp: memory.timestamp ?? now,
+      createdAt: now,
+      updatedAt: now,
+      metadata: memory.metadata ?? null,
+    };
+
+    this.memories.set(memory.id, record);
+    return record;
+  }
+
+  async update(id: string, patch: MemoryRecordUpdate): Promise<MemoryRecord> {
+    const record = this.memories.get(id);
+    if (!record) throw new Error(`Memory ${id} not found`);
+
+    const updated: MemoryRecord = {
+      ...record,
+      ...(patch.scope && { scope: patch.scope }),
+      ...(patch.collection && { collection: patch.collection }),
+      ...(patch.content && { content: patch.content }),
+      ...(patch.wmem !== undefined && { wmem: patch.wmem }),
+      ...(patch.smem && { smem: patch.smem }),
+      ...(patch.timestamp && { timestamp: patch.timestamp }),
+      ...(patch.metadata !== undefined && { metadata: patch.metadata }),
+      updatedAt: patch.updatedAt ?? Date.now(),
+    };
+
+    this.memories.set(id, updated);
+    return updated;
+  }
+
+  async delete(id: string): Promise<void> {
+    this.memories.delete(id);
+  }
+
+  async mdelete(ids: string[]): Promise<void> {
+    for (const id of ids) {
+      this.memories.delete(id);
+    }
+  }
+
+  /**
+   * Apply filters to memory list.
+   */
+  private applyFilters(
+    records: MemoryRecord[],
+    filter: MemoryFilter,
+  ): MemoryRecord[] {
+    return records.filter((record) => {
+      // Filter by scope
+      if (filter.scope) {
+        if (
+          filter.scope.namespace !== undefined &&
+          record.scope.namespace !== filter.scope.namespace
+        ) {
+          return false;
+        }
+        if (
+          filter.scope.entityId !== undefined &&
+          record.scope.entityId !== filter.scope.entityId
+        ) {
+          return false;
+        }
+        if (
+          filter.scope.agentId !== undefined &&
+          record.scope.agentId !== filter.scope.agentId
+        ) {
+          return false;
+        }
+      }
+
+      // Filter by collections
+      if (filter.collections && !filter.collections.includes(record.collection)) {
+        return false;
+      }
+
+      // Filter by wmem
+      if (filter.wmem !== undefined && record.wmem !== filter.wmem) {
+        return false;
+      }
+
+      // Filter by smem
+      if (filter.smem !== undefined) {
+        const hasSmem = record.smem.expiresAt !== null;
+        if (filter.smem !== hasSmem) return false;
+      }
+
+      // Filter by timestamp range
+      if (filter.after !== undefined && record.timestamp <= filter.after) {
+        return false;
+      }
+      if (filter.before !== undefined && record.timestamp >= filter.before) {
+        return false;
+      }
+
+      // Filter by metadata (simple equality check for now)
+      if (filter.metadata) {
+        const recordMeta = record.metadata ?? {};
+        for (const [key, value] of Object.entries(filter.metadata)) {
+          if (recordMeta[key] !== value) return false;
+        }
+      }
+
+      return true;
+    });
+  }
+
+  /**
+   * Apply sorting to memory list.
+   */
+  private applySorting(
+    records: MemoryRecord[],
+    order?: "asc" | "desc",
+  ): MemoryRecord[] {
+    return records.sort((a, b) => {
+      const diff = a.timestamp - b.timestamp;
+      return order === "desc" ? -diff : diff;
     });
   }
 }

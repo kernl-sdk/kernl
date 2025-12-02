@@ -4,9 +4,7 @@
 
 import type { JSONObject } from "@kernl-sdk/protocol";
 import type { AsyncCodec } from "@kernl-sdk/shared/lib";
-
 import type { IndexHandle } from "@kernl-sdk/retrieval";
-import type { EmbeddingModel } from "@kernl-sdk/protocol";
 
 import type { MemoryStore } from "./store";
 
@@ -14,12 +12,7 @@ import type { MemoryStore } from "./store";
 // Byte types
 // -------------------
 
-/**
- * Text content.
- */
-export interface TextByte {
-  value: string;
-}
+export type TextByte = string;
 
 /**
  * Image content.
@@ -144,6 +137,26 @@ export interface NewMemory {
 }
 
 /**
+ * Simplified input for agent-scoped memory creation.
+ *
+ * Sugar over NewMemory with:
+ * - id auto-generated if not provided
+ * - scope fields flattened (namespace, entityId) - agentId is implicit
+ * - kind defaults to "semantic"
+ */
+export interface AgentMemoryCreate {
+  id?: string;
+  namespace?: string;
+  entityId?: string;
+  collection: string;
+  content: MemoryByte;
+  wmem?: boolean;
+  smem?: { expiresAt: number | null };
+  timestamp?: number;
+  metadata?: JSONObject | null;
+}
+
+/**
  * Base memory record fields.
  */
 interface BaseMemoryRecord {
@@ -240,7 +253,6 @@ export interface MemoryReindexParams {
 
 /**
  * Flat document for search indexes.
- * Combines flattened MemoryRecord fields with IndexableByte content.
  */
 export interface IndexMemoryRecord extends IndexableByte {
   id: string;

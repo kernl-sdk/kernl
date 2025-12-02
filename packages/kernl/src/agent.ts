@@ -32,6 +32,8 @@ import type {
   ThreadExecuteResult,
   ThreadStreamEvent,
 } from "@/thread/types";
+import type { AgentMemoryCreate, MemorySearchQuery } from "./memory";
+import { randomID } from "@kernl-sdk/shared/lib";
 
 export class Agent<
     TContext = UnknownContext,
@@ -326,6 +328,80 @@ export class Agent<
         }),
       update: (tid: string, patch: RThreadUpdateParams) =>
         kthreads.update(tid, patch),
+    };
+  }
+
+  /**
+   * Memory management scoped to this agent.
+   *
+   * Provides a simplified API for creating memories with:
+   * - Auto-generated IDs
+   * - Flattened scope fields (namespace, entityId) - agentId is implicit
+   * - Default kind of "semantic"
+   *
+   * @example
+   * ```ts
+   * await agent.memories.create({
+   *   namespace: "user-123",
+   *   collection: "preferences",
+   *   content: { text: "User prefers TypeScript" },
+   * });
+   * ```
+   */
+  get memories() {
+    if (!this.kernl) {
+      throw new MisconfiguredError(
+        `Agent ${this.id} not bound to kernl. Call kernl.register(agent) first.`,
+      );
+    }
+
+    const agentId = this.id;
+    const kmem = this.kernl.memories;
+
+    return {
+      /**
+       * Create a new memory scoped to this agent.
+       */
+      create: (params: AgentMemoryCreate) =>
+        kmem.create({
+          id: params.id ?? `mem_${randomID()}`,
+          scope: {
+            namespace: params.namespace,
+            entityId: params.entityId,
+            agentId,
+          },
+          kind: "semantic",
+          collection: params.collection,
+          content: params.content,
+          wmem: params.wmem,
+          smem: params.smem,
+          timestamp: params.timestamp,
+          metadata: params.metadata,
+        }),
+
+      /**
+       * Search memories scoped to this agent.
+       */
+      search: (
+        params: Omit<MemorySearchQuery, "filter"> & {
+          filter?: Omit<NonNullable<MemorySearchQuery["filter"]>, "scope"> & {
+            scope?: Omit<
+              NonNullable<NonNullable<MemorySearchQuery["filter"]>["scope"]>,
+              "agentId"
+            >;
+          };
+        },
+      ) =>
+        kmem.search({
+          ...params,
+          filter: {
+            ...params.filter,
+            scope: {
+              ...params.filter?.scope,
+              agentId,
+            },
+          },
+        }),
     };
   }
 }

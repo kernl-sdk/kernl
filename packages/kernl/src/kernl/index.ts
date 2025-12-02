@@ -1,2 +1,8 @@
 export { Kernl } from "./kernl";
-export type { KernlOptions, StorageOptions, AgentRegistry, ModelRegistry } from "./types";
+export type {
+  KernlOptions,
+  StorageOptions,
+  MemoryOptions,
+  AgentRegistry,
+  ModelRegistry,
+} from "./types";

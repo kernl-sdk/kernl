@@ -154,9 +154,6 @@ importers:
         specifier: workspace:*
         version: link:../shared
     devDependencies:
-      '@kernl-sdk/ai':
-        specifier: workspace:*
-        version: link:../providers/ai
       '@types/node':
         specifier: ^24.10.0
         version: 24.10.1
@@ -254,6 +251,9 @@ importers:
         specifier: ^8.16.3
         version: 8.16.3
     devDependencies:
+      '@kernl-sdk/ai':
+        specifier: workspace:^
+        version: link:../../providers/ai
       '@kernl-sdk/protocol':
         specifier: workspace:^
         version: link:../../protocol
@@ -285,9 +285,27 @@ importers:
         specifier: ^0.10.0
         version: 0.10.18
     devDependencies:
+      '@kernl-sdk/ai':
+        specifier: workspace:*
+        version: link:../../providers/ai
+      '@kernl-sdk/pg':
+        specifier: workspace:*
+        version: link:../pg
+      '@kernl-sdk/protocol':
+        specifier: workspace:*
+        version: link:../../protocol
       '@types/node':
         specifier: ^24.10.0
         version: 24.10.1
+      '@types/pg':
+        specifier: ^8.15.2
+        version: 8.15.6
+      kernl:
+        specifier: workspace:*
+        version: link:../../kernl
+      pg:
+        specifier: ^8.16.0
+        version: 8.16.3
       tsc-alias:
         specifier: ^1.8.10
         version: 1.8.16

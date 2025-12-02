@@ -1,4 +1,5 @@
 import type { LanguageModel } from "@kernl-sdk/protocol";
+import { resolveEmbeddingModel } from "@kernl-sdk/retrieval";
 
 import { Agent } from "@/agent";
 import { UnknownContext } from "@/context";
@@ -7,10 +8,17 @@ import type { Thread } from "@/thread";
 import type { ResolvedAgentResponse } from "@/guardrail";
 import { InMemoryStorage, type KernlStorage } from "@/storage";
 import { RThreads } from "@/api/resources/threads";
+import {
+  Memory,
+  MemoryByteEncoder,
+  MemoryIndexHandle,
+  buildMemoryIndexSchema,
+} from "@/memory";
 
-import type { KernlOptions } from "./types";
 import type { ThreadExecuteResult, ThreadStreamEvent } from "@/thread/types";
 import type { AgentResponseType } from "@/agent/types";
+
+import type { KernlOptions } from "./types";
 
 /**
  * The kernl - manages agent processes, scheduling, and task lifecycle.
@@ -27,12 +35,41 @@ export class Kernl extends KernlHooks<UnknownContext, AgentResponseType> {
 
   // --- public API ---
   readonly threads: RThreads; /* Threads resource */
+  readonly memories: Memory; /* Memory system */
 
   constructor(options: KernlOptions = {}) {
     super();
     this.storage = options.storage?.db ?? new InMemoryStorage();
     this.storage.bind({ agents: this.agents, models: this.models });
     this.threads = new RThreads(this.storage.threads);
+
+    // initialize memory
+    const embeddingModel =
+      options.memory?.embeddingModel ?? "openai/text-embedding-3-small";
+    const embedder =
+      typeof embeddingModel === "string"
+        ? resolveEmbeddingModel<string>(embeddingModel)
+        : embeddingModel;
+    const encoder = new MemoryByteEncoder(embedder);
+
+    const vector = options.storage?.vector;
+    const indexId = options.memory?.indexId ?? "memories_sindex";
+    const dimensions = options.memory?.dimensions ?? 1536;
+    const providerOptions = options.memory?.indexProviderOptions ?? { schema: "kernl" };
+
+    this.memories = new Memory({
+      store: this.storage.memories,
+      search:
+        vector !== undefined
+          ? new MemoryIndexHandle({
+              index: vector,
+              indexId,
+              schema: buildMemoryIndexSchema({ dimensions }),
+              providerOptions,
+            })
+          : undefined,
+      encoder,
+    });
   }
 
   /**

@@ -37,7 +37,7 @@ export const TABLE_MEMORIES = defineTable(
 
 /* ---- Record Schema ---- */
 
-const TextByteSchema = z.object({ value: z.string() });
+const TextByteSchema = z.string();
 
 // Binary data can be Uint8Array or base64/URI string
 const BinaryDataSchema = z.union([

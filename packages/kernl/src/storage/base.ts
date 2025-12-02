@@ -4,6 +4,7 @@
 
 import type { AgentRegistry, ModelRegistry } from "@/kernl/types";
 import type { ThreadStore } from "./thread";
+import type { MemoryStore } from "@/memory/store";
 
 /**
  * The main storage interface for Kernl.
@@ -15,6 +16,11 @@ export interface KernlStorage {
    * Thread store - manages thread execution records and event history.
    */
   threads: ThreadStore;
+
+  /**
+   * Memory store - manages memory records for agents.
+   */
+  memories: MemoryStore;
 
   // tasks: TaskStore;
   // traces: TraceStore;

@@ -23,7 +23,7 @@ export class MemoryByteEncoder implements MemoryByteCodec {
    * Extracts text and computes embeddings for each modality.
    */
   async encode(byte: MemoryByte): Promise<IndexableByte> {
-    const text = this.extractText(byte);
+    const text = byte.text;
     const tvec = text ? await this.embed(text) : undefined;
 
     // TODO: embed other modalities (image, audio, video)
@@ -52,15 +52,5 @@ export class MemoryByteEncoder implements MemoryByteCodec {
   async embed(text: string): Promise<number[]> {
     const result = await this.embedder.embed({ values: [text] });
     return result.embeddings[0] ?? [];
-  }
-
-  /**
-   * Extract canonical text from MemoryByte.
-   */
-  private extractText(byte: MemoryByte): string | undefined {
-    // Priority: explicit text > image alt text
-    if (byte.text?.value) return byte.text.value;
-    if (byte.image?.alt) return byte.image.alt;
-    return undefined;
   }
 }

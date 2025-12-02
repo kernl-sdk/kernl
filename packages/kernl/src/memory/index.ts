@@ -4,6 +4,9 @@
 
 export { Memory } from "./memory";
 export { MemoryByteEncoder } from "./encoder";
+export { buildMemoryIndexSchema } from "./schema";
+export { MemoryIndexHandle } from "./handle";
+export type { MemoryIndexHandleConfig } from "./handle";
 
 export type {
   // Byte types
@@ -18,6 +21,7 @@ export type {
   MemoryScope,
   MemoryKind,
   NewMemory,
+  AgentMemoryCreate,
   MemoryConfig,
   MemoryReindexParams,
   MemoryRecord,

@@ -1,5 +1,7 @@
 /**
- * Memory codecs.
+ * Domain-level memory codecs.
+ *
+ * Codecs for transforming between memory domain types and search/index formats.
  */
 
 import type { Codec, AsyncCodec } from "@kernl-sdk/shared/lib";
@@ -12,7 +14,7 @@ import type {
   IndexMemoryRecord,
   IndexMemoryRecordPatch,
   MemoryByteCodec,
-} from "./types";
+} from "../types";
 
 /**
  * Codec for converting MemoryFilter to retrieval Filter.
@@ -77,7 +79,7 @@ export function recordCodec(
       };
     },
     async decode(): Promise<MemoryRecord> {
-      throw new Error("createRecordCodec.decode not implemented");
+      throw new Error("recordCodec.decode not implemented");
     },
   };
 }
