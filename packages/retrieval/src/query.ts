@@ -5,6 +5,8 @@
  * supporting simple queries, hybrid fusion, and complex filtered searches.
  */
 
+import type { SearchCapabilities } from "./types";
+
 // ---------------------
 // Filter Operators
 // ---------------------
@@ -217,4 +219,63 @@ export function isQueryOptions(input: QueryInput): input is SearchQuery {
     "orderBy" in input ||
     "topK" in input
   );
+}
+
+// ---------------------
+// Query Planning
+// ---------------------
+
+/**
+ * Result of planning a query against backend capabilities.
+ */
+export interface PlannedQuery {
+  /** Adapted query input */
+  input: SearchQuery;
+  /** Whether the query was degraded from the original */
+  degraded: boolean;
+  /** Warnings about adaptations made */
+  warnings?: string[];
+}
+
+/**
+ * Plan a query against backend capabilities.
+ *
+ * Preserves full richness where possible, degrades gracefully otherwise.
+ * - Hybrid not supported → drop text, keep vector
+ * - Multi-signal not supported → keep first signal only
+ */
+export function planQuery(
+  input: QueryInput,
+  caps: SearchCapabilities,
+): PlannedQuery {
+  const normalized = normalizeQuery(input);
+  const warnings: string[] = [];
+
+  let signals = normalized.query ?? [];
+
+  // Analyze signals
+  const hasVector = signals.some((s) => s.tvec !== undefined);
+  const hasText = signals.some((s) => s.text !== undefined);
+  const isHybrid = hasVector && hasText;
+
+  // Hybrid not supported → drop text, keep vector
+  if (isHybrid && !caps.modes.has("hybrid")) {
+    signals = signals.map((s) => {
+      const { text, ...rest } = s;
+      return rest;
+    });
+    warnings.push("hybrid not supported, using vector-only");
+  }
+
+  // Multi-signal not supported → keep first signal only
+  if (signals.length > 1 && !caps.multiSignal) {
+    signals = [signals[0]];
+    warnings.push("multi-signal not supported, using first signal");
+  }
+
+  return {
+    input: { ...normalized, query: signals },
+    degraded: warnings.length > 0,
+    warnings: warnings.length > 0 ? warnings : undefined,
+  };
 }

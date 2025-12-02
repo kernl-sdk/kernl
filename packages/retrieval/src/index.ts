@@ -18,6 +18,7 @@ import type {
   IndexSummary,
   IndexStats,
   UnknownDocument,
+  SearchCapabilities,
 } from "./types";
 import type { IndexHandle } from "./handle";
 
@@ -99,4 +100,9 @@ export interface SearchIndex<TBindConfig = unknown> {
    * Not all backends support warming. Throws if unsupported.
    */
   warm(id: string): Promise<void>;
+
+  /**
+   * Query backend capabilities for query planning.
+   */
+  capabilities(): SearchCapabilities;
 }

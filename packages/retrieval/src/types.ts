@@ -8,7 +8,13 @@ import type { CursorPageParams } from "@kernl-sdk/shared";
 // Field Types & Values
 // ---------------------
 
-type ScalarType = "string" | "int" | "float" | "boolean" | "date";
+/**
+ * Scalar field types.
+ *
+ * - "int": 32-bit integer (adapter-specific, typically SQL INTEGER)
+ * - "bigint": 64-bit integer (adapter-specific, typically SQL BIGINT)
+ */
+type ScalarType = "string" | "int" | "bigint" | "float" | "boolean" | "date";
 type ComplexType = "object" | "geopoint";
 type VectorType = "vector" | "sparse-vector";
 type ArrayableType = ScalarType | ComplexType;
@@ -219,4 +225,34 @@ export interface SearchHit<TDocument = UnknownDocument> {
   score: number;
   /** Projected document fields (can be partial due to `include`/`exclude`) */
   document?: Partial<TDocument>;
+}
+
+// ---------------------
+// Search Capabilities
+// ---------------------
+
+/**
+ * Supported search modes.
+ */
+export type SearchMode = "vector" | "text" | "hybrid";
+
+/**
+ * Backend capabilities for query planning.
+ *
+ * Allows callers to adapt queries based on what the backend supports,
+ * preserving full richness where possible and degrading gracefully.
+ */
+export interface SearchCapabilities {
+  /** Supported query modes */
+  modes: Set<SearchMode>;
+  /** Multiple ranking signals (fusion) supported? */
+  multiSignal?: boolean;
+  /** Multiple vector signals supported? */
+  multiVector?: boolean;
+  /** Multiple text signals supported? */
+  multiText?: boolean;
+  /** Filter support */
+  filters?: boolean;
+  /** OrderBy support */
+  orderBy?: boolean;
 }
