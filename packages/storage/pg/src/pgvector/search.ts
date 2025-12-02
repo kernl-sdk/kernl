@@ -9,6 +9,7 @@ import type {
   IndexSummary,
   IndexStats,
   UnknownDocument,
+  SearchCapabilities,
 } from "@kernl-sdk/retrieval";
 
 import { PGIndexHandle } from "./handle";
@@ -247,6 +248,19 @@ export class PGSearchIndex implements SearchIndex<PGIndexConfig> {
    * No-op for pgvector.
    */
   async warm(_id: string): Promise<void> {}
+
+  /**
+   * pgvector capabilities.
+   */
+  capabilities(): SearchCapabilities {
+    return {
+      modes: new Set(["vector"]),
+      multiSignal: false,
+      multiVector: false,
+      filters: true,
+      orderBy: true,
+    };
+  }
 
   /**
    * Get a handle for operating on a specific index.

@@ -254,10 +254,24 @@ export class PGIndexHandle<TDocument = UnknownDocument>
     throw new Error("addField not yet implemented");
   }
 
-  // --- internal utils ---
+  /* ---- internal utils ---- */
 
   /**
    * Resolve table config: use explicit binding or derive from conventions.
+   *
+   * Resolution order:
+   * - If a PGIndexConfig was provided or bound via PGSearchIndex.createIndex()
+   *   / bindIndex(), that config is used (schema, table, pkey, fields).
+   * - Otherwise we fall back to convention-based parsing of the index id via
+   *   parseIndexId(id):
+   *     - "docs"             → schema: "public",    table: "docs"
+   *     - "analytics.events" → schema: "analytics", table: "events"
+   *
+   * This allows callers to:
+   *   - Point at existing tables without an explicit bindIndex call by using
+   *     either "table" or "schema.table" ids, and
+   *   - Rely on explicit configs (from createIndex/bindIndex) when using the
+   *     higher-level SearchIndex API.
    */
   private get table() {
     if (this.config) {

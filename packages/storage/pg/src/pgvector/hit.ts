@@ -43,13 +43,14 @@ export const SEARCH_HIT = {
       }
     }
 
+    // Always include id in document for consistency
+    doc.id = String(id);
+
     return {
       id: String(id),
       index,
       score: typeof score === "number" ? score : 0,
-      document: Object.keys(doc).length
-        ? (doc as unknown as Partial<TDocument>)
-        : undefined,
+      document: doc as unknown as Partial<TDocument>,
     };
   },
 };

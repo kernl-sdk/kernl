@@ -30,6 +30,7 @@
     }
   },
   "scripts": {
+    "clean": "rm -rf dist",
     "build": "tsc && tsc-alias --resolve-full-paths",
     "dev": "tsc --watch",
     "check-types": "tsc --noEmit",
@@ -38,6 +39,7 @@
     "test:run": "vitest run"
   },
   "devDependencies": {
+    "@kernl-sdk/ai": "workspace:^",
     "@kernl-sdk/protocol": "workspace:^",
     "@types/node": "^24.10.0",
     "@types/pg": "^8.15.6",

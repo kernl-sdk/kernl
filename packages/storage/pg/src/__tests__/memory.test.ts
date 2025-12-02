@@ -37,14 +37,14 @@ describe.sequential("PGMemoryStore", () => {
         scope: { namespace: "test", entityId: "user-1" },
         kind: "semantic",
         collection: "facts",
-        content: { text: { value: "The user likes coffee" } },
+        content: { text: "The user likes coffee" },
       });
 
       expect(memory.id).toBe("mem-1");
       expect(memory.scope.namespace).toBe("test");
       expect(memory.scope.entityId).toBe("user-1");
       expect(memory.collection).toBe("facts");
-      expect(memory.content).toEqual({ text: { value: "The user likes coffee" } });
+      expect(memory.content).toEqual({ text: "The user likes coffee" });
       expect(memory.wmem).toBe(false);
       expect(memory.smem.expiresAt).toBeNull();
       expect(memory.createdAt).toBeTypeOf("number");
@@ -75,7 +75,7 @@ describe.sequential("PGMemoryStore", () => {
         scope: { namespace: "test" },
         kind: "episodic",
         collection: "working",
-        content: { text: { value: "Current task context" } },
+        content: { text: "Current task context" },
         wmem: true,
       });
 
@@ -90,7 +90,7 @@ describe.sequential("PGMemoryStore", () => {
         scope: { namespace: "test" },
         kind: "episodic",
         collection: "short-term",
-        content: { text: { value: "Temporary information" } },
+        content: { text: "Temporary information" },
         smem: { expiresAt },
       });
 
@@ -105,14 +105,14 @@ describe.sequential("PGMemoryStore", () => {
         scope: { namespace: "test" },
         kind: "semantic",
         collection: "facts",
-        content: { text: { value: "Test memory" } },
+        content: { text: "Test memory" },
       });
 
       const memory = await storage.memories.get("mem-get-1");
 
       expect(memory).not.toBeNull();
       expect(memory!.id).toBe("mem-get-1");
-      expect(memory!.content).toEqual({ text: { value: "Test memory" } });
+      expect(memory!.content).toEqual({ text: "Test memory" });
     });
 
     it("should return null for non-existent memory", async () => {
@@ -129,7 +129,7 @@ describe.sequential("PGMemoryStore", () => {
         scope: { namespace: "ns1", entityId: "user-1" },
         kind: "semantic",
         collection: "facts",
-        content: { text: { value: "Fact 1" } },
+        content: { text: "Fact 1" },
         wmem: true,
         timestamp: 1000,
       });
@@ -138,7 +138,7 @@ describe.sequential("PGMemoryStore", () => {
         scope: { namespace: "ns1", entityId: "user-1" },
         kind: "semantic",
         collection: "preferences",
-        content: { text: { value: "Pref 1" } },
+        content: { text: "Pref 1" },
         wmem: false,
         timestamp: 2000,
       });
@@ -147,7 +147,7 @@ describe.sequential("PGMemoryStore", () => {
         scope: { namespace: "ns2", entityId: "user-2" },
         kind: "semantic",
         collection: "facts",
-        content: { text: { value: "Fact 2" } },
+        content: { text: "Fact 2" },
         wmem: false,
         timestamp: 3000,
       });
@@ -239,7 +239,7 @@ describe.sequential("PGMemoryStore", () => {
         scope: { namespace: "test" },
         kind: "semantic",
         collection: "facts",
-        content: { text: { value: "Original" } },
+        content: { text: "Original" },
       });
 
       // Small delay to ensure timestamp changes
@@ -247,10 +247,10 @@ describe.sequential("PGMemoryStore", () => {
 
       const updated = await storage.memories.update("update-1", {
         id: "update-1",
-        content: { text: { value: "Updated" } },
+        content: { text: "Updated" },
       });
 
-      expect(updated.content).toEqual({ text: { value: "Updated" } });
+      expect(updated.content).toEqual({ text: "Updated" });
       expect(updated.updatedAt).toBeGreaterThan(updated.createdAt);
     });
 
@@ -260,7 +260,7 @@ describe.sequential("PGMemoryStore", () => {
         scope: { namespace: "test" },
         kind: "semantic",
         collection: "facts",
-        content: { text: { value: "Test" } },
+        content: { text: "Test" },
         wmem: false,
       });
 
@@ -277,7 +277,7 @@ describe.sequential("PGMemoryStore", () => {
         scope: { namespace: "test" },
         kind: "episodic",
         collection: "facts",
-        content: { text: { value: "Test" } },
+        content: { text: "Test" },
       });
 
       const expiresAt = Date.now() + 7200000;
@@ -295,7 +295,7 @@ describe.sequential("PGMemoryStore", () => {
         scope: { namespace: "test" },
         kind: "semantic",
         collection: "facts",
-        content: { text: { value: "Test" } },
+        content: { text: "Test" },
       });
 
       const updated = await storage.memories.update("update-4", {
@@ -320,7 +320,7 @@ describe.sequential("PGMemoryStore", () => {
         scope: { namespace: "test" },
         kind: "semantic",
         collection: "facts",
-        content: { text: { value: "To be deleted" } },
+        content: { text: "To be deleted" },
       });
 
       await storage.memories.delete("delete-1");
@@ -341,21 +341,21 @@ describe.sequential("PGMemoryStore", () => {
         scope: { namespace: "test" },
         kind: "semantic",
         collection: "facts",
-        content: { text: { value: "Memory 1" } },
+        content: { text: "Memory 1" },
       });
       await storage.memories.create({
         id: "mdelete-2",
         scope: { namespace: "test" },
         kind: "semantic",
         collection: "facts",
-        content: { text: { value: "Memory 2" } },
+        content: { text: "Memory 2" },
       });
       await storage.memories.create({
         id: "mdelete-3",
         scope: { namespace: "test" },
         kind: "semantic",
         collection: "facts",
-        content: { text: { value: "Memory 3" } },
+        content: { text: "Memory 3" },
       });
 
       await storage.memories.mdelete(["mdelete-1", "mdelete-2"]);
@@ -380,7 +380,7 @@ describe.sequential("PGMemoryStore", () => {
         scope: { namespace: "test" },
         kind: "episodic",
         collection: "short-term",
-        content: { text: { value: "Active" } },
+        content: { text: "Active" },
         smem: { expiresAt: now + 3600000 }, // expires in 1 hour
       });
 
@@ -390,7 +390,7 @@ describe.sequential("PGMemoryStore", () => {
         scope: { namespace: "test" },
         kind: "episodic",
         collection: "short-term",
-        content: { text: { value: "Expired" } },
+        content: { text: "Expired" },
         smem: { expiresAt: now - 3600000 }, // expired 1 hour ago
       });
 
@@ -400,7 +400,7 @@ describe.sequential("PGMemoryStore", () => {
         scope: { namespace: "test" },
         kind: "semantic",
         collection: "long-term",
-        content: { text: { value: "Long term" } },
+        content: { text: "Long term" },
         smem: { expiresAt: null },
       });
     });

@@ -18,6 +18,7 @@ type Similarity = VectorFieldSchema["similarity"];
 const SCALAR_TO_PG: Record<string, string> = {
   string: "TEXT",
   int: "INTEGER",
+  bigint: "BIGINT",
   float: "DOUBLE PRECISION",
   boolean: "BOOLEAN",
   date: "TIMESTAMPTZ",

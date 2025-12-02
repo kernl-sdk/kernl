@@ -18,6 +18,7 @@ describe("SEARCH_HIT", () => {
         index: "docs",
         score: 0.95,
         document: {
+          id: "doc-123",
           title: "Hello World",
           content: "Some content",
         },
@@ -42,10 +43,10 @@ describe("SEARCH_HIT", () => {
       expect(result.score).toBe(0);
     });
 
-    it("returns undefined document when no fields", () => {
+    it("returns document with only id when no other fields", () => {
       const row = { id: "1", score: 0.5 };
       const result = SEARCH_HIT.decode(row, "docs");
-      expect(result.document).toBeUndefined();
+      expect(result.document).toEqual({ id: "1" });
     });
 
     describe("with binding", () => {
@@ -76,6 +77,7 @@ describe("SEARCH_HIT", () => {
         const result = SEARCH_HIT.decode(row, "docs", binding);
 
         expect(result.document).toEqual({
+          id: "1",
           title: "Hello",
           content: "World",
           embedding: [0.1, 0.2, 0.3],
@@ -94,6 +96,7 @@ describe("SEARCH_HIT", () => {
         const result = SEARCH_HIT.decode(row, "docs", binding);
 
         expect(result.document).toEqual({
+          id: "1",
           title: "Hello",
         });
         expect((result.document as any)?.extra_col).toBeUndefined();
@@ -111,11 +114,12 @@ describe("SEARCH_HIT", () => {
         const result = SEARCH_HIT.decode(row, "docs", binding);
 
         expect(result.document).toEqual({
+          id: "1",
           title: "Hello",
         });
       });
 
-      it("returns undefined document when no bound fields present", () => {
+      it("returns document with only id when no bound fields present", () => {
         const row = {
           id: "1",
           score: 0.9,
@@ -124,7 +128,7 @@ describe("SEARCH_HIT", () => {
 
         const result = SEARCH_HIT.decode(row, "docs", binding);
 
-        expect(result.document).toBeUndefined();
+        expect(result.document).toEqual({ id: "1" });
       });
     });
 
