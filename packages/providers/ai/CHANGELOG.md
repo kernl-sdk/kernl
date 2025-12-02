@@ -1,5 +1,12 @@
 # @kernl/ai
 
+## 0.2.7
+
+### Patch Changes
+
+- Updated dependencies [a7d6138]
+  - @kernl-sdk/retrieval@0.1.0
+
 ## 0.2.6
 
 ### Patch Changes

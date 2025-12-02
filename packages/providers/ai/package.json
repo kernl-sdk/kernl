@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/ai",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Vercel AI SDK adapter for kernl",
   "keywords": [
     "kernl",
