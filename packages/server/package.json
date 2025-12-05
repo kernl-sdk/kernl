@@ -1,0 +1,35 @@
+{
+  "name": "@kernl-sdk/server",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Internal dev server for kernl (experimental)",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "tsc && tsc-alias --resolve-full-paths",
+    "dev": "tsc --watch",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.1",
+    "@hono/zod-validator": "^0.7.5",
+    "@kernl-sdk/ai": "workspace:*",
+    "ai": "^5.0.93",
+    "hono": "^4.6.0",
+    "kernl": "workspace:*",
+    "pino": "^9.6.0",
+    "pino-pretty": "^13.0.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "tsc-alias": "^1.8.10",
+    "typescript": "5.9.2"
+  }
+}
