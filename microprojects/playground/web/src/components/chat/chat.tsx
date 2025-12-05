@@ -2,7 +2,7 @@ import useSWR from "swr";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, type UIMessage } from "ai";
+import { DefaultChatTransport, isToolUIPart, type UIMessage } from "ai";
 import { nanoid } from "nanoid";
 import { toast } from "sonner";
 import { ArrowDown } from "lucide-react";
@@ -15,6 +15,13 @@ import {
   MessageContent,
   MessageResponse,
 } from "@/components/ai-elements/message";
+import {
+  Tool,
+  ToolHeader,
+  ToolContent,
+  ToolInput,
+  ToolOutput,
+} from "@/components/ai-elements/tool";
 import type { PromptInputMessage } from "@/components/ai-elements/prompt-input";
 import { AgentDrawer } from "@/components/sidebar/agent-drawer";
 import { HistorySidebar } from "@/components/sidebar/history-sidebar";
@@ -217,6 +224,36 @@ export function Chat({
                           </MessageResponse>
                         );
                       }
+
+                      if (isToolUIPart(part)) {
+                        const toolTitle =
+                          "toolName" in part
+                            ? String(part.toolName)
+                            : part.toolCallId;
+
+                        return (
+                          <Tool key={`${m.id}-${i}`}>
+                            <ToolHeader
+                              title={toolTitle}
+                              type={part.type}
+                              state={part.state}
+                            />
+                            <ToolContent>
+                              {part.input !== undefined && (
+                                <ToolInput input={part.input as object} />
+                              )}
+                              {(part.output !== undefined ||
+                                part.errorText !== undefined) && (
+                                <ToolOutput
+                                  output={part.output as object}
+                                  errorText={part.errorText}
+                                />
+                              )}
+                            </ToolContent>
+                          </Tool>
+                        );
+                      }
+
                       return null;
                     })}
                   </MessageContent>

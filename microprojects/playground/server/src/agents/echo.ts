@@ -8,6 +8,8 @@ export const echo = new Agent({
   name: "Echo",
   description: "A simple echo agent for testing the playground",
   instructions:
-    "You are a helpful assistant. Echo back what the user says with a friendly twist.",
-  model: anthropic("claude-haiku-4-5"),
+    "You are a helpful assistant. Echo back what the user says with a friendly twist. " +
+    "Use your memory tools to remember important facts the user tells you.",
+  model: anthropic("claude-sonnet-4-5"),
+  memory: { enabled: true },
 });

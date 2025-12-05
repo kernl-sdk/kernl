@@ -10,6 +10,8 @@
     "kernl": "workspace:*",
     "@kernl-sdk/server": "workspace:*",
     "@kernl-sdk/ai": "workspace:*",
+    "@kernl-sdk/pg": "workspace:*",
+    "@kernl-sdk/turbopuffer": "workspace:*",
     "@ai-sdk/anthropic": "^1.0.0",
     "@ai-sdk/openai": "^1.0.0"
   },
