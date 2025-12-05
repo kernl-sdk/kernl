@@ -2,3 +2,4 @@ packages:
   - "packages/*"
   - "packages/providers/*"
   - "packages/storage/*"
+  - "microprojects/playground/*"
