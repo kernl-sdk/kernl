@@ -3,6 +3,7 @@ import { createUIMessageStreamResponse } from "ai";
 import { UIMessageCodec, toUIMessageStream } from "@kernl-sdk/ai";
 
 import { NotFoundError } from "@/lib/error";
+import { generateTitle } from "@/lib/utils";
 
 import { jarvis } from "@/agents/jarvis";
 import { titler } from "@/agents/title-agent";
@@ -37,15 +38,12 @@ async function stream(cx: Context) {
 
   const input = await UIMessageCodec.decode(message); // validates and converts
 
-  // if thread doesn't exist, create it with a generated title before streaming
   const existing = await jarvis.threads.get(tid);
   if (!existing) {
-    const prompt = `User message: ${JSON.stringify(message)}`;
-    const res = await titler.run(prompt); // haiku 4.5
-
-    const _thread = await jarvis.threads.create({
-      tid,
-      title: res.response,
+    // if thread doesn't exist, create it and generate title asynchronously
+    await jarvis.threads.create({ tid });
+    generateTitle(message, titler, async (title) => {
+      await jarvis.threads.update(tid, { title });
     });
   }
 
