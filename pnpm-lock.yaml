@@ -32,9 +32,15 @@ importers:
       '@kernl-sdk/ai':
         specifier: workspace:*
         version: link:../../../packages/providers/ai
+      '@kernl-sdk/pg':
+        specifier: workspace:*
+        version: link:../../../packages/storage/pg
       '@kernl-sdk/server':
         specifier: workspace:*
         version: link:../../../packages/server
+      '@kernl-sdk/turbopuffer':
+        specifier: workspace:*
+        version: link:../../../packages/storage/turbopuffer
       kernl:
         specifier: workspace:*
         version: link:../../../packages/kernl

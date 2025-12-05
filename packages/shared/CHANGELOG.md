@@ -1,5 +1,11 @@
 # @kernl/shared
 
+## 0.3.0
+
+### Minor Changes
+
+- 2b0993d: Add `nextCursor` getter to `CursorPage` for accessing the pagination cursor without fetching the next page
+
 ## 0.2.0
 
 ### Minor Changes
