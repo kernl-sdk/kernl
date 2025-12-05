@@ -1,5 +1,13 @@
 # @kernl-sdk/retrieval
 
+## 0.1.2
+
+### Patch Changes
+
+- Bump to pick up @kernl-sdk/shared with pagination types
+- Updated dependencies
+  - @kernl-sdk/protocol@0.2.7
+
 ## 0.1.1
 
 ### Patch Changes

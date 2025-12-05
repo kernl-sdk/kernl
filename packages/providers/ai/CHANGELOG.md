@@ -1,5 +1,14 @@
 # @kernl/ai
 
+## 0.2.9
+
+### Patch Changes
+
+- Bump to pick up @kernl-sdk/shared with pagination types
+- Updated dependencies
+  - @kernl-sdk/protocol@0.2.7
+  - @kernl-sdk/retrieval@0.1.2
+
 ## 0.2.8
 
 ### Patch Changes

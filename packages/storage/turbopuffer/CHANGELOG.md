@@ -1,5 +1,13 @@
 # @kernl-sdk/turbopuffer
 
+## 0.1.2
+
+### Patch Changes
+
+- Bump to pick up @kernl-sdk/shared with pagination types
+- Updated dependencies
+  - @kernl-sdk/retrieval@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes

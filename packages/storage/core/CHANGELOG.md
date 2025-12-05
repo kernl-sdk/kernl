@@ -1,5 +1,14 @@
 # @kernl/storage
 
+## 0.1.15
+
+### Patch Changes
+
+- Bump to pick up @kernl-sdk/shared with pagination types
+- Updated dependencies
+  - kernl@0.7.2
+  - @kernl-sdk/protocol@0.2.7
+
 ## 0.1.14
 
 ### Patch Changes

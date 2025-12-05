@@ -1,5 +1,11 @@
 # @kernl/protocol
 
+## 0.2.7
+
+### Patch Changes
+
+- Bump to pick up @kernl-sdk/shared with pagination types
+
 ## 0.2.6
 
 ### Patch Changes
