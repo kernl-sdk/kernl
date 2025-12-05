@@ -304,36 +304,18 @@ export class Agent<
    */
   async tools(context: Context<TContext>): Promise<Tool<TContext>[]> {
     const all: Tool<TContext>[] = [];
-    const toolIds = new Set<string>();
 
-    // --- systools ---
-    for (const toolkit of this.systools) {
-      const tools = await toolkit.list(context);
-
-      const duplicates = tools.map((t) => t.id).filter((id) => toolIds.has(id));
-      if (duplicates.length > 0) {
-        throw new MisconfiguredError(
-          `Duplicate tool IDs found across toolkits: ${duplicates.join(", ")}`,
-        );
-      }
-
-      tools.forEach((t) => toolIds.add(t.id));
-      all.push(...tools);
+    for (const toolkit of [...this.systools, ...this.toolkits]) {
+      all.push(...(await toolkit.list(context)));
     }
 
-    // --- user toolkits ---
-    for (const toolkit of this.toolkits) {
-      const tools = await toolkit.list(context);
+    const ids = all.map((t) => t.id);
+    const duplicates = ids.filter((id, i) => ids.indexOf(id) !== i);
 
-      const duplicates = tools.map((t) => t.id).filter((id) => toolIds.has(id));
-      if (duplicates.length > 0) {
-        throw new MisconfiguredError(
-          `Duplicate tool IDs found across toolkits: ${duplicates.join(", ")}`,
-        );
-      }
-
-      tools.forEach((t) => toolIds.add(t.id));
-      all.push(...tools);
+    if (duplicates.length > 0) {
+      throw new MisconfiguredError(
+        `Duplicate tool IDs found: ${[...new Set(duplicates)].join(", ")}`,
+      );
     }
 
     return all;
