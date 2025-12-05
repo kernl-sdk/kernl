@@ -23,6 +23,9 @@ export interface AgentConfig<
   /* The name of the agent (defaults to ID if not provided) */
   name: string;
 
+  /* A brief description of the agent's purpose */
+  description?: string;
+
   /**
    * The instructions for the agent. Will be used as the "system prompt" when this agent is
    * invoked. Describes what the agent should do, and how it responds.
@@ -86,6 +89,14 @@ export interface AgentConfig<
   toolkits?: BaseToolkit<TContext>[];
 
   /**
+   * Memory configuration for this agent.
+   * Enables memory system tools (memories.search, memories.create, memories.list).
+   *
+   * Requires kernl to be configured with memory storage.
+   */
+  memory?: AgentMemoryConfig;
+
+  /**
    * A list of checks that run in parallel to the agent's execution on the input + output for the agent,
    * depending on the configuration.
    */
@@ -146,3 +157,13 @@ export interface AgentGuardrails<
  * 'text' is a special type that indicates the output will be a string.
  */
 export type AgentResponseType = TextResponse | ZodType;
+
+/**
+ * Memory configuration for an agent.
+ */
+export interface AgentMemoryConfig {
+  /**
+   * Enable memory system tools for this agent.
+   */
+  enabled: boolean;
+}

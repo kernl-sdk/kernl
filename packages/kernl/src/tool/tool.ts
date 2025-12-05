@@ -3,12 +3,16 @@ import { Context, UnknownContext } from "@/context";
 
 import { ModelBehaviorError } from "@/lib/error";
 import { logger } from "@/lib/logger";
+
+import {
+  FAILED,
+  COMPLETED,
+  INTERRUPTIBLE,
+  type LanguageModelTool,
+} from "@kernl-sdk/protocol";
 import { json } from "@kernl-sdk/shared/lib";
-import { FAILED, COMPLETED, INTERRUPTIBLE } from "@kernl-sdk/protocol";
-import type { LanguageModelTool } from "@kernl-sdk/protocol";
 
 import type {
-  ToolType,
   ToolConfig,
   ToolApprovalFunction,
   ToolEnabledFunction,
@@ -199,7 +203,7 @@ export class FunctionTool<
       description: this.description,
       parameters: z.toJSONSchema(this.parameters ?? z.object({}), {
         target: "draft-7",
-      }) as any, // Use empty object if no parameters (matches AI SDK)
+      }) as any, // use empty object if no parameters (matches AI SDK)
     };
   }
 }

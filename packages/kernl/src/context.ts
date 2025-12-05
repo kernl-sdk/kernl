@@ -1,3 +1,5 @@
+import type { Agent } from "@/agent";
+
 /**
  * Context that is being passed around as part of the session is unknown
  */
@@ -17,6 +19,12 @@ export class Context<TContext = UnknownContext> {
    * The inner context object.
    */
   context: TContext;
+
+  /**
+   * The agent executing this context.
+   * Set by the thread during execution.
+   */
+  agent?: Agent<TContext, any>;
 
   // ----------------------
   // TEMPORARY: Tool approval tracking until actions system is refined

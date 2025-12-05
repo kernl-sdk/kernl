@@ -9,6 +9,7 @@ import type {
   MemoryScope,
   MemoryConfig,
   MemorySearchQuery,
+  MemoryListOptions,
   MemoryByteCodec,
   IndexMemoryRecord,
   WorkingMemorySnapshot,
@@ -98,6 +99,13 @@ export class Memory {
       filter: q.filter ? MEMORY_FILTER.encode(q.filter) : undefined,
       topK: q.limit ?? 20,
     });
+  }
+
+  /**
+   * List memories matching the filter.
+   */
+  async list(options?: MemoryListOptions): Promise<MemoryRecord[]> {
+    return this.store.list(options);
   }
 
   /**

@@ -112,6 +112,7 @@ export class Thread<
     this.agent = options.agent;
     this.context =
       options.context ?? new Context<TContext>(this.namespace, {} as TContext);
+    this.context.agent = options.agent;
     this.parent = options.task ?? null;
     this.model = options.model ?? options.agent.model;
     this.storage = options.storage;
@@ -335,7 +336,7 @@ export class Thread<
       state: this.state,
       tick: this._tick,
       context: this.context,
-      metadata: this.metadata,
+      // no metadata - not owned by checkpoint
     });
   }
 
@@ -441,6 +442,7 @@ export class Thread<
           // (TMP) - passing the approval status through the context until actions system
           // is refined
           const ctx = new Context(this.namespace, this.context.context);
+          ctx.agent = this.agent;
           ctx.approve(call.callId); // mark this call as approved
           const res = await tool.invoke(ctx, call.arguments, call.callId);
 

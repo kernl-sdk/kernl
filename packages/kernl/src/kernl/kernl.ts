@@ -8,6 +8,7 @@ import type { Thread } from "@/thread";
 import type { ResolvedAgentResponse } from "@/guardrail";
 import { InMemoryStorage, type KernlStorage } from "@/storage";
 import { RThreads } from "@/api/resources/threads";
+import { RAgents } from "@/api/resources/agents";
 import {
   Memory,
   MemoryByteEncoder,
@@ -27,21 +28,23 @@ import type { KernlOptions } from "./types";
  * tracing.
  */
 export class Kernl extends KernlHooks<UnknownContext, AgentResponseType> {
-  private agents: Map<string, Agent> = new Map();
-  private models: Map<string, LanguageModel> = new Map();
+  private readonly _agents: Map<string, Agent> = new Map();
+  private readonly _models: Map<string, LanguageModel> = new Map();
 
   readonly storage: KernlStorage;
   athreads: Map<string, Thread<any, any>> = new Map(); /* active threads */
 
   // --- public API ---
-  readonly threads: RThreads; /* Threads resource */
-  readonly memories: Memory; /* Memory system */
+  readonly threads: RThreads;
+  readonly agents: RAgents;
+  readonly memories: Memory;
 
   constructor(options: KernlOptions = {}) {
     super();
     this.storage = options.storage?.db ?? new InMemoryStorage();
-    this.storage.bind({ agents: this.agents, models: this.models });
+    this.storage.bind({ agents: this._agents, models: this._models });
     this.threads = new RThreads(this.storage.threads);
+    this.agents = new RAgents(this._agents);
 
     // initialize memory
     const embeddingModel =
@@ -76,15 +79,15 @@ export class Kernl extends KernlHooks<UnknownContext, AgentResponseType> {
    * Registers a new agent with the kernl instance.
    */
   register(agent: Agent): void {
-    this.agents.set(agent.id, agent);
+    this._agents.set(agent.id, agent);
     agent.bind(this);
 
     // (TODO): implement exhaustive model registry in protocol/ package
     //
     // auto-populate model registry for storage hydration
     const key = `${agent.model.provider}/${agent.model.modelId}`;
-    if (!this.models.has(key)) {
-      this.models.set(key, agent.model);
+    if (!this._models.has(key)) {
+      this._models.set(key, agent.model);
     }
   }
 

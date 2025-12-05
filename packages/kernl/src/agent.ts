@@ -15,7 +15,7 @@ import type {
   RThreadUpdateParams,
 } from "@/api/resources/threads/types";
 import type { Context, UnknownContext } from "./context";
-import { Tool } from "./tool";
+import { Tool, memory } from "./tool";
 import { BaseToolkit } from "./tool/toolkit";
 import {
   InputGuardrail,
@@ -25,14 +25,22 @@ import {
 import { AgentHooks } from "./lifecycle";
 
 import { MisconfiguredError, RuntimeError } from "./lib/error";
-import type { AgentConfig, AgentResponseType } from "@/agent/types";
+import type {
+  AgentConfig,
+  AgentMemoryConfig,
+  AgentResponseType,
+} from "@/agent/types";
 import type {
   TextResponse,
   ThreadExecuteOptions,
   ThreadExecuteResult,
   ThreadStreamEvent,
 } from "@/thread/types";
-import type { AgentMemoryCreate, MemorySearchQuery } from "./memory";
+import type {
+  AgentMemoryCreate,
+  MemoryListOptions,
+  MemorySearchQuery,
+} from "./memory";
 import { randomID } from "@kernl-sdk/shared/lib";
 
 export class Agent<
@@ -46,11 +54,14 @@ export class Agent<
 
   id: string;
   name: string;
+  description?: string;
   instructions: (context: Context<TContext>) => Promise<string> | string;
 
   model: LanguageModel;
   modelSettings: LanguageModelRequestSettings;
   toolkits: BaseToolkit<TContext>[];
+  systools: BaseToolkit<TContext>[];
+  memory: AgentMemoryConfig;
   // actions: ActionSet; /* TODO */
 
   guardrails: {
@@ -81,6 +92,7 @@ export class Agent<
     }
     this.id = config.id;
     this.name = config.name;
+    this.description = config.description;
     this.instructions =
       typeof config.instructions === "function"
         ? config.instructions
@@ -89,6 +101,9 @@ export class Agent<
     this.modelSettings = config.modelSettings ?? {};
 
     this.toolkits = config.toolkits ?? [];
+    this.systools = [];
+    this.memory = config.memory ?? { enabled: false };
+
     for (const toolkit of this.toolkits) {
       toolkit.bind(this);
     }
@@ -121,6 +136,14 @@ export class Agent<
    */
   bind(kernl: Kernl): void {
     this.kernl = kernl;
+
+    // initialize system toolkits
+    if (this.memory.enabled) {
+      // safety: system tools only rely on ctx.agent, not ctx.context
+      const toolkit = memory as unknown as BaseToolkit<TContext>;
+      this.systools.push(toolkit);
+      toolkit.bind(this);
+    }
   }
 
   /**
@@ -247,12 +270,18 @@ export class Agent<
   /**
    * @internal
    *
-   * Get a specific tool by ID from all toolkits.
+   * Get a specific tool by ID from systools and toolkits.
    *
    * @param id The tool ID to look up
    * @returns The tool if found, undefined otherwise
    */
   tool(id: string): Tool<TContext> | undefined {
+    // Check systools first
+    for (const toolkit of this.systools) {
+      const tool = toolkit.get(id);
+      if (tool) return tool;
+    }
+    // Then user toolkits
     for (const toolkit of this.toolkits) {
       const tool = toolkit.get(id);
       if (tool) return tool;
@@ -263,7 +292,7 @@ export class Agent<
   /**
    * @internal
    *
-   * Get all tools available from all toolkits for the given context.
+   * Get all tools available from systools and toolkits for the given context.
    * Checks for duplicate tool IDs across toolkits and throws an error if found.
    *
    * (TODO): Consider returning toolkits alongside tools so we can serialize them
@@ -274,9 +303,25 @@ export class Agent<
    * @throws {MisconfiguredError} If duplicate tool IDs are found across toolkits
    */
   async tools(context: Context<TContext>): Promise<Tool<TContext>[]> {
-    const allTools: Tool<TContext>[] = [];
+    const all: Tool<TContext>[] = [];
     const toolIds = new Set<string>();
 
+    // --- systools ---
+    for (const toolkit of this.systools) {
+      const tools = await toolkit.list(context);
+
+      const duplicates = tools.map((t) => t.id).filter((id) => toolIds.has(id));
+      if (duplicates.length > 0) {
+        throw new MisconfiguredError(
+          `Duplicate tool IDs found across toolkits: ${duplicates.join(", ")}`,
+        );
+      }
+
+      tools.forEach((t) => toolIds.add(t.id));
+      all.push(...tools);
+    }
+
+    // --- user toolkits ---
     for (const toolkit of this.toolkits) {
       const tools = await toolkit.list(context);
 
@@ -288,10 +333,10 @@ export class Agent<
       }
 
       tools.forEach((t) => toolIds.add(t.id));
-      allTools.push(...tools);
+      all.push(...tools);
     }
 
-    return allTools;
+    return all;
   }
 
   /**
@@ -360,6 +405,24 @@ export class Agent<
 
     return {
       /**
+       * List memories scoped to this agent.
+       */
+      list: (
+        params?: Omit<MemoryListOptions, "filter"> & {
+          collection?: string;
+          limit?: number;
+          // (TODO): we might want to add the filter back here
+        },
+      ) =>
+        kmem.list({
+          filter: {
+            scope: { agentId },
+            collections: params?.collection ? [params.collection] : undefined,
+          },
+          limit: params?.limit,
+        }),
+
+      /**
        * Create a new memory scoped to this agent.
        */
       create: (params: AgentMemoryCreate) =>
@@ -384,6 +447,7 @@ export class Agent<
        */
       search: (
         params: Omit<MemorySearchQuery, "filter"> & {
+          // (TODO): is this correct?
           filter?: Omit<NonNullable<MemorySearchQuery["filter"]>, "scope"> & {
             scope?: Omit<
               NonNullable<NonNullable<MemorySearchQuery["filter"]>["scope"]>,
