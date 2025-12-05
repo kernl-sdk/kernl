@@ -1,5 +1,23 @@
 # @kernl/pg
 
+## 0.1.14
+
+### Patch Changes
+
+- Updated dependencies
+  - @kernl-sdk/shared@0.2.0
+  - kernl@0.7.1
+  - @kernl-sdk/retrieval@0.1.1
+  - @kernl-sdk/storage@0.1.14
+
+## 0.1.13
+
+### Patch Changes
+
+- Updated dependencies [13545a5]
+  - kernl@0.7.0
+  - @kernl-sdk/storage@0.1.13
+
 ## 0.1.12
 
 ### Patch Changes
