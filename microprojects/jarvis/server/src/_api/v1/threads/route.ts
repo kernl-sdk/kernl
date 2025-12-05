@@ -1,81 +1,69 @@
-import { Hono, type Context } from "hono";
+import { Hono } from "hono";
 import { Kernl } from "kernl";
 import { historyToUIMessages } from "@kernl-sdk/ai";
+import { zValidator } from "@hono/zod-validator";
 
 import { NotFoundError } from "@/lib/error";
-import { logger } from "@/lib/logger";
 
-const threads = new Hono();
+import { ThreadsListQuery } from "./schema";
 
-/**
- * - Thread routes :: /threads -
- */
-threads.get("/", list);
-threads.get("/:tid", get);
-threads.delete("/:tid", del);
+type Variables = { kernl: Kernl };
 
-export default threads;
-
-// --- handlers ---
+const threads = new Hono<{ Variables: Variables }>();
 
 /**
- * @route GET /v1/threads?agent_id=...
+ * GET /threads
  *
  * List stored threads.
  */
-async function list(cx: Context) {
-  const kernl = cx.get("kernl") as Kernl; // get the Kernl instance
-
-  const query = cx.req.query();
-  const limit = query.limit ? parseInt(query.limit) : undefined;
-  const agentId = query.agent_id;
+threads.get("/", zValidator("query", ThreadsListQuery), async (c) => {
+  const kernl = c.get("kernl");
+  const { agent_id, limit } = c.req.valid("query");
 
   const page = await kernl.threads.list({
-    agentId,
+    agentId: agent_id,
     limit,
   });
 
-  const threads = await page.collect();
+  const list = await page.collect();
 
-  return cx.json({
-    threads,
-    count: threads.length,
-  });
-}
+  return c.json({ threads: list, count: list.length });
+});
 
 /**
- * @route GET /v1/threads/:tid
+ * GET /threads/:tid
  *
- * Get a thread with all its events.
+ * Get a thread with its history.
  */
-async function get(cx: Context) {
-  const kernl = cx.get("kernl") as Kernl; // get the Kernl instance
-  const tid = cx.req.param("tid");
+threads.get("/:tid", async (c) => {
+  const kernl = c.get("kernl");
+  const tid = c.req.param("tid");
 
-  const thread = await kernl.threads.get(tid, { history: { limit: 50 } }); // tail: 50 events
+  const thread = await kernl.threads.get(tid, { history: { limit: 50 } });
   if (!thread) {
     throw new NotFoundError("Thread not found");
   }
 
-  const h = thread.history ?? [];
-  const history = h.reverse(); // reverse so UI sees events chronologically.
+  const history = (thread.history ?? []).reverse();
 
-  return cx.json({
+  return c.json({
     ...thread,
-    history: historyToUIMessages(history), // make sure to convert to UIMessage format
+    history: historyToUIMessages(history),
   });
-}
+});
 
 /**
- * @route DELETE /v1/threads/:tid
+ * DELETE /threads/:tid
  *
  * Delete a thread and all associated events.
  */
-async function del(cx: Context) {
-  const kernl = cx.get("kernl") as Kernl;
-  const tid = cx.req.param("tid");
+threads.delete("/:tid", async (c) => {
+  const kernl = c.get("kernl");
+  const tid = c.req.param("tid");
 
   await kernl.threads.delete(tid);
 
-  return cx.json({ success: true });
-}
+  return c.json({ success: true });
+});
+
+export default threads;

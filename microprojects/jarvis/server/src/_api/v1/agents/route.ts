@@ -1,57 +1,52 @@
-import { Hono, type Context } from "hono";
-import { createUIMessageStreamResponse } from "ai";
+import { Hono } from "hono";
+import { Kernl } from "kernl";
+import { zValidator } from "@hono/zod-validator";
+import { createUIMessageStreamResponse, type UIMessage } from "ai";
 import { UIMessageCodec, toUIMessageStream } from "@kernl-sdk/ai";
 
 import { NotFoundError } from "@/lib/error";
 import { generateTitle } from "@/lib/utils";
 
-import { jarvis } from "@/agents/jarvis";
 import { titler } from "@/agents/title-agent";
 
-const agents = new Hono();
+import { StreamAgentBody } from "./schema";
+
+type Variables = { kernl: Kernl };
+
+const agents = new Hono<{ Variables: Variables }>();
 
 /**
- * - Agent routes :: /agents -
- */
-// agents.get("/", list);
-agents.post("/:id/stream", stream);
-
-export default agents;
-
-// --- handlers ---
-
-/**
- * @route POST /v1/agents/:id/stream
+ * POST /agents/:id/stream
  *
  * Stream agent execution with real-time updates.
  */
-async function stream(cx: Context) {
-  const id = cx.req.param("id");
+agents.post("/:id/stream", zValidator("json", StreamAgentBody), async (c) => {
+  const kernl = c.get("kernl");
+  const id = c.req.param("id");
 
-  // for now, only support jarvis agent
-  if (id !== "jarvis") {
-    throw new NotFoundError("Agent not found");
+  const agent = kernl.agents.get(id);
+  if (!agent) {
+    throw new NotFoundError(`Agent "${id}" not found`);
   }
 
-  const body = await cx.req.json();
-  const { tid, message } = body;
+  const { tid, message } = c.req.valid("json");
 
-  const input = await UIMessageCodec.decode(message); // validates and converts
+  const input = await UIMessageCodec.decode(message as unknown as UIMessage);
 
-  const existing = await jarvis.threads.get(tid);
+  const existing = await agent.threads.get(tid);
   if (!existing) {
     // if thread doesn't exist, create it and generate title asynchronously
-    await jarvis.threads.create({ tid });
+    await agent.threads.create({ tid });
     generateTitle(message, titler, async (title) => {
-      await jarvis.threads.update(tid, { title });
+      await agent.threads.update(tid, { title });
     });
   }
 
-  const kstream = jarvis.stream(input, {
-    threadId: tid,
-  });
+  const kstream = agent.stream(input, { threadId: tid });
 
   return createUIMessageStreamResponse({
     stream: toUIMessageStream(kstream),
   });
-}
+});
+
+export default agents;
