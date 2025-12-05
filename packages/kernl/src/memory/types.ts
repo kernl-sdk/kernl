@@ -128,7 +128,7 @@ export interface NewMemory {
   id: string;
   scope: MemoryScope;
   kind: MemoryKind;
-  collection: string;
+  collection?: string;
   content: MemoryByte;
   wmem?: boolean;
   smem?: { expiresAt: number | null };
@@ -148,7 +148,7 @@ export interface AgentMemoryCreate {
   id?: string;
   namespace?: string;
   entityId?: string;
-  collection: string;
+  collection?: string;
   content: MemoryByte;
   wmem?: boolean;
   smem?: { expiresAt: number | null };
@@ -178,7 +178,7 @@ interface BaseMemoryRecord {
   id: string;
   scope: MemoryScope;
   kind: MemoryKind;
-  collection: string;
+  collection: string | null;
   content: MemoryByte;
   wmem: boolean;
   smem: { expiresAt: number | null };
@@ -275,7 +275,7 @@ export interface IndexMemoryRecord extends IndexableByte {
   entityId: string | null;
   agentId: string | null;
   kind: MemoryKind;
-  collection: string;
+  collection: string | null;
   timestamp: number;
   createdAt: number;
   updatedAt: number;

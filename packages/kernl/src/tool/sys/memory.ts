@@ -11,13 +11,11 @@ import { z } from "zod";
 import { tool } from "../tool";
 import { Toolkit } from "../toolkit";
 
-// --- Tools ---
-
 /**
  * Search memories for relevant information using natural language.
  */
 const search = tool({
-  id: "memories.search",
+  id: "search_memories",
   description:
     "Search your memories. " +
     "Use this to recall facts, preferences, or context you've previously stored.",
@@ -50,7 +48,7 @@ const search = tool({
  * Store a new memory to persist across conversations.
  */
 const create = tool({
-  id: "memories.create",
+  id: "create_memory",
   description:
     "Store a new memory. Use this to remember important facts, user preferences, " +
     "or context that should persist across conversations.",
@@ -59,13 +57,13 @@ const create = tool({
     collection: z
       .string()
       .optional()
-      .describe("Category for organizing memories (default: 'facts')"),
+      .describe("Category for organizing memories"),
   }),
   execute: async (ctx, { content, collection }) => {
     assert(ctx.agent, "ctx.agent required for memory tools");
 
     const mem = await ctx.agent.memories.create({
-      collection: collection ?? "facts",
+      collection,
       content: { text: content },
     });
 
@@ -77,7 +75,7 @@ const create = tool({
  * Update an existing memory.
  */
 const update = tool({
-  id: "memories.update",
+  id: "update_memory",
   description:
     "Update an existing memory. Use this to correct or modify previously " +
     "stored facts or preferences.",
@@ -103,7 +101,7 @@ const update = tool({
  * List stored memories, optionally filtered by collection.
  */
 const list = tool({
-  id: "memories.list",
+  id: "list_memories",
   description:
     "List your stored memories. Use this to see what you've remembered, " +
     "optionally filtered by collection.",
@@ -137,7 +135,7 @@ const list = tool({
 /**
  * Memory system toolkit.
  *
- * Provides memories.list, memories.create, memories.update, and memories.search tools.
+ * Provides list_memories, create_memory, update_memory, and search_memories tools.
  */
 export const memory = new Toolkit({
   id: "sys.memory",

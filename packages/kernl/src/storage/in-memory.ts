@@ -415,7 +415,7 @@ export class InMemoryMemoryStore implements MemoryStore {
       id: memory.id,
       scope: memory.scope,
       kind: memory.kind,
-      collection: memory.collection,
+      collection: memory.collection ?? null,
       content: memory.content,
       wmem: memory.wmem ?? false,
       smem: memory.smem ?? { expiresAt: null },
@@ -490,7 +490,11 @@ export class InMemoryMemoryStore implements MemoryStore {
       }
 
       // Filter by collections
-      if (filter.collections && !filter.collections.includes(record.collection)) {
+      if (
+        filter.collections &&
+        (record.collection === null ||
+          !filter.collections.includes(record.collection))
+      ) {
         return false;
       }
 

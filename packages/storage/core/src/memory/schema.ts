@@ -15,7 +15,7 @@ export const TABLE_MEMORIES = defineTable(
     entity_id: text().nullable(),
     agent_id: text().nullable(),
     kind: text(), // "episodic" | "semantic"
-    collection: text(),
+    collection: text().nullable(),
     content: jsonb(),
     wmem: boolean().default(false),
     smem_expires_at: bigint().nullable(),
@@ -80,7 +80,7 @@ export const MemoryDBRecordSchema = z.object({
   entity_id: z.string().nullable(),
   agent_id: z.string().nullable(),
   kind: MemoryKindSchema,
-  collection: z.string(),
+  collection: z.string().nullable(),
   content: MemoryByteSchema,
   wmem: z.boolean(),
   smem_expires_at: pgBigint.nullable(),
