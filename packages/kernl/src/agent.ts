@@ -23,25 +23,27 @@ import {
   type ResolvedAgentResponse,
 } from "./guardrail";
 import { AgentHooks } from "./lifecycle";
-
-import { MisconfiguredError, RuntimeError } from "./lib/error";
-import type {
-  AgentConfig,
-  AgentMemoryConfig,
-  AgentResponseType,
-} from "@/agent/types";
-import type {
-  TextResponse,
-  ThreadExecuteOptions,
-  ThreadExecuteResult,
-  ThreadStreamEvent,
-} from "@/thread/types";
 import type {
   AgentMemoryCreate,
   MemoryListOptions,
   MemorySearchQuery,
 } from "./memory";
+
 import { randomID } from "@kernl-sdk/shared/lib";
+import { MisconfiguredError, RuntimeError } from "./lib/error";
+
+/* types */
+import type {
+  AgentConfig,
+  AgentMemoryConfig,
+  AgentResponseType,
+} from "./agent/types";
+import type {
+  TextResponse,
+  ThreadExecuteOptions,
+  ThreadExecuteResult,
+  ThreadStreamEvent,
+} from "./thread/types";
 
 export class Agent<
     TContext = UnknownContext,
@@ -59,10 +61,10 @@ export class Agent<
 
   model: LanguageModel;
   modelSettings: LanguageModelRequestSettings;
+  // actions: ActionSet; /* TODO */
   toolkits: BaseToolkit<TContext>[];
   systools: BaseToolkit<TContext>[];
   memory: AgentMemoryConfig;
-  // actions: ActionSet; /* TODO */
 
   guardrails: {
     input: InputGuardrail[];
@@ -70,10 +72,9 @@ export class Agent<
   };
   responseType: TResponse = "text" as TResponse;
   resetToolChoice: boolean;
-  // toolUseBehavior: ToolUseBehavior; (TODO)
 
   // --- (TODO) ---
-  // handoffDescription: string; // ??
+  // toolUseBehavior: ToolUseBehavior;
   // handoffs: (Agent<any, TResponse> | Handoff<any, TResponse>)[];
   // ----------
 
@@ -114,21 +115,6 @@ export class Agent<
     }
     this.resetToolChoice = config.resetToolChoice ?? true;
     // this.toolUseBehavior = config.toolUseBehavior ?? "run_llm_again";
-
-    // this.handoffDescription = config.handoffDescription ?? "";
-    // this.handoffs = config.handoffs ?? [];
-
-    // --- Runtime warning for handoff response type compatibility ---
-    // if (config.handoffresponseTypeWarningEnabled) {
-    //     ...
-    //     if (responseTypes.size > 1) {
-    //       logger.warn(
-    //         `[Agent] Warning: Handoff agents have different response types: ${Array.from(responseTypes).join(", ")}.
-    //          You can make it type-safe by using Agent.create({ ... }) method instead.`,
-    //       );
-    //     }
-    //   }
-    // }
   }
 
   /**
