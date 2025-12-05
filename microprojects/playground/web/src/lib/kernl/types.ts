@@ -8,6 +8,7 @@ import type { UIMessage } from "ai";
 export interface ThreadsListParams {
   agentId?: string;
   limit?: number;
+  cursor?: string;
 }
 
 /**
@@ -15,7 +16,7 @@ export interface ThreadsListParams {
  */
 export interface ThreadsListResponse {
   threads: Thread[];
-  count: number;
+  next: string | null;
 }
 
 /**

@@ -62,6 +62,13 @@ export class CursorPage<
   }
 
   /**
+   * Cursor for the next page, or null if this is the last page.
+   */
+  get nextCursor(): string | null {
+    return this.last ? null : this._next;
+  }
+
+  /**
    * Fetch the next page, or null if there is no next page.
    */
   async next(): Promise<this | null> {

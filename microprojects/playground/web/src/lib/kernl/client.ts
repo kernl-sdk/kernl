@@ -40,6 +40,7 @@ class ThreadsResource {
     return this.http.get<ThreadsListResponse>("/threads", {
       agent_id: params?.agentId,
       limit: params?.limit,
+      cursor: params?.cursor,
     });
   }
 

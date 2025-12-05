@@ -13,20 +13,19 @@ export const threads = new Hono<{ Variables: Variables }>();
 /**
  * GET /threads
  *
- * List stored threads.
+ * List stored threads with cursor-based pagination.
  */
 threads.get("/", zValidator("query", ThreadsListQuery), async (c) => {
   const kernl = c.get("kernl") as Kernl;
-  const { agent_id, limit } = c.req.valid("query");
+  const { agent_id, limit, cursor } = c.req.valid("query");
 
   const page = await kernl.threads.list({
     agentId: agent_id,
     limit,
+    cursor,
   });
 
-  const list = await page.collect();
-
-  return c.json({ threads: list, count: list.length });
+  return c.json({ threads: page.data, next: page.nextCursor });
 });
 
 /**

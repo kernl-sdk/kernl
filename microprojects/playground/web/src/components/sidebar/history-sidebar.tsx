@@ -1,9 +1,10 @@
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import useSWR from "swr";
+import useSWRInfinite from "swr/infinite";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { History, ChevronRight } from "lucide-react";
-import { kernl, type Thread } from "@/lib/kernl";
+import { kernl, type Thread, type ThreadsListResponse } from "@/lib/kernl";
 
 interface HistorySidebarProps {
   agentId: string;
@@ -60,6 +61,8 @@ function groupThreadsByTime(
   return groups;
 }
 
+const PAGE_SIZE = 20;
+
 export function HistorySidebar({
   agentId,
   open,
@@ -67,15 +70,50 @@ export function HistorySidebar({
 }: HistorySidebarProps) {
   const navigate = useNavigate();
 
-  const { data, isLoading } = useSWR(open ? ["threads", agentId] : null, () =>
-    kernl.threads.list({ agentId, limit: 50 }),
-  );
+  const getKey = (
+    pageIndex: number,
+    previousPageData: ThreadsListResponse | null,
+  ) => {
+    if (!open) return null;
+    if (previousPageData && !previousPageData.next) return null;
+    if (pageIndex === 0) return ["threads", agentId, undefined];
+    return ["threads", agentId, previousPageData?.next];
+  };
 
-  const threads: GroupedThread[] = (data?.threads ?? []).map((t: Thread) => ({
-    tid: t.tid,
-    title: t.title ?? "New conversation",
-    updatedAt: new Date(t.updatedAt),
-  }));
+  const fetcher = ([, agentId, cursor]: [string, string, string | undefined]) =>
+    kernl.threads.list({ agentId, limit: PAGE_SIZE, cursor });
+
+  const { data, isLoading, size, setSize } = useSWRInfinite(getKey, fetcher);
+
+  const threads: GroupedThread[] = (data ?? [])
+    .flatMap((page) => page.threads)
+    .map((t: Thread) => ({
+      tid: t.tid,
+      title: t.title ?? "New conversation",
+      updatedAt: new Date(t.updatedAt),
+    }));
+
+  const hasMore = data?.[data.length - 1]?.next !== null;
+  const isLoadingMore = size > 0 && data && typeof data[size - 1] === "undefined";
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasMore || isLoadingMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setSize(size + 1);
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingMore, size, setSize]);
 
   const handleSelectThread = (threadId: string) => {
     navigate(`/agents/${agentId}/c/${threadId}`);
@@ -144,9 +182,18 @@ export function HistorySidebar({
                       </div>
                     ),
                 )}
-                <p className="py-8 text-center text-xs text-muted">
-                  End of history
-                </p>
+                {hasMore ? (
+                  <div
+                    ref={sentinelRef}
+                    className="py-8 text-center text-xs text-muted"
+                  >
+                    {isLoadingMore ? "Loading..." : ""}
+                  </div>
+                ) : (
+                  <p className="py-8 text-center text-xs text-muted">
+                    End of history
+                  </p>
+                )}
               </>
             )}
           </div>
