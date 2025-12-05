@@ -74,6 +74,32 @@ const create = tool({
 });
 
 /**
+ * Update an existing memory.
+ */
+const update = tool({
+  id: "memories.update",
+  description:
+    "Update an existing memory. Use this to correct or modify previously " +
+    "stored facts or preferences.",
+  parameters: z.object({
+    id: z.string().describe("ID of the memory to update"),
+    content: z.string().optional().describe("New text content"),
+    collection: z.string().optional().describe("New collection category"),
+  }),
+  execute: async (ctx, { id, content, collection }) => {
+    assert(ctx.agent, "ctx.agent required for memory tools");
+
+    const mem = await ctx.agent.memories.update({
+      id,
+      content: content ? { text: content } : undefined,
+      collection,
+    });
+
+    return { id: mem.id, updated: true };
+  },
+});
+
+/**
  * List stored memories, optionally filtered by collection.
  */
 const list = tool({
@@ -111,10 +137,10 @@ const list = tool({
 /**
  * Memory system toolkit.
  *
- * Provides memories.search, memories.create, and memories.list tools.
+ * Provides memories.list, memories.create, memories.update, and memories.search tools.
  */
 export const memory = new Toolkit({
   id: "sys.memory",
   description: "Tools for storing and retrieving agent memories",
-  tools: [list, create, search],
+  tools: [list, create, update, search],
 });

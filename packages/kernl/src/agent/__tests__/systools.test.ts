@@ -73,6 +73,7 @@ describe("Agent systools", () => {
 
       expect(agent.tool("memories.search")).toBeDefined();
       expect(agent.tool("memories.create")).toBeDefined();
+      expect(agent.tool("memories.update")).toBeDefined();
       expect(agent.tool("memories.list")).toBeDefined();
     });
 
@@ -94,6 +95,7 @@ describe("Agent systools", () => {
 
       expect(ids).toContain("memories.search");
       expect(ids).toContain("memories.create");
+      expect(ids).toContain("memories.update");
       expect(ids).toContain("memories.list");
     });
 
@@ -113,9 +115,11 @@ describe("Agent systools", () => {
       const tools = await agent.tools(ctx);
 
       // Memory tools should be first (from systools)
-      expect(tools[0].id).toBe("memories.search");
+      // Order: list, create, update, search
+      expect(tools[0].id).toBe("memories.list");
       expect(tools[1].id).toBe("memories.create");
-      expect(tools[2].id).toBe("memories.list");
+      expect(tools[2].id).toBe("memories.update");
+      expect(tools[3].id).toBe("memories.search");
     });
   });
 

@@ -25,6 +25,7 @@ import {
 import { AgentHooks } from "./lifecycle";
 import type {
   AgentMemoryCreate,
+  AgentMemoryUpdate,
   MemoryListOptions,
   MemorySearchQuery,
 } from "./memory";
@@ -407,6 +408,19 @@ export class Agent<
           wmem: params.wmem,
           smem: params.smem,
           timestamp: params.timestamp,
+          metadata: params.metadata,
+        }),
+
+      /**
+       * Update an existing memory scoped to this agent.
+       */
+      update: (params: AgentMemoryUpdate) =>
+        kmem.update({
+          id: params.id,
+          content: params.content,
+          collection: params.collection,
+          wmem: params.wmem,
+          smem: params.smem,
           metadata: params.metadata,
         }),
 

@@ -157,6 +157,21 @@ export interface AgentMemoryCreate {
 }
 
 /**
+ * Simplified input for agent-scoped memory updates.
+ *
+ * Allows updating content, collection, and memory layer flags.
+ * Scope (namespace, entityId, agentId) cannot be changed after creation.
+ */
+export interface AgentMemoryUpdate {
+  id: string;
+  content?: MemoryByte;
+  collection?: string;
+  wmem?: boolean;
+  smem?: { expiresAt: number | null };
+  metadata?: JSONObject | null;
+}
+
+/**
  * Base memory record fields.
  */
 interface BaseMemoryRecord {

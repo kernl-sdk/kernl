@@ -22,6 +22,7 @@ export type {
   MemoryKind,
   NewMemory,
   AgentMemoryCreate,
+  AgentMemoryUpdate,
   MemoryConfig,
   MemoryReindexParams,
   MemoryRecord,
