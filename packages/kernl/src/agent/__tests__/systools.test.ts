@@ -71,10 +71,10 @@ describe("Agent systools", () => {
       const kernl = new Kernl();
       kernl.register(agent);
 
-      expect(agent.tool("memories.search")).toBeDefined();
-      expect(agent.tool("memories.create")).toBeDefined();
-      expect(agent.tool("memories.update")).toBeDefined();
-      expect(agent.tool("memories.list")).toBeDefined();
+      expect(agent.tool("search_memories")).toBeDefined();
+      expect(agent.tool("create_memory")).toBeDefined();
+      expect(agent.tool("update_memory")).toBeDefined();
+      expect(agent.tool("list_memories")).toBeDefined();
     });
 
     it("includes memory tools in agent.tools() output", async () => {
@@ -93,10 +93,10 @@ describe("Agent systools", () => {
       const tools = await agent.tools(ctx);
       const ids = tools.map((t) => t.id);
 
-      expect(ids).toContain("memories.search");
-      expect(ids).toContain("memories.create");
-      expect(ids).toContain("memories.update");
-      expect(ids).toContain("memories.list");
+      expect(ids).toContain("search_memories");
+      expect(ids).toContain("create_memory");
+      expect(ids).toContain("update_memory");
+      expect(ids).toContain("list_memories");
     });
 
     it("systools appear before user toolkits in tools() output", async () => {
@@ -116,10 +116,10 @@ describe("Agent systools", () => {
 
       // Memory tools should be first (from systools)
       // Order: list, create, update, search
-      expect(tools[0].id).toBe("memories.list");
-      expect(tools[1].id).toBe("memories.create");
-      expect(tools[2].id).toBe("memories.update");
-      expect(tools[3].id).toBe("memories.search");
+      expect(tools[0].id).toBe("list_memories");
+      expect(tools[1].id).toBe("create_memory");
+      expect(tools[2].id).toBe("update_memory");
+      expect(tools[3].id).toBe("search_memories");
     });
   });
 
