@@ -1,5 +1,19 @@
 # @kernl-sdk/server
 
+## 0.0.7
+
+### Patch Changes
+
+- Updated dependencies [6a6aa03]
+  - kernl@0.7.4
+
+## 0.0.6
+
+### Patch Changes
+
+- Updated dependencies
+  - kernl@0.7.4
+
 ## 0.0.5
 
 ### Patch Changes

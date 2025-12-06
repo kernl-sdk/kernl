@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/turbopuffer",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Turbopuffer search index adapter for kernl",
   "keywords": [
     "kernl",

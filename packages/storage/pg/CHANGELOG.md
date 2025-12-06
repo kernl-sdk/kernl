@@ -1,5 +1,21 @@
 # @kernl/pg
 
+## 0.1.18
+
+### Patch Changes
+
+- Updated dependencies [6a6aa03]
+  - kernl@0.7.4
+  - @kernl-sdk/storage@0.1.18
+
+## 0.1.17
+
+### Patch Changes
+
+- Updated dependencies
+  - kernl@0.7.4
+  - @kernl-sdk/storage@0.1.17
+
 ## 0.1.16
 
 ### Patch Changes
