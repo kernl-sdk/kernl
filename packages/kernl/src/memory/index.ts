@@ -3,7 +3,7 @@
  */
 
 export { Memory } from "./memory";
-export { MemoryByteEncoder } from "./encoder";
+export { MemoryByteEncoder, ObjectTextCodec } from "./encoder";
 export { buildMemoryIndexSchema } from "./schema";
 export { MemoryIndexHandle } from "./handle";
 export type { MemoryIndexHandleConfig } from "./handle";

@@ -63,6 +63,7 @@ export interface MemoryByte {
  */
 export interface IndexableByte {
   text?: string; // canonical semantic text
+  objtext?: string; // string projection of object for indexing (not full JSON)
   tvec?: number[]; // text embedding
   ivec?: number[]; // image embedding
   avec?: number[]; // audio embedding

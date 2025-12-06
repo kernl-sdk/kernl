@@ -2,9 +2,40 @@
  * MemoryByte encoder - converts MemoryByte to IndexableByte with embeddings.
  */
 
-import type { EmbeddingModel } from "@kernl-sdk/protocol";
+import type { EmbeddingModel, JSONObject } from "@kernl-sdk/protocol";
+import { stringify as yamlStringify } from "yaml";
 
 import type { MemoryByte, IndexableByte, MemoryByteCodec } from "./types";
+
+// ---------------------
+// ObjectTextCodec
+// ---------------------
+
+const MAX_OBJECT_TEXT_LENGTH = 3000;
+
+/**
+ * Codec for converting JSONObject to a canonical text representation.
+ *
+ * Uses YAML for human-readable, deterministic output suitable for:
+ * - Full-text search indexing
+ * - Embedding input (combined with text field)
+ *
+ * TODO: Allow users to pass custom codec via MemoryOptions.
+ */
+export const ObjectTextCodec = {
+  /**
+   * Encode a JSONObject to canonical text.
+   * Uses YAML with sorted keys for determinism.
+   * Truncates at MAX_OBJECT_TEXT_LENGTH chars.
+   */
+  encode(obj: JSONObject): string {
+    const yaml = yamlStringify(obj, { sortMapEntries: true });
+    if (yaml.length <= MAX_OBJECT_TEXT_LENGTH) {
+      return yaml;
+    }
+    return yaml.slice(0, MAX_OBJECT_TEXT_LENGTH) + "\n...";
+  },
+};
 
 /**
  * Encoder that converts MemoryByte to IndexableByte.
@@ -20,21 +51,35 @@ export class MemoryByteEncoder implements MemoryByteCodec {
 
   /**
    * Encode a MemoryByte to IndexableByte.
-   * Extracts text and computes embeddings for each modality.
+   *
+   * - Produces `objtext` string projection for FTS indexing
+   * - Combines text + objtext for embedding input
+   * - Returns text (fallback to objtext if no text provided)
+   *
+   * Note: metadata is NOT set here - it comes from record.metadata
+   * via the domain codec, not from MemoryByte.object.
    */
   async encode(byte: MemoryByte): Promise<IndexableByte> {
-    const text = byte.text;
-    const tvec = text ? await this.embed(text) : undefined;
+    const objtext = byte.object
+      ? ObjectTextCodec.encode(byte.object) // encode object as embeddable string
+      : undefined;
+
+    // (TODO): this behavior deserves consideration - do we always want to merge text + object?
+    //
+    // combine text + object for richer embedding
+    const combined = [byte.text, objtext].filter(Boolean).join("\n");
+    const tvec = combined ? await this.embed(combined) : undefined;
 
     // TODO: embed other modalities (image, audio, video)
+    //
     // const ivec = byte.image ? await this.embedImage(byte.image) : undefined;
     // const avec = byte.audio ? await this.embedAudio(byte.audio) : undefined;
     // const vvec = byte.video ? await this.embedVideo(byte.video) : undefined;
 
     return {
-      text,
+      text: byte.text ?? objtext, // fallback to projection if no text
+      objtext,
       tvec,
-      metadata: byte.object ?? null,
     };
   }
 

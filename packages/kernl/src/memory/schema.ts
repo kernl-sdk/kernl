@@ -105,6 +105,11 @@ export function buildMemoryIndexSchema(
       fts: true,
       optional: true,
     },
+    objtext: {
+      type: "string",
+      fts: true,
+      optional: true,
+    },
 
     // vector fields for different modalities
     tvec: {

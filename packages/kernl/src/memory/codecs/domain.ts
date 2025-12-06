@@ -58,6 +58,11 @@ export const MEMORY_FILTER: Codec<MemoryFilter, SearchFilter> = {
 
 /**
  * Create a codec for MemoryRecord -> IndexMemoryRecord.
+ *
+ * Combines:
+ * - Record scope/timestamps from MemoryRecord
+ * - Indexed content (text, object projection, embeddings) from byte codec
+ * - User metadata from record.metadata (not from content.object)
  */
 export function recordCodec(
   bytecodec: MemoryByteCodec,
@@ -76,6 +81,7 @@ export function recordCodec(
         createdAt: record.createdAt,
         updatedAt: record.updatedAt,
         ...indexable,
+        metadata: record.metadata ?? null, // user metadata, not content.object
       };
     },
     async decode(): Promise<MemoryRecord> {

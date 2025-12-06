@@ -47,6 +47,7 @@
     "@kernl-sdk/shared": "workspace:^",
     "@modelcontextprotocol/sdk": "^1.20.2",
     "pino": "^9.6.0",
+    "yaml": "^2.8.2",
     "zod": "^4.1.12"
   },
   "devDependencies": {
