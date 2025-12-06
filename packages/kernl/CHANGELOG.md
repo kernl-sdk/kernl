@@ -1,5 +1,14 @@
 # @kernl/core
 
+## 0.7.4
+
+### Patch Changes
+
+- 6a6aa03: Add ObjectTextCodec for YAML-based object projection in memory indexing
+  - Memory encoder now produces `objtext` field for FTS on structured objects
+  - Embedding input combines text + objtext for richer semantic search
+  - Fix domain codec to properly preserve user metadata (record.metadata)
+
 ## 0.7.3
 
 ### Patch Changes
