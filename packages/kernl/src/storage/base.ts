@@ -6,7 +6,6 @@
 import type { AgentRegistry, ModelRegistry } from "@/kernl/types";
 import type { ThreadStore } from "./thread";
 import type { MemoryStore } from "@/memory"
-// import type { MemoryStore } from "@/memory/store"
 import type { WakeupStore } from "@/wakeup";
 
 /**
@@ -28,7 +27,7 @@ export interface KernlStorage {
   /**
    * Wakeup store - manages wakeup records for agents.
    */
-  wakeups: WakeupStore
+  wakeups: WakeupStore;
 
   // tasks: TaskStore;
   // traces: TraceStore;

@@ -19,7 +19,7 @@ import type {
   RThreadUpdateParams,
 } from "@/api/resources/threads/types";
 import type { Context, UnknownContext } from "./context";
-import { Tool, memory } from "./tool";
+import { Tool, memory, wakeup } from "./tool";
 import { BaseToolkit } from "./tool/toolkit";
 import {
   InputGuardrail,
@@ -116,13 +116,22 @@ export class Agent<
     this.kernl = kernl;
 
     // initialize system toolkits
+
+    // Memory System Tool
     if (this.memory.enabled) {
       // safety: system tools only rely on ctx.agent, not ctx.context
       const toolkit = memory as unknown as BaseToolkit<TContext>;
       this.systools.push(toolkit);
       toolkit.bind(this);
     }
+    // Wakeup System Tool
+    {
+      const wakeupToolKit = wakeup as unknown as BaseToolkit<TContext>;
+      this.systools.push(wakeupToolKit);
+      wakeupToolKit.bind(this);
+    }
   }
+
 
   /**
    * Blocking execution - spawns or resumes thread and waits for completion
