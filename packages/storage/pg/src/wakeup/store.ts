@@ -1,3 +1,8 @@
+/**
+ * PostgreSQL Wakeup store implementation.
+ * /packages/storage/pg/src/wakeup/store.ts
+ */
+
 import type { Pool, PoolClient } from "pg";
 
 import type {
@@ -6,15 +11,35 @@ import type {
   ScheduledWakeup,
   ScheduledWakeupUpdate,
 } from "kernl";
+
 import {
   KERNL_SCHEMA_NAME,
-  NewScheduledWakeupCodec,
-  ScheduledWakeupRecordCodec,
+  ScheduledWakeupRecordSchema,
   type ScheduledWakeupRecord,
 } from "@kernl-sdk/storage";
 
+import { NewScheduledWakeupCodec, ScheduledWakeupCodec } from "./codec";
+import { PATCH } from "./sql";
+
 /**
- * PostgreSQL wakeup store implementation.
+ * Convert ms/bigint ms to a JS number in ms.
+ */
+const toMs = (value: number | bigint): number =>
+  typeof value === "bigint" ? Number(value) : value;
+
+/**
+ * Convert ms to epoch seconds (integer).
+ */
+const toSeconds = (ms: number | bigint): number =>
+  Math.floor(toMs(ms) / 1000);
+
+/**
+ * PostgreSQL implementation of WakeupStore.
+ *
+ * Follows the same pattern as PGMemoryStore:
+ *  - depends on ensureInit() to create tables
+ *  - always validates with Zod Schemas
+ *  - converts between domain types and DB records via codecs
  */
 export class PGWakeupStore implements WakeupStore {
   private db: Pool | PoolClient;
@@ -25,130 +50,120 @@ export class PGWakeupStore implements WakeupStore {
     this.ensureInit = ensureInit;
   }
 
-  /**
-   * Create a scheduled wakeup.
-   */
-  async create(wakeup: NewScheduledWakeup): Promise<ScheduledWakeup> {
+  async create(input: NewScheduledWakeup): Promise<ScheduledWakeup> {
     await this.ensureInit();
-    const record = NewScheduledWakeupCodec.encode(wakeup);
+
+    const row = NewScheduledWakeupCodec.encode(input);
 
     const result = await this.db.query<ScheduledWakeupRecord>(
       `INSERT INTO ${KERNL_SCHEMA_NAME}.scheduled_wakeups
-       (id, thread_id, wait_time_ms, reason, woken, claimed_at, created_at, updated_at, error)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       (id, thread_id, run_at_s, reason, woken, claimed_at_s, created_at, updated_at, error)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
        RETURNING *`,
       [
-        record.id,
-        record.thread_id,
-        record.wait_time_ms,
-        record.reason,
-        record.woken,
-        record.claimed_at,
-        record.created_at,
-        record.updated_at,
-        record.error,
+        row.id,
+        row.thread_id,
+        row.run_at_s,
+        row.reason,
+        row.woken,
+        row.claimed_at_s,
+        row.created_at,
+        row.updated_at,
+        row.error,
       ],
     );
 
-    return ScheduledWakeupRecordCodec.decode(result.rows[0]);
+    const record = ScheduledWakeupRecordSchema.parse(result.rows[0]);
+    return ScheduledWakeupCodec.decode(record);
   }
 
-  /**
-   * Atomically claim due wakeups using SKIP LOCKED to avoid double-processing.
-   */
-  async claimDue(limit: number): Promise<ScheduledWakeup[]> {
+  async get(id: string): Promise<ScheduledWakeup | null> {
     await this.ensureInit();
-    if (limit <= 0) return [];
-
-    const now = Date.now();
 
     const result = await this.db.query<ScheduledWakeupRecord>(
-      `
-      WITH due AS (
-        SELECT id
-        FROM ${KERNL_SCHEMA_NAME}.scheduled_wakeups
-        WHERE woken = false
-          AND claimed_at IS NULL
-          AND created_at + wait_time_ms <= $1::bigint
-        ORDER BY created_at ASC
-        LIMIT $2
-        FOR UPDATE SKIP LOCKED
-      )
-      UPDATE ${KERNL_SCHEMA_NAME}.scheduled_wakeups w
-      SET claimed_at = $1,
-          updated_at = $1
-      FROM due
-      WHERE w.id = due.id
-      RETURNING w.*
-    `,
-      [now, limit],
+      `SELECT * FROM ${KERNL_SCHEMA_NAME}.scheduled_wakeups WHERE id = $1`,
+      [id],
     );
 
-    return result.rows.map((row) => ScheduledWakeupRecordCodec.decode(row));
+    if (result.rows.length === 0) return null;
+
+    const record = ScheduledWakeupRecordSchema.parse(result.rows[0]);
+    return ScheduledWakeupCodec.decode(record);
   }
 
-  /**
-   * Update wakeup status/error fields.
-   */
   async update(
     id: string,
     patch: ScheduledWakeupUpdate,
   ): Promise<ScheduledWakeup> {
     await this.ensureInit();
 
-    const fields: string[] = [];
-    const params: any[] = [];
-    let idx = 1;
-
-    if (patch.woken !== undefined) {
-      fields.push(`woken = $${idx++}`);
-      params.push(patch.woken);
-    }
-    if (patch.claimedAt !== undefined) {
-      fields.push(`claimed_at = $${idx++}`);
-      params.push(patch.claimedAt ? patch.claimedAt.getTime() : null);
-    }
-
-    if (patch.error !== undefined) {
-      fields.push(`error = $${idx++}`);
-      params.push(patch.error);
-    }
-
-    const updatedAt = patch.updatedAt?.getTime() ?? Date.now();
-    fields.push(`updated_at = $${idx++}`);
-    params.push(updatedAt);
-
-    params.push(id);
-    const idParam = idx;
+    const { sql, params } = PATCH.encode({ patch, startIdx: 2 });
 
     const result = await this.db.query<ScheduledWakeupRecord>(
-      `
-      UPDATE ${KERNL_SCHEMA_NAME}.scheduled_wakeups
-      SET ${fields.join(", ")}
-      WHERE id = $${idParam}
-      RETURNING *
-    `,
-      params,
+      `UPDATE ${KERNL_SCHEMA_NAME}.scheduled_wakeups
+       SET ${sql}
+       WHERE id = $1
+       RETURNING *`,
+      [id, ...params],
     );
 
     if (result.rows.length === 0) {
-      throw new Error(`Wakeup ${id} not found`);
+      throw new Error(`Wakeup with id ${id} not found`);
     }
 
-    return ScheduledWakeupRecordCodec.decode(result.rows[0]);
+    const record = ScheduledWakeupRecordSchema.parse(result.rows[0]);
+    return ScheduledWakeupCodec.decode(record);
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.ensureInit();
+
+    await this.db.query(
+      `DELETE FROM ${KERNL_SCHEMA_NAME}.scheduled_wakeups WHERE id = $1`,
+      [id],
+    );
   }
 
   /**
-   * Cancel all pending wakeups for a thread.
+   * Atomically claim up to `limit` due wakeups.
+   *
+   * Uses SELECT ... FOR UPDATE SKIP LOCKED pattern.
    */
-  async cancelForThread(tid: string): Promise<void> {
+  async claimDue(
+    nowMs: number | bigint,
+    limit: number,
+  ): Promise<ScheduledWakeup[]> {
     await this.ensureInit();
-    await this.db.query(
+
+    const nowMsNum = toMs(nowMs);
+    const nowS = toSeconds(nowMs);
+
+    const result = await this.db.query<ScheduledWakeupRecord>(
       `
-      DELETE FROM ${KERNL_SCHEMA_NAME}.scheduled_wakeups
-      WHERE thread_id = $1 AND woken = false
-    `,
-      [tid],
+      WITH due AS (
+        SELECT id
+        FROM ${KERNL_SCHEMA_NAME}.scheduled_wakeups
+        WHERE woken = FALSE
+          AND claimed_at_s IS NULL
+          AND run_at_s <= $1
+        ORDER BY run_at_s ASC
+        LIMIT $2
+        FOR UPDATE SKIP LOCKED
+      )
+      UPDATE ${KERNL_SCHEMA_NAME}.scheduled_wakeups AS sw
+      SET claimed_at_s = $1,
+          updated_at = $3
+      FROM due
+      WHERE sw.id = due.id
+      RETURNING sw.*;
+      `,
+      [nowS, limit, nowMsNum],
+    );
+
+    return result.rows.map((row) =>
+      ScheduledWakeupCodec.decode(
+        ScheduledWakeupRecordSchema.parse(row),
+      ),
     );
   }
 }

@@ -82,3 +82,11 @@ export type {
   MemoryByte,
   MemoryByteCodec,
 } from "./memory";
+
+// --- wakeups ---
+export type {
+  WakeupStore,
+  NewScheduledWakeup,
+  ScheduledWakeup,
+  ScheduledWakeupUpdate,
+} from "./wakeup";
