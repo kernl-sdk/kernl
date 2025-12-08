@@ -12,6 +12,8 @@
 import assert from "assert";
 import { z } from "zod";
 
+import { randomID } from "@kernl-sdk/shared/lib";
+
 import { tool } from "../tool";
 import { Toolkit } from "../toolkit";
 
@@ -97,13 +99,17 @@ const wait = tool({
     const now_s = Math.floor(Date.now() / 1000);
     const targetRunAt_s =
       run_at_s ?? (delay_s !== undefined ? now_s + delay_s : now_s);
+    const targetRunAt_ms = targetRunAt_s * 1000;
 
-    // Delegate to the storage-backed wakeup store.
-    // We keep the shape generic here and rely on the store implementation
-    // to map fields into its internal schema.
+    // Create the scheduled wakeup record.
+    // Field names and units must match NewScheduledWakeup domain type:
+    //   - id: unique wakeup ID (generated here)
+    //   - threadId: camelCase
+    //   - runAt: epoch milliseconds
     await wakeupStore.create({
-      thread_id,
-      run_at_s: targetRunAt_s,
+      id: `wkp_${randomID()}`,
+      threadId: thread_id,
+      runAt: targetRunAt_ms,
       reason: reason ?? null,
     });
 
