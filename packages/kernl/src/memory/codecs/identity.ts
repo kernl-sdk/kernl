@@ -1,5 +1,6 @@
 /**
  * Identity codecs - pass through unchanged.
+ * /packages/kernl/src/memory/codecs/identity.ts
  *
  * Used for backends that support the full IndexMemoryRecord schema natively.
  */

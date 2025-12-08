@@ -1,3 +1,7 @@
+/**
+ * /packages/kernl/src/tool/index.ts
+ */
+
 export { BaseTool, FunctionTool, HostedTool, tool } from "./tool";
 export { BaseToolkit, Toolkit, FunctionToolkit, MCPToolkit } from "./toolkit";
 export type {

@@ -1,5 +1,6 @@
 /**
  * MemoryByte encoder - converts MemoryByte to IndexableByte with embeddings.
+ * /packages/kernl/src/memory/encoder.ts
  */
 
 import type { EmbeddingModel, JSONObject } from "@kernl-sdk/protocol";

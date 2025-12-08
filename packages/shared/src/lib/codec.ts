@@ -2,6 +2,7 @@ import { z, type ZodType } from "zod";
 
 /**
  * Bidirectional codec for converting between types.
+ * /packages/shared/src/lib/codec.ts
  *
  * @example
  * ```typescript

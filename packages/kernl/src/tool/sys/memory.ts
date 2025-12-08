@@ -1,5 +1,6 @@
 /**
  * Memory system toolkit.
+ * /packages/kernl/src/tool/sys/memory.ts
  *
  * Provides tools for agents to store and retrieve memories.
  * Enabled via `memory: true` in agent config.

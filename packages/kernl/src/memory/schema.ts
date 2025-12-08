@@ -1,5 +1,6 @@
 /**
  * Memory index schema builder.
+ * /packages/kernl/src/memory/schema.ts
  */
 
 import type { FieldSchema } from "@kernl-sdk/retrieval";

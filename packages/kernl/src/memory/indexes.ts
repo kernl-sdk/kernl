@@ -1,5 +1,6 @@
 /**
  * Memory index interfaces.
+ * /packages/kernl/src/memory/indexes.ts
  *
  * Indexes are projections of the primary store (DB) that enable
  * specialized query patterns (vector search, graph traversal, archival).

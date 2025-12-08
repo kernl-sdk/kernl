@@ -1,5 +1,6 @@
 /**
  * Turbopuffer backend codecs.
+ * /packages/kernl/src/memory/codecs/tpuf.ts
  *
  * Turbopuffer constraints:
  * - Exactly one ANN vector field named "vector" per namespace.

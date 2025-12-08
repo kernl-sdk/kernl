@@ -20,6 +20,7 @@ import { MEMORY_FILTER, PATCH_CODEC, recordCodec } from "./codecs";
 
 /**
  * Memory is the primary memory abstraction for agents.
+ * /packages/kernl/src/memory/memory.ts
  *
  * Sits above storage/index layers + owns cognitive policy, eviction/TTL, consolidation.
  *

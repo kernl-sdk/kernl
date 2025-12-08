@@ -1,3 +1,7 @@
+/**
+ * /packages/kernl/src/context.ts
+ */
+
 import type { Agent } from "@/agent";
 
 /**

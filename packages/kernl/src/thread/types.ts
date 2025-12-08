@@ -1,3 +1,6 @@
+/**
+ * /packages/kernl/src/thread/types.ts
+ */
 import {
   ToolCall,
   LanguageModel,

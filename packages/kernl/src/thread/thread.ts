@@ -1,3 +1,6 @@
+/**
+ * /packages/kernl/src/thread/thread.ts
+ */
 import assert from "assert";
 import { ZodType } from "zod";
 import * as z from "zod";
