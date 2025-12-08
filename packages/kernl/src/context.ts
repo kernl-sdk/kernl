@@ -30,6 +30,12 @@ export class Context<TContext = UnknownContext> {
    */
   agent?: Agent<TContext, any>;
 
+  /**
+   * The thread ID for the current execution.
+   * Set by the thread during tool execution.
+   */
+  threadId?: string;
+
   // ----------------------
   // TEMPORARY: Tool approval tracking until actions system is refined
   // ----------------------

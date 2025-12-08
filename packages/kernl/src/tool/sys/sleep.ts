@@ -4,9 +4,7 @@
  *
  * Provides a tool for agents to sleep (pause) and schedule a wakeup for the current thread.
  *
- * The thread runtime is responsible for:
- *   - Passing the current thread_id into this tool's parameters.
- *   - Using the async/INTERRUPTIBLE tool state to checkpoint/save and stop the thread.
+ * The thread runtime provides threadId via ctx.threadId automatically.
  */
 
 import assert from "assert";
@@ -20,18 +18,12 @@ import { Toolkit } from "../toolkit";
 /**
  * Parameters for the wait tool.
  *
- * The runtime must pass:
- *  - thread_id: the id of the thread to resume later
- * And either:
+ * Either:
  *  - delay_s: number of seconds from now, OR
  *  - run_at_s: absolute epoch seconds when the thread should resume
  */
 const WaitParamsSchema = z
   .object({
-    thread_id: z
-      .string()
-      .min(1)
-      .describe("The id of the current thread to resume later."),
     delay_s: z
       .number()
       .int()
@@ -63,14 +55,14 @@ const WaitParamsSchema = z
 /**
  * wait_until
  *
- * Schedules a wakeup for the given thread_id and then causes the tool call
+ * Schedules a wakeup for the current thread and then causes the tool call
  * to be INTERRUPTIBLE (via requiresApproval). The actual checkpoint/save/stop
  * behaviour is handled by the existing async tool + thread runtime.
  */
 const wait = tool({
   id: "wait_until",
   description:
-    "Pause this agent until a future time by scheduling a wakeup for the given thread.",
+    "Pause this agent until a future time. The thread will be resumed automatically.",
   mode: "async" as const,
   parameters: WaitParamsSchema,
 
@@ -79,9 +71,10 @@ const wait = tool({
    * INTERRUPTIBLE and execute() is not run until some future approval/resume.
    */
   requiresApproval: async (ctx, params) => {
-    assert(ctx.agent, "ctx.agent is required for wakeup tools");
+    assert(ctx.agent, "ctx.agent is required for sleep tools");
+    assert(ctx.threadId, "ctx.threadId is required for sleep tools");
 
-    const { thread_id, delay_s, run_at_s, reason } = params as z.infer<
+    const { delay_s, run_at_s, reason } = params as z.infer<
       typeof WaitParamsSchema
     >;
 
@@ -104,11 +97,11 @@ const wait = tool({
     // Create the scheduled wakeup record.
     // Field names and units must match NewScheduledWakeup domain type:
     //   - id: unique wakeup ID (generated here)
-    //   - threadId: camelCase
+    //   - threadId: from context (set by thread runtime)
     //   - runAt: epoch milliseconds
     await wakeupStore.create({
       id: `wkp_${randomID()}`,
-      threadId: thread_id,
+      threadId: ctx.threadId,
       runAt: targetRunAt_ms,
       reason: reason ?? null,
     });

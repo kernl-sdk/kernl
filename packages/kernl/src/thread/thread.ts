@@ -144,6 +144,7 @@ export class Thread<
     }
   }
 
+  // MARK: Execute
   /**
    * Blocking execution - runs until terminal state or interruption
    */
@@ -195,6 +196,7 @@ export class Thread<
     }
   }
 
+  // MARK: _execute main loop
   /**
    * Main execution loop - always yields events, callers can propagate or discard.
    *
@@ -449,6 +451,7 @@ export class Thread<
           // is refined
           const ctx = new Context(this.namespace, this.context.context);
           ctx.agent = this.agent;
+          ctx.threadId = this.tid;
           ctx.approve(call.callId); // mark this call as approved
           const res = await tool.invoke(ctx, call.arguments, call.callId);
 
