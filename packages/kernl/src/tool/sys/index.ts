@@ -8,3 +8,5 @@
 
 
 export { memory } from "./memory";
+// TODO: This should honestly be called sleep. But semantics.
+export { wakeup } from "./wakeup";
