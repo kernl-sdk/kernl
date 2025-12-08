@@ -15,6 +15,7 @@ import { UnimplementedError } from "@kernl-sdk/shared/lib";
 /* pg */
 import { PGThreadStore } from "./thread/store";
 import { PGMemoryStore } from "./memory/store";
+import { PGWakeupStore } from "./wakeup/store";
 import { MIGRATIONS } from "./migrations";
 import { SQL_IDENTIFIER_REGEX } from "./sql";
 
@@ -109,11 +110,13 @@ export class PGStorage implements KernlStorage {
 
   threads: PGThreadStore;
   memories: PGMemoryStore;
+  wakeups: PGWakeupStore;
 
   constructor(config: PGStorageConfig) {
     this.pool = config.pool;
     this.threads = new PGThreadStore(this.pool, () => this.ensureInit());
     this.memories = new PGMemoryStore(this.pool, () => this.ensureInit());
+    this.wakeups = new PGWakeupStore(this.pool, () => this.ensureInit());
   }
 
   /**

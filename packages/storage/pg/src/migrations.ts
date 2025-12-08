@@ -8,6 +8,7 @@ import {
   TABLE_THREADS,
   TABLE_THREAD_EVENTS,
   TABLE_MEMORIES,
+  TABLE_SCHEDULED_WAKEUPS,
 } from "@kernl-sdk/storage";
 
 /**
@@ -38,6 +39,12 @@ export const MIGRATIONS: Migration[] = [
     id: "002_memories",
     async up(ctx) {
       await ctx.createTable(TABLE_MEMORIES);
+    },
+  },
+  {
+    id: "003_scheduled_wakeups",
+    async up(ctx) {
+      await ctx.createTable(TABLE_SCHEDULED_WAKEUPS);
     },
   },
 ];

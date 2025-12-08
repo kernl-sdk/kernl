@@ -1,3 +1,7 @@
+/**
+ * 
+ * /package/kernl/src/index.ts
+*/
 export { Kernl } from "./kernl";
 export type {
   KernlOptions,
