@@ -14,4 +14,4 @@ export type {
 } from "./types";
 
 // --- system toolkits ---
-export { memory, wakeup } from "./sys";
+export { memory, sleep } from "./sys";

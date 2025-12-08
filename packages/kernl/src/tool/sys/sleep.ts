@@ -1,8 +1,8 @@
 /**
- * Wakeup system toolkit.
- * /packages/kernl/src/tool/sys/wakeup.ts
+ * Sleep system toolkit.
+ * /packages/kernl/src/tool/sys/sleep.ts
  *
- * Provides a tool for agents to schedule a wakeup (sleep/wait) for the current thread.
+ * Provides a tool for agents to sleep (pause) and schedule a wakeup for the current thread.
  *
  * The thread runtime is responsible for:
  *   - Passing the current thread_id into this tool's parameters.
@@ -135,8 +135,8 @@ const wait = tool({
 
 // --- Toolkit ---
 
-export const wakeup = new Toolkit({
-  id: "sys.wakeup",
-  description: "Tools for scheduling and managing agent wakeups.",
+export const sleep = new Toolkit({
+  id: "sys.sleep",
+  description: "Tools for pausing agents and scheduling wakeups.",
   tools: [wait],
 });

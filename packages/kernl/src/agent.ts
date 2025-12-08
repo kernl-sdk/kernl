@@ -19,7 +19,7 @@ import type {
   RThreadUpdateParams,
 } from "@/api/resources/threads/types";
 import type { Context, UnknownContext } from "./context";
-import { Tool, memory, wakeup } from "./tool";
+import { Tool, memory, sleep } from "./tool";
 import { BaseToolkit } from "./tool/toolkit";
 import {
   InputGuardrail,
@@ -124,11 +124,11 @@ export class Agent<
       this.systools.push(toolkit);
       toolkit.bind(this);
     }
-    // Wakeup System Tool
+    // Sleep System Tool
     {
-      const wakeupToolKit = wakeup as unknown as BaseToolkit<TContext>;
-      this.systools.push(wakeupToolKit);
-      wakeupToolKit.bind(this);
+      const sleepToolkit = sleep as unknown as BaseToolkit<TContext>;
+      this.systools.push(sleepToolkit);
+      sleepToolkit.bind(this);
     }
   }
 

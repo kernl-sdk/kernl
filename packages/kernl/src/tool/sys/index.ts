@@ -5,8 +5,5 @@
  * These are internal toolkits that can be enabled via agent config flags.
  */
 
-
-
 export { memory } from "./memory";
-// TODO: This should honestly be called sleep. But semantics.
-export { wakeup } from "./wakeup";
+export { sleep } from "./sleep";
