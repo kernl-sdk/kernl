@@ -1,3 +1,7 @@
+/**
+ * /packages/kernl/src/agent/types.ts
+ */
+
 import { type ZodType } from "zod";
 
 import {

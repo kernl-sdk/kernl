@@ -1,3 +1,6 @@
+/**
+ * /packages/kernl/src/kernl/types.ts
+ */
 import { LanguageModel, EmbeddingModel } from "@kernl-sdk/protocol";
 import { SearchIndex } from "@kernl-sdk/retrieval";
 

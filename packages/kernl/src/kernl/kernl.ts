@@ -1,3 +1,6 @@
+/**
+ * /packages/kernl/src/kernl/kernl.ts
+ */
 import type { LanguageModel } from "@kernl-sdk/protocol";
 import { resolveEmbeddingModel } from "@kernl-sdk/retrieval";
 
