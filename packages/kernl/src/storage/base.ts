@@ -1,10 +1,13 @@
 /**
  * Core storage contracts.
+ * /packages/kernl/src/storage/base.ts
  */
 
 import type { AgentRegistry, ModelRegistry } from "@/kernl/types";
 import type { ThreadStore } from "./thread";
-import type { MemoryStore } from "@/memory/store";
+import type { MemoryStore } from "@/memory"
+// import type { MemoryStore } from "@/memory/store"
+import type { WakeupStore } from "@/wakeup";
 
 /**
  * The main storage interface for Kernl.
@@ -21,6 +24,11 @@ export interface KernlStorage {
    * Memory store - manages memory records for agents.
    */
   memories: MemoryStore;
+
+  /**
+   * Wakeup store - manages wakeup records for agents.
+   */
+  wakeups: WakeupStore
 
   // tasks: TaskStore;
   // traces: TraceStore;

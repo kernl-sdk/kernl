@@ -1,5 +1,6 @@
 /**
  * In-memory storage implementation for Kernl.
+ * /packages/kernl/src/storage/in-memory.ts
  *
  * Pure domain-level - no codecs, schemas, or DB records.
  *
@@ -33,6 +34,13 @@ import type {
   MemoryListOptions,
   MemoryFilter,
 } from "@/memory";
+import type {
+  NewScheduledWakeup,
+  ScheduledWakeup,
+  ScheduledWakeupUpdate,
+  WakeupStore,
+} from "@/wakeup";
+
 
 /**
  * In-memory storage implementation.
@@ -40,10 +48,12 @@ import type {
 export class InMemoryStorage implements KernlStorage {
   threads: InMemoryThreadStore;
   memories: InMemoryMemoryStore;
+  wakeups: InMemoryWakeupStore;
 
   constructor() {
     this.threads = new InMemoryThreadStore();
     this.memories = new InMemoryMemoryStore();
+    this.wakeups = new InMemoryWakeupStore();
   }
 
   bind(registries: { agents: AgentRegistry; models: ModelRegistry }): void {
@@ -540,5 +550,98 @@ export class InMemoryMemoryStore implements MemoryStore {
       const diff = a.timestamp - b.timestamp;
       return order === "desc" ? -diff : diff;
     });
+  }
+}
+
+
+/**
+ * In-memory wakeup store implementation
+ */
+export class InMemoryWakeupStore implements WakeupStore {
+  private wakeups = new Map<string, ScheduledWakeup>();
+
+  async create(input: NewScheduledWakeup): Promise<ScheduledWakeup> {
+    const now = Date.now();
+
+    const record: ScheduledWakeup = {
+      id: input.id,
+      threadId: input.threadId,
+      runAt: input.runAt,
+      reason: input.reason ?? null,
+      woken: false,
+      claimedAt: null,
+      createdAt: now,
+      updatedAt: now,
+      error: null,
+    };
+
+    this.wakeups.set(record.id, record);
+    return record;
+  }
+
+  async get(id: string): Promise<ScheduledWakeup | null> {
+    return this.wakeups.get(id) ?? null;
+  }
+
+  async update(
+    id: string,
+    patch: ScheduledWakeupUpdate,
+  ): Promise<ScheduledWakeup> {
+    const existing = this.wakeups.get(id);
+    if (!existing) {
+      throw new Error(`Wakeup with id ${id} not found`);
+    }
+
+    const updated: ScheduledWakeup = {
+      ...existing,
+      runAt: patch.runAt ?? existing.runAt,
+      reason: patch.reason ?? existing.reason,
+      woken: patch.woken ?? existing.woken,
+      claimedAt:
+        patch.claimedAt !== undefined ? patch.claimedAt : existing.claimedAt,
+      error: patch.error ?? existing.error,
+      updatedAt: patch.updatedAt ?? Date.now(),
+    };
+
+    this.wakeups.set(id, updated);
+    return updated;
+  }
+
+  async delete(id: string): Promise<void> {
+    this.wakeups.delete(id);
+  }
+
+  async claimDue(
+    nowMs: number | bigint,
+    limit: number,
+  ): Promise<ScheduledWakeup[]> {
+    const now = typeof nowMs === "bigint" ? Number(nowMs) : nowMs;
+
+    const candidates: ScheduledWakeup[] = [];
+
+    for (const w of this.wakeups.values()) {
+      if (!w.woken && w.claimedAt == null && w.runAt <= now) {
+        candidates.push(w);
+      }
+    }
+
+    candidates.sort((a, b) => a.runAt - b.runAt);
+
+    const selected = candidates.slice(0, limit);
+    const updatedSelected: ScheduledWakeup[] = [];
+
+    const claimTime = Date.now();
+
+    for (const w of selected) {
+      const updated: ScheduledWakeup = {
+        ...w,
+        claimedAt: claimTime,
+        updatedAt: claimTime,
+      };
+      this.wakeups.set(updated.id, updated);
+      updatedSelected.push(updated);
+    }
+
+    return updatedSelected;
   }
 }
