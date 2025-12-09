@@ -60,6 +60,7 @@ export interface MemoryByte {
  * Search-ready projection of a MemoryByte.
  *
  * Contains canonical text plus embeddings for each modality.
+ * Note: metadata is NOT included - it lives in the primary DB only.
  */
 export interface IndexableByte {
   text?: string; // canonical semantic text
@@ -68,7 +69,6 @@ export interface IndexableByte {
   ivec?: number[]; // image embedding
   avec?: number[]; // audio embedding
   vvec?: number[]; // video embedding
-  metadata?: JSONObject | null; // structured payload
 }
 
 /**

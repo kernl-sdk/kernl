@@ -136,11 +136,6 @@ export function buildMemoryIndexSchema(
       similarity,
       optional: true,
     },
-
-    metadata: {
-      type: "object",
-      optional: true,
-    },
   };
 
   return schema;

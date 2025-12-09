@@ -29,11 +29,8 @@ import type { IndexMemoryRecord } from "../types";
  */
 export const TPUF_DOC: Codec<IndexMemoryRecord, UnknownDocument> = {
   encode(doc: IndexMemoryRecord): UnknownDocument {
-    const { tvec, ivec, avec, vvec, metadata, ...rest } = doc;
-    const row: UnknownDocument = {
-      ...rest,
-      metadata: metadata as UnknownDocument["metadata"], // metadata is JSONObject | null, cast to FieldValue for UnknownDocument
-    };
+    const { tvec, ivec, avec, vvec, ...rest } = doc;
+    const row: UnknownDocument = { ...rest };
     if (tvec) row.vector = tvec;
     return row;
   },

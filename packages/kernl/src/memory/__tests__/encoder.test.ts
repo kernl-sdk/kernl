@@ -113,7 +113,7 @@ describe("MemoryByteEncoder", () => {
       expect(embedCall.values[0]).toContain("shots: 2");
     });
 
-    it("does not set metadata (handled by domain codec)", async () => {
+    it("does not include metadata (lives in primary DB only)", async () => {
       const embedder = createMockEmbedder();
       const encoder = new MemoryByteEncoder(embedder);
 
@@ -123,7 +123,8 @@ describe("MemoryByteEncoder", () => {
       };
       const result = await encoder.encode(byte);
 
-      expect(result.metadata).toBeUndefined();
+      // metadata is not part of IndexableByte - it stays in the primary DB
+      expect("metadata" in result).toBe(false);
     });
 
     it("returns undefined tvec when no content", async () => {
