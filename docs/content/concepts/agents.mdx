@@ -1,0 +1,125 @@
+<span className="section-label">Concepts › I.</span>
+
+# Agents
+
+> *Reference:* [Agents](/reference/agent)
+
+An agent is a language model (LLM) which is configured with:
+
+- **Instructions** — the system prompt that tells the model who it is and how it should respond.
+- **Model** — which LLM to call, plus any optional model tuning parameters.
+- **Tools** — a list of functions or APIs the LLM can invoke to accomplish a task.
+
+## Creating an agent
+
+```ts
+import { Agent } from "kernl";
+import { anthropic } from "@kernl-sdk/ai/anthropic";
+
+const agent = new Agent({
+  id: "jarvis",
+  name: "Jarvis",
+  model: anthropic("claude-sonnet-4-5"),
+  instructions: "You are a helpful assistant.",
+});
+```
+
+Register it with kernl before use:
+
+```ts
+import { Kernl } from "kernl";
+
+const kernl = new Kernl();
+kernl.register(agent);
+```
+
+## Basic configuration
+
+| Option | Description |
+|--------|-------------|
+| `id` | Unique identifier (required) |
+| `name` | Display name |
+| `model` | LLM to use |
+| `instructions` | System prompt — can be a string or function |
+| `toolkits` | Array of toolkits |
+| `memory` | Memory settings (`{ enabled: true }`) |
+
+## Running
+
+**Blocking** — wait for the full response:
+
+```ts
+const result = await agent.run("What's 2 + 2?");
+console.log(result.response);
+```
+
+**Streaming** — receive events as they happen:
+
+```ts
+const stream = agent.stream("Tell me a story");
+
+for await (const event of stream) {
+  if (event.kind === "text-delta") {
+    process.stdout.write(event.text);
+  }
+}
+```
+
+## Dynamic instructions
+
+Instructions can be a function that receives context:
+
+```ts
+import { Agent } from "kernl";
+import { anthropic } from "@kernl-sdk/ai/anthropic";
+
+const agent = new Agent<UserContext>({
+  id: "assistant",
+  name: "Assistant",
+  model: anthropic("claude-sonnet-4-5"),
+  instructions: (ctx) => `
+    You are helping ${ctx.context.user.name}.
+    Today is ${new Date().toDateString()}.
+  `,
+});
+
+await agent.run("Hello", {
+  context: {
+    username: "Tony"
+  }
+});
+```
+
+## Adding tools
+
+```ts
+import { Agent } from "kernl";
+import { anthropic } from "@kernl-sdk/ai/anthropic";
+import { math } from "@/toolkits/math";
+import { github } from "@/toolkits/github";
+
+const jarvis = new Agent({
+  id: "jarvis",
+  name: "Jarvis",
+  model: anthropic("claude-sonnet-4-5"),
+  instructions: "You are a helpful assistant with access to tools.",
+  toolkits: [math, github],
+});
+```
+
+## Enabling memory
+
+```ts
+import { Agent } from "kernl";
+import { anthropic } from "@kernl-sdk/ai/anthropic";
+
+const jarvis = new Agent({
+  id: "jarvis",
+  name: "Jarvis",
+  model: anthropic("claude-sonnet-4-5"),
+  instructions: "You are a helpful assistant. Remember user preferences.",
+  memory: { enabled: true },
+});
+```
+
+See [Memory](/concepts/memory) for details.

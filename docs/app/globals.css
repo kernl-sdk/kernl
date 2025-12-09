@@ -1,0 +1,430 @@
+:root {
+  --font-sans: 'SF Pro', 'SF Pro Text', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --color-brand: #9AB4B8;
+}
+
+/* Header */
+.dark nav[class*="nextra-nav"],
+.dark header,
+.dark [class*="navbar"] {
+  background: var(--nextra-bg) !important;
+  border-bottom: none !important;
+}
+
+/* Centered header logo */
+.header-center-logo {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.header-logo-icon {
+  color: var(--color-steel);
+  opacity: 0.8;
+}
+
+.logo-text {
+  font-family: 'SF Mono', Menlo, monospace;
+  font-weight: 400;
+  font-size: 14px;
+  color: var(--color-brand);
+}
+
+/* Hide search */
+.dark [data-nextra-search],
+.dark [class*="nextra-search"],
+.dark nav [class*="search"] {
+  display: none !important;
+}
+
+/* Smaller GitHub icon */
+.dark nav a[href*="github"] svg,
+.dark [class*="navbar"] a[href*="github"] svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 15.4px;
+}
+
+.nextra-content {
+  font-size: 15.4px;
+}
+
+.dark {
+  --nextra-bg: #080909;
+  --nextra-fg: #ffffff;
+  --color-brand: #9AB4B8;
+  --color-steel: #B4D5FA;
+  --color-success: #74E381;
+  --color-muted: #7a7a7a;
+  color: #ffffff;
+}
+
+/* Content links only (not sidebar) */
+.dark .nextra-content a,
+.dark article a {
+  color: var(--color-steel);
+  text-decoration: none;
+}
+
+.dark body {
+  background: linear-gradient(to bottom, #080909 0%, #000000 100%);
+  background-attachment: fixed;
+}
+
+/* Code block styling */
+pre,
+pre code,
+[data-rehype-pretty-code-figure] pre,
+[data-rehype-pretty-code-figure] pre code,
+.nextra-code pre,
+.nextra-code code {
+  font-family: 'SF Mono', Menlo, monospace !important;
+  font-size: 12px !important;
+  font-weight: 300 !important;
+  line-height: 1.6 !important;
+}
+
+.dark pre,
+.dark [data-rehype-pretty-code-figure] pre {
+  background: #080808 !important;
+  border: 1px solid #1f1f1f !important;
+  border-radius: 12px !important;
+}
+
+html.dark pre,
+html.dark [data-rehype-pretty-code-figure] pre {
+  background: #080808 !important;
+  border: 1px solid #1f1f1f !important;
+  border-radius: 12px !important;
+}
+
+.dark [data-rehype-pretty-code-figure],
+html.dark [data-rehype-pretty-code-figure],
+.dark figure[data-rehype-pretty-code-figure],
+.dark div[data-rehype-pretty-code-figure] {
+  border: 1px solid #1f1f1f !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: none !important;
+  outline: none !important;
+  ring: none !important;
+}
+
+.dark pre,
+html.dark pre {
+  border: 1px solid #1f1f1f !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  outline: none !important;
+  --tw-ring-shadow: none !important;
+  --tw-ring-color: transparent !important;
+}
+
+/* Inline code */
+:not(pre) > code {
+  font-family: 'SF Mono', Menlo, monospace !important;
+  font-size: 0.85em !important;
+  font-weight: 300 !important;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.dark :not(pre) > code {
+  font-family: 'SF Mono', Menlo, monospace !important;
+  font-size: 0.85em !important;
+  font-weight: 300 !important;
+  background: rgba(154, 180, 184, 0.07) !important;
+  color: #9AB4B8 !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+/* Headings */
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6 {
+  color: #9AB4B8 !important;
+  border: none !important;
+  text-decoration: none !important;
+}
+
+/* Hide default breadcrumb */
+.dark nav[aria-label="breadcrumb"],
+.dark .nextra-breadcrumb {
+  display: none !important;
+}
+
+/* Custom section label */
+.section-label {
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 12px;
+  color: #9AB4B8;
+  margin-bottom: 0.5rem;
+}
+
+.dark h1 {
+  color: #ffffff !important;
+  font-size: 1.6rem !important;
+  font-weight: 600 !important;
+  border: none !important;
+  margin-bottom: 2.5rem !important;
+}
+
+.dark h2 {
+  font-size: 1.1rem !important;
+  border-bottom: none !important;
+  margin-top: 3rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.dark h3 {
+  font-size: 1rem !important;
+  margin-top: 2.25rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.dark h4 {
+  font-size: 0.9rem !important;
+  margin-top: 1.75rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* Lists */
+.dark .nextra-content ul,
+.dark article ul {
+  list-style: none !important;
+  padding-left: 0 !important;
+}
+
+.dark .nextra-content ul li,
+.dark article ul li {
+  position: relative !important;
+  padding-left: 1.25rem !important;
+}
+
+.dark .nextra-content ul li::before,
+.dark article ul li::before {
+  content: "•" !important;
+  position: absolute !important;
+  left: 0 !important;
+  font-size: 1.2em !important;
+  top: -0.1em !important;
+  color: #9AB4B8 !important;
+}
+
+/* Table styling */
+.dark table,
+.dark .nextra-content table,
+.dark article table {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: table !important;
+  table-layout: auto !important;
+  border: none !important;
+  border-collapse: collapse !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  border-spacing: 0 !important;
+}
+
+.dark table thead,
+.dark .nextra-content table thead,
+.dark table thead tr,
+.dark .nextra-content table thead tr {
+  border: none !important;
+  border-top: none !important;
+}
+
+.dark table th,
+.dark .nextra-content table th {
+  background: transparent !important;
+  border: none !important;
+  border-top: none !important;
+  border-bottom: 1px solid #333 !important;
+  text-align: left !important;
+}
+
+.dark table td,
+.dark .nextra-content table td {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid #1f1f1f !important;
+  text-align: left !important;
+}
+
+.dark table tr:last-child td,
+.dark .nextra-content table tr:last-child td {
+  border-bottom: none !important;
+}
+
+.dark table tr,
+.dark .nextra-content table tr {
+  background: transparent !important;
+}
+
+/* Sidebar styling */
+.dark aside,
+.dark [class*="sidebar"] {
+  font-size: 13px !important;
+}
+
+/* Sidebar folder/section headers (dropdowns) */
+.dark aside button,
+.dark aside summary,
+.dark [class*="sidebar"] button,
+.dark [class*="sidebar"] summary,
+.dark aside [class*="folder"],
+.dark [class*="sidebar"] [class*="folder"] {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--nextra-fg) !important;
+  background: transparent !important;
+}
+
+.dark aside button:hover,
+.dark aside summary:hover,
+.dark [class*="sidebar"] button:hover,
+.dark [class*="sidebar"] summary:hover,
+.dark aside [class*="folder"]:hover,
+.dark [class*="sidebar"] [class*="folder"]:hover {
+  background: transparent !important;
+}
+
+/* Sidebar links */
+.dark aside a,
+.dark [class*="sidebar"] a {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  background: transparent !important;
+  transition: color 0.2s ease !important;
+}
+
+/* Sidebar link hover state */
+.dark aside a:hover,
+.dark [class*="sidebar"] a:hover {
+  color: #ffffff !important;
+  background: transparent !important;
+}
+
+/* Sidebar active state */
+html.dark aside li.active > a,
+html.dark [class*="sidebar"] li.active > a {
+  color: var(--color-steel) !important;
+  font-weight: 500 !important;
+  background: transparent !important;
+}
+
+/* Hide system drawer / footer at bottom of sidebar */
+.dark aside > div:last-child,
+.dark [class*="sidebar"] > div:last-child,
+.dark aside footer,
+.dark [class*="sidebar"] footer,
+.dark [class*="sidebar-footer"],
+.dark [class*="theme-switch"],
+.dark aside [class*="bottom"],
+.dark [data-nextra-sidebar] > div:last-child {
+  display: none !important;
+}
+
+/* Page action buttons - floated to right of content */
+.page-header-row {
+  float: right;
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  margin-left: 1rem;
+}
+
+.page-action-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid #212626;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.page-action-btn:hover {
+  border-color: #9AB4B8;
+}
+
+.page-action-icon {
+  animation: icon-fade-in 0.3s ease forwards;
+}
+
+.page-action-icon-brand {
+  color: var(--color-brand);
+}
+
+.page-action-icon-steel {
+  color: var(--color-steel);
+}
+
+.page-action-icon-success {
+  color: var(--color-success);
+}
+
+@keyframes icon-fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* Content width on smaller screens */
+@media (max-width: 1600px) {
+  .nextra-content,
+  article,
+  .dark .nextra-content,
+  .dark article {
+    max-width: 824px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Navbar right icons */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.navbar-icon-link {
+  color: #888;
+  transition: color 0.15s ease;
+}
+
+.navbar-icon-link:hover {
+  color: #fff;
+}
+
+.navbar-icon-github {
+  color: #fff;
+}
+
+/* Blockquotes */
+.dark blockquote,
+.dark .nextra-content blockquote,
+.dark article blockquote {
+  font-size: 0.9em;
+  color: var(--color-muted);
+  border-left: 2px solid var(--color-brand);
+  padding-left: 1rem;
+  margin-left: 0;
+}

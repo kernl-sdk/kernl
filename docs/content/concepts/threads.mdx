@@ -1,0 +1,97 @@
+<span className="section-label">Concepts › IV.</span>
+
+# Threads
+
+> *Reference:* [Threads](/reference/threads)
+
+A Thread is a single execution of an agent. It holds the message history, tool calls, state, and everything that happens during a run.
+
+Agents are stateless. Threads hold state.
+
+## Creating a thread
+
+Every call to `agent.run()` or `agent.stream()` creates or resumes a thread:
+
+```ts
+// creates a new thread (auto-generated ID)
+const result = await agent.run("Hello");
+
+// creates a new thread with explicit ID
+const result = await agent.run("Hello", { threadId: "thread_abc123" });
+```
+
+## Resuming a thread
+
+Pass the same `threadId` to continue a previous execution:
+
+```ts
+// first message
+await agent.run("My name is Tony", { threadId: "thread_123" });
+
+// later - same thread, agent remembers context
+await agent.run("What's my name?", { threadId: "thread_123" });
+// → "Your name is Tony"
+```
+
+The thread's history is loaded from storage and the conversation continues.
+
+## Events and history
+
+Everything that happens in a thread is recorded as an event:
+
+- User messages
+- Assistant messages
+- Tool calls
+- Tool results
+- Errors
+
+## Persistence
+
+When storage is configured, threads are automatically persisted:
+
+```ts
+import { Kernl } from "kernl";
+import { postgres } from "@kernl-sdk/pg";
+
+const kernl = new Kernl({
+  storage: {
+    db: postgres({ connstr: process.env.DATABASE_URL }),
+  },
+});
+```
+
+Threads checkpoint at key moments:
+- When execution starts
+- After each tool call completes
+- When execution ends
+
+This means you can resume a thread even after a crash or restart.
+
+## Listing threads
+
+Access an agent's threads:
+
+```ts
+// list all threads for an agent
+const threads = await agent.threads.list();
+
+// get a specific thread
+const thread = await agent.threads.get("thread_abc123");
+
+// get thread with history
+const thread = await agent.threads.get("thread_abc123", { history: true });
+
+// delete a thread
+await agent.threads.delete("thread_abc123");
+```
+
+## Namespaces
+
+Threads can be scoped to a namespace for multi-tenant applications:
+
+```ts
+await agent.run("Hello", {
+  threadId: "thread_123",
+  namespace: "tenant-abc",
+});
+```

@@ -1,0 +1,29 @@
+<span className="section-label">VII.</span>
+
+# Glossary
+
+Key terms and concepts used throughout kernl.
+
+## Agent
+
+A configured LLM with instructions, tools, and memory settings. Agents are stateless — they define behavior but don't hold conversation state.
+
+## Thread
+
+A single execution of an agent. Contains message history, tool calls, and state. Threads are the unit of persistence and can be resumed.
+
+## Memory
+
+Knowledge that persists beyond individual threads. Can be created, searched, and updated by agents or manually.
+
+## Toolkit
+
+A collection of related tools that can be attached to an agent. Tools are functions the LLM can call to take actions.
+
+## Namespace
+
+A logical partition for isolating threads and memories. Useful for multi-tenant applications.
+
+## Context
+
+Runtime data passed into an agent's execution — user info, session state, or any data your agent needs access to.

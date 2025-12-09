@@ -1,0 +1,83 @@
+<span className="section-label">III.</span>
+
+# Getting Started
+
+import { Steps } from 'nextra/components'
+
+<Steps>
+
+### Install the CLI
+
+```bash
+# homebrew
+brew install kernl
+
+# or npm
+npm install -g @kernl-sdk/cli
+```
+
+### Create a project
+
+```bash
+kernl init my-project
+cd my-project
+```
+
+### Set your API keys
+
+```bash
+# .env
+ANTHROPIC_API_KEY=sk-...
+OPENAI_API_KEY=sk-...
+GOOGLE_GENERATIVE_AI_API_KEY=sk-...
+```
+
+### Make it yours
+
+Open `src/agents/jarvis.ts`:
+
+```ts
+import { Agent } from "kernl";
+import { anthropic } from "@kernl-sdk/ai/anthropic";
+
+import { math } from "@/toolkits/math";
+
+export const jarvis = new Agent({
+  id: "jarvis",
+  name: "Jarvis",
+  instructions: "You are Jarvis, a helpful assistant.",
+  model: anthropic("claude-sonnet-4-5"),
+  toolkits: [math],
+});
+```
+
+Change the instructions. Add a new toolkit. Make it do something useful.
+
+</Steps>
+
+## Project structure
+
+```
+src/
+├── agents/
+│   └── jarvis.ts
+├── toolkits/
+│   └── math/
+│       ├── index.ts
+│       ├── add.ts
+│       └── ...
+├── app.ts
+└── index.ts
+```
+
+**agents/** — One file per agent. Export the agent instance.
+
+**toolkits/** — Group related tools together. Each toolkit exports from its `index.ts`.
+
+**index.ts** — Entrypoint. Create a Kernl instance, register agents, run.
+
+## Next steps
+
+- [Agents](/concepts/agents) — deeper dive into agent configuration
+- [Memory](/concepts/memory) — give your agent persistent memory
+- [Threads](/concepts/threads) — manage execution state
