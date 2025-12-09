@@ -2,6 +2,7 @@ export default {
   "*": {
     theme: {
       toc: false,
+      copyPage: false,
     },
   },
   index: "Overview",
