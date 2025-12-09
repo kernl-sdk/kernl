@@ -3,3 +3,4 @@ packages:
   - "packages/providers/*"
   - "packages/storage/*"
   - "microprojects/playground/*"
+  - "docs"
