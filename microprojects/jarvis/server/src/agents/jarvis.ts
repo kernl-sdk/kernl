@@ -23,5 +23,5 @@ When asked for updates or status:
 
 Keep responses focused and avoid unnecessary details.`,
   model: anthropic("claude-sonnet-4-5"),
-  toolkits: [linear],
+  toolkits: [linear, github],
 });
