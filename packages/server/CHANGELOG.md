@@ -1,5 +1,13 @@
 # @kernl-sdk/server
 
+## 0.0.8
+
+### Patch Changes
+
+- Updated dependencies [3fe8682]
+  - kernl@0.8.0
+  - @kernl-sdk/ai@0.3.0
+
 ## 0.0.7
 
 ### Patch Changes

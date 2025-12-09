@@ -1,5 +1,12 @@
 # @kernl/storage
 
+## 0.1.19
+
+### Patch Changes
+
+- Updated dependencies [3fe8682]
+  - kernl@0.8.0
+
 ## 0.1.18
 
 ### Patch Changes
