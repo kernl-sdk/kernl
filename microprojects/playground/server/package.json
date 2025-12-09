@@ -7,13 +7,13 @@
     "start": "tsx --env-file=.env.local src/index.ts"
   },
   "dependencies": {
-    "kernl": "workspace:*",
-    "@kernl-sdk/server": "workspace:*",
+    "@ai-sdk/anthropic": "^1.0.0",
+    "@ai-sdk/openai": "^1.0.0",
     "@kernl-sdk/ai": "workspace:*",
     "@kernl-sdk/pg": "workspace:*",
+    "@kernl-sdk/server": "workspace:*",
     "@kernl-sdk/turbopuffer": "workspace:*",
-    "@ai-sdk/anthropic": "^1.0.0",
-    "@ai-sdk/openai": "^1.0.0"
+    "kernl": "*"
   },
   "devDependencies": {
     "@types/node": "^24.10.0",
