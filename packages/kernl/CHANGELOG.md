@@ -1,5 +1,13 @@
 # @kernl/core
 
+## 0.8.1
+
+### Patch Changes
+
+- 86fad68: Drop metadata from search index projection
+
+  Metadata now lives only in the primary DB, not the search index. This fixes Turbopuffer serialization errors with nested objects and simplifies the index schema.
+
 ## 0.8.0
 
 ### Minor Changes
