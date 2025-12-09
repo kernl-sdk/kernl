@@ -17,7 +17,7 @@ import {
 } from "@/memory";
 
 import type { ThreadExecuteResult, ThreadStreamEvent } from "@/thread/types";
-import type { AgentResponseType } from "@/agent/types";
+import type { AgentOutputType } from "@/agent/types";
 
 import type { KernlOptions } from "./types";
 
@@ -27,7 +27,7 @@ import type { KernlOptions } from "./types";
  * Orchestrates agent execution, including guardrails, tool calls, session persistence, and
  * tracing.
  */
-export class Kernl extends KernlHooks<UnknownContext, AgentResponseType> {
+export class Kernl extends KernlHooks<UnknownContext, AgentOutputType> {
   private readonly _agents: Map<string, Agent> = new Map();
   private readonly _models: Map<string, LanguageModel> = new Map();
 
@@ -94,9 +94,9 @@ export class Kernl extends KernlHooks<UnknownContext, AgentResponseType> {
   /**
    * Spawn a new thread - blocking execution
    */
-  async spawn<TContext, TResponse extends AgentResponseType>(
-    thread: Thread<TContext, TResponse>,
-  ): Promise<ThreadExecuteResult<ResolvedAgentResponse<TResponse>>> {
+  async spawn<TContext, TOutput extends AgentOutputType>(
+    thread: Thread<TContext, TOutput>,
+  ): Promise<ThreadExecuteResult<ResolvedAgentResponse<TOutput>>> {
     this.athreads.set(thread.tid, thread);
     try {
       return await thread.execute();
@@ -110,9 +110,9 @@ export class Kernl extends KernlHooks<UnknownContext, AgentResponseType> {
    *
    * NOTE: just blocks for now
    */
-  async schedule<TContext, TResponse extends AgentResponseType>(
-    thread: Thread<TContext, TResponse>,
-  ): Promise<ThreadExecuteResult<ResolvedAgentResponse<TResponse>>> {
+  async schedule<TContext, TOutput extends AgentOutputType>(
+    thread: Thread<TContext, TOutput>,
+  ): Promise<ThreadExecuteResult<ResolvedAgentResponse<TOutput>>> {
     this.athreads.set(thread.tid, thread);
     try {
       return await thread.execute();
@@ -126,8 +126,8 @@ export class Kernl extends KernlHooks<UnknownContext, AgentResponseType> {
    *
    * Spawn a new thread - streaming execution
    */
-  async *spawnStream<TContext, TResponse extends AgentResponseType>(
-    thread: Thread<TContext, TResponse>,
+  async *spawnStream<TContext, TOutput extends AgentOutputType>(
+    thread: Thread<TContext, TOutput>,
   ): AsyncIterable<ThreadStreamEvent> {
     this.athreads.set(thread.tid, thread);
     try {
@@ -142,8 +142,8 @@ export class Kernl extends KernlHooks<UnknownContext, AgentResponseType> {
    *
    * Schedule an existing thread - streaming execution
    */
-  async *scheduleStream<TContext, TResponse extends AgentResponseType>(
-    thread: Thread<TContext, TResponse>,
+  async *scheduleStream<TContext, TOutput extends AgentOutputType>(
+    thread: Thread<TContext, TOutput>,
   ): AsyncIterable<ThreadStreamEvent> {
     this.athreads.set(thread.tid, thread);
     try {

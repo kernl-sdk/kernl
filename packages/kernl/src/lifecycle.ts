@@ -5,8 +5,8 @@ import { Context, UnknownContext } from "./context";
 import { Tool } from "./tool";
 import type { ToolCall } from "@kernl-sdk/protocol";
 
-import { AgentResponseType } from "@/agent/types";
-import { TextResponse } from "@/thread/types";
+import { AgentOutputType } from "@/agent/types";
+import { TextOutput } from "@/thread/types";
 
 export type EventEmitterEvents = Record<string, any[]>;
 
@@ -60,7 +60,7 @@ class TypedEventEmitter<
 
 export type AgentHookEvents<
   TContext = UnknownContext,
-  TOutput extends AgentResponseType = TextResponse,
+  TOutput extends AgentOutputType = TextOutput,
 > = {
   /**
    * @param context - The context of the run
@@ -107,7 +107,7 @@ export type AgentHookEvents<
  */
 export class AgentHooks<
   TContext = UnknownContext,
-  TOutput extends AgentResponseType = TextResponse,
+  TOutput extends AgentOutputType = TextOutput,
 > extends TypedEventEmitter<AgentHookEvents<TContext, TOutput>> {}
 
 /**
@@ -119,7 +119,7 @@ export class AgentHooks<
  */
 export type KernlHookEvents<
   TContext = UnknownContext,
-  TOutput extends AgentResponseType = TextResponse,
+  TOutput extends AgentOutputType = TextOutput,
 > = {
   /**
    * @param context - The context of the run
@@ -177,5 +177,5 @@ export type KernlHookEvents<
  */
 export class KernlHooks<
   TContext = UnknownContext,
-  TOutput extends AgentResponseType = TextResponse,
+  TOutput extends AgentOutputType = TextOutput,
 > extends TypedEventEmitter<KernlHookEvents<TContext, TOutput>> {}

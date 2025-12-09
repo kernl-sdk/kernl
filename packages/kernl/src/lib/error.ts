@@ -9,8 +9,8 @@ import { randomID } from "@kernl-sdk/shared/lib";
 // import { SerializedThread } from "@/lib/serde/thread";
 type SerializedThread = any;
 
-import { AgentResponseType } from "@/agent/types";
-import { TextResponse } from "@/thread/types";
+import { AgentOutputType } from "@/agent/types";
+import { TextOutput } from "@/thread/types";
 
 /**
  * Abstract base class for all `kernl` errors
@@ -144,7 +144,7 @@ export class InputGuardrailTripwireTriggered extends AgentError {
  */
 export class OutputGuardrailTripwireTriggered<
   TMeta extends OutputGuardrailMetadata,
-  TOutputType extends AgentResponseType = TextResponse,
+  TOutputType extends AgentOutputType = TextOutput,
 > extends AgentError {
   result: OutputGuardrailResult<TMeta, TOutputType>;
   constructor(

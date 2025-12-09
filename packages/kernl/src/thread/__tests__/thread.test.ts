@@ -1061,7 +1061,7 @@ describe("Thread", () => {
   });
 
   describe("Final Output Parsing", () => {
-    it("should return text output when responseType is 'text'", async () => {
+    it("should return text output when output is 'text'", async () => {
       const model = createMockModel(async (req: LanguageModelRequest) => {
         return {
           content: [
@@ -1087,7 +1087,7 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        responseType: "text",
+        output: "text",
       });
 
       const kernl = new Kernl();
@@ -1136,7 +1136,7 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        responseType: responseSchema,
+        output: responseSchema,
       });
 
       const kernl = new Kernl();
@@ -1186,7 +1186,7 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        responseType: responseSchema,
+        output: responseSchema,
       });
 
       const kernl = new Kernl();
@@ -1231,7 +1231,7 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        responseType: responseSchema,
+        output: responseSchema,
       });
 
       const kernl = new Kernl();
@@ -1277,7 +1277,7 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        responseType: responseSchema,
+        output: responseSchema,
       });
 
       const kernl = new Kernl();
@@ -1336,7 +1336,7 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        responseType: responseSchema,
+        output: responseSchema,
       });
 
       const kernl = new Kernl();
@@ -1405,7 +1405,7 @@ describe("Thread", () => {
         name: "Test",
         instructions: "Test agent",
         model,
-        responseType: "text",
+        output: "text",
       });
 
       const kernl = new Kernl();
