@@ -5,6 +5,7 @@ import {
   FAILED,
   type LanguageModelResponse,
   type LanguageModelResponseItem,
+  type LanguageModelResponseType,
   type LanguageModelFinishReason,
   type LanguageModelUsage,
   type LanguageModelWarning,
@@ -16,6 +17,7 @@ import type {
   LanguageModelV3FinishReason,
   LanguageModelV3Usage,
   LanguageModelV3CallWarning,
+  JSONSchema7,
 } from "@ai-sdk/provider";
 
 /**
@@ -172,3 +174,42 @@ export const WARNING: Codec<LanguageModelWarning, LanguageModelV3CallWarning> =
       }
     },
   };
+
+/**
+ * AI SDK response format type.
+ *
+ * Maps to the `responseFormat` parameter in AI SDK's doGenerate/doStream.
+ */
+export interface AISdkResponseFormat {
+  type: "json";
+  schema?: JSONSchema7;
+  name?: string;
+  description?: string;
+}
+
+/**
+ * Codec for converting protocol responseType to AI SDK responseFormat.
+ *
+ * - `kind: "text"` or undefined → undefined (AI SDK defaults to text)
+ * - `kind: "json"` → `{ type: "json", schema, name, description }`
+ */
+export const RESPONSE_FORMAT: Codec<
+  LanguageModelResponseType | undefined,
+  AISdkResponseFormat | undefined
+> = {
+  encode: (responseType) => {
+    if (!responseType || responseType.kind === "text") {
+      return undefined;
+    }
+
+    return {
+      type: "json",
+      schema: responseType.schema,
+      name: responseType.name,
+      description: responseType.description,
+    };
+  },
+  decode: () => {
+    throw new Error("codec:unimplemented");
+  },
+};

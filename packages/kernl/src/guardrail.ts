@@ -4,19 +4,19 @@ import { LanguageModelResponse } from "@kernl-sdk/protocol";
 
 import { Agent } from "./agent";
 import { Context, UnknownContext } from "./context";
-import type { AgentResponseType } from "@/agent/types";
-import type { TextResponse, ThreadEvent } from "@/thread/types";
+import type { AgentOutputType } from "@/agent/types";
+import type { TextOutput, ThreadEvent } from "@/thread/types";
 
 /**
  * Resolves the agent output type based on the response type.
- * - If TResponse is "text" → output is string
- * - If TResponse is a ZodType → output is the inferred type from that schema
+ * - If TOutput is "text" → output is string
+ * - If TOutput is a ZodType → output is the inferred type from that schema
  */
-export type ResolvedAgentResponse<TResponse extends AgentResponseType> =
-  TResponse extends TextResponse
+export type ResolvedAgentResponse<TOutput extends AgentOutputType> =
+  TOutput extends TextOutput
     ? string
-    : TResponse extends ZodType
-      ? z.infer<TResponse>
+    : TOutput extends ZodType
+      ? z.infer<TOutput>
       : never;
 
 /**
@@ -149,10 +149,10 @@ export function defineInputGuardrail({
  */
 export interface OutputGuardrailFunctionArgs<
   TContext = UnknownContext,
-  TResponse extends AgentResponseType = TextResponse,
+  TOutput extends AgentOutputType = TextOutput,
 > {
   agent: Agent<any, any>;
-  agentOutput: ResolvedAgentResponse<TResponse>; // ??
+  agentOutput: ResolvedAgentResponse<TOutput>; // ??
   context: Context<TContext>;
   /**
    * Additional details about the agent output.
@@ -166,16 +166,16 @@ export interface OutputGuardrailFunctionArgs<
  * A function that takes an output guardrail function arguments and returns a `GuardrailFunctionOutput`.
  */
 export type OutputGuardrailFunction<
-  TResponse extends AgentResponseType = TextResponse,
+  TOutput extends AgentOutputType = TextOutput,
 > = (
-  args: OutputGuardrailFunctionArgs<UnknownContext, TResponse>,
+  args: OutputGuardrailFunctionArgs<UnknownContext, TOutput>,
 ) => Promise<GuardrailFunctionOutput>;
 
 /**
  * A guardrail that checks the output of the agent.
  */
 export interface OutputGuardrail<
-  TResponse extends AgentResponseType = TextResponse,
+  TOutput extends AgentOutputType = TextOutput,
 > {
   /**
    * The name of the guardrail.
@@ -185,7 +185,7 @@ export interface OutputGuardrail<
   /**
    * The function that performs the guardrail check.
    */
-  execute: OutputGuardrailFunction<TResponse>;
+  execute: OutputGuardrailFunction<TOutput>;
 }
 
 /**
@@ -201,7 +201,7 @@ export interface OutputGuardrailMetadata {
  */
 export interface OutputGuardrailResult<
   TMeta = OutputGuardrailMetadata,
-  TResponse extends AgentResponseType = TextResponse,
+  TOutput extends AgentOutputType = TextOutput,
 > {
   /**
    * The metadata of the guardrail.
@@ -211,12 +211,12 @@ export interface OutputGuardrailResult<
   /**
    * The output of the agent that ran.
    */
-  agentOutput: ResolvedAgentResponse<TResponse>; // ??
+  agentOutput: ResolvedAgentResponse<TOutput>; // ??
 
   /**
    * The agent that ran.
    */
-  agent: Agent<UnknownContext, TResponse>;
+  agent: Agent<UnknownContext, TOutput>;
 
   /**
    * The output of the guardrail.
@@ -229,43 +229,43 @@ export interface OutputGuardrailResult<
  */
 export interface OutputGuardrailDefinition<
   TMeta = OutputGuardrailMetadata,
-  TResponse extends AgentResponseType = TextResponse,
+  TOutput extends AgentOutputType = TextOutput,
 > extends OutputGuardrailMetadata {
-  guardrailFunction: OutputGuardrailFunction<TResponse>;
+  guardrailFunction: OutputGuardrailFunction<TOutput>;
   run(
-    args: OutputGuardrailFunctionArgs<UnknownContext, TResponse>,
-  ): Promise<OutputGuardrailResult<TMeta, TResponse>>;
+    args: OutputGuardrailFunctionArgs<UnknownContext, TOutput>,
+  ): Promise<OutputGuardrailResult<TMeta, TOutput>>;
 }
 
 /**
  * Arguments for defining an output guardrail definition.
  */
 export interface DefineOutputGuardrailArgs<
-  TResponse extends AgentResponseType = TextResponse,
+  TOutput extends AgentOutputType = TextOutput,
 > {
   name: string;
-  execute: OutputGuardrailFunction<TResponse>;
+  execute: OutputGuardrailFunction<TOutput>;
 }
 
 /**
  * Creates an output guardrail definition.
  */
 export function defineOutputGuardrail<
-  TResponse extends AgentResponseType = TextResponse,
+  TOutput extends AgentOutputType = TextOutput,
 >({
   name,
   execute,
-}: DefineOutputGuardrailArgs<TResponse>): OutputGuardrailDefinition<
+}: DefineOutputGuardrailArgs<TOutput>): OutputGuardrailDefinition<
   OutputGuardrailMetadata,
-  TResponse
+  TOutput
 > {
   return {
     type: "output",
     name,
     guardrailFunction: execute,
     async run(
-      args: OutputGuardrailFunctionArgs<UnknownContext, TResponse>,
-    ): Promise<OutputGuardrailResult<OutputGuardrailMetadata, TResponse>> {
+      args: OutputGuardrailFunctionArgs<UnknownContext, TOutput>,
+    ): Promise<OutputGuardrailResult<OutputGuardrailMetadata, TOutput>> {
       return {
         guardrail: { type: "output", name },
         agent: args.agent,

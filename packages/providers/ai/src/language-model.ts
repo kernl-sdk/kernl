@@ -11,7 +11,7 @@ import { message, reasoning } from "@kernl-sdk/protocol";
 import { MESSAGE } from "./convert/message";
 import { TOOL } from "./convert/tools";
 import { MODEL_SETTINGS } from "./convert/settings";
-import { MODEL_RESPONSE } from "./convert/response";
+import { MODEL_RESPONSE, RESPONSE_FORMAT } from "./convert/response";
 import { convertStream } from "./convert/stream";
 
 /**
@@ -36,11 +36,13 @@ export class AISDKLanguageModel implements LanguageModel {
     const messages = request.input.map(MESSAGE.encode);
     const tools = request.tools ? request.tools.map(TOOL.encode) : undefined;
     const settings = MODEL_SETTINGS.encode(request.settings);
+    const responseFormat = RESPONSE_FORMAT.encode(request.responseType);
 
     const result = await this.model.doGenerate({
       prompt: messages,
       tools,
       ...settings,
+      responseFormat,
       abortSignal: request.abort,
     });
 
@@ -56,11 +58,13 @@ export class AISDKLanguageModel implements LanguageModel {
     const messages = request.input.map(MESSAGE.encode);
     const tools = request.tools ? request.tools.map(TOOL.encode) : undefined;
     const settings = MODEL_SETTINGS.encode(request.settings);
+    const responseFormat = RESPONSE_FORMAT.encode(request.responseType);
 
     const stream = await this.model.doStream({
       prompt: messages,
       tools,
       ...settings,
+      responseFormat,
       abortSignal: request.abort,
     });
 

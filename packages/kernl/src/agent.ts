@@ -37,10 +37,10 @@ import { MisconfiguredError, RuntimeError } from "./lib/error";
 import type {
   AgentConfig,
   AgentMemoryConfig,
-  AgentResponseType,
+  AgentOutputType,
 } from "./agent/types";
 import type {
-  TextResponse,
+  TextOutput,
   ThreadExecuteOptions,
   ThreadExecuteResult,
   ThreadStreamEvent,
@@ -48,10 +48,10 @@ import type {
 
 export class Agent<
     TContext = UnknownContext,
-    TResponse extends AgentResponseType = TextResponse,
+    TOutput extends AgentOutputType = TextOutput,
   >
-  extends AgentHooks<TContext, TResponse>
-  implements AgentConfig<TContext, TResponse>
+  extends AgentHooks<TContext, TOutput>
+  implements AgentConfig<TContext, TOutput>
 {
   private kernl?: Kernl;
 
@@ -69,25 +69,12 @@ export class Agent<
 
   guardrails: {
     input: InputGuardrail[];
-    output: OutputGuardrail<AgentResponseType>[];
+    output: OutputGuardrail<AgentOutputType>[];
   };
-  responseType: TResponse = "text" as TResponse;
+  output: TOutput = "text" as TOutput;
   resetToolChoice: boolean;
 
-  // --- (TODO) ---
-  // toolUseBehavior: ToolUseBehavior;
-  // handoffs: (Agent<any, TResponse> | Handoff<any, TResponse>)[];
-  // ----------
-
-  // /* Process/thread-group–wide signal state shared by all threads in the group: shared pending signals, job control
-  // (stops/cont, group exit), rlimits, etc. */
-  // signal: *struct signal_struct;
-  //
-  //  /* Table of signal handlers (sa_handler, sa_mask, flags) shared by threads
-  // (CLONE_SIGHAND). RCU-protected so readers can access it locklessly. */
-  // sighand: *struct sighand_struct __rcu;
-
-  constructor(config: AgentConfig<TContext, TResponse>) {
+  constructor(config: AgentConfig<TContext, TOutput>) {
     super();
     if (config.id.trim() === "") {
       throw new MisconfiguredError("Agent must have an id.");
@@ -111,8 +98,8 @@ export class Agent<
     }
 
     this.guardrails = config.guardrails ?? { input: [], output: [] };
-    if (config.responseType) {
-      this.responseType = config.responseType;
+    if (config.output) {
+      this.output = config.output;
     }
     this.resetToolChoice = config.resetToolChoice ?? true;
     // this.toolUseBehavior = config.toolUseBehavior ?? "run_llm_again";
@@ -142,7 +129,7 @@ export class Agent<
   async run(
     input: string | LanguageModelItem[],
     options?: ThreadExecuteOptions<TContext>,
-  ): Promise<ThreadExecuteResult<ResolvedAgentResponse<TResponse>>> {
+  ): Promise<ThreadExecuteResult<ResolvedAgentResponse<TOutput>>> {
     if (!this.kernl) {
       throw new MisconfiguredError(
         `Agent ${this.id} not bound to kernl. Call kernl.register(agent) first.`,
@@ -155,7 +142,7 @@ export class Agent<
         : input;
     const tid = options?.threadId;
 
-    let thread: Thread<TContext, TResponse> | null = null;
+    let thread: Thread<TContext, TOutput> | null = null;
 
     if (tid) {
       // no concurrent execution of same thread - correctness contract
@@ -168,7 +155,7 @@ export class Agent<
       if (this.kernl.storage?.threads) {
         thread = (await this.kernl.storage.threads.get(tid, {
           history: true,
-        })) as Thread<TContext, TResponse> | null;
+        })) as Thread<TContext, TOutput> | null;
       }
     }
 
@@ -216,7 +203,7 @@ export class Agent<
         : input;
     const tid = options?.threadId;
 
-    let thread: Thread<TContext, TResponse> | null = null;
+    let thread: Thread<TContext, TOutput> | null = null;
 
     if (tid) {
       // no concurrent execution of same thread - correctness contract
@@ -229,7 +216,7 @@ export class Agent<
       if (this.kernl.storage?.threads) {
         thread = (await this.kernl.storage.threads.get(tid, {
           history: true,
-        })) as Thread<TContext, TResponse> | null;
+        })) as Thread<TContext, TOutput> | null;
       }
     }
 

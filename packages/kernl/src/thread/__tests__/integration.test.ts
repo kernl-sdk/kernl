@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll } from "vitest";
 import { z } from "zod";
 import { openai } from "@ai-sdk/openai";
 import { AISDKLanguageModel } from "@kernl-sdk/ai";
+import "@kernl-sdk/ai/openai"; // (TMP)
 
 import { Agent } from "@/agent";
 import { Kernl } from "@/kernl";
@@ -23,21 +24,17 @@ import type { LanguageModelItem } from "@kernl-sdk/protocol";
 
 const SKIP_INTEGRATION_TESTS = !process.env.OPENAI_API_KEY;
 
-describe.skipIf(SKIP_INTEGRATION_TESTS)(
-  "Thread streaming integration",
-  () => {
-    let kernl: Kernl;
-    let model: AISDKLanguageModel;
+describe.skipIf(SKIP_INTEGRATION_TESTS)("Thread streaming integration", () => {
+  let kernl: Kernl;
+  let model: AISDKLanguageModel;
 
-    beforeAll(() => {
-      kernl = new Kernl();
-      model = new AISDKLanguageModel(openai("gpt-4o"));
-    });
+  beforeAll(() => {
+    kernl = new Kernl();
+    model = new AISDKLanguageModel(openai("gpt-4.1"));
+  });
 
-    describe("stream()", () => {
-      it(
-        "should yield both delta events and complete items",
-        async () => {
+  describe("stream()", () => {
+    it("should yield both delta events and complete items", async () => {
       const agent = new Agent({
         id: "test-stream",
         name: "Test Stream Agent",
@@ -103,13 +100,9 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
       // Should have finish event
       const finishEvents = events.filter((e) => e.kind === "finish");
       expect(finishEvents.length).toBe(1);
-        },
-        30000,
-      );
+    }, 30000);
 
-      it(
-        "should filter deltas from history but include complete items",
-        async () => {
+    it("should filter deltas from history but include complete items", async () => {
       const agent = new Agent({
         id: "test-history",
         name: "Test History Agent",
@@ -153,8 +146,12 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
       );
       expect(streamDeltas.length).toBeGreaterThan(0);
 
-      // History should contain the input message
-      expect(history[0]).toEqual(input[0]);
+      // History should contain the input message (with ThreadEvent headers added)
+      expect(history[0]).toMatchObject({
+        kind: "message",
+        role: "user",
+        content: [{ kind: "text", text: "Count to 3" }],
+      });
 
       // History should contain complete Message items
       const historyMessages = history.filter((e) => e.kind === "message");
@@ -170,11 +167,9 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
       );
       expect(textContent.text).toBeTruthy();
       expect(textContent.text.length).toBeGreaterThan(0);
-        },
-        30000,
-      );
+    }, 30000);
 
-      it("should work with tool calls", async () => {
+    it("should work with tool calls", async () => {
       const addTool = tool({
         id: "add",
         name: "add",
@@ -257,122 +252,118 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
 
       // Verify the assistant's final response references the correct answer
       const messages = events.filter((e) => e.kind === "message");
-      const assistantMessage = messages.find((m: any) => m.role === "assistant");
+      const assistantMessage = messages.find(
+        (m: any) => m.role === "assistant",
+      );
       expect(assistantMessage).toBeDefined();
       const textContent = (assistantMessage as any).content.find(
         (c: any) => c.kind === "text",
       );
       expect(textContent).toBeDefined();
       expect(textContent.text).toContain("42");
+    }, 30000);
+
+    it("should properly encode tool results with matching callIds for multi-turn", async () => {
+      const multiplyTool = tool({
+        id: "multiply",
+        name: "multiply",
+        description: "Multiply two numbers",
+        parameters: z.object({
+          a: z.number().describe("First number"),
+          b: z.number().describe("Second number"),
+        }),
+        execute: async (ctx, { a, b }) => {
+          return a * b;
         },
-        30000,
+      });
+
+      const toolkit = new Toolkit({
+        id: "math",
+        tools: [multiplyTool],
+      });
+
+      const agent = new Agent({
+        id: "test-multi-turn",
+        name: "Test Multi-Turn Agent",
+        instructions: "You are a helpful assistant that can do math.",
+        model,
+        toolkits: [toolkit],
+      });
+
+      const input: LanguageModelItem[] = [
+        {
+          kind: "message",
+          id: "msg-1",
+          role: "user",
+          content: [{ kind: "text", text: "What is 7 times 6?" }],
+        },
+      ];
+
+      const thread = new Thread({ agent, input });
+      const events: ThreadStreamEvent[] = [];
+
+      // Collect all events from the stream
+      for await (const event of thread.stream()) {
+        events.push(event);
+      }
+
+      // Find the tool call and result
+      const toolCalls = events.filter(
+        (e): e is Extract<ThreadStreamEvent, { kind: "tool-call" }> =>
+          e.kind === "tool-call",
+      );
+      const toolResults = events.filter(
+        (e): e is Extract<ThreadStreamEvent, { kind: "tool-result" }> =>
+          e.kind === "tool-result",
       );
 
-      it(
-        "should properly encode tool results with matching callIds for multi-turn",
-        async () => {
-          const multiplyTool = tool({
-            id: "multiply",
-            name: "multiply",
-            description: "Multiply two numbers",
-            parameters: z.object({
-              a: z.number().describe("First number"),
-              b: z.number().describe("Second number"),
-            }),
-            execute: async (ctx, { a, b }) => {
-              return a * b;
-            },
-          });
+      expect(toolCalls.length).toBeGreaterThan(0);
+      expect(toolResults.length).toBeGreaterThan(0);
 
-          const toolkit = new Toolkit({
-            id: "math",
-            tools: [multiplyTool],
-          });
+      const multiplyCall = toolCalls[0];
+      const multiplyResult = toolResults[0];
 
-          const agent = new Agent({
-            id: "test-multi-turn",
-            name: "Test Multi-Turn Agent",
-            instructions: "You are a helpful assistant that can do math.",
-            model,
-            toolkits: [toolkit],
-          });
+      // Verify callId matches between tool call and result
+      expect(multiplyCall.callId).toBe(multiplyResult.callId);
+      expect(multiplyCall.toolId).toBe("multiply");
+      expect(multiplyResult.toolId).toBe("multiply");
 
-          const input: LanguageModelItem[] = [
-            {
-              kind: "message",
-              id: "msg-1",
-              role: "user",
-              content: [{ kind: "text", text: "What is 7 times 6?" }],
-            },
-          ];
+      // Verify the tool result has the correct structure
+      expect(multiplyResult.callId).toBeDefined();
+      expect(typeof multiplyResult.callId).toBe("string");
+      expect(multiplyResult.callId.length).toBeGreaterThan(0);
 
-          const thread = new Thread({ agent, input });
-          const events: ThreadStreamEvent[] = [];
-
-          // Collect all events from the stream
-          for await (const event of thread.stream()) {
-            events.push(event);
-          }
-
-          // Find the tool call and result
-          const toolCalls = events.filter(
-            (e): e is Extract<ThreadStreamEvent, { kind: "tool-call" }> =>
-              e.kind === "tool-call",
-          );
-          const toolResults = events.filter(
-            (e): e is Extract<ThreadStreamEvent, { kind: "tool-result" }> =>
-              e.kind === "tool-result",
-          );
-
-          expect(toolCalls.length).toBeGreaterThan(0);
-          expect(toolResults.length).toBeGreaterThan(0);
-
-          const multiplyCall = toolCalls[0];
-          const multiplyResult = toolResults[0];
-
-          // Verify callId matches between tool call and result
-          expect(multiplyCall.callId).toBe(multiplyResult.callId);
-          expect(multiplyCall.toolId).toBe("multiply");
-          expect(multiplyResult.toolId).toBe("multiply");
-
-          // Verify the tool result has the correct structure
-          expect(multiplyResult.callId).toBeDefined();
-          expect(typeof multiplyResult.callId).toBe("string");
-          expect(multiplyResult.callId.length).toBeGreaterThan(0);
-
-          // Verify history contains both with matching callIds
-          const history = (thread as any).history as ThreadEvent[];
-          const historyToolCall = history.find(
-            (e) => e.kind === "tool-call" && e.toolId === "multiply",
-          );
-          const historyToolResult = history.find(
-            (e) => e.kind === "tool-result" && e.toolId === "multiply",
-          );
-
-          expect(historyToolCall).toBeDefined();
-          expect(historyToolResult).toBeDefined();
-          expect((historyToolCall as any).callId).toBe(
-            (historyToolResult as any).callId,
-          );
-
-          // Verify final response uses the tool result
-          const messages = events.filter((e) => e.kind === "message");
-          const assistantMessage = messages.find((m: any) => m.role === "assistant");
-          expect(assistantMessage).toBeDefined();
-          const textContent = (assistantMessage as any).content.find(
-            (c: any) => c.kind === "text",
-          );
-          expect(textContent).toBeDefined();
-          expect(textContent.text).toContain("42");
-        },
-        30000,
+      // Verify history contains both with matching callIds
+      const history = (thread as any).history as ThreadEvent[];
+      const historyToolCall = history.find(
+        (e) => e.kind === "tool-call" && e.toolId === "multiply",
       );
-    });
+      const historyToolResult = history.find(
+        (e) => e.kind === "tool-result" && e.toolId === "multiply",
+      );
 
-    describe("execute()", () => {
-      it(
-        "should consume stream and return final response",
-        async () => {
+      expect(historyToolCall).toBeDefined();
+      expect(historyToolResult).toBeDefined();
+      expect((historyToolCall as any).callId).toBe(
+        (historyToolResult as any).callId,
+      );
+
+      // Verify final response uses the tool result
+      const messages = events.filter((e) => e.kind === "message");
+      const assistantMessage = messages.find(
+        (m: any) => m.role === "assistant",
+      );
+      expect(assistantMessage).toBeDefined();
+      const textContent = (assistantMessage as any).content.find(
+        (c: any) => c.kind === "text",
+      );
+      expect(textContent).toBeDefined();
+      expect(textContent.text).toContain("42");
+    }, 30000);
+  });
+
+  describe("execute()", () => {
+    it("should consume stream and return final response", async () => {
       const agent = new Agent({
         id: "test-blocking",
         name: "Test Blocking Agent",
@@ -399,14 +390,10 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
 
       // Should have final state
       expect(result.state).toBe("stopped");
-        },
-        30000,
-      );
+    }, 30000);
 
-      it(
-        "should validate structured output in blocking mode",
-        async () => {
-      const responseSchema = z.object({
+    it("should validate structured output in blocking mode", async () => {
+      const PersonSchema = z.object({
         name: z.string(),
         age: z.number(),
       });
@@ -417,7 +404,7 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
         instructions:
           "You are a helpful assistant. Return JSON with name and age fields.",
         model,
-        responseType: responseSchema,
+        output: PersonSchema,
       });
 
       const input: LanguageModelItem[] = [
@@ -442,9 +429,6 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)(
       expect(typeof result.response).toBe("object");
       expect((result.response as any).name).toBeTruthy();
       expect(typeof (result.response as any).age).toBe("number");
-        },
-        30000,
-      );
-    });
-  },
-);
+    }, 30000);
+  });
+});

@@ -1,4 +1,6 @@
 import assert from "assert";
+import { ZodType } from "zod";
+import * as z from "zod";
 
 import { Agent } from "@/agent";
 import { Context } from "@/context";
@@ -30,7 +32,8 @@ import type {
   ThreadExecuteResult,
   PerformActionsResult,
 } from "./types";
-import type { AgentResponseType } from "@/agent/types";
+import type { AgentOutputType } from "@/agent/types";
+import type { LanguageModelResponseType } from "@kernl-sdk/protocol";
 
 import {
   tevent,
@@ -82,11 +85,11 @@ import {
  */
 export class Thread<
   TContext = unknown,
-  TResponse extends AgentResponseType = "text",
+  TOutput extends AgentOutputType = "text",
 > {
   readonly tid: string;
   readonly namespace: string;
-  readonly agent: Agent<TContext, TResponse>;
+  readonly agent: Agent<TContext, TOutput>;
   readonly context: Context<TContext>;
   readonly model: LanguageModel; /* inherited from the agent unless specified */
   readonly parent: Task<TContext> | null; /* parent task which spawned this thread */
@@ -106,7 +109,7 @@ export class Thread<
   private abort?: AbortController;
   private storage?: ThreadStore;
 
-  constructor(options: ThreadOptions<TContext, TResponse>) {
+  constructor(options: ThreadOptions<TContext, TOutput>) {
     this.tid = options.tid ?? `tid_${randomID()}`;
     this.namespace = options.namespace ?? "kernl";
     this.agent = options.agent;
@@ -142,7 +145,7 @@ export class Thread<
    * Blocking execution - runs until terminal state or interruption
    */
   async execute(): Promise<
-    ThreadExecuteResult<ResolvedAgentResponse<TResponse>>
+    ThreadExecuteResult<ResolvedAgentResponse<TOutput>>
   > {
     for await (const _event of this.stream()) {
       // just consume the stream (already in history in _execute())
@@ -158,7 +161,7 @@ export class Thread<
 
     const text = getFinalResponse(items);
     assert(text, "_execute continues until text !== null"); // (TODO): consider preventing infinite loops here
-    const parsed = parseFinalResponse(text, this.agent.responseType);
+    const parsed = parseFinalResponse(text, this.agent.output);
 
     return { response: parsed, state: this.state };
   }
@@ -405,7 +408,7 @@ export class Thread<
         e.kind === "tool-result" &&
         (e.state as any) === "requires_approval" // (TODO): fix this
       ) {
-        // Find the original tool call for this pending approval
+        // find the original tool call for this pending approval
         const call = intentions.toolCalls.find((c) => c.callId === e.callId);
         call && pendingApprovals.push(call);
       } else {
@@ -508,10 +511,21 @@ export class Thread<
     );
     const tools = enabled.map((tool) => tool.serialize());
 
+    // derive responseType from agent.output
+    let responseType: LanguageModelResponseType | undefined;
+    if (this.agent.output && this.agent.output !== "text") {
+      const schema = this.agent.output as ZodType;
+      responseType = {
+        kind: "json",
+        schema: z.toJSONSchema(schema, { target: "draft-7" }) as any,
+      };
+    }
+
     return {
       input: filtered,
       settings,
       tools,
+      responseType,
     };
   }
 }

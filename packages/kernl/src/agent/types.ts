@@ -1,30 +1,26 @@
 import { type ZodType } from "zod";
 
-import { Context, UnknownContext } from "@/context";
 import {
   LanguageModel,
   LanguageModelRequestSettings,
 } from "@kernl-sdk/protocol";
+
+import { Context, UnknownContext } from "@/context";
 import { InputGuardrail, OutputGuardrail } from "@/guardrail";
 import { BaseToolkit } from "@/tool";
 
-import { TextResponse } from "@/thread/types";
+import { TextOutput } from "@/thread/types";
 
 /**
  * Configuration for an agent.
  */
 export interface AgentConfig<
   TContext = UnknownContext,
-  TResponse extends AgentResponseType = TextResponse,
+  TOutput extends AgentOutputType = TextOutput,
 > {
-  /* The unique identifier for the agent */
-  id: string;
-
-  /* The name of the agent (defaults to ID if not provided) */
-  name: string;
-
-  /* A brief description of the agent's purpose */
-  description?: string;
+  id: string /* The unique identifier for the agent */;
+  name: string /* The name of the agent (defaults to ID if not provided) */;
+  description?: string /* A brief description of the agent's purpose */;
 
   /**
    * The instructions for the agent. Will be used as the "system prompt" when this agent is
@@ -37,12 +33,6 @@ export interface AgentConfig<
   instructions:
     | string
     | ((context: Context<TContext>) => Promise<string> | string);
-
-  // /**
-  //  * A description of the agent. This is used when the agent is used as a handoff, so that an LLM
-  //  * knows what it does and when to invoke it.
-  //  */
-  // handoffDescription: string;
 
   // /**
   //  * Handoffs are sub-agents that the agent can delegate to. You can provide a list of handoffs,
@@ -62,6 +52,19 @@ export interface AgentConfig<
    * Configures model-specific tuning parameters (e.g. temperature, top_p, etc.)
    */
   modelSettings?: LanguageModelRequestSettings;
+
+  /**
+   * The type of the output that the agent will return.
+   *
+   * Can be either:
+   * - `"text"` (default): The agent returns a plain string response
+   * - A Zod schema: The agent returns structured output validated against the schema
+   *
+   * When a Zod schema is provided, the output is converted to JSON Schema and sent to the
+   * model for native structured output support. The response is then validated against
+   * the Zod schema as a safety net.
+   */
+  output?: TOutput;
 
   /**
    * A list of toolkits the agent can use. Toolkits are collections of related tools
@@ -100,12 +103,7 @@ export interface AgentConfig<
    * A list of checks that run in parallel to the agent's execution on the input + output for the agent,
    * depending on the configuration.
    */
-  guardrails?: AgentGuardrails<TResponse>;
-
-  /**
-   * The type of the response that the agent will return. If not provided, response will be a string.
-   */
-  responseType?: TResponse;
+  guardrails?: AgentGuardrails<TOutput>;
 
   // /**
   //  * (TODO): Not sure if this is really necessary.. need to see use case examples
@@ -137,9 +135,7 @@ export interface AgentConfig<
 /**
  * Guardrails for an agent.
  */
-export interface AgentGuardrails<
-  TResponse extends AgentResponseType = TextResponse,
-> {
+export interface AgentGuardrails<TOutput extends AgentOutputType = TextOutput> {
   /**
    * A list of checks that run in parallel to the agent's execution, before generating a response.
    * Runs only if the agent is the first agent in the chain.
@@ -149,14 +145,14 @@ export interface AgentGuardrails<
    * A list of checks that run on the final output of the agent, after generating a response. Runs
    * only if the agent produces a final output.
    */
-  output: OutputGuardrail<TResponse>[];
+  output: OutputGuardrail<TOutput>[];
 }
 
 /**
- * The type of the output object. If not provided, the output will be a string.
+ * The type of the output. If not provided, the output will be a string.
  * 'text' is a special type that indicates the output will be a string.
  */
-export type AgentResponseType = TextResponse | ZodType;
+export type AgentOutputType = TextOutput | ZodType;
 
 /**
  * Memory configuration for an agent.

@@ -15,7 +15,7 @@ import { Task } from "@/task";
 import { Context } from "@/context";
 import { Agent } from "@/agent";
 
-import type { AgentResponseType } from "@/agent/types";
+import type { AgentOutputType } from "@/agent/types";
 import type { ThreadStore } from "@/storage";
 
 /**
@@ -23,7 +23,10 @@ import type { ThreadStore } from "@/storage";
  */
 export type PublicThreadEvent = LanguageModelItem & ThreadEventBase;
 
-export type TextResponse = "text";
+/**
+ * Text output type - indicates the agent returns a plain string.
+ */
+export type TextOutput = "text";
 
 /**
  * Thread state values as a const array (for zod schemas).
@@ -61,10 +64,10 @@ export const REQUIRES_APPROVAL = "requires_approval";
  */
 export interface IThread<
   TContext = unknown,
-  TResponse extends AgentResponseType = "text",
+  TOutput extends AgentOutputType = "text",
 > {
   tid: string;
-  agent: Agent<TContext, TResponse>;
+  agent: Agent<TContext, TOutput>;
   model: LanguageModel;
 
   context: Context<TContext>;
@@ -148,9 +151,9 @@ export interface ThreadExecuteResult<TResponse = unknown> {
  */
 export interface ThreadOptions<
   TContext = unknown,
-  TResponse extends AgentResponseType = "text",
+  TOutput extends AgentOutputType = "text",
 > {
-  agent: Agent<TContext, TResponse>;
+  agent: Agent<TContext, TOutput>;
   input?: LanguageModelItem[];
   history?: ThreadEvent[];
   context?: Context<TContext>;

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { openai } from "@ai-sdk/openai";
 import { anthropic } from "@ai-sdk/anthropic";
+import { google } from "@ai-sdk/google";
 import { IN_PROGRESS } from "@kernl-sdk/protocol";
 
 import { AISDKLanguageModel } from "../language-model";
@@ -11,12 +12,28 @@ import { AISDKLanguageModel } from "../language-model";
  * These tests require API keys to be set:
  * - OPENAI_API_KEY for OpenAI tests
  * - ANTHROPIC_API_KEY for Anthropic tests
+ * - GOOGLE_GENERATIVE_AI_API_KEY for Google tests
  *
- * Run with: OPENAI_API_KEY=your-key ANTHROPIC_API_KEY=your-key pnpm test:run
+ * Run with: OPENAI_API_KEY=your-key ANTHROPIC_API_KEY=your-key GOOGLE_GENERATIVE_AI_API_KEY=your-key pnpm test:run
  */
 
 const SKIP_OPENAI_TESTS = !process.env.OPENAI_API_KEY;
 const SKIP_ANTHROPIC_TESTS = !process.env.ANTHROPIC_API_KEY;
+const SKIP_GOOGLE_TESTS = !process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+
+/**
+ * Shared JSON schema for structured output tests.
+ * Extracts a person's name and age from text.
+ */
+const PERSON_SCHEMA = {
+  type: "object" as const,
+  properties: {
+    name: { type: "string" as const, description: "The person's name" },
+    age: { type: "number" as const, description: "The person's age in years" },
+  },
+  required: ["name", "age"],
+  additionalProperties: false,
+};
 
 describe.skipIf(SKIP_OPENAI_TESTS)("AISDKLanguageModel - OpenAI", () => {
   let gpt41: AISDKLanguageModel;
@@ -741,6 +758,109 @@ describe.skipIf(SKIP_OPENAI_TESTS)("AISDKLanguageModel - OpenAI", () => {
       ).rejects.toThrow(/max_output_tokens/);
     });
   });
+
+  describe("structured output", () => {
+    it("should generate structured JSON output with responseType", async () => {
+      const response = await gpt41.generate({
+        input: [
+          {
+            kind: "message",
+            role: "user",
+            id: "msg-1",
+            content: [
+              {
+                kind: "text",
+                text: "Extract the person info: John Smith is 42 years old.",
+              },
+            ],
+          },
+        ],
+        responseType: {
+          kind: "json",
+          schema: PERSON_SCHEMA,
+          name: "person",
+          description: "A person with name and age",
+        },
+        settings: {
+          maxTokens: 100,
+          temperature: 0,
+        },
+      });
+
+      expect(response.content).toBeDefined();
+      expect(response.content.length).toBeGreaterThan(0);
+
+      // Find the assistant message with JSON output
+      const messages = response.content.filter(
+        (item) => item.kind === "message" && item.role === "assistant",
+      );
+      expect(messages.length).toBeGreaterThan(0);
+
+      const msg = messages[0] as any;
+      const textContent = msg.content.find((c: any) => c.kind === "text");
+      expect(textContent).toBeDefined();
+
+      // Parse and validate the JSON output
+      const parsed = JSON.parse(textContent.text);
+      expect(parsed.name).toBe("John Smith");
+      expect(parsed.age).toBe(42);
+    });
+
+    it("should stream structured JSON output with responseType", async () => {
+      const events = [];
+
+      for await (const event of gpt41.stream({
+        input: [
+          {
+            kind: "message",
+            role: "user",
+            id: "msg-1",
+            content: [
+              {
+                kind: "text",
+                text: "Extract the person info: Alice Wong is 28 years old.",
+              },
+            ],
+          },
+        ],
+        responseType: {
+          kind: "json",
+          schema: PERSON_SCHEMA,
+          name: "person",
+          description: "A person with name and age",
+        },
+        settings: {
+          maxTokens: 100,
+          temperature: 0,
+        },
+      })) {
+        events.push(event);
+      }
+
+      expect(events.length).toBeGreaterThan(0);
+
+      // Should have text-delta events for streaming JSON
+      const textDeltas = events.filter((e) => e.kind === "text-delta");
+      expect(textDeltas.length).toBeGreaterThan(0);
+
+      // Should have a complete message with the JSON
+      const messages = events.filter((e) => e.kind === "message");
+      expect(messages.length).toBeGreaterThan(0);
+
+      const msg = messages[0] as any;
+      const textContent = msg.content.find((c: any) => c.kind === "text");
+      expect(textContent).toBeDefined();
+
+      // Parse and validate the JSON output
+      const parsed = JSON.parse(textContent.text);
+      expect(parsed.name).toBe("Alice Wong");
+      expect(parsed.age).toBe(28);
+
+      // Should have finish event
+      const finishEvents = events.filter((e) => e.kind === "finish");
+      expect(finishEvents.length).toBe(1);
+    });
+  });
 });
 
 describe.skipIf(SKIP_ANTHROPIC_TESTS)("AISDKLanguageModel - Anthropic", () => {
@@ -881,6 +1001,285 @@ describe.skipIf(SKIP_ANTHROPIC_TESTS)("AISDKLanguageModel - Anthropic", () => {
 
       const args = JSON.parse(toolCall.arguments);
       expect(typeof args).toBe("object");
+
+      // Should have finish event
+      const finishEvents = events.filter((e) => e.kind === "finish");
+      expect(finishEvents.length).toBe(1);
+    });
+  });
+
+  describe("structured output", () => {
+    it("should generate structured JSON output with responseType", async () => {
+      const response = await claude.generate({
+        input: [
+          {
+            kind: "message",
+            role: "user",
+            id: "msg-1",
+            content: [
+              {
+                kind: "text",
+                text: "Extract the person info: Maria Garcia is 35 years old.",
+              },
+            ],
+          },
+        ],
+        responseType: {
+          kind: "json",
+          schema: PERSON_SCHEMA,
+          name: "person",
+          description: "A person with name and age",
+        },
+        settings: {
+          maxTokens: 100,
+          temperature: 0,
+        },
+      });
+
+      expect(response.content).toBeDefined();
+      expect(response.content.length).toBeGreaterThan(0);
+
+      // Find the assistant message with JSON output
+      const messages = response.content.filter(
+        (item) => item.kind === "message" && item.role === "assistant",
+      );
+      expect(messages.length).toBeGreaterThan(0);
+
+      const msg = messages[0] as any;
+      const textContent = msg.content.find((c: any) => c.kind === "text");
+      expect(textContent).toBeDefined();
+
+      // Parse and validate the JSON output
+      const parsed = JSON.parse(textContent.text);
+      expect(parsed.name).toBe("Maria Garcia");
+      expect(parsed.age).toBe(35);
+    });
+
+    it("should stream structured JSON output with responseType", async () => {
+      const events = [];
+
+      for await (const event of claude.stream({
+        input: [
+          {
+            kind: "message",
+            role: "user",
+            id: "msg-1",
+            content: [
+              {
+                kind: "text",
+                text: "Extract the person info: David Chen is 55 years old.",
+              },
+            ],
+          },
+        ],
+        responseType: {
+          kind: "json",
+          schema: PERSON_SCHEMA,
+          name: "person",
+          description: "A person with name and age",
+        },
+        settings: {
+          maxTokens: 100,
+          temperature: 0,
+        },
+      })) {
+        events.push(event);
+      }
+
+      expect(events.length).toBeGreaterThan(0);
+
+      // Should have text-delta events for streaming JSON
+      const textDeltas = events.filter((e) => e.kind === "text-delta");
+      expect(textDeltas.length).toBeGreaterThan(0);
+
+      // Should have a complete message with the JSON
+      const messages = events.filter((e) => e.kind === "message");
+      expect(messages.length).toBeGreaterThan(0);
+
+      const msg = messages[0] as any;
+      const textContent = msg.content.find((c: any) => c.kind === "text");
+      expect(textContent).toBeDefined();
+
+      // Parse and validate the JSON output
+      const parsed = JSON.parse(textContent.text);
+      expect(parsed.name).toBe("David Chen");
+      expect(parsed.age).toBe(55);
+
+      // Should have finish event
+      const finishEvents = events.filter((e) => e.kind === "finish");
+      expect(finishEvents.length).toBe(1);
+    });
+  });
+});
+
+describe.skipIf(SKIP_GOOGLE_TESTS)("AISDKLanguageModel - Google", () => {
+  let gemini: AISDKLanguageModel;
+
+  beforeAll(() => {
+    gemini = new AISDKLanguageModel(google("gemini-2.5-flash-lite"));
+  });
+
+  describe("generate", () => {
+    it("should generate a simple text response", async () => {
+      const response = await gemini.generate({
+        input: [
+          {
+            kind: "message",
+            role: "user",
+            id: "msg-1",
+            content: [
+              { kind: "text", text: "Say 'Hello, World!' and nothing else." },
+            ],
+          },
+        ],
+        settings: {
+          maxTokens: 50,
+          temperature: 0,
+        },
+      });
+
+      expect(response.content).toBeDefined();
+      expect(response.content.length).toBeGreaterThan(0);
+      expect(response.usage).toBeDefined();
+      expect(response.usage.totalTokens).toBeGreaterThan(0);
+
+      const messages = response.content.filter(
+        (item) => item.kind === "message",
+      );
+      expect(messages.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("stream", () => {
+    it("should stream text responses", async () => {
+      const events = [];
+
+      for await (const event of gemini.stream({
+        input: [
+          {
+            kind: "message",
+            role: "user",
+            id: "msg-1",
+            content: [{ kind: "text", text: "Count to 5" }],
+          },
+        ],
+        settings: {
+          maxTokens: 50,
+          temperature: 0,
+        },
+      })) {
+        events.push(event);
+      }
+
+      expect(events.length).toBeGreaterThan(0);
+
+      // Should have at least one finish event
+      const finishEvents = events.filter((e) => e.kind === "finish");
+      expect(finishEvents.length).toBe(1);
+
+      // Should have usage information
+      const finishEvent = finishEvents[0] as any;
+      expect(finishEvent.usage).toBeDefined();
+      expect(finishEvent.usage.totalTokens).toBeGreaterThan(0);
+    });
+  });
+
+  describe("structured output", () => {
+    it("should generate structured JSON output with responseType", async () => {
+      const response = await gemini.generate({
+        input: [
+          {
+            kind: "message",
+            role: "user",
+            id: "msg-1",
+            content: [
+              {
+                kind: "text",
+                text: "Extract the person info: Kenji Tanaka is 29 years old.",
+              },
+            ],
+          },
+        ],
+        responseType: {
+          kind: "json",
+          schema: PERSON_SCHEMA,
+          name: "person",
+          description: "A person with name and age",
+        },
+        settings: {
+          maxTokens: 100,
+          temperature: 0,
+        },
+      });
+
+      expect(response.content).toBeDefined();
+      expect(response.content.length).toBeGreaterThan(0);
+
+      // Find the assistant message with JSON output
+      const messages = response.content.filter(
+        (item) => item.kind === "message" && item.role === "assistant",
+      );
+      expect(messages.length).toBeGreaterThan(0);
+
+      const msg = messages[0] as any;
+      const textContent = msg.content.find((c: any) => c.kind === "text");
+      expect(textContent).toBeDefined();
+
+      // Parse and validate the JSON output
+      const parsed = JSON.parse(textContent.text);
+      expect(parsed.name).toBe("Kenji Tanaka");
+      expect(parsed.age).toBe(29);
+    });
+
+    it("should stream structured JSON output with responseType", async () => {
+      const events = [];
+
+      for await (const event of gemini.stream({
+        input: [
+          {
+            kind: "message",
+            role: "user",
+            id: "msg-1",
+            content: [
+              {
+                kind: "text",
+                text: "Extract the person info: Sarah Johnson is 41 years old.",
+              },
+            ],
+          },
+        ],
+        responseType: {
+          kind: "json",
+          schema: PERSON_SCHEMA,
+          name: "person",
+          description: "A person with name and age",
+        },
+        settings: {
+          maxTokens: 100,
+          temperature: 0,
+        },
+      })) {
+        events.push(event);
+      }
+
+      expect(events.length).toBeGreaterThan(0);
+
+      // Should have text-delta events for streaming JSON
+      const textDeltas = events.filter((e) => e.kind === "text-delta");
+      expect(textDeltas.length).toBeGreaterThan(0);
+
+      // Should have a complete message with the JSON
+      const messages = events.filter((e) => e.kind === "message");
+      expect(messages.length).toBeGreaterThan(0);
+
+      const msg = messages[0] as any;
+      const textContent = msg.content.find((c: any) => c.kind === "text");
+      expect(textContent).toBeDefined();
+
+      // Parse and validate the JSON output
+      const parsed = JSON.parse(textContent.text);
+      expect(parsed.name).toBe("Sarah Johnson");
+      expect(parsed.age).toBe(41);
 
       // Should have finish event
       const finishEvents = events.filter((e) => e.kind === "finish");

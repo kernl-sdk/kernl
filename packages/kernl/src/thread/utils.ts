@@ -8,7 +8,7 @@ import { ToolCall, LanguageModelItem } from "@kernl-sdk/protocol";
 import { ModelBehaviorError } from "@/lib/error";
 
 /* types */
-import type { AgentResponseType } from "@/agent/types";
+import type { AgentOutputType } from "@/agent/types";
 import type {
   ThreadEvent,
   ThreadEventBase,
@@ -129,30 +129,31 @@ export function getFinalResponse(items: LanguageModelItem[]): string | null {
 }
 
 /**
- * (TODO): This should run through the language model's native structured output (if avail)
+ * Parse the final response according to the output type schema.
  *
- * Parse the final response according to the response type schema.
- * - If responseType is "text", returns the text as-is
- * - If responseType is a ZodType, parses and validates the text as JSON
+ * This serves as a safety net validation after native structured output from the provider.
+ *
+ * - If output is "text", returns the text as-is
+ * - If output is a ZodType, parses and validates the text as JSON
  *
  * @throws {ModelBehaviorError} if structured output validation fails
  */
-export function parseFinalResponse<TResponse extends AgentResponseType>(
+export function parseFinalResponse<TOutput extends AgentOutputType>(
   text: string,
-  responseType: TResponse,
-): ResolvedAgentResponse<TResponse> {
-  if (responseType === "text") {
-    return text as ResolvedAgentResponse<TResponse>; // text output - return as-is
+  output: TOutput,
+): ResolvedAgentResponse<TOutput> {
+  if (output === "text") {
+    return text as ResolvedAgentResponse<TOutput>; // text output - return as-is
   }
 
   // structured output - decode JSON and validate with schema
-  if (responseType && typeof responseType === "object") {
+  if (output && typeof output === "object") {
     // (TODO): prob better way of checking this here
-    const schema = responseType as ZodType;
+    const schema = output as ZodType;
 
     try {
       const validated = json(schema).decode(text); // (TODO): it would be nice if we could use `decodeSafe` here
-      return validated as ResolvedAgentResponse<TResponse>;
+      return validated as ResolvedAgentResponse<TOutput>;
     } catch (error) {
       throw new ModelBehaviorError(
         `Failed to parse structured output: ${error instanceof Error ? error.message : String(error)}`,
@@ -161,5 +162,5 @@ export function parseFinalResponse<TResponse extends AgentResponseType>(
   }
 
   // Fallback - should not reach here
-  return text as ResolvedAgentResponse<TResponse>;
+  return text as ResolvedAgentResponse<TOutput>;
 }
