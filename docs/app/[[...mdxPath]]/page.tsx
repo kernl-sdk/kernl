@@ -21,7 +21,7 @@ export default async function Page(props: PageProps) {
 
   return (
     <Wrapper toc={toc} metadata={metadata} sourceCode={sourceCode}>
-      <PageActions />
+      <PageActions sourceCode={sourceCode} />
       <MDXContent />
     </Wrapper>
   )
