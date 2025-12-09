@@ -4,26 +4,19 @@
 
 Key terms and concepts used throughout kernl.
 
-## Agent
+---
 
-A configured LLM with instructions, tools, and memory settings. Agents are stateless — they define behavior but don't hold conversation state.
+1.1 :: **Agent**. A language model (LLM) which is configured with instructions, model settings, and tools. Agents are stateless — they define behavior but don't hold conversation state.
 
-## Thread
+1.2 :: **Thread**. A stateful execution of an agent with a clear lifecycle, which consists of a sequence of events.<br />
+&nbsp;&nbsp;&nbsp;&nbsp;(a) **State**. Temporary data relevant only during the current session.<br />
+&nbsp;&nbsp;&nbsp;&nbsp;(b) **Event**. The content of the conversation, as well as actions taken by agents such as tool calls.
 
-A single execution of an agent. Contains message history, tool calls, and state. Threads are the unit of persistence and can be resumed.
+1.3 :: **Memory**. Knowledge that persists beyond individual threads. Can be created, searched, and updated by agents or manually.
 
-## Memory
+1.4 :: **Context**. Runtime data passed into an agent's execution — user info, session state, or any data your agent needs access to. It is a propagation mechanism which carries execution-scoped values across API boundaries.
 
-Knowledge that persists beyond individual threads. Can be created, searched, and updated by agents or manually.
+1.5 :: **Toolkit**. A collection of related tools that can be attached to an agent (e.g. `gmail :: {list, send, ...}`).<br />
+&nbsp;&nbsp;&nbsp;&nbsp;(a) **Tool**. A function the LLM can call to take actions or retrieve information.
 
-## Toolkit
-
-A collection of related tools that can be attached to an agent. Tools are functions the LLM can call to take actions.
-
-## Namespace
-
-A logical partition for isolating threads and memories. Useful for multi-tenant applications.
-
-## Context
-
-Runtime data passed into an agent's execution — user info, session state, or any data your agent needs access to.
+1.6 :: **Namespace**. A logical partition for isolating threads and memories. Useful for multi-tenant applications.
