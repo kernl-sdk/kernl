@@ -38,7 +38,9 @@ const search = tool({
 
     return mems.map((h) => ({
       id: h.document?.id,
+      collection: h.document?.collection,
       text: h.document?.text,
+      object: h.document?.objtext,
       score: h.score,
     }));
   },
@@ -126,6 +128,7 @@ const list = tool({
       id: r.id,
       collection: r.collection,
       text: r.content.text,
+      object: r.content.object,
     }));
   },
 });

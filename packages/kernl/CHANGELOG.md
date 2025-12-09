@@ -1,5 +1,12 @@
 # @kernl/core
 
+## 0.8.2
+
+### Patch Changes
+
+- fix: handle postgres duplicate key error when index already exists
+- fix: include object content and collection in memory search/list results
+
 ## 0.8.1
 
 ### Patch Changes

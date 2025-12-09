@@ -103,7 +103,8 @@ export class MemoryIndexHandle implements IndexHandle<IndexMemoryRecord> {
       // Ignore "already exists" errors
       if (
         err.message?.includes("already exists") ||
-        err.message?.includes("AlreadyExists")
+        err.message?.includes("AlreadyExists") ||
+        err.code === "23505" // postgres unique constraint violation
       ) {
         return;
       }
