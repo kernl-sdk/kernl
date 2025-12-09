@@ -37,6 +37,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           }
           pageMap={pageMap}
           docsRepositoryBase="https://github.com/kernl-sdk/kernl/tree/main/docs"
+          nextThemes={{
+            defaultTheme: 'dark',
+            forcedTheme: 'dark',
+          }}
         >
           {children}
         </Layout>

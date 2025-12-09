@@ -428,3 +428,15 @@ html.dark [class*="sidebar"] li.active > a {
   padding-left: 1rem;
   margin-left: 0;
 }
+
+/* Mobile menu solid background */
+@media (max-width: 768px) {
+  .dark [data-nextra-menu],
+  .dark [class*="mobile-menu"],
+  .dark aside[class*="nextra"],
+  .dark nav[class*="mobile"],
+  .dark [data-nextra-sidebar-container],
+  .dark [class*="sidebar-container"] {
+    background: #080909 !important;
+  }
+}
