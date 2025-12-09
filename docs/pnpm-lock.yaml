@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       next:
         specifier: ^16.0.8
         version: 16.0.8(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -23,6 +26,9 @@ importers:
       react-dom:
         specifier: ^19.1.0
         version: 19.2.1(react@19.2.1)
+      tailwind-merge:
+        specifier: ^3.4.0
+        version: 3.4.0
     devDependencies:
       '@types/node':
         specifier: ^24.10.0
@@ -1740,6 +1746,9 @@ packages:
 
   tabbable@6.3.0:
     resolution: {integrity: sha512-EIHvdY5bPLuWForiR/AN2Bxngzpuwn1is4asboytXtpTgsArc+WmSJKVLlhdh71u7jFcryDqB2A8lQvj78MkyQ==}
+
+  tailwind-merge@3.4.0:
+    resolution: {integrity: sha512-uSaO4gnW+b3Y2aWoWfFpX62vn2sR3skfhbjsEnaBI81WD1wBLlHZe5sWf0AqjksNdYTbGBEd0UasQMT3SNV15g==}
 
   tinyexec@1.0.2:
     resolution: {integrity: sha512-W/KYk+NFhkmsYpuHq5JykngiOCnxeVL8v8dFnqxSD8qEEdRfXk1SDM6JzNqcERbcGYj9tMrDQBYV9cjgnunFIg==}
@@ -4193,6 +4202,8 @@ snapshots:
   system-architecture@0.1.0: {}
 
   tabbable@6.3.0: {}
+
+  tailwind-merge@3.4.0: {}
 
   tinyexec@1.0.2: {}
 
