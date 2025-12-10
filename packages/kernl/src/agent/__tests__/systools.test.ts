@@ -26,11 +26,13 @@ describe("Agent systools", () => {
       const kernl = new Kernl();
       kernl.register(agent);
 
-      expect(agent.systools.length).toBe(1);
+      // memory + sleep toolkits
+      expect(agent.systools.length).toBe(2);
       expect(agent.systools[0].id).toBe("sys.memory");
+      expect(agent.systools[1].id).toBe("sys.sleep");
     });
 
-    it("has no systools when memory not configured", () => {
+    it("has only sleep toolkit when memory not configured", () => {
       const agent = new Agent({
         id: "test-agent",
         name: "Test",
@@ -41,10 +43,12 @@ describe("Agent systools", () => {
       const kernl = new Kernl();
       kernl.register(agent);
 
-      expect(agent.systools.length).toBe(0);
+      // sleep is always registered
+      expect(agent.systools.length).toBe(1);
+      expect(agent.systools[0].id).toBe("sys.sleep");
     });
 
-    it("has no systools when memory.enabled is false", () => {
+    it("has only sleep toolkit when memory.enabled is false", () => {
       const agent = new Agent({
         id: "test-agent",
         name: "Test",
@@ -56,7 +60,9 @@ describe("Agent systools", () => {
       const kernl = new Kernl();
       kernl.register(agent);
 
-      expect(agent.systools.length).toBe(0);
+      // sleep is always registered
+      expect(agent.systools.length).toBe(1);
+      expect(agent.systools[0].id).toBe("sys.sleep");
     });
 
     it("can retrieve memory tools via agent.tool()", () => {
@@ -114,12 +120,13 @@ describe("Agent systools", () => {
       const ctx = new Context("test");
       const tools = await agent.tools(ctx);
 
-      // Memory tools should be first (from systools)
-      // Order: list, create, update, search
+      // Memory tools should be first (from systools), then sleep tools
+      // Order: memory tools (list, create, update, search), then sleep tools (wait_until)
       expect(tools[0].id).toBe("list_memories");
       expect(tools[1].id).toBe("create_memory");
       expect(tools[2].id).toBe("update_memory");
       expect(tools[3].id).toBe("search_memories");
+      expect(tools[4].id).toBe("wait_until");
     });
   });
 
@@ -145,6 +152,71 @@ describe("Agent systools", () => {
       });
 
       expect(agent.memory).toEqual({ enabled: true });
+    });
+  });
+
+  describe("sleep toolkit", () => {
+    it("sleep toolkit is always registered", () => {
+      const agent = new Agent({
+        id: "test-agent",
+        name: "Test",
+        instructions: "Test",
+        model,
+      });
+
+      const kernl = new Kernl();
+      kernl.register(agent);
+
+      const sleepToolkit = agent.systools.find((t) => t.id === "sys.sleep");
+      expect(sleepToolkit).toBeDefined();
+    });
+
+    it("can retrieve wait_until tool via agent.tool()", () => {
+      const agent = new Agent({
+        id: "test-agent",
+        name: "Test",
+        instructions: "Test",
+        model,
+      });
+
+      const kernl = new Kernl();
+      kernl.register(agent);
+
+      expect(agent.tool("wait_until")).toBeDefined();
+    });
+
+    it("includes wait_until in agent.tools() output", async () => {
+      const agent = new Agent({
+        id: "test-agent",
+        name: "Test",
+        instructions: "Test",
+        model,
+      });
+
+      const kernl = new Kernl();
+      kernl.register(agent);
+
+      const ctx = new Context("test");
+      const tools = await agent.tools(ctx);
+      const ids = tools.map((t) => t.id);
+
+      expect(ids).toContain("wait_until");
+    });
+
+    it("wait_until tool has correct description", () => {
+      const agent = new Agent({
+        id: "test-agent",
+        name: "Test",
+        instructions: "Test",
+        model,
+      });
+
+      const kernl = new Kernl();
+      kernl.register(agent);
+
+      const tool = agent.tool("wait_until");
+      expect(tool).toBeDefined();
+      expect(tool!.id).toBe("wait_until");
     });
   });
 });

@@ -40,9 +40,8 @@ const WaitParamsSchema = z
       .describe("Exact epoch seconds when this thread should be resumed."),
     reason: z
       .string()
-      .max(512)
       .optional()
-      .describe("Optional human-readable reason for the wakeup."),
+      .describe("Optional human-readable reason for the sleep."),
   })
   .refine(
     (v) => (v.delay_s ?? null) !== null || (v.run_at_s ?? null) !== null,
@@ -57,7 +56,7 @@ const WaitParamsSchema = z
  *
  * Schedules a wakeup for the current thread and then causes the tool call
  * to be INTERRUPTIBLE (via requiresApproval). The actual checkpoint/save/stop
- * behaviour is handled by the existing async tool + thread runtime.
+ * behaviour is handled by the thread runtime.
  */
 const wait = tool({
   id: "wait_until",
@@ -95,8 +94,8 @@ const wait = tool({
     const targetRunAt_ms = targetRunAt_s * 1000;
 
     // Create the scheduled wakeup record.
-    // Field names and units must match NewScheduledWakeup domain type:
-    //   - id: unique wakeup ID (generated here)
+    // Field names and units must match your NewScheduledWakeup domain type:
+    //   - id: unique wakeup ID
     //   - threadId: from context (set by thread runtime)
     //   - runAt: epoch milliseconds
     await wakeupStore.create({
@@ -106,16 +105,16 @@ const wait = tool({
       reason: reason ?? null,
     });
 
-    // Returning true tells the tool engine this call requires approval,
-    // so it will mark the tool call as INTERRUPTIBLE and *not* run execute()
-    // until a scheduler/poller resumes/approves it.
+    // Returning true: this call requires approval → tool engine will:
+    //   - set ToolResult.state = INTERRUPTIBLE
+    //   - NOT call execute() in this tick
     return true;
   },
 
   /**
    * execute() is only expected to run if/when the tool call is explicitly
-   * approved/resumed by your scheduler. For now it just returns a simple
-   * acknowledgement.
+   * approved/resumed by some higher-level scheduler. For sleep we can just
+   * return a simple acknowledgement; in many flows this will never be hit.
    */
   execute: async () => {
     return {

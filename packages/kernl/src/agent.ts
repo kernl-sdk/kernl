@@ -279,6 +279,21 @@ export class Agent<
   /**
    * @internal
    *
+   * Check if a tool ID belongs to a system toolkit.
+   *
+   * @param id The tool ID to check
+   * @returns true if the tool is a system tool
+   */
+  isSysTool(id: string): boolean {
+    for (const toolkit of this.systools) {
+      if (toolkit.get(id)) return true;
+    }
+    return false;
+  }
+
+  /**
+   * @internal
+   *
    * Get all tools available from systools and toolkits for the given context.
    * Checks for duplicate tool IDs across toolkits and throws an error if found.
    *

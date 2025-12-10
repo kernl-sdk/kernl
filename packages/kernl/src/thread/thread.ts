@@ -22,6 +22,7 @@ import {
   LanguageModel,
   LanguageModelItem,
   LanguageModelRequest,
+  INTERRUPTIBLE
 } from "@kernl-sdk/protocol";
 import { randomID, filter } from "@kernl-sdk/shared/lib";
 
@@ -256,13 +257,9 @@ export class Thread<
       await this.checkpoint(); /* c3: tick complete */
 
       if (pendingApprovals.length > 0) {
-        // publish a batch approval request containing all of them
-        //
-        // const reqid = randomID();
-        // this.kernl.publish(channel, approvalRequest);
-        //
-        // const filter = { reqid }
-        // await wait_event(Action.ApprovalResponse, filter);
+        // Thread halts when actions require approval (e.g., sleep).
+        // External scheduler will resume the thread later.
+        return;
       }
     }
   }
@@ -409,9 +406,11 @@ export class Thread<
 
     // (TODO): clean this - approval tracking should be handled differently
     for (const e of toolEvents) {
+      // actions.push(e);
       if (
         e.kind === "tool-result" &&
-        (e.state as any) === "requires_approval" // (TODO): fix this
+        e.state === INTERRUPTIBLE &&
+        this.agent.isSysTool(e.toolId)
       ) {
         // find the original tool call for this pending approval
         const call = intentions.toolCalls.find((c) => c.callId === e.callId);
@@ -452,7 +451,13 @@ export class Thread<
           const ctx = new Context(this.namespace, this.context.context);
           ctx.agent = this.agent;
           ctx.threadId = this.tid;
-          ctx.approve(call.callId); // mark this call as approved
+
+          // Don't pre-approve system tools - they use requiresApproval to signal
+          // INTERRUPTIBLE state (e.g., sleep tool halts the execution loop)
+          if (!this.agent.isSysTool(call.toolId)) {
+            ctx.approve(call.callId);
+          }
+
           const res = await tool.invoke(ctx, call.arguments, call.callId);
 
           return {
