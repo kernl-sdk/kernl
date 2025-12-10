@@ -139,6 +139,9 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+  ::selection {
+    background: oklch(0.3245 0.0348 223.05);
+  }
 }
 
 /* Hide native and Radix scrollbars */

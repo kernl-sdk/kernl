@@ -22,7 +22,7 @@ const transformerLineNumbers: ShikiTransformer = {
 export async function highlight(code: string, lang: string = "typescript") {
   return codeToHtml(code, {
     lang,
-    theme: jotai as Parameters<typeof codeToHtml>[1]["theme"],
+    theme: jotai as any,
     transformers: [transformerLineNumbers],
   });
 }

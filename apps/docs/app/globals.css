@@ -27,7 +27,6 @@
 
 .header-logo-icon {
   color: var(--color-steel);
-  opacity: 0.8;
 }
 
 .logo-text {
@@ -67,6 +66,8 @@ body {
   --color-steel: #B4D5FA;
   --color-success: #74E381;
   --color-muted: #7a7a7a;
+  --color-surface: #0A0A0A;
+  --color-border: #1F1F1F;
   color: #ffffff;
 }
 
@@ -97,15 +98,15 @@ pre code,
 
 .dark pre,
 .dark [data-rehype-pretty-code-figure] pre {
-  background: #080808 !important;
-  border: 1px solid #1f1f1f !important;
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
   border-radius: 12px !important;
 }
 
 html.dark pre,
 html.dark [data-rehype-pretty-code-figure] pre {
-  background: #080808 !important;
-  border: 1px solid #1f1f1f !important;
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
   border-radius: 12px !important;
 }
 
@@ -113,7 +114,7 @@ html.dark [data-rehype-pretty-code-figure] pre {
 html.dark [data-rehype-pretty-code-figure],
 .dark figure[data-rehype-pretty-code-figure],
 .dark div[data-rehype-pretty-code-figure] {
-  border: 1px solid #1f1f1f !important;
+  border: 1px solid var(--color-border) !important;
   border-radius: 12px !important;
   overflow: hidden;
   box-shadow: none !important;
@@ -123,7 +124,7 @@ html.dark [data-rehype-pretty-code-figure],
 
 .dark pre,
 html.dark pre {
-  border: 1px solid #1f1f1f !important;
+  border: 1px solid var(--color-border) !important;
   border-radius: 12px !important;
   box-shadow: none !important;
   outline: none !important;
@@ -261,7 +262,7 @@ html.dark pre {
 .dark .nextra-content table td {
   background: transparent !important;
   border: none !important;
-  border-bottom: 1px solid #1f1f1f !important;
+  border-bottom: 1px solid var(--color-border) !important;
   text-align: left !important;
 }
 
