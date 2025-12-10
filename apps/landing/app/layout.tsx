@@ -51,7 +51,7 @@ export default function RootLayout({
         <Scrollbar />
         <Script
           id="reb2b"
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               !function(key) {
