@@ -1,10 +1,6 @@
 /**
  * Sleep system toolkit.
  * /packages/kernl/src/tool/sys/sleep.ts
- *
- * Provides a tool for agents to sleep (pause) and schedule a wakeup for the current thread.
- *
- * The thread runtime provides threadId via ctx.threadId automatically.
  */
 
 import assert from "assert";
@@ -15,13 +11,6 @@ import { randomID } from "@kernl-sdk/shared/lib";
 import { tool } from "../tool";
 import { Toolkit } from "../toolkit";
 
-/**
- * Parameters for the wait tool.
- *
- * Either:
- *  - delay_s: number of seconds from now, OR
- *  - run_at_s: absolute epoch seconds when the thread should resume
- */
 const WaitParamsSchema = z
   .object({
     delay_s: z
@@ -51,13 +40,6 @@ const WaitParamsSchema = z
     },
   );
 
-/**
- * wait_until
- *
- * Schedules a wakeup for the current thread and then causes the tool call
- * to be INTERRUPTIBLE (via requiresApproval). The actual checkpoint/save/stop
- * behaviour is handled by the thread runtime.
- */
 const wait = tool({
   id: "wait_until",
   description:
@@ -65,11 +47,13 @@ const wait = tool({
   mode: "async" as const,
   parameters: WaitParamsSchema,
 
-  /**
-   * We do the scheduling here and return true so the tool call becomes
-   * INTERRUPTIBLE and execute() is not run until some future approval/resume.
-   */
-  requiresApproval: async (ctx, params) => {
+  // NOTE: we rely on execute(), not requiresApproval, so the tool
+  // ends up with state=COMPLETED (green) in the UI.
+  //
+  // This function:
+  //   1) Schedules the wakeup in storage.
+  //   2) Returns metadata so the UI can render a 'Sleeping' success state.
+  execute: async (ctx, params) => {
     assert(ctx.agent, "ctx.agent is required for sleep tools");
     assert(ctx.threadId, "ctx.threadId is required for sleep tools");
 
@@ -93,11 +77,6 @@ const wait = tool({
       run_at_s ?? (delay_s !== undefined ? now_s + delay_s : now_s);
     const targetRunAt_ms = targetRunAt_s * 1000;
 
-    // Create the scheduled wakeup record.
-    // Field names and units must match your NewScheduledWakeup domain type:
-    //   - id: unique wakeup ID
-    //   - threadId: from context (set by thread runtime)
-    //   - runAt: epoch milliseconds
     await wakeupStore.create({
       id: `wkp_${randomID()}`,
       threadId: ctx.threadId,
@@ -105,20 +84,13 @@ const wait = tool({
       reason: reason ?? null,
     });
 
-    // Returning true: this call requires approval → tool engine will:
-    //   - set ToolResult.state = INTERRUPTIBLE
-    //   - NOT call execute() in this tick
-    return true;
-  },
-
-  /**
-   * execute() is only expected to run if/when the tool call is explicitly
-   * approved/resumed by some higher-level scheduler. For sleep we can just
-   * return a simple acknowledgement; in many flows this will never be hit.
-   */
-  execute: async () => {
+    // This object becomes the `result` in the tool-result event.
+    // The UI can key off `status: "sleeping"` to show a green "Sleeping" badge.
     return {
+      status: "sleeping",
       scheduled: true,
+      run_at_s: targetRunAt_s,
+      run_at_ms: targetRunAt_ms,
       message:
         "Wakeup scheduled; the thread will resume when the wakeup is processed.",
     };

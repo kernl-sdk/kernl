@@ -191,9 +191,13 @@ export class Thread<
     } catch (err) {
       throw err;
     } finally {
-      this.state = STOPPED;
+      // Preserve INTERRUPTIBLE state (set by sleep/approval flows).
+      // Only transition to STOPPED if we're still RUNNING.
+      if (this.state === RUNNING) {
+        this.state = STOPPED;
+      }
       this.abort = undefined;
-      await this.checkpoint(); /* c4: final checkpoint - persist STOPPED state */
+      await this.checkpoint(); /* c4: final checkpoint - persist final state */
     }
   }
 
@@ -259,6 +263,8 @@ export class Thread<
       if (pendingApprovals.length > 0) {
         // Thread halts when actions require approval (e.g., sleep).
         // External scheduler will resume the thread later.
+        // Set state to INTERRUPTIBLE so callers know the thread is sleeping, not stopped.
+        this.state = INTERRUPTIBLE;
         return;
       }
     }
@@ -404,21 +410,47 @@ export class Thread<
     const actions: ThreadEventInner[] = [];
     const pendingApprovals: ToolCall[] = [];
 
-    // (TODO): clean this - approval tracking should be handled differently
     for (const e of toolEvents) {
-      // actions.push(e);
-      if (
-        e.kind === "tool-result" &&
-        e.state === INTERRUPTIBLE &&
-        this.agent.isSysTool(e.toolId)
-      ) {
-        // find the original tool call for this pending approval
-        const call = intentions.toolCalls.find((c) => c.callId === e.callId);
-        call && pendingApprovals.push(call);
-      } else {
-        actions.push(e);
+      actions.push(e); // always record the tool call in history
+
+      // Only system tools are allowed to affect control flow.
+      if (e.kind === "tool-result" && this.agent.isSysTool(e.toolId)) {
+        // 1) Future-proof: generic approval-based interrupts (other sys tools)
+        //    If you later add real approval flows that still use INTERRUPTIBLE,
+        //    this branch continues to work.
+        if (e.state === INTERRUPTIBLE) {
+          const call = intentions.toolCalls.find((c) => c.callId === e.callId);
+          if (call) pendingApprovals.push(call);
+          continue;
+        }
+
+        // 2) Sleep tool: state is COMPLETED, but semantically it means
+        //    "alarm set, thread should pause until wakeup."
+        if (e.toolId === "wait_until") {
+          const call = intentions.toolCalls.find((c) => c.callId === e.callId);
+          if (call) pendingApprovals.push(call);
+          continue;
+        }
       }
     }
+    // const actions: ThreadEventInner[] = [];
+    // const pendingApprovals: ToolCall[] = [];
+
+    // // (TODO): clean this - approval tracking should be handled differently
+    // for (const e of toolEvents) {
+    //   // actions.push(e);
+    //   if (
+    //     e.kind === "tool-result" &&
+    //     e.state === INTERRUPTIBLE &&
+    //     this.agent.isSysTool(e.toolId)
+    //   ) {
+    //     // find the original tool call for this pending approval
+    //     const call = intentions.toolCalls.find((c) => c.callId === e.callId);
+    //     call && pendingApprovals.push(call);
+    //   } else {
+    //     actions.push(e);
+    //   }
+    // }
 
     return {
       actions: actions,
