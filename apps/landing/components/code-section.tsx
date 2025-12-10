@@ -12,8 +12,8 @@ export function CodeSection({ agentCode, appCode }: CodeSectionProps) {
     <>
       {/* Desktop: side by side */}
       <div className="hidden w-full max-w-6xl gap-6 min-[1624px]:flex min-[1900px]:max-w-7xl">
-        {appCode}
-        {agentCode}
+        <div key="app" className="flex-1">{appCode}</div>
+        <div key="agent" className="flex-1">{agentCode}</div>
       </div>
 
       {/* Mobile/Tablet: tabs */}

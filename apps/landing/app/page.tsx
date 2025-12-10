@@ -6,6 +6,7 @@ import { LogoMarquee } from "@/components/logo-marquee";
 import { Features } from "@/components/features";
 import { VideoPlaceholder } from "@/components/video-placeholder";
 import { Footer } from "@/components/footer";
+import { highlight } from "@/lib/highlight";
 
 const agentCode = `// agents/jarvis.ts
 
@@ -35,7 +36,10 @@ const stream = jarvis.stream(
   { threadId: "thread_123" },
 );`;
 
-export default function Home() {
+export default async function Home() {
+  const appHtml = await highlight(appCode);
+  const agentHtml = await highlight(agentCode);
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -43,8 +47,8 @@ export default function Home() {
         <Hero />
         <section className="flex w-full max-w-md justify-center pt-8 sm:max-w-lg md:max-w-2xl lg:max-w-3xl xl:max-w-5xl min-[1624px]:max-w-6xl min-[1900px]:max-w-7xl">
           <CodeSection
-            appCode={<CodePanel code={appCode} />}
-            agentCode={<CodePanel code={agentCode} />}
+            appCode={<CodePanel html={appHtml} />}
+            agentCode={<CodePanel html={agentHtml} />}
           />
         </section>
         {/* <LogoMarquee /> */}
