@@ -18,6 +18,7 @@ import {
   MemoryIndexHandle,
   buildMemoryIndexSchema,
 } from "@/memory";
+import { WakeupScheduler } from "@/scheduler";
 
 import type { ThreadExecuteResult, ThreadStreamEvent } from "@/thread/types";
 import type { AgentOutputType } from "@/agent/types";
@@ -41,6 +42,7 @@ export class Kernl extends KernlHooks<UnknownContext, AgentOutputType> {
   readonly threads: RThreads;
   readonly agents: RAgents;
   readonly memories: Memory;
+  readonly scheduler: WakeupScheduler | null;
 
   constructor(options: KernlOptions = {}) {
     super();
@@ -76,6 +78,15 @@ export class Kernl extends KernlHooks<UnknownContext, AgentOutputType> {
           : undefined,
       encoder,
     });
+
+    // initialize scheduler
+    if (options.scheduler) {
+      const schedulerOpts =
+        typeof options.scheduler === "boolean" ? {} : options.scheduler;
+      this.scheduler = new WakeupScheduler(this, schedulerOpts);
+    } else {
+      this.scheduler = null;
+    }
   }
 
   /**

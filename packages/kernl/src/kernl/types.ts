@@ -6,6 +6,7 @@ import { SearchIndex } from "@kernl-sdk/retrieval";
 
 import { Agent } from "@/agent";
 import { KernlStorage } from "@/storage";
+import type { WakeupSchedulerOptions } from "@/scheduler/types";
 
 /**
  * Storage configuration for Kernl.
@@ -84,6 +85,18 @@ export interface KernlOptions {
    * Memory system configuration.
    */
   memory?: MemoryOptions;
+
+  /**
+   * Scheduler configuration for wakeup polling.
+   *
+   * - If `true`, creates a scheduler with default options (30s interval, batch size 10)
+   * - If an object, creates a scheduler with the provided options
+   * - If `false` or omitted, no scheduler is created
+   *
+   * The scheduler polls for due wakeups and resumes sleeping threads.
+   * Call `kernl.scheduler.start()` to begin polling.
+   */
+  scheduler?: boolean | WakeupSchedulerOptions;
 }
 
 /**

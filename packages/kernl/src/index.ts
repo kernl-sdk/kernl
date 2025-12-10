@@ -90,3 +90,7 @@ export type {
   ScheduledWakeup,
   ScheduledWakeupUpdate,
 } from "./wakeup";
+
+// --- scheduler ---
+export { WakeupScheduler } from "./scheduler";
+export type { WakeupSchedulerOptions, WakeupSchedulerState } from "./scheduler";
