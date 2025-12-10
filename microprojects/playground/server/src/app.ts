@@ -15,7 +15,10 @@ export function build(): Kernl {
       db: postgres({ connstr: process.env.DATABASE_URL! }),
       vector: pgvector({ connstr: process.env.DATABASE_URL! }),
     },
-    scheduler: true,
+    // scheduler: true,
+    scheduler: {
+      autoStart: true
+    }
   });
 
   // --- agents ---
@@ -25,7 +28,7 @@ export function build(): Kernl {
   kernl.register(watson);
 
   // start wakeup scheduler
-  kernl.schedule?.start();
+  // kernl.schedule?.start();
 
   return kernl;
 }
