@@ -1,5 +1,7 @@
 import { Kernl } from "kernl";
 import { pgvector, postgres } from "@kernl-sdk/pg";
+import "@kernl-sdk/ai/openai";
+
 // import { turbopuffer } from "@kernl-sdk/turbopuffer";
 
 import { echo } from "./agents/echo";
@@ -13,6 +15,7 @@ export function build(): Kernl {
       db: postgres({ connstr: process.env.DATABASE_URL! }),
       vector: pgvector({ connstr: process.env.DATABASE_URL! }),
     },
+    scheduler: true,
   });
 
   // --- agents ---
@@ -20,6 +23,9 @@ export function build(): Kernl {
   kernl.register(sleeper);
   kernl.register(titler);
   kernl.register(watson);
+
+  // start wakeup scheduler
+  kernl.schedule?.start();
 
   return kernl;
 }
