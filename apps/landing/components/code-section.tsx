@@ -17,7 +17,7 @@ export function CodeSection({ agentCode, appCode }: CodeSectionProps) {
       </div>
 
       {/* Mobile/Tablet: tabs */}
-      <div className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-2xl min-[1624px]:hidden">
+      <div className="w-[calc(100vw-48px)] sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-2xl min-[1624px]:hidden">
         <Tabs defaultValue="app" className="w-full">
           <TabsList className="mb-4 bg-surface border border-border">
             <TabsTrigger value="app" className="font-mono text-xs">

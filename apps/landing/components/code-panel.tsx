@@ -39,7 +39,7 @@ export function CodePanel({ html }: CodePanelProps) {
       {/* Main panel */}
       <div className="relative overflow-hidden rounded-xl border border-border/50 bg-surface">
         <div
-          className="p-4 font-mono text-[12px] leading-6 [&_pre]:!bg-transparent [&_code]:!bg-transparent [&_.line-number]:mr-4 [&_.line-number]:inline-block [&_.line-number]:w-4 [&_.line-number]:select-none [&_.line-number]:text-right [&_.line-number]:font-mono"
+          className="overflow-x-auto p-4 font-mono text-[12px] leading-6 [&_pre]:!bg-transparent [&_code]:!bg-transparent [&_.line-number]:mr-4 [&_.line-number]:inline-block [&_.line-number]:w-4 [&_.line-number]:select-none [&_.line-number]:text-right [&_.line-number]:font-mono"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </div>

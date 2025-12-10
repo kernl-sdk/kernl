@@ -37,7 +37,7 @@ export function Scrollbar() {
 
   return (
     <div
-      className="fixed right-8 z-50 flex w-0.5"
+      className="fixed right-8 z-50 hidden w-0.5 md:flex"
       style={{
         top: `${(1 - TRACK_HEIGHT_PERCENT) / 2 * 100}%`,
         height: `${TRACK_HEIGHT_PERCENT * 100}%`,
