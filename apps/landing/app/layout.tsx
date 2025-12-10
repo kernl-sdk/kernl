@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Geist_Mono } from "next/font/google";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Scrollbar } from "@/components/scrollbar";
@@ -48,6 +49,22 @@ export default function RootLayout({
           {children}
         </ScrollArea>
         <Scrollbar />
+        <Script
+          id="reb2b"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              !function(key) {
+                if (window.reb2b) return;
+                window.reb2b = {loaded: true};
+                var s = document.createElement("script");
+                s.async = true;
+                s.src = "https://ddwl4m2hdecbv.cloudfront.net/b/" + key + "/" + key + ".js.gz";
+                document.getElementsByTagName("script")[0].parentNode.insertBefore(s, document.getElementsByTagName("script")[0]);
+              }("Z6PVLHQP7Z6R");
+            `,
+          }}
+        />
       </body>
     </html>
   );
