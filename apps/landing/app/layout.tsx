@@ -15,6 +15,25 @@ export const metadata: Metadata = {
   icons: {
     icon: "/kernl-logo.png",
   },
+  openGraph: {
+    title: "kernl",
+    description: "The runtime for software 3.0",
+    url: "https://www.kernl.sh",
+    siteName: "kernl",
+    images: [
+      {
+        url: "https://www.kernl.sh/kernl-logo.png",
+        width: 512,
+        height: 512,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "kernl",
+    description: "The runtime for software 3.0",
+    images: ["https://www.kernl.sh/kernl-logo.png"],
+  },
 };
 
 export default function RootLayout({
