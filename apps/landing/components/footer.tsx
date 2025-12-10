@@ -1,5 +1,4 @@
 const navLinks = [
-  { href: "#", label: "About" },
   { href: "#", label: "Contact" },
   { href: "https://docs.kernl.sh", label: "Docs" },
 ];

@@ -5,7 +5,7 @@ import { IconCopy, IconCheck } from "@/components/ui/icons";
 
 export function InstallCommand() {
   const [copied, setCopied] = useState(false);
-  const command = "npm i -g @kernl-sdk/cli";
+  const command = "pnpm i -g @kernl-sdk/cli";
 
   const copy = async () => {
     await navigator.clipboard.writeText(command);
