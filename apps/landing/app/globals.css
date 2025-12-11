@@ -352,6 +352,9 @@ body {
   background: var(--color-surface);
   border: 1px solid oklch(1 0 0 / 8%);
   overflow-x: auto;
+  max-width: 100%;
+  width: 0;
+  min-width: 100%;
 }
 
 .prose-custom pre code {

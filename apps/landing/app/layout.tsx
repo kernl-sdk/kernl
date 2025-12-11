@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Scrollbar } from "@/components/scrollbar";
+import { Footer } from "@/components/footer";
 import "./globals.css";
 
 const geistMono = Geist_Mono({
@@ -49,6 +50,7 @@ export default function RootLayout({
       <body className={`${geistMono.variable} h-screen antialiased`}>
         <ScrollArea className="h-screen" scrollHideDelay={0}>
           {children}
+          <Footer />
         </ScrollArea>
         <Scrollbar />
         <Toaster

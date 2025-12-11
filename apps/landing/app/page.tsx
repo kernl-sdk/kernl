@@ -5,7 +5,6 @@ import { CodeSection } from "@/components/code-section";
 // import { LogoMarquee } from "@/components/logo-marquee";
 import { Features } from "@/components/features";
 import { VideoPlaceholder } from "@/components/video-placeholder";
-import { Footer } from "@/components/footer";
 import { highlight } from "@/lib/highlight";
 
 const agentCode = `// agents/jarvis.ts
@@ -55,7 +54,6 @@ export default async function Home() {
         <Features />
         <VideoPlaceholder />
       </main>
-      <Footer />
     </div>
   );
 }

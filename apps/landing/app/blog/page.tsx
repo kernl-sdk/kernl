@@ -41,7 +41,7 @@ export default function BlogPage() {
         {isChangelog ? (
           /* Timeline view for changelog */
           <div className="relative mt-12">
-            <div className="space-y-0">
+            <div className="space-y-12 md:space-y-0">
               {filteredPosts.map((log, index) => {
                 const formattedDate = new Date(log.date).toLocaleDateString(
                   "en-US",
@@ -54,26 +54,26 @@ export default function BlogPage() {
                   <article
                     key={log.slug}
                     id={log.slug}
-                    className="relative grid grid-cols-[200px_1fr] gap-12 pb-16"
+                    className="relative flex flex-col gap-4 pb-12 md:grid md:grid-cols-[200px_1fr] md:gap-12 md:pb-16"
                   >
-                    {/* Timeline line - connects to next entry */}
+                    {/* Timeline line - desktop only */}
                     {!isLast && (
-                      <div className="absolute left-[7px] top-[15px] bottom-0 w-px bg-white/10" />
+                      <div className="hidden md:block absolute left-[7px] top-[15px] bottom-0 w-px bg-white/10" />
                     )}
 
-                    {/* Date column - sticky */}
-                    <div className="sticky top-32 self-start h-fit">
+                    {/* Date - simple on mobile, with dot on desktop */}
+                    <div className="md:sticky md:top-32 md:self-start md:h-fit">
                       <div className="flex items-center gap-4">
-                        <div className={`relative z-10 h-[15px] w-[15px] rounded-full border-4 border-[#0a0a0a] ${isLatest ? 'bg-steel' : 'bg-muted-foreground'}`} />
-                        <time dateTime={log.date} className="text-sm text-foreground">
+                        <div className={`hidden md:block relative z-10 h-[15px] w-[15px] rounded-full border-4 border-[#0a0a0a] ${isLatest ? 'bg-steel' : 'bg-muted-foreground'}`} />
+                        <time dateTime={log.date} className="text-sm text-muted-foreground md:text-foreground">
                           {formattedDate}
                         </time>
                       </div>
                     </div>
 
                     {/* Content column */}
-                    <div>
-                      <h2 className="text-[1.375rem] font-semibold text-foreground mb-6">
+                    <div className="min-w-0">
+                      <h2 className="text-xl md:text-[1.375rem] font-semibold text-foreground mb-4 md:mb-6 tracking-[-0.012em] leading-[1.6]">
                         {log.title}
                       </h2>
                       <div className="prose-custom">

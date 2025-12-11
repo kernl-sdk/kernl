@@ -16,7 +16,7 @@ interface BlogFiltersProps {
 
 export function BlogFilters({ onFilterChange, activeFilter }: BlogFiltersProps) {
   return (
-    <nav className="flex items-center gap-6 overflow-x-auto pb-2">
+    <nav className="flex items-center gap-6 overflow-x-auto pb-2 max-w-[calc(100vw-3rem)]">
       {CATEGORIES.map((category) => (
         <button
           key={category.value}

@@ -116,7 +116,7 @@ export function BlogHeader({
           <BlogFilters onFilterChange={onFilterChange} activeFilter={activeFilter} />
           <button
             onClick={() => setIsOpen(true)}
-            className="text-foreground hover:text-brand transition-colors cursor-pointer"
+            className="hidden md:block text-foreground hover:text-brand transition-colors cursor-pointer"
           >
             <SearchIcon size={16} />
           </button>
