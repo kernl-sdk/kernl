@@ -1,5 +1,13 @@
 # create-kernl
 
+## 0.2.1
+
+### Patch Changes
+
+- Trigger initial trusted publishing
+- Updated dependencies
+  - @kernl-sdk/cli@0.3.1
+
 ## 0.2.0
 
 ### Minor Changes

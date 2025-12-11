@@ -1,5 +1,11 @@
 # @kernl/cli
 
+## 0.3.1
+
+### Patch Changes
+
+- Trigger initial trusted publishing
+
 ## 0.3.0
 
 ### Minor Changes
