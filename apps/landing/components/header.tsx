@@ -7,7 +7,7 @@ import { IconDiscord, IconGitHub } from "@/components/ui/icons";
 const navLinks = [
   { href: "https://docs.kernl.sh", label: "docs" },
   { href: "/marketplace", label: "marketplace" },
-  { href: "https://www.dremnik.com/blog", label: "blog", external: true },
+  { href: "/blog", label: "blog" },
 ];
 
 function MenuIcon({ size = 20 }: { size?: number }) {
@@ -89,7 +89,7 @@ export function Header() {
       {/* Desktop nav sidebar */}
       <nav className="fixed left-12 top-24 z-50 hidden flex-col gap-3 md:flex">
         {navLinks.map((link) =>
-          link.external ? (
+          link.href.startsWith("http") ? (
             <a
               key={link.label}
               href={link.href}
@@ -138,7 +138,7 @@ export function Header() {
 
         <nav className="flex flex-col gap-2 px-4 pt-4">
           {navLinks.map((link) =>
-            link.external ? (
+            link.href.startsWith("http") ? (
               <a
                 key={link.label}
                 href={link.href}

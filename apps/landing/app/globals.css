@@ -24,7 +24,7 @@
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  --muted-foreground: oklch(0.648812 0.014593 262.3594);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
@@ -110,7 +110,7 @@ body {
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
+  --muted-foreground: oklch(0.648812 0.014593 262.3594);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
@@ -214,4 +214,163 @@ body {
 
 .animate-marquee {
   animation: marquee 20s linear infinite;
+}
+
+/* Blog prose styles */
+.prose-custom {
+  color: var(--foreground);
+  line-height: 1.75;
+  font-size: 15.4px;
+}
+
+.prose-custom h2 {
+  font-size: 1.125rem;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  color: var(--color-brand);
+}
+
+.prose-custom h3 {
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  margin-top: 2.25rem;
+  margin-bottom: 0.75rem;
+  color: var(--color-brand);
+}
+
+.prose-custom h4 {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-brand);
+}
+
+.prose-custom p {
+  margin-bottom: 1.25rem;
+  color: var(--foreground);
+}
+
+.prose-custom a {
+  position: relative;
+  color: var(--color-steel);
+  text-decoration: none;
+}
+
+.prose-custom a::before {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgb(180 213 250 / 0.2);
+}
+
+.prose-custom a::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgb(180 213 250 / 0.6);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease-out;
+}
+
+.prose-custom a:hover::after {
+  transform: scaleX(1);
+}
+
+.prose-custom strong {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.prose-custom em {
+  font-style: italic;
+}
+
+.prose-custom ul,
+.prose-custom ol {
+  margin-bottom: 1.25rem;
+  padding-left: 0;
+  list-style: none;
+}
+
+.prose-custom li {
+  position: relative;
+  margin-bottom: 0.5rem;
+  padding-left: 1.25rem;
+  color: var(--foreground);
+}
+
+.prose-custom ul li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  font-size: 1.2em;
+  top: -0.1em;
+  color: var(--color-brand);
+}
+
+.prose-custom ol {
+  counter-reset: list-counter;
+}
+
+.prose-custom ol li {
+  counter-increment: list-counter;
+}
+
+.prose-custom ol li::before {
+  content: counter(list-counter) ".";
+  position: absolute;
+  left: 0;
+  color: var(--color-brand);
+  font-size: 0.9em;
+}
+
+.prose-custom pre {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border-radius: 12px;
+  background: var(--color-surface);
+  border: 1px solid oklch(1 0 0 / 8%);
+  overflow-x: auto;
+}
+
+.prose-custom pre code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+.prose-custom :not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  font-weight: 300;
+  background: rgba(154, 180, 184, 0.07);
+  color: var(--color-brand);
+  padding: 4px 8px;
+  border-radius: 0;
+}
+
+.prose-custom blockquote {
+  border-left: 2px solid var(--color-brand);
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  font-size: 0.9em;
+  color: oklch(0.55 0 0);
+}
+
+.prose-custom hr {
+  border: none;
+  border-top: 1px solid oklch(1 0 0 / 10%);
+  margin: 2rem 0;
 }

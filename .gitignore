@@ -34,6 +34,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Velite
+.velite/
+
 # Misc
 .DS_Store
 *.pem

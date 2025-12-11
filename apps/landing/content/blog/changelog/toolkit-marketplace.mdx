@@ -1,0 +1,28 @@
+---
+title: Toolkit Marketplace
+slug: toolkit-marketplace
+date: 2025-12-10
+author: dremnik
+category: changelog
+excerpt: Browse and install pre-built toolkits with a single command.
+---
+
+The toolkit marketplace is now live. Browse available toolkits at [kernl.sh/marketplace](/marketplace) and add them to your project:
+
+```bash
+kernl add toolkit github
+```
+
+This downloads the toolkit source to your `toolkits/` directory and installs any required dependencies.
+
+```ts
+import { github } from "@/toolkits/github";
+
+const agent = new Agent({
+  id: "assistant",
+  model: anthropic("claude-sonnet-4-5"),
+  toolkits: [github],
+});
+```
+
+We're launching with toolkits for GitHub, Linear, Slack, Notion, and Postgres. More coming soon.

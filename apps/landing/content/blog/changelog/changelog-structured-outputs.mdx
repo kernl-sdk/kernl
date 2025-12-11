@@ -1,0 +1,36 @@
+---
+title: Structured Outputs
+slug: changelog-structured-outputs
+date: 2025-12-03
+author: dremnik
+category: changelog
+excerpt: Agents can now return typed, validated responses using Zod schemas.
+---
+
+Agents can now return structured outputs—typed, validated responses defined with Zod schemas.
+
+```ts
+import { Agent } from "kernl";
+import { anthropic } from "@kernl-sdk/ai/anthropic";
+import { z } from "zod";
+
+const agent = new Agent({
+  id: "extractor",
+  model: anthropic("claude-sonnet-4-5"),
+  instructions: "Extract structured data from text.",
+  output: z.object({
+    name: z.string(),
+    age: z.number(),
+    city: z.string(),
+  }),
+});
+
+const result = await agent.run("John is 30 years old and lives in NYC.");
+
+// { name: "John", age: 30, city: "NYC" }
+console.log(result.response);
+```
+
+The model's response is automatically parsed and validated against your schema. If validation fails, you'll get a clear error explaining what went wrong.
+
+This works with any model that supports structured outputs, and gracefully falls back to JSON parsing for models that don't.
