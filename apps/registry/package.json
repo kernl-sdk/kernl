@@ -1,0 +1,18 @@
+{
+  "name": "@kernl/registry",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsx build.ts",
+    "typecheck": "NODE_OPTIONS='--max-old-space-size=4096' tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "fast-glob": "^3.3.2",
+    "kernl": "^0.8.2",
+    "tsx": "^4.19.0",
+    "typescript": "^5",
+    "zod": "^4.1.12"
+  }
+}

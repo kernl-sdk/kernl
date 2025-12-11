@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/toolkits/*": ["toolkits/*"]
+    }
+  },
+  "include": ["toolkits/**/*.ts", "registry/**/*.ts", "build.ts"],
+  "exclude": ["node_modules", "dist"]
+}

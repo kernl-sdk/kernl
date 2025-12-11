@@ -1,0 +1,10 @@
+{
+  "$schema": "https://registry.kernl.sh/schema.json",
+  "toolkitsDir": "src/toolkits",
+  "aliases": {
+    "toolkits": "@/toolkits"
+  },
+  "registries": {
+    "@kernl": "https://registry.kernl.sh/toolkits/{name}.json"
+  }
+}
