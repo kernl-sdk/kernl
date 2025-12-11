@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://registry.kernl.sh/schema.json",
+  "title": "Kernl Registry Item",
+  "description": "Schema for Kernl registry items (toolkits, agents, skills)",
+  "type": "object",
+  "required": [
+    "name",
+    "type",
+    "title",
+    "description",
+    "dependencies",
+    "env",
+    "files",
+    "registryVersion",
+    "updatedAt"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://registry.kernl.sh/schema.json"
+    },
+    "name": {
+      "type": "string",
+      "description": "Unique identifier for the registry item"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["registry:toolkit", "registry:agent", "registry:skill"],
+      "description": "The type of registry item"
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable display name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief description of the item"
+    },
+    "icon": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to the item's icon (SVG or PNG)"
+    },
+    "category": {
+      "type": "string",
+      "description": "Category for marketplace organization"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "NPM package dependencies required by this item"
+    },
+    "env": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Environment variables required by this item"
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "content"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Relative file path"
+          },
+          "content": {
+            "type": "string",
+            "description": "File contents"
+          }
+        }
+      },
+      "description": "Source files included in this item"
+    },
+    "registryVersion": {
+      "type": "string",
+      "description": "Version of the registry schema"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of last update"
+    }
+  },
+  "additionalProperties": false
+}

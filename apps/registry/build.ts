@@ -75,6 +75,12 @@ async function main() {
     console.log("\n  ✓ icons → dist/icons");
   }
 
+  // copy schema
+  if (existsSync("schema.json")) {
+    await cp("schema.json", "dist/schema.json");
+    console.log("  ✓ schema.json → dist/schema.json");
+  }
+
   console.log("\nDone!");
 }
 
