@@ -1,4 +1,5 @@
-import { readFile, writeFile, mkdir } from "fs/promises";
+import { readFile, writeFile, mkdir, cp } from "fs/promises";
+import { existsSync } from "fs";
 import { join } from "path";
 
 import { toolkits } from "./registry/toolkits";
@@ -17,6 +18,8 @@ interface RegistryOutput {
   type: RegistryType;
   title: string;
   description: string;
+  icon?: string;
+  category?: string;
   dependencies: string[];
   env: string[];
   files: OutputFile[];
@@ -38,6 +41,8 @@ async function buildToolkit(item: RegistryItem): Promise<RegistryOutput> {
     type: item.type,
     title: item.title,
     description: item.description,
+    icon: item.icon,
+    category: item.category,
     dependencies: item.dependencies || [],
     env: item.env || [],
     files,
@@ -62,6 +67,12 @@ async function main() {
       console.error(`  ✗ ${item.name}: ${msg}`);
       process.exit(1);
     }
+  }
+
+  // copy icons
+  if (existsSync("icons")) {
+    await cp("icons", "dist/icons", { recursive: true });
+    console.log("\n  ✓ icons → dist/icons");
   }
 
   console.log("\nDone!");

@@ -9,6 +9,8 @@ export interface RegistryItem {
   type: RegistryType;
   title: string;
   description: string;
+  icon?: string;
+  category?: string;
   dependencies?: string[];
   env?: string[];
   files: RegistryFile[];
