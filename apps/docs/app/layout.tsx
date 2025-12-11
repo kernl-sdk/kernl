@@ -1,7 +1,6 @@
 import { Layout, Navbar } from 'nextra-theme-docs'
 import { Head } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
-import Link from 'next/link'
 import 'nextra-theme-docs/style.css'
 import './globals.css'
 import { HeaderLogo } from '../components/header-logo'
@@ -48,7 +47,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           navbar={
             <>
               <Navbar
-                logo={<Link href="https://www.kernl.sh" className="logo-text">kernl</Link>}
+                logo={<span className="logo-text">kernl</span>}
               >
                 <NavbarRight />
               </Navbar>
