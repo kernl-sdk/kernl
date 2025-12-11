@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     icon: "/kernl-logo.png",
   },
   openGraph: {
-    title: "kernl",
+    title: "kernl – The runtime for software 3.0",
     description: "The runtime for software 3.0",
     url: "https://www.kernl.sh",
     siteName: "kernl",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "kernl",
+    title: "kernl – The runtime for software 3.0",
     description: "The runtime for software 3.0",
     images: ["https://www.kernl.sh/og/home.png"],
   },
