@@ -2,7 +2,7 @@ import { Header } from "@/components/header";
 import { Hero } from "@/components/hero";
 import { CodePanel } from "@/components/code-panel";
 import { CodeSection } from "@/components/code-section";
-import { LogoMarquee } from "@/components/logo-marquee";
+// import { LogoMarquee } from "@/components/logo-marquee";
 import { Features } from "@/components/features";
 import { VideoPlaceholder } from "@/components/video-placeholder";
 import { Footer } from "@/components/footer";

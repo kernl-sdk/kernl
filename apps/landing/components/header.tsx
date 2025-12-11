@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { IconDiscord, IconGitHub } from "@/components/ui/icons";
 
 const navLinks = [
   { href: "https://docs.kernl.sh", label: "docs" },
-  { href: "#", label: "marketplace", disabled: true },
+  { href: "/marketplace", label: "marketplace" },
   { href: "https://www.dremnik.com/blog", label: "blog", external: true },
 ];
 
@@ -62,7 +63,7 @@ export function Header() {
         </button>
 
         {/* Logo */}
-        <span className="font-mono text-sm text-brand">kernl</span>
+        <Link href="/" className="font-mono text-sm text-brand">kernl</Link>
 
         {/* Social icons */}
         <div className="flex items-center gap-5">
@@ -86,18 +87,28 @@ export function Header() {
       </header>
 
       {/* Desktop nav sidebar */}
-      <nav className="fixed left-12 top-20 z-50 hidden flex-col gap-3 md:flex">
-        {navLinks.map((link) => (
-          <a
-            key={link.label}
-            href={link.disabled ? undefined : link.href}
-            target={link.external ? "_blank" : undefined}
-            rel={link.external ? "noopener noreferrer" : undefined}
-            className={`w-fit bg-brand/[0.07] px-3 py-1.5 font-mono text-xs transition-opacity ${link.disabled ? "cursor-not-allowed text-brand/40" : "text-brand hover:opacity-70"}`}
-          >
-            {link.label}
-          </a>
-        ))}
+      <nav className="fixed left-12 top-24 z-50 hidden flex-col gap-3 md:flex">
+        {navLinks.map((link) =>
+          link.external ? (
+            <a
+              key={link.label}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-fit bg-brand/[0.07] px-3 py-1.5 font-mono text-xs text-brand transition-opacity hover:opacity-70"
+            >
+              {link.label}
+            </a>
+          ) : (
+            <Link
+              key={link.label}
+              href={link.href}
+              className="w-fit bg-brand/[0.07] px-3 py-1.5 font-mono text-xs text-brand transition-opacity hover:opacity-70"
+            >
+              {link.label}
+            </Link>
+          )
+        )}
       </nav>
 
       {/* Mobile menu overlay */}
@@ -115,7 +126,7 @@ export function Header() {
         }`}
       >
         <div className="flex items-center justify-between px-4 py-4">
-          <span className="font-mono text-sm text-brand">kernl</span>
+          <Link href="/" className="font-mono text-sm text-brand">kernl</Link>
           <button
             onClick={() => setMenuOpen(false)}
             className="text-brand"
@@ -126,18 +137,29 @@ export function Header() {
         </div>
 
         <nav className="flex flex-col gap-2 px-4 pt-4">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.disabled ? undefined : link.href}
-              target={link.external ? "_blank" : undefined}
-              rel={link.external ? "noopener noreferrer" : undefined}
-              onClick={() => !link.disabled && setMenuOpen(false)}
-              className={`w-fit bg-brand/[0.07] px-3 py-2 font-mono text-sm transition-opacity ${link.disabled ? "cursor-not-allowed text-brand/40" : "text-brand hover:opacity-70"}`}
-            >
-              {link.label}
-            </a>
-          ))}
+          {navLinks.map((link) =>
+            link.external ? (
+              <a
+                key={link.label}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMenuOpen(false)}
+                className="w-fit bg-brand/[0.07] px-3 py-2 font-mono text-sm text-brand transition-opacity hover:opacity-70"
+              >
+                {link.label}
+              </a>
+            ) : (
+              <Link
+                key={link.label}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                className="w-fit bg-brand/[0.07] px-3 py-2 font-mono text-sm text-brand transition-opacity hover:opacity-70"
+              >
+                {link.label}
+              </Link>
+            )
+          )}
         </nav>
 
         {/* Social links at bottom of mobile menu */}
