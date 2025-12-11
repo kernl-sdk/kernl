@@ -1,10 +1,10 @@
 {
-  "name": "@kernl-sdk/cli",
-  "version": "0.2.7",
-  "description": "CLI for managing kernl applications",
+  "name": "create-kernl",
+  "version": "0.1.0",
+  "description": "Create a new kernl application",
   "keywords": [
     "kernl",
-    "cli",
+    "create",
     "ai",
     "agent",
     "framework",
@@ -15,7 +15,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/kernl-sdk/kernl.git",
-    "directory": "packages/cli"
+    "directory": "packages/create-kernl"
   },
   "homepage": "https://github.com/kernl-sdk/kernl#readme",
   "bugs": {
@@ -26,41 +26,27 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    },
-    "./create": {
-      "types": "./dist/create.d.ts",
-      "default": "./dist/create.js"
     }
   },
   "bin": "./dist/index.js",
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "dist",
-    "templates",
-    "README.md"
-  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "prepublishOnly": "pnpm build",
-    "lint": "eslint src/",
-    "check-types": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "@antfu/ni": "^28.0.0",
-    "@clack/prompts": "^0.11.0",
-    "commander": "^14.0.2",
-    "fast-glob": "^3.3.3",
-    "picocolors": "^1.1.1",
-    "zod": "^4.1.12"
+    "@kernl-sdk/cli": "workspace:*",
+    "commander": "^14.0.2"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
     "tsup": "^8.5.1",
-    "typescript": "5.9.2",
-    "vitest": "^4.0.8"
+    "typescript": "^5.9.2"
   }
 }

@@ -1,7 +1,8 @@
 import { readFile } from "fs/promises";
 import { existsSync } from "fs";
 import { resolve } from "path";
-import { red } from "picocolors";
+import * as p from "@clack/prompts";
+import color from "picocolors";
 
 import { KernlConfigSchema, type KernlConfig } from "./schema";
 
@@ -16,19 +17,16 @@ export async function loadcfg(
   const path = findcfg(cwd);
 
   if (!path) {
-    console.error(red(`Error: ${CONFIG_FILE} not found.`));
-    console.error();
-    console.error(
-      `Run ${red("kernl init <project>")} to create a new project, or create ${CONFIG_FILE}:`,
+    p.log.error(`${CONFIG_FILE} not found.`);
+    p.log.message(
+      `Run ${color.cyan("kernl init <project>")} to create a new project, or create ${CONFIG_FILE}:`,
     );
-    console.error();
-    console.error(`  {`);
-    console.error(`    "toolkitsDir": "src/toolkits",`);
-    console.error(`    "aliases": { "toolkits": "@/toolkits" },`);
-    console.error(
-      `    "registries": { "@kernl": "https://registry.kernl.sh/toolkits/{name}.json" }`,
-    );
-    console.error(`  }`);
+    p.log.message(`
+  {
+    "toolkitsDir": "src/toolkits",
+    "aliases": { "toolkits": "@/toolkits" },
+    "registries": { "@kernl": "https://registry.kernl.sh/toolkits/{name}.json" }
+  }`);
     process.exit(1);
   }
 
@@ -37,10 +35,9 @@ export async function loadcfg(
   const result = KernlConfigSchema.safeParse(json);
 
   if (!result.success) {
-    console.error(red(`Error: Invalid ${CONFIG_FILE}`));
-    console.error();
+    p.log.error(`Invalid ${CONFIG_FILE}`);
     for (const issue of result.error.issues) {
-      console.error(`  ${issue.path.join(".")}: ${issue.message}`);
+      p.log.message(`  ${issue.path.join(".")}: ${issue.message}`);
     }
     process.exit(1);
   }

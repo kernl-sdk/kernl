@@ -1,6 +1,6 @@
 import { readdirSync } from "fs";
 import { access, constants } from "fs/promises";
-import { red } from "picocolors";
+import * as p from "@clack/prompts";
 
 /**
  * Check if a directory is writable.
@@ -18,7 +18,11 @@ export async function isWriteable(directory: string): Promise<boolean> {
  * Check if a folder is empty or only contains safe files.
  * Returns true if empty/safe, false if there are conflicts.
  */
-export function isFolderEmpty(root: string, name: string): boolean {
+export function isFolderEmpty(
+  root: string,
+  name: string,
+  silent = false,
+): boolean {
   const ignore = [
     ".DS_Store",
     ".git",
@@ -45,17 +49,15 @@ export function isFolderEmpty(root: string, name: string): boolean {
     .filter((file) => !/\.iml$/.test(file));
 
   if (conflicts.length > 0) {
-    console.log(
-      `The directory ${red(name)} contains files that could conflict:`,
-    );
-    console.log();
-    for (const file of conflicts) {
-      console.log(`  ${file}`);
+    if (!silent) {
+      p.log.error(`Directory ${name} contains conflicting files:`);
+      for (const file of conflicts) {
+        p.log.message(`  ${file}`);
+      }
+      p.log.message(
+        "Either use a new directory name, or remove the files listed above.",
+      );
     }
-    console.log();
-    console.log(
-      "Either try using a new directory name, or remove the files listed above.",
-    );
     return false;
   }
 

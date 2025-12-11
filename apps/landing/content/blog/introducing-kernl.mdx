@@ -14,15 +14,11 @@ The pitch is simple: agents that work in production, built on infrastructure you
 
 ## Why this exists
 
-Building agents looks easy at first. You call the API, parse some JSON, maybe add a tool or two. Then you ship it.
+I was astounded to learn that 85% of production agents are still custom code.. &thinsp;<sup><a href="#ref-1">1</a></sup>&thinsp;
 
-Conversation state fills up context windows. Memory that lasts beyond a single session turns into an infrastructure project—embeddings, vector stores, retrieval logic. Tool execution grows from a simple function call into validation, error handling, retries, approval flows.
+So I asked myself, "Why are people hand-rolling the same code over and over again, alone?"
 
-You've accidentally built a framework. And it's not a good one.
-
-So you reach for something off the shelf. LangChain. CrewAI. Vercel AI SDK. Mastra. But something's off there too.
-
-85% of production agents are custom code, and these are the three main reasons teams cited for throwing them away after trying them&thinsp;<sup><a href="#ref-1">1</a></sup>&thinsp;:
+These are the three main reasons teams cited for throwing away frameworks after trying them:
 
 1. *Dependency hell*. "LangChain pulls in 47 packages. Our security team said no."
 2. *Abstraction mismatch*. "We spent more time fighting the framework than solving our problem."
@@ -50,8 +46,8 @@ And lastly it means building in the open. The Linux spirit—code that belongs t
 
 These are a few of the ideals that we will strive to live up to, and will continue to cultivate as part of this ecosystem's DNA:
 
-- *Aggressive minimalism*. Like I said, this is our central ethos. Every abstraction earns its place. If it doesn't need to exist, it doesn't.
-- *An open world, a strong community*. The AI ecosystem is fragmented. We're building for interoperability, not lock-in. We believe in the power of collective intelligence and decentralization.
+- *Aggressive minimalism*. Every abstraction earns its place. If it doesn't need to exist, it doesn't.
+- *An open world, a strong community*. We're building for interoperability, not lock-in. We believe in the power of collective intelligence and decentralization.
 - *Composition over inheritance*. Take what you need, leave what you don't.
 - *Opinionated, not constricting*. Sensible defaults, escape hatches where you need them.
 - *Your environment, your control*. You decide where your agents run. The execution environment is yours.

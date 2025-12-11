@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
 import type { Command } from "commander";
 import { mkdir, writeFile } from "fs/promises";
 import { existsSync } from "fs";
-import prompts from "prompts";
+import * as clack from "@clack/prompts";
 
 import { loadcfg } from "@/lib/config/load";
 import { fetchItem } from "@/registry/fetch";
@@ -17,15 +17,25 @@ vi.mock("fs", () => ({
   existsSync: vi.fn(),
 }));
 
-vi.mock("prompts", () => ({
-  default: vi.fn(),
+vi.mock("@clack/prompts", () => ({
+  intro: vi.fn(),
+  outro: vi.fn(),
+  spinner: vi.fn(() => ({ start: vi.fn(), stop: vi.fn() })),
+  confirm: vi.fn(),
+  isCancel: vi.fn(() => false),
+  log: {
+    step: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    message: vi.fn(),
+  },
 }));
 
 vi.mock("@/lib/config/load", () => ({
   loadcfg: vi.fn(),
 }));
 
-vi.mock("@/lib/registry/fetch", () => ({
+vi.mock("@/registry/fetch", () => ({
   buildUrl: vi.fn(
     (name: string) => `https://registry.kernl.sh/toolkits/${name}.json`,
   ),
@@ -52,7 +62,7 @@ const mockConfig = {
 
 const mockRegistryItem = {
   name: "gmail",
-  type: "kernl:toolkit" as const,
+  type: "registry:toolkit" as const,
   title: "Gmail Toolkit",
   description: "Gmail operations",
   dependencies: ["@googleapis/gmail@^5.0.0"],
@@ -107,7 +117,7 @@ describe("toolkit command", () => {
 
   it("skips if directory exists and user declines", async () => {
     vi.mocked(existsSync).mockReturnValue(true);
-    vi.mocked(prompts).mockResolvedValue({ overwrite: false });
+    vi.mocked(clack.confirm).mockResolvedValue(false);
 
     await toolkit.parseAsync(["node", "test", "gmail"]);
 
@@ -116,7 +126,7 @@ describe("toolkit command", () => {
 
   it("overwrites if directory exists and user confirms", async () => {
     vi.mocked(existsSync).mockReturnValue(true);
-    vi.mocked(prompts).mockResolvedValue({ overwrite: true });
+    vi.mocked(clack.confirm).mockResolvedValue(true);
 
     await toolkit.parseAsync(["node", "test", "gmail"]);
 
@@ -128,7 +138,7 @@ describe("toolkit command", () => {
 
     await toolkit.parseAsync(["node", "test", "gmail", "-y"]);
 
-    expect(prompts).not.toHaveBeenCalled();
+    expect(clack.confirm).not.toHaveBeenCalled();
     expect(writeFile).not.toHaveBeenCalled();
   });
 

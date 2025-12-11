@@ -8,7 +8,7 @@ export function InstallCommand() {
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
   const [isHovered, setIsHovered] = useState(false);
   const [copied, setCopied] = useState(false);
-  const command = "pnpm i -g @kernl-sdk/cli";
+  const command = "npm create kernl@latest";
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!containerRef.current) return;

@@ -1,6 +1,6 @@
 import { copyFile, mkdir } from "fs/promises";
 import { join, dirname } from "path";
-import { sync as glob } from "fast-glob";
+import fg from "fast-glob";
 
 interface CopyOptions {
   cwd?: string;
@@ -22,7 +22,7 @@ export async function copy(
 ): Promise<void> {
   const { cwd, rename, parents = false } = options;
 
-  const files = glob(patterns, {
+  const files = fg.sync(patterns, {
     cwd,
     dot: true,
     absolute: false,

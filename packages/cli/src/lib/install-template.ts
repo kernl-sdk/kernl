@@ -1,7 +1,7 @@
 import os from "os";
 import { join } from "path";
 import { writeFile } from "fs/promises";
-import { bold, cyan } from "picocolors";
+import * as p from "@clack/prompts";
 
 import { copy } from "@/lib/copy";
 import { install, type PackageManager } from "@/lib/install";
@@ -13,6 +13,7 @@ interface InstallTemplateOptions {
   packageManager: PackageManager;
   skipInstall: boolean;
   skipGit: boolean;
+  silent?: boolean;
 }
 
 /**
@@ -24,23 +25,24 @@ export async function installTemplate({
   packageManager,
   skipInstall,
   skipGit,
+  silent = false,
 }: InstallTemplateOptions): Promise<void> {
-  console.log(bold(`Using ${packageManager}.`));
-  console.log();
-
-  // Copy template files
-  const templatePath = join(__dirname, "../../templates/default");
+  // Copy template files (path relative to dist/ after bundling)
+  const templatePath = join(__dirname, "../templates/default");
   await copy(["**"], root, {
     cwd: templatePath,
     parents: true,
     rename(name) {
-      // Rename gitignore to .gitignore
-      if (name === "gitignore") {
-        return ".gitignore";
-      }
+      // Rename dotfiles (can't include dots in template names)
+      if (name === "gitignore") return ".gitignore";
+      if (name === "env.example") return ".env.example";
       return name;
     },
   });
+
+  if (!silent) {
+    p.log.step("Project structure created");
+  }
 
   // Generate package.json
   const packageJson = {
@@ -71,24 +73,22 @@ export async function installTemplate({
 
   // Install dependencies
   if (!skipInstall) {
-    console.log("Installing dependencies:");
-    for (const dependency in packageJson.dependencies) {
-      console.log(`- ${cyan(dependency)}`);
-    }
-    console.log();
-    console.log("Installing devDependencies:");
-    for (const dependency in packageJson.devDependencies) {
-      console.log(`- ${cyan(dependency)}`);
-    }
-    console.log();
+    const s = p.spinner();
+    s.start(`Installing dependencies via ${packageManager}`);
 
-    await install(root, packageManager);
-    console.log();
+    try {
+      await install(root, packageManager, true); // always silent since we have spinner
+      s.stop(`Dependencies installed via ${packageManager}`);
+    } catch (error) {
+      s.stop("Failed to install dependencies");
+      throw error;
+    }
   }
 
   // Initialize git
   if (!skipGit && tryGitInit(root)) {
-    console.log("Initialized a git repository.");
-    console.log();
+    if (!silent) {
+      p.log.step("Initialized git repository");
+    }
   }
 }

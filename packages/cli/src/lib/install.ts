@@ -9,11 +9,12 @@ export type PackageManager = "pnpm" | "npm" | "yarn" | "bun";
 export function install(
   root: string,
   packageManager: PackageManager,
+  silent = false,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const child = spawn(packageManager, ["install"], {
       cwd: root,
-      stdio: "inherit",
+      stdio: silent ? "ignore" : "inherit",
       shell: true,
     });
 

@@ -4,7 +4,7 @@ import { RegistryItemSchema } from "../schema";
 describe("RegistryItemSchema", () => {
   const validItem = {
     name: "gmail",
-    type: "kernl:toolkit" as const,
+    type: "registry:toolkit" as const,
     title: "Gmail Toolkit",
     description: "Send and read emails",
     files: [
@@ -42,7 +42,7 @@ describe("RegistryItemSchema", () => {
     expect(() =>
       RegistryItemSchema.parse({
         ...validItem,
-        type: "kernl:agent",
+        type: "invalid:type",
       }),
     ).toThrow();
   });

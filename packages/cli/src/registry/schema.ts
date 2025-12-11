@@ -8,7 +8,7 @@ const RegistryFileSchema = z.object({
 export const RegistryItemSchema = z.object({
   $schema: z.string().optional(),
   name: z.string(),
-  type: z.string(),
+  type: z.enum(["registry:toolkit", "registry:agent", "registry:skill"]),
   title: z.string(),
   description: z.string(),
   dependencies: z.array(z.string()).default([]),

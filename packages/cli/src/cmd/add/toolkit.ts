@@ -2,8 +2,8 @@ import { Command } from "commander";
 import { mkdir, writeFile } from "fs/promises";
 import { existsSync } from "fs";
 import { join, dirname } from "path";
-import { green, cyan, yellow, red } from "picocolors";
-import prompts from "prompts";
+import * as p from "@clack/prompts";
+import color from "picocolors";
 
 /* lib */
 import { loadcfg } from "@/lib/config/load";
@@ -27,6 +27,8 @@ export const toolkit = new Command("toolkit")
  * Add one or more toolkits from the registry.
  */
 async function addToolkit(names: string[], opts: Options) {
+  p.intro(color.bgCyan(color.black(" kernl add ")));
+
   const config = await loadcfg();
   const errors: string[] = [];
   const allDeps: string[] = [];
@@ -38,21 +40,26 @@ async function addToolkit(names: string[], opts: Options) {
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Unknown error";
       errors.push(`${name}: ${msg}`);
-      console.error(red(`Failed to add ${name}: ${msg}`));
-      console.error();
+      p.log.error(`Failed to add ${name}: ${msg}`);
     }
   }
 
   // install dependencies for the toolkit
   if (allDeps.length) {
-    console.log(`\nInstalling dependencies...`);
+    const s = p.spinner();
+    s.start("Installing dependencies");
     await addDeps(allDeps, process.cwd());
+    s.stop("Dependencies installed");
   }
 
   if (errors.length > 0 && errors.length < names.length) {
-    console.log(`\n${yellow("Some toolkits failed:")}`);
-    for (const e of errors) console.log(`  ${red("×")} ${e}`);
+    p.log.warn("Some toolkits failed:");
+    for (const e of errors) {
+      p.log.message(`  ${color.red("×")} ${e}`);
+    }
   }
+
+  p.outro("Done!");
 }
 
 /**
@@ -65,32 +72,31 @@ async function installToolkit(
   opts: Options,
 ): Promise<string[]> {
   const url = buildUrl(name, config);
-  console.log(`Fetching ${cyan(name)}...`);
 
+  const s = p.spinner();
+  s.start(`Fetching ${name}`);
   const item = await fetchItem(url);
+  s.stop(`Fetched ${item.title || item.name}`);
+
   const targetDir = join(config.toolkitsDir, item.name);
 
   // check if exists
   if (existsSync(targetDir)) {
     if (opts.yes) {
-      console.log(yellow(`${item.name} already exists, skipping`));
+      p.log.warn(`${item.name} already exists, skipping`);
       return [];
     }
 
-    const { overwrite } = await prompts({
-      type: "confirm",
-      name: "overwrite",
+    const overwrite = await p.confirm({
       message: `${item.name} already exists. Overwrite?`,
-      initial: false,
+      initialValue: false,
     });
 
-    if (!overwrite) {
-      console.log(`Skipped ${item.name}`);
+    if (p.isCancel(overwrite) || !overwrite) {
+      p.log.step(`Skipped ${item.name}`);
       return [];
     }
   }
-
-  console.log(`Adding ${green(item.title || item.name)}...\n`);
 
   // write files
   for (const file of item.files) {
@@ -100,17 +106,16 @@ async function installToolkit(
 
     await mkdir(dirname(target), { recursive: true });
     await writeFile(target, content);
-    console.log(`  ${green("+")} ${rel}`);
+    p.log.step(`${color.green("+")} ${rel}`);
   }
 
   // show env vars
   if (item.env.length) {
-    console.log(`\n  Required env vars:`);
+    p.log.message(color.dim("Required env vars:"));
     for (const e of item.env) {
-      console.log(`    ${yellow("[ ]")} ${e}`);
+      p.log.message(`  ${color.yellow("○")} ${e}`);
     }
   }
 
-  console.log();
   return item.dependencies;
 }

@@ -1,4 +1,4 @@
-import { red } from "picocolors";
+import * as p from "@clack/prompts";
 
 import { RegistryItemSchema, type RegistryItem } from "./schema";
 import type { KernlConfig } from "@/lib/config/schema";
@@ -15,10 +15,9 @@ export function buildUrl(name: string, config: KernlConfig): string {
     const [, scope, toolkit] = match;
     const template = config.registries[`@${scope}`];
     if (!template) {
-      console.error(red(`Unknown registry: @${scope}`));
-      console.error();
-      console.error(`Add it to kernl.json:`);
-      console.error(`  "registries": { "@${scope}": "https://..." }`);
+      p.log.error(`Unknown registry: @${scope}`);
+      p.log.message(`Add it to kernl.json:`);
+      p.log.message(`  "registries": { "@${scope}": "https://..." }`);
       process.exit(1);
     }
     return template.replace("{name}", toolkit);
