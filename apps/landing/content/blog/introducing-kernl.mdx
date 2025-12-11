@@ -4,90 +4,88 @@ slug: introducing-kernl
 date: 2025-12-01
 author: dremnik
 category: product
-excerpt: A TypeScript framework for building AI agents that remember, reason, and act.
+excerpt: The runtime for software 3.0.
 image: kernl
 ---
 
-We're excited to introduce kernl, a TypeScript framework for building AI agents that remember, reason, and act.
+Today we're excited to introduce kernl, a TypeScript framework for building agents that remember, reason, and act.
 
-## Why we built this
+The pitch is simple: agents that work in production, built on infrastructure you can actually understand.
 
-Most agent frameworks give you a chat loop and call it a day. You're left stitching together conversation persistence, memory that outlives a single session, tool execution, and multi-turn reasoning. kernl treats these as first-class concerns, not afterthoughts.
+## Why this exists
 
-## What makes kernl different
+Building agents looks easy at first. You call the API, parse some JSON, maybe add a tool or two. Then you ship it.
 
-- **Memory is not optional.** Memory is the bottleneck to personalization and utility. Agents that remember context over time are fundamentally more useful. kernl makes this easy.
-- **Provider agnostic.** No vendor lock-in. Swap models per-agent or per-request. Use Claude for reasoning, GPT for generation, whatever fits your use case.
-- **TypeScript-native.** Full type safety. Your IDE knows what's happening. No magic strings, no runtime surprises.
+Conversation state fills up context windows. Memory that lasts beyond a single session turns into an infrastructure project—embeddings, vector stores, retrieval logic. Tool execution grows from a simple function call into validation, error handling, retries, approval flows.
 
-## Philosophy
+You've accidentally built a framework. And it's not a good one.
 
-- Open must win.
-- Composition over inheritance.
-- Customizable where you need it.
-- Full control of the execution environment. We know you want to run your tools + agents in *your* env.
+So you reach for something off the shelf. LangChain. CrewAI. Vercel AI SDK. Mastra. But something's off there too.
 
+85% of production agents are custom code, and these are the three main reasons teams cited for throwing them away after trying them: [1]
 
-## Basic usage
+1. Dependency hell
+"LangChain pulls in 47 packages. Our security team said no."
 
-Agents run on threads (persistent conversation state) and build memories (knowledge that spans threads). The Kernl runtime orchestrates execution and storage.
+2. Abstraction mismatch
+"We spent more time fighting the framework than solving our problem."
 
-```ts
-import { Kernl, Agent } from "kernl";
-import { postgres } from "@kernl-sdk/pg";
-import { anthropic } from "@kernl-sdk/ai/anthropic";
+3. Debugging nightmares
+"When it breaks, we need to read THEIR code, not ours."
 
-const kernl = new Kernl({
-  storage: {
-    db: postgres({ connstr: process.env.DATABASE_URL })
-  }
-});
+This is the state of things today: roll your own and drown in accidental complexity, or use a framework and fight it until you fork it.
 
-const agent = new Agent({
-  id: "assistant",
-  name: "Assistant",
-  model: anthropic("claude-sonnet-4-5"),
-  instructions: "You are a helpful assistant.",
-  memory: { enabled: true },
-});
+We think there's a third option.
 
-kernl.register(agent);
+## How we think about this
 
-const result = await agent.run("Remember that I prefer dark mode.", {
-  threadId: "thread_123",
-});
-```
+Software 3.0 needs better infrastructure—that's what we're building.
 
-## Toolkits
+Aggressive minimalism is at the heart of the design ethos behind this company, and the belief in quality is central to its DNA.
 
-Agents become useful when they can act. kernl has first-class support for toolkits—collections of tools that agents can use to accomplish tasks.
+Every line of code, and every addition to the framework is intentional. Ruthless simplification is a never ending war that we will continue to wage.
 
-```ts
-import { tool, Toolkit } from "kernl";
-import { z } from "zod";
+In practice, this means 3 external dependencies—not 47. Functions you can read in one sitting if you want to browse the source. When something breaks, you trace it in your code, not ours.
 
-const search = tool({
-  id: "search",
-  description: "Search the web",
-  parameters: z.object({ query: z.string() }),
-  execute: async (ctx, { query }) => {
-    // your implementation
-  },
-});
+It also means you own what you use. Our toolkit [marketplace](/marketplace) works like shadcn: browse, copy, customize. The code lives in your repo, under your control, customizable to your needs.
 
-export const web = new Toolkit({
-  id: "web",
-  description: "Web search tools",
-  tools: [search],
-});
-```
+And lastly it means building in the open. The Linux spirit—code that belongs to everyone, shaped by the people who use it. We want to cultivate a community, not a customer base.
 
-We also support MCP (Model Context Protocol) out of the box, so you can connect to any MCP server without writing integration code.
+## A couple of our principles
 
-## Get started
+- *Aggressive minimalism*. Like I said, this is our central ethos. Every abstraction earns its place. If it doesn't need to exist, it doesn't.
+- *An open world, a strong community*. The AI ecosystem is fragmented. We're building for interoperability, not lock-in. We believe in the power of collective intelligence and decentralization.
+- *Composition over inheritance*. Take what you need, leave what you don't.
+- *Opinionated, not constricting*. Sensible defaults, escape hatches where you need them.
+- *Your environment, your control*. Your agents run where you run them. Not on our servers. Not in someone else's cloud. The execution environment is yours.
+
+These are the ideals that we will strive to live up to, and will continue to cultivate as part of this ecosystem's DNA.
+
+## Getting started
 
 ```bash
 npm install kernl
 ```
 
-Read the [documentation](https://docs.kernl.sh) to learn more, or browse the [marketplace](/marketplace) for pre-built toolkits.
+```ts
+import { Kernl, Agent } from "kernl";
+import { anthropic } from "@kernl-sdk/ai/anthropic";
+
+const kernl = new Kernl();
+
+const agent = new Agent({
+  id: "assistant",
+  model: anthropic("claude-sonnet-4-5"),
+  instructions: "You are a helpful assistant.",
+});
+
+kernl.register(agent);
+
+await agent.run("Hello, world.");
+```
+
+Read the [docs](https://docs.kernl.sh). Browse the [marketplace](/marketplace). Or just start building.
+
+---
+
+[1] Qiu et al., "[Measuring Agents in Production](https://arxiv.org/pdf/2512.04123)," 2025.
