@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist_Mono } from "next/font/google";
+import { Toaster } from "sonner";
+
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Scrollbar } from "@/components/scrollbar";
 import "./globals.css";
@@ -49,6 +51,18 @@ export default function RootLayout({
           {children}
         </ScrollArea>
         <Scrollbar />
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            style: {
+              background: "var(--color-surface)",
+              border: "none",
+              color: "var(--color-brand)",
+              fontFamily: "SF Mono, monospace",
+              fontSize: "13px",
+            },
+          }}
+        />
         <Script
           id="reb2b"
           dangerouslySetInnerHTML={{

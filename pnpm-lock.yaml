@@ -87,6 +87,9 @@ importers:
       shiki:
         specifier: ^3.19.0
         version: 3.19.0
+      sonner:
+        specifier: ^2.0.7
+        version: 2.0.7(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       tailwind-merge:
         specifier: ^3.4.0
         version: 3.4.0
