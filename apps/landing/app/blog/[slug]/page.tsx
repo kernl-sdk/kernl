@@ -22,9 +22,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = getPost(slug);
   if (!post) return {};
 
+  const ogImage = post.image?.startsWith("/")
+    ? `https://www.kernl.sh${post.image}`
+    : post.image;
+
   return {
     title: `${post.title} | kernl`,
     description: post.excerpt,
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      url: `https://www.kernl.sh/blog/${post.slug}`,
+      siteName: "kernl",
+      type: "article",
+      ...(ogImage && {
+        images: [{ url: ogImage, width: 1200, height: 630 }],
+      }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+      ...(ogImage && { images: [ogImage] }),
+    },
   };
 }
 

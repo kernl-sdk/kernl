@@ -26,17 +26,17 @@ export const metadata: Metadata = {
     siteName: "kernl",
     images: [
       {
-        url: "https://www.kernl.sh/kernl-logo.png",
-        width: 512,
-        height: 512,
+        url: "https://www.kernl.sh/og/home.png",
+        width: 1200,
+        height: 630,
       },
     ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "kernl",
     description: "The runtime for software 3.0",
-    images: ["https://www.kernl.sh/kernl-logo.png"],
+    images: ["https://www.kernl.sh/og/home.png"],
   },
 };
 

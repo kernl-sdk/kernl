@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { IconKernl } from "@/components/ui/icons";
 
 interface BlogCardProps {
   slug: string;
@@ -50,17 +49,13 @@ export function BlogCard({
       <article className="flex flex-col gap-3">
         {/* Image placeholder */}
         <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-[oklch(0.12_0_0)] border border-white/5">
-          <div className="flex h-full w-full items-center justify-center">
-            {image === "kernl" ? (
-              <IconKernl size={48} className="text-steel" />
-            ) : image ? (
-              <img src={image} alt={title} className="h-full w-full object-cover" />
-            ) : (
-              <div className="text-muted-foreground/30 font-mono text-xs">
-                {category}
-              </div>
-            )}
-          </div>
+          {image ? (
+            <img src={image} alt={title} className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-muted-foreground/30 font-mono text-xs">
+              {category}
+            </div>
+          )}
         </div>
 
         {/* Meta */}
