@@ -296,9 +296,19 @@ body {
   font-style: italic;
 }
 
+.prose-custom sup {
+  margin-left: 2px;
+}
+
+.prose-custom sup a::before,
+.prose-custom sup a::after {
+  display: none;
+}
+
 .prose-custom ul,
 .prose-custom ol {
   margin-bottom: 1.25rem;
+  margin-left: 1rem;
   padding-left: 0;
   list-style: none;
 }

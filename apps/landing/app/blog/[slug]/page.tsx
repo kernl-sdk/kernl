@@ -57,15 +57,15 @@ export default async function BlogPostPage({ params }: Props) {
 
         {/* Header */}
         <header className="mt-8">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span className="capitalize">{post.category}</span>
             <span>·</span>
             <time dateTime={post.date}>{formattedDate}</time>
           </div>
-          <h1 className="mt-4 text-2xl font-semibold text-foreground leading-tight md:text-3xl">
+          <h1 className="mt-2 text-2xl font-semibold text-foreground leading-tight md:text-3xl">
             {post.title}
           </h1>
-          <span className="mt-4 inline-block font-mono text-sm text-brand">
+          <span className="mt-2 inline-block font-mono text-xs text-brand">
             {post.author}
           </span>
         </header>

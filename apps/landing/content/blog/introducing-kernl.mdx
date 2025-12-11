@@ -22,16 +22,11 @@ You've accidentally built a framework. And it's not a good one.
 
 So you reach for something off the shelf. LangChain. CrewAI. Vercel AI SDK. Mastra. But something's off there too.
 
-85% of production agents are custom code, and these are the three main reasons teams cited for throwing them away after trying them: [1]
+85% of production agents are custom code, and these are the three main reasons teams cited for throwing them away after trying them&thinsp;<sup><a href="#ref-1">1</a></sup>&thinsp;:
 
-1. Dependency hell
-"LangChain pulls in 47 packages. Our security team said no."
-
-2. Abstraction mismatch
-"We spent more time fighting the framework than solving our problem."
-
-3. Debugging nightmares
-"When it breaks, we need to read THEIR code, not ours."
+1. *Dependency hell*. "LangChain pulls in 47 packages. Our security team said no."
+2. *Abstraction mismatch*. "We spent more time fighting the framework than solving our problem."
+3. *Debugging nightmares*. "When it breaks, we need to read THEIR code, not ours."
 
 This is the state of things today: roll your own and drown in accidental complexity, or use a framework and fight it until you fork it.
 
@@ -53,18 +48,18 @@ And lastly it means building in the open. The Linux spirit—code that belongs t
 
 ## A couple of our principles
 
+These are a few of the ideals that we will strive to live up to, and will continue to cultivate as part of this ecosystem's DNA:
+
 - *Aggressive minimalism*. Like I said, this is our central ethos. Every abstraction earns its place. If it doesn't need to exist, it doesn't.
 - *An open world, a strong community*. The AI ecosystem is fragmented. We're building for interoperability, not lock-in. We believe in the power of collective intelligence and decentralization.
 - *Composition over inheritance*. Take what you need, leave what you don't.
 - *Opinionated, not constricting*. Sensible defaults, escape hatches where you need them.
 - *Your environment, your control*. Your agents run where you run them. Not on our servers. Not in someone else's cloud. The execution environment is yours.
 
-These are the ideals that we will strive to live up to, and will continue to cultivate as part of this ecosystem's DNA.
-
 ## Getting started
 
 ```bash
-npm install kernl
+npm create kernl@latest
 ```
 
 ```ts
@@ -88,4 +83,4 @@ Read the [docs](https://docs.kernl.sh). Browse the [marketplace](/marketplace). 
 
 ---
 
-[1] Qiu et al., "[Measuring Agents in Production](https://arxiv.org/pdf/2512.04123)," 2025.
+<span id="ref-1">1.</span> Qiu et al., "[Measuring Agents in Production](https://arxiv.org/pdf/2512.04123)," 2025.
