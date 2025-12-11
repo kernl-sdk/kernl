@@ -12,6 +12,15 @@ interface OutputFile {
   content: string;
 }
 
+interface IndexItem {
+  name: string;
+  type: RegistryType;
+  title: string;
+  description: string;
+  icon?: string;
+  category?: string;
+}
+
 interface RegistryOutput {
   $schema: string;
   name: string;
@@ -69,10 +78,22 @@ async function main() {
     }
   }
 
+  // generate index.json
+  const index: IndexItem[] = toolkits.map((item) => ({
+    name: item.name,
+    type: item.type,
+    title: item.title,
+    description: item.description,
+    icon: item.icon,
+    category: item.category,
+  }));
+  await writeFile("dist/index.json", JSON.stringify(index, null, 2));
+  console.log("\n  ✓ index.json → dist/index.json");
+
   // copy icons
   if (existsSync("icons")) {
     await cp("icons", "dist/icons", { recursive: true });
-    console.log("\n  ✓ icons → dist/icons");
+    console.log("  ✓ icons → dist/icons");
   }
 
   // copy schema
