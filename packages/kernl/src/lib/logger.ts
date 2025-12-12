@@ -1,25 +1,4 @@
-import pino from "pino";
-
 import { env } from "./env";
-
-/**
- * By default we don't log LLM inputs/outputs, to prevent exposing sensitive data.
- * Set KERNL_LOG_MODEL_DATA=true to enable.
- */
-const dontLogModelData = !env.KERNL_LOG_MODEL_DATA;
-
-/**
- * By default we don't log tool inputs/outputs, to prevent exposing sensitive data.
- * Set KERNL_LOG_TOOL_DATA=true to enable.
- */
-const dontLogToolData = !env.KERNL_LOG_TOOL_DATA;
-
-/**
- * Base pino logger instance
- */
-const base = pino({
-  level: env.LOG_LEVEL,
-});
 
 /**
  * A logger instance with namespace support and sensitive data flags.
@@ -52,21 +31,21 @@ export type Logger = {
  * Get a logger for a given namespace.
  *
  * @param namespace - the namespace to use for the logger (e.g., 'kernl:core', 'kernl:agent').
- * @returns A logger object with all pino log levels and sensitive data flags.
+ * @returns A logger object with console-based logging and sensitive data flags.
  */
 export function getLogger(namespace: string = "kernl"): Logger {
-  const child = base.child({ namespace });
+  const prefix = `[${namespace}]`;
 
   return {
     namespace,
-    trace: child.trace.bind(child),
-    debug: child.debug.bind(child),
-    info: child.info.bind(child),
-    warn: child.warn.bind(child),
-    error: child.error.bind(child),
-    fatal: child.fatal.bind(child),
-    dontLogModelData,
-    dontLogToolData,
+    trace: (msg, ...args) => console.debug(prefix, msg, ...args),
+    debug: (msg, ...args) => console.debug(prefix, msg, ...args),
+    info: (msg, ...args) => console.info(prefix, msg, ...args),
+    warn: (msg, ...args) => console.warn(prefix, msg, ...args),
+    error: (msg, ...args) => console.error(prefix, msg, ...args),
+    fatal: (msg, ...args) => console.error(prefix, "[FATAL]", msg, ...args),
+    dontLogModelData: !env.KERNL_LOG_MODEL_DATA,
+    dontLogToolData: !env.KERNL_LOG_TOOL_DATA,
   };
 }
 
