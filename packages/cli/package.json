@@ -32,7 +32,9 @@
       "default": "./dist/create.js"
     }
   },
-  "bin": "./dist/index.js",
+  "bin": {
+    "kernl": "./dist/index.js"
+  },
   "publishConfig": {
     "access": "public"
   },
