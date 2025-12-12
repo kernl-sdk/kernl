@@ -31,4 +31,14 @@ export const toolkits: RegistryItem[] = [
     env: ["EXA_API_KEY"],
     files: [{ path: "toolkits/exa/index.ts" }],
   },
+  {
+    name: "parallel",
+    type: "registry:toolkit",
+    title: "Parallel",
+    description: "Real-time web search and content extraction via Parallel AI",
+    icon: "https://registry.kernl.sh/icons/parallel.svg",
+    category: "search",
+    env: ["PARALLEL_API_KEY"],
+    files: [{ path: "toolkits/parallel/index.ts" }],
+  },
 ];
