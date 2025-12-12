@@ -1,5 +1,13 @@
 # create-kernl
 
+## 0.2.2
+
+### Patch Changes
+
+- Trigger publish workflow
+- Updated dependencies
+  - @kernl-sdk/cli@0.3.2
+
 ## 0.2.1
 
 ### Patch Changes
