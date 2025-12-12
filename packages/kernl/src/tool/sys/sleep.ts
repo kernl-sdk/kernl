@@ -11,34 +11,19 @@ import { randomID } from "@kernl-sdk/shared/lib";
 import { tool } from "../tool";
 import { Toolkit } from "../toolkit";
 
-const WaitParamsSchema = z
-  .object({
-    delay_s: z
-      .number()
-      .int()
-      .nonnegative()
-      .optional()
-      .describe(
-        "How many seconds from now to wait before resuming this thread.",
-      ),
-    run_at_s: z
-      .number()
-      .int()
-      .nonnegative()
-      .optional()
-      .describe("Exact epoch seconds when this thread should be resumed."),
-    reason: z
-      .string()
-      .optional()
-      .describe("Optional human-readable reason for the sleep."),
-  })
-  .refine(
-    (v) => (v.delay_s ?? null) !== null || (v.run_at_s ?? null) !== null,
-    {
-      message: "Either delay_s or run_at_s must be provided",
-      path: ["delay_s"],
-    },
-  );
+const WaitParamsSchema = z.object({
+  delay_s: z
+    .number()
+    .int()
+    .nonnegative()
+    .describe(
+      "How many seconds from now to wait before resuming this thread.",
+    ),
+  reason: z
+    .string()
+    .optional()
+    .describe("Optional human-readable reason for the sleep."),
+});
 
 const wait = tool({
   id: "wait_until",
@@ -57,9 +42,7 @@ const wait = tool({
     assert(ctx.agent, "ctx.agent is required for sleep tools");
     assert(ctx.threadId, "ctx.threadId is required for sleep tools");
 
-    const { delay_s, run_at_s, reason } = params as z.infer<
-      typeof WaitParamsSchema
-    >;
+    const { delay_s, reason } = params as z.infer<typeof WaitParamsSchema>;
 
     const agent: any = ctx.agent;
 
@@ -74,20 +57,14 @@ const wait = tool({
 
     const now_s = Math.floor(Date.now() / 1000);
 
-    // Calculate sleep duration in seconds.
-    // If delay_s is provided, use it directly.
-    // If run_at_s is provided, calculate the duration from now.
-    const sleepForS =
-      delay_s !== undefined ? delay_s : Math.max(0, (run_at_s ?? now_s) - now_s);
-
     // For UI display purposes
-    const targetRunAt_s = now_s + sleepForS;
+    const targetRunAt_s = now_s + delay_s;
     const targetRunAt_ms = targetRunAt_s * 1000;
 
     await wakeupStore.create({
       id: `wkp_${randomID()}`,
       threadId: ctx.threadId,
-      sleepFor: sleepForS,
+      sleepFor: delay_s,
       reason: reason ?? null,
     });
 
