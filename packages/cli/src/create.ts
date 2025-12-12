@@ -4,7 +4,7 @@ import color from "picocolors";
 import * as p from "@clack/prompts";
 
 import { isWriteable, isFolderEmpty } from "@/lib/validate";
-import { installTemplate } from "@/lib/install-template";
+import { installTemplate, type Provider } from "@/lib/install-template";
 import type { PackageManager } from "@/lib/install";
 
 export interface CreateOptions {
@@ -30,7 +30,7 @@ export async function create(options: CreateOptions = {}) {
     p.intro(color.bgCyan(color.black(" create-kernl ")));
   }
 
-  // resolve project name
+  // 1. resolve project name
   let target = options.name;
   if (!target) {
     if (skipPrompts) {
@@ -53,19 +53,21 @@ export async function create(options: CreateOptions = {}) {
   const root = resolve(basedir, target!);
   const name = basename(root);
 
-  // validate parent directory is writable
+  // 2. validate parent directory is writable
   if (!(await isWriteable(dirname(root)))) {
-    p.cancel("The application path is not writable, please check folder permissions.");
+    p.cancel(
+      "The application path is not writable, please check folder permissions.",
+    );
     process.exit(1);
   }
 
-  // create directory + validate empty (unless force)
+  // 3. create directory + validate empty (unless force)
   mkdirSync(root, { recursive: true });
   if (!options.force && !isFolderEmpty(root, name, silent)) {
     process.exit(1);
   }
 
-  // resolve package manager
+  // 4. resolve package manager
   let pm: PackageManager = options.pm || "pnpm";
   if (!options.pm && !skipPrompts) {
     const selected = await p.select({
@@ -85,23 +87,60 @@ export async function create(options: CreateOptions = {}) {
     pm = selected as PackageManager;
   }
 
+  // 5. select AI provider (required)
+  let provider: Provider = "anthropic";
+  if (!skipPrompts) {
+    const selected = await p.select({
+      message: "Select a default provider:",
+      options: [
+        { value: "anthropic", label: "Anthropic" },
+        { value: "openai", label: "OpenAI" },
+        { value: "google", label: "Google" },
+      ],
+    });
+
+    if (p.isCancel(selected)) {
+      p.cancel("Operation cancelled.");
+      process.exit(0);
+    }
+    provider = selected as Provider;
+  }
+
+  // 6. prompt for API key (optional)
+  let apiKey: string | undefined;
+  if (!skipPrompts) {
+    const envVars: Record<Provider, string> = {
+      openai: "OPENAI_API_KEY",
+      anthropic: "ANTHROPIC_API_KEY",
+      google: "GOOGLE_GENERATIVE_AI_API_KEY",
+    };
+
+    const key = await p.text({
+      message: `Enter your ${envVars[provider]} (optional):`,
+      placeholder: "Press Enter to skip",
+    });
+
+    if (!p.isCancel(key) && key) {
+      apiKey = key;
+    }
+  }
+
   await installTemplate({
     appName: name,
     root,
     packageManager: pm,
-    skipInstall: false,
-    skipGit: false,
+    provider,
+    apiKey,
     silent,
   });
 
   if (!silent) {
     const devCmd = pm === "npm" ? "npm run dev" : `${pm} dev`;
 
-    p.note(
-      `cd ${target}\n${devCmd}`,
-      "Next steps",
-    );
+    p.note(`cd ${target}\n${devCmd}`, "Next steps");
 
-    p.outro(`Problems? ${color.underline(color.cyan("https://github.com/kernl-sdk/kernl/issues"))}`);
+    p.outro(
+      `Problems? ${color.underline(color.cyan("https://github.com/kernl-sdk/kernl/issues"))}`,
+    );
   }
 }
