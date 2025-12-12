@@ -1,5 +1,6 @@
 /**
  * Memory table definition and record schema.
+ * /packages/storage/core/src/memory/schema.ts
  */
 
 import { z } from "zod";

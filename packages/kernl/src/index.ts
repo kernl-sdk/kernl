@@ -1,3 +1,6 @@
+/**
+ * /package/kernl/src/index.ts
+*/
 export { Kernl } from "./kernl";
 export type {
   KernlOptions,
@@ -79,3 +82,15 @@ export type {
   MemoryByte,
   MemoryByteCodec,
 } from "./memory";
+
+// --- wakeups ---
+export type {
+  WakeupStore,
+  NewScheduledWakeup,
+  ScheduledWakeup,
+  ScheduledWakeupUpdate,
+} from "./wakeup";
+
+// --- scheduler ---
+export { WakeupScheduler } from "./scheduler";
+export type { WakeupSchedulerOptions, WakeupSchedulerState } from "./scheduler";

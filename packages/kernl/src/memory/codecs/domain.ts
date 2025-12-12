@@ -1,5 +1,6 @@
 /**
  * Domain-level memory codecs.
+ * /packages/kernl/src/memory/codecs/domain.ts
  *
  * Codecs for transforming between memory domain types and search/index formats.
  */

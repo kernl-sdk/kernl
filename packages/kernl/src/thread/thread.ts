@@ -1,3 +1,6 @@
+/**
+ * /packages/kernl/src/thread/thread.ts
+ */
 import assert from "assert";
 import { ZodType } from "zod";
 import * as z from "zod";
@@ -19,6 +22,7 @@ import {
   LanguageModel,
   LanguageModelItem,
   LanguageModelRequest,
+  INTERRUPTIBLE
 } from "@kernl-sdk/protocol";
 import { randomID, filter } from "@kernl-sdk/shared/lib";
 
@@ -141,6 +145,7 @@ export class Thread<
     }
   }
 
+  // MARK: Execute
   /**
    * Blocking execution - runs until terminal state or interruption
    */
@@ -186,12 +191,17 @@ export class Thread<
     } catch (err) {
       throw err;
     } finally {
-      this.state = STOPPED;
+      // Preserve INTERRUPTIBLE state (set by sleep/approval flows).
+      // Only transition to STOPPED if we're still RUNNING.
+      if (this.state === RUNNING) {
+        this.state = STOPPED;
+      }
       this.abort = undefined;
-      await this.checkpoint(); /* c4: final checkpoint - persist STOPPED state */
+      await this.checkpoint(); /* c4: final checkpoint - persist final state */
     }
   }
 
+  // MARK: _execute main loop
   /**
    * Main execution loop - always yields events, callers can propagate or discard.
    *
@@ -251,13 +261,11 @@ export class Thread<
       await this.checkpoint(); /* c3: tick complete */
 
       if (pendingApprovals.length > 0) {
-        // publish a batch approval request containing all of them
-        //
-        // const reqid = randomID();
-        // this.kernl.publish(channel, approvalRequest);
-        //
-        // const filter = { reqid }
-        // await wait_event(Action.ApprovalResponse, filter);
+        // Thread halts when actions require approval (e.g., sleep).
+        // External scheduler will resume the thread later.
+        // Set state to INTERRUPTIBLE so callers know the thread is sleeping, not stopped.
+        this.state = INTERRUPTIBLE;
+        return;
       }
     }
   }
@@ -402,19 +410,47 @@ export class Thread<
     const actions: ThreadEventInner[] = [];
     const pendingApprovals: ToolCall[] = [];
 
-    // (TODO): clean this - approval tracking should be handled differently
     for (const e of toolEvents) {
-      if (
-        e.kind === "tool-result" &&
-        (e.state as any) === "requires_approval" // (TODO): fix this
-      ) {
-        // find the original tool call for this pending approval
-        const call = intentions.toolCalls.find((c) => c.callId === e.callId);
-        call && pendingApprovals.push(call);
-      } else {
-        actions.push(e);
+      actions.push(e); // always record the tool call in history
+
+      // Only system tools are allowed to affect control flow.
+      if (e.kind === "tool-result" && this.agent.isSysTool(e.toolId)) {
+        // 1) Future-proof: generic approval-based interrupts (other sys tools)
+        //    If you later add real approval flows that still use INTERRUPTIBLE,
+        //    this branch continues to work.
+        if (e.state === INTERRUPTIBLE) {
+          const call = intentions.toolCalls.find((c) => c.callId === e.callId);
+          if (call) pendingApprovals.push(call);
+          continue;
+        }
+
+        // 2) Sleep tool: state is COMPLETED, but semantically it means
+        //    "alarm set, thread should pause until wakeup."
+        if (e.toolId === "wait_until") {
+          const call = intentions.toolCalls.find((c) => c.callId === e.callId);
+          if (call) pendingApprovals.push(call);
+          continue;
+        }
       }
     }
+    // const actions: ThreadEventInner[] = [];
+    // const pendingApprovals: ToolCall[] = [];
+
+    // // (TODO): clean this - approval tracking should be handled differently
+    // for (const e of toolEvents) {
+    //   // actions.push(e);
+    //   if (
+    //     e.kind === "tool-result" &&
+    //     e.state === INTERRUPTIBLE &&
+    //     this.agent.isSysTool(e.toolId)
+    //   ) {
+    //     // find the original tool call for this pending approval
+    //     const call = intentions.toolCalls.find((c) => c.callId === e.callId);
+    //     call && pendingApprovals.push(call);
+    //   } else {
+    //     actions.push(e);
+    //   }
+    // }
 
     return {
       actions: actions,
@@ -446,7 +482,14 @@ export class Thread<
           // is refined
           const ctx = new Context(this.namespace, this.context.context);
           ctx.agent = this.agent;
-          ctx.approve(call.callId); // mark this call as approved
+          ctx.threadId = this.tid;
+
+          // Don't pre-approve system tools - they use requiresApproval to signal
+          // INTERRUPTIBLE state (e.g., sleep tool halts the execution loop)
+          if (!this.agent.isSysTool(call.toolId)) {
+            ctx.approve(call.callId);
+          }
+
           const res = await tool.invoke(ctx, call.arguments, call.callId);
 
           return {

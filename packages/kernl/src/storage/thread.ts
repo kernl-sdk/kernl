@@ -1,5 +1,6 @@
 /**
  * Thread storage contracts.
+ * /packages/kernl/src/storage/thread.ts
  */
 
 import type { Thread } from "@/thread";

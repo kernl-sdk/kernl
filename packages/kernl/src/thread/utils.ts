@@ -1,3 +1,6 @@
+/**
+ * /packages/kernl/src/thread/utils.ts
+ */
 import { ZodType } from "zod";
 
 import type { ResolvedAgentResponse } from "@/guardrail";

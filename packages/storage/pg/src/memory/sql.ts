@@ -1,6 +1,7 @@
 /**
  * Memory SQL conversion codecs.
- *
+ * /packages/storage/pg/src/memory/sql.ts
+ * 
  * TODO: generalize object -> SQL conversion into a shared utility
  */
 

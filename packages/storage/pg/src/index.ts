@@ -1,5 +1,6 @@
 /**
  * @kernl/pg - PostgreSQL storage adapter for Kernl
+ * /packages/storage/pg/src/index.ts
  */
 
 export {
@@ -12,6 +13,7 @@ export {
   resolveVectorConfig,
 } from "./storage";
 export { PGMemoryStore } from "./memory/store";
+export { PGWakeupStore } from "./wakeup/store";
 export { postgres, pgvector, type PostgresConfig } from "./postgres";
 export { MIGRATIONS, REQUIRED_SCHEMA_VERSION } from "./migrations";
 export {

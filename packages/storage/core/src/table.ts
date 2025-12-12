@@ -1,5 +1,6 @@
 /**
  * Schema name for all kernl tables.
+ * /packages/storage/core/table.ts
  */
 export const KERNL_SCHEMA_NAME = "kernl";
 

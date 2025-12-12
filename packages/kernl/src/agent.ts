@@ -1,3 +1,7 @@
+/**
+ * /packages/kernl/src/agent.ts
+ */
+
 import {
   message,
   LanguageModel,
@@ -15,7 +19,7 @@ import type {
   RThreadUpdateParams,
 } from "@/api/resources/threads/types";
 import type { Context, UnknownContext } from "./context";
-import { Tool, memory } from "./tool";
+import { Tool, memory, sleep } from "./tool";
 import { BaseToolkit } from "./tool/toolkit";
 import {
   InputGuardrail,
@@ -112,13 +116,22 @@ export class Agent<
     this.kernl = kernl;
 
     // initialize system toolkits
+
+    // Memory System Tool
     if (this.memory.enabled) {
       // safety: system tools only rely on ctx.agent, not ctx.context
       const toolkit = memory as unknown as BaseToolkit<TContext>;
       this.systools.push(toolkit);
       toolkit.bind(this);
     }
+    // Sleep System Tool
+    {
+      const sleepToolkit = sleep as unknown as BaseToolkit<TContext>;
+      this.systools.push(sleepToolkit);
+      sleepToolkit.bind(this);
+    }
   }
+
 
   /**
    * Blocking execution - spawns or resumes thread and waits for completion
@@ -261,6 +274,21 @@ export class Agent<
       if (tool) return tool;
     }
     return undefined;
+  }
+
+  /**
+   * @internal
+   *
+   * Check if a tool ID belongs to a system toolkit.
+   *
+   * @param id The tool ID to check
+   * @returns true if the tool is a system tool
+   */
+  isSysTool(id: string): boolean {
+    for (const toolkit of this.systools) {
+      if (toolkit.get(id)) return true;
+    }
+    return false;
   }
 
   /**

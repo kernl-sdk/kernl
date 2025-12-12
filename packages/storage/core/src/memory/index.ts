@@ -1,5 +1,6 @@
 /**
  * Memory storage types and schema.
+ * /packages/storage/core/src/memory/index.ts
  */
 
 export {

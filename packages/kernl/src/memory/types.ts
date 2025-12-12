@@ -1,5 +1,6 @@
 /**
  * Memory types.
+ * /packages/kernl/src/memory/types.ts
  */
 
 import type { JSONObject } from "@kernl-sdk/protocol";

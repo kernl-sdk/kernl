@@ -1,3 +1,7 @@
+/**
+ * /packages/kernl/src/context.ts
+ */
+
 import type { Agent } from "@/agent";
 
 /**
@@ -25,6 +29,12 @@ export class Context<TContext = UnknownContext> {
    * Set by the thread during execution.
    */
   agent?: Agent<TContext, any>;
+
+  /**
+   * The thread ID for the current execution.
+   * Set by the thread during tool execution.
+   */
+  threadId?: string;
 
   // ----------------------
   // TEMPORARY: Tool approval tracking until actions system is refined

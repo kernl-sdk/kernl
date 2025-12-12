@@ -1,5 +1,6 @@
 /**
  * Memory index handle with lazy initialization.
+ * /packages/kernl/src/memory/handle.ts
  */
 
 import {

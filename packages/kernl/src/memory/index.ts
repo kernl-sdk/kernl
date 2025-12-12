@@ -1,5 +1,6 @@
 /**
  * Memory module.
+ * /packages/kernl/src/memory/index.ts
  */
 
 export { Memory } from "./memory";

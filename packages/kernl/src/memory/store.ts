@@ -1,5 +1,6 @@
 /**
  * Memory store interface.
+ * /packages/kernl/src/memory/store.ts
  */
 
 import type {

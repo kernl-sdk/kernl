@@ -1,5 +1,6 @@
 /**
  * Memory codecs.
+ * /packages/kernl/src/memory/codecs/index.ts
  *
  * Re-exports all memory codecs:
  * - Domain codecs (MEMORY_FILTER, PATCH_CODEC, recordCodec)
