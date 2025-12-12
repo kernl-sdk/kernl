@@ -13,6 +13,27 @@ The toolkit marketplace is now live. Browse available toolkits at [kernl.sh/mark
 kernl add toolkit github
 ```
 
+## The philosophy
+
+From the very beginning, the goal was to make toolkits customizable.
+
+The idea is to give you solid defaults — well-structured tools, clear descriptions, sensible implementations — and then let you take it from there. Tweak the execution logic. Add new tools. Change how things work for your particular context. Build your own version.
+
+When you add a toolkit, the source code is copied directly into your project — just like [shadcn](https://ui.shadcn.com). No package dependency, just files in your `toolkits/` directory that you fully control.
+
+```
+toolkits/
+└── github/
+    ├── index.ts      ← yours to modify
+    ├── create-issue.ts
+    ├── list-repos.ts
+    └── ...
+```
+
+Maybe you want the `create-issue` tool to auto-assign based on your team's rotation. Maybe you want to add custom labels, or filter repos by org. The code is right there — make it yours.
+
+## How it works
+
 This downloads the toolkit source to your `toolkits/` directory and installs any required dependencies.
 
 ```ts
