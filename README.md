@@ -14,8 +14,6 @@ kernl is a Typescript framework for building + coordinating AI agents that remem
 Install the CLI:
 
 ```bash
-brew install kernl
-# or
 npm install -g @kernl-sdk/cli
 ```
 
