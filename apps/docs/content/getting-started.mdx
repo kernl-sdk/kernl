@@ -23,18 +23,9 @@ kernl init my-project
 cd my-project
 ```
 
-### Set your API keys
+### Your first agent
 
-```bash
-# .env
-ANTHROPIC_API_KEY=sk-...
-OPENAI_API_KEY=sk-...
-GOOGLE_GENERATIVE_AI_API_KEY=sk-...
-```
-
-### Make it yours
-
-Open `src/agents/jarvis.ts`:
+Open `src/agents/jarvis.ts`. This is your agent:
 
 ```ts
 import { Agent } from "kernl";
@@ -51,11 +42,72 @@ export const jarvis = new Agent({
 });
 ```
 
-Change the instructions. Add a new toolkit. Make it do something useful.
+The starter project includes a simple `math` toolkit—now let's add something more useful.
+
+### Add toolkits
+
+Toolkits give your agent capabilities. You can grab pre-built ones from the registry or write your own.
+
+**From the marketplace**
+
+Browse [kernl.sh/marketplace](https://www.kernl.sh/marketplace) and add with a single command:
+
+```bash
+kernl add toolkit github
+```
+
+This downloads the toolkit to `toolkits/`, installs dependencies, and shows any environment variables to configure.
+
+**Your own tools**
+
+Create a tool with `tool()` and group them into a `Toolkit`:
+
+```ts
+import { tool, Toolkit } from "kernl";
+import { z } from "zod";
+
+const greet = tool({
+  id: "greet",
+  description: "Greet someone by name",
+  parameters: z.object({ name: z.string() }),
+  execute: async (ctx, { name }) => `Hello, ${name}!`,
+});
+
+export const hello = new Toolkit({
+  id: "hello",
+  description: "Greeting tools",
+  tools: [greet],
+});
+```
+
+Then wire toolkits into your agent:
+
+```ts
+import { github } from "@/toolkits/github";
+import { hello } from "@/toolkits/hello";
+
+export const jarvis = new Agent({
+  id: "jarvis",
+  name: "Jarvis",
+  instructions: "You are Jarvis, a helpful assistant.",
+  model: anthropic("claude-sonnet-4-5"),
+  toolkits: [github, hello],
+});
+```
+
+### Run it
+
+```bash
+pnpm start
+```
+
+This runs the example in `src/index.ts`—sends a message to your agent and prints the response. A minimal 'hello world' so you know the agent works.
 
 </Steps>
 
 ## Project structure
+
+The CLI scaffolds a sensible basic project structure for you:
 
 ```
 src/
@@ -66,19 +118,21 @@ src/
 │   │   ├── index.ts
 │   │   ├── add.ts
 │   │   └── ...
-│   └── github/
+│   └── github/        ← added via registry
 │       └── index.ts
 └── index.ts
 ```
 
-**agents/** — One file per agent. Export the agent instance.
+For real applications, you'll likely want to run your agent inside a server. Check out the [microprojects](https://github.com/kernl-sdk/kernl/tree/master/microprojects) for production-ready examples:
 
-**toolkits/** — Group related tools together. Each toolkit exports from its `index.ts`.
+- **Jarvis** — Chief of Staff for dev teams with Linear + GitHub toolkits
+- **Watson** — Customer discovery agent with memory and workflows
 
-**index.ts** — Entrypoint. Create a Kernl instance, register agents, run.
+Both follow the same pattern: a `server/` running Hono + kernl, and a `web/` frontend chatbot that hits the agent API.
 
 ## Next steps
 
 - [Agents](/concepts/agents) — deeper dive into agent configuration
+- [Toolkits](/concepts/toolkits) — create custom toolkits or connect to MCP servers
 - [Memory](/concepts/memory) — give your agent persistent memory
 - [Threads](/concepts/threads) — manage execution state

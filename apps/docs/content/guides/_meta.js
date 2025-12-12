@@ -1,3 +1,3 @@
 export default {
-  index: 'Overview'
+  chatbot: 'Chatbot - AI SDK'
 }

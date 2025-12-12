@@ -8,8 +8,8 @@ export default {
   index: "Overview",
   architecture: "Architecture",
   "getting-started": "Getting Started",
+  guides: "Guides",
   concepts: "Concepts",
-  guides: { display: "hidden" },
   reference: "Reference",
   glossary: "Glossary",
 };

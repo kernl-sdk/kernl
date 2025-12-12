@@ -442,3 +442,8 @@ html.dark [class*="sidebar"] li.active > a {
   }
 }
 
+/* Steps component - nudge counter up to align with heading */
+.nextra-steps h3::before {
+  transform: translateY(-6px) !important;
+}
+
