@@ -1,5 +1,11 @@
 # create-kernl
 
+## 0.2.3
+
+### Patch Changes
+
+- Fix workspace protocol in published package
+
 ## 0.2.2
 
 ### Patch Changes
