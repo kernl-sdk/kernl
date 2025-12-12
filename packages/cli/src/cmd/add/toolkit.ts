@@ -75,7 +75,15 @@ async function installToolkit(
 
   const s = p.spinner();
   s.start(`Fetching ${name}`);
-  const item = await fetchItem(url);
+
+  let item;
+  try {
+    item = await fetchItem(url);
+  } catch (err) {
+    s.stop(`Failed to fetch ${name}`);
+    throw err;
+  }
+
   s.stop(`Fetched ${item.title || item.name}`);
 
   const targetDir = join(config.toolkitsDir, item.name);
