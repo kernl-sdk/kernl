@@ -173,8 +173,8 @@ importers:
         specifier: workspace:*
         version: link:../../../packages/storage/turbopuffer
       kernl:
-        specifier: '*'
-        version: 0.8.2
+        specifier: workspace:*
+        version: link:../../../packages/kernl
     devDependencies:
       '@types/node':
         specifier: ^24.10.0
