@@ -18,6 +18,8 @@ I was astounded to learn that 85% of production agents are still custom code.. &
 
 So I asked myself, "Why are people hand-rolling the same code over and over again, alone?"
 
+We clearly need a unified framework for building them, but why doesn't this exist?
+
 These are the three main reasons teams cited for throwing away frameworks after trying them:
 
 1. *Dependency hell*. "LangChain pulls in 47 packages. Our security team said no."
@@ -36,11 +38,61 @@ Aggressive minimalism is at the heart of the design ethos behind this company, a
 
 Every line of code, and every addition to the framework is intentional. Ruthless simplification is a never ending war that we will continue to wage.
 
-In practice, this means 3 external dependencies—not 47. Functions you can read in one sitting if you want to browse the source. When something breaks, you trace it in your code, not ours.
-
-It also means you own what you use. Our toolkit [marketplace](/marketplace) works like shadcn: browse, copy, customize. The code lives in your repo, under your control, customizable to your needs.
+In practice, this means 3 external dependencies—not 47. Functions you can read in one sitting if you want to browse the source.
 
 And lastly it means building in the open. The Linux spirit—code that belongs to everyone, shaped by the people who use it. We want to cultivate a community, not a customer base.
+
+## Why kernl
+
+This is just the beginning, but here are a few reasons why choose kernl today:
+
+**Toolkit marketplace**. Open by design, customizable to your needs. Browse, copy, own. The code lives in your repo, not ours.
+
+```bash
+kernl add toolkit github
+```
+
+There's no magic under the hood, no remote server you have to rely on — it works just like shadcn and copies the toolkit into your project so you can edit the code to your needs.
+
+**Thread persistence**. Simple storage configuration, no managing message threads manually. Conversations just work.
+
+```ts
+import { Kernl } from "kernl";
+import { postgres } from "@kernl-sdk/pg";
+
+const kernl = new Kernl({
+  storage: {
+    db: postgres({ connstr: process.env.DATABASE_URL }), // this is all you need to configure persistence
+  },
+});
+
+await jarvis.stream("My name is Tony.", { 
+  threadId: "thread_123" 
+});
+
+// resumes the same thread
+await jarvis.stream("What's my name?", { 
+  threadId: "thread_123" 
+});
+```
+
+**Memory**. Namespace-scoped memories that outlive individual threads. Agents that actually remember.
+
+```ts
+const jarvis = new Agent({
+  id: "jarvis",
+  name: "J.A.R.V.I.S.",
+  model: anthropic("claude-sonnet-4-5"),
+  instructions: "Help Tony Stark save the world from destruction.",
+  memory: { enabled: true }, // this enables Jarvis to see and search its own memories, across threads
+});
+
+await jarvis.memories.create({
+  namespace: "org-a", // optional namespacing for multi-tenant use cases
+  collection: "preferences",
+  content: { text: "Tony prefers his coffee extra strong." },
+});
+```
 
 ## A couple of our principles
 
@@ -62,12 +114,15 @@ npm create kernl@latest
 import { Kernl, Agent } from "kernl";
 import { anthropic } from "@kernl-sdk/ai/anthropic";
 
+import { math } from "@/toolkits/math";
+
 const kernl = new Kernl();
 
 const agent = new Agent({
   id: "assistant",
   model: anthropic("claude-sonnet-4-5"),
   instructions: "You are a helpful assistant.",
+  toolkits: [math]
 });
 
 kernl.register(agent);
