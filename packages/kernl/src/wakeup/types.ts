@@ -15,12 +15,20 @@ export interface NewScheduledWakeup {
   threadId: string;
 
   /**
-   * When this wakeup becomes due (epoch milliseconds).
+   * Duration to sleep (seconds). Preferred over `runAt`.
    *
+   * The system will calculate the absolute wakeup time as `created_at + sleepFor`.
+   */
+  sleepFor?: number;
+
+  /**
+   * (Legacy) When this wakeup becomes due (epoch milliseconds).
+   *
+   * For backward compatibility. Prefer using `sleepFor` instead.
    * Storage providers can store this as seconds (`run_at_s`) or ms,
    * codecs handle conversion.
    */
-  runAt: number;
+  runAt?: number;
 
   /**
    * Optional free-form reason for observability.
@@ -39,6 +47,11 @@ export interface ScheduledWakeup {
    * Due time in epoch milliseconds (domain-level).
    */
   runAt: number;
+
+  /**
+   * Duration to sleep (seconds).
+   */
+  sleepFor: number;
 
   reason: string | null;
 

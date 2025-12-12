@@ -73,14 +73,21 @@ const wait = tool({
     }
 
     const now_s = Math.floor(Date.now() / 1000);
-    const targetRunAt_s =
-      run_at_s ?? (delay_s !== undefined ? now_s + delay_s : now_s);
+
+    // Calculate sleep duration in seconds.
+    // If delay_s is provided, use it directly.
+    // If run_at_s is provided, calculate the duration from now.
+    const sleepForS =
+      delay_s !== undefined ? delay_s : Math.max(0, (run_at_s ?? now_s) - now_s);
+
+    // For UI display purposes
+    const targetRunAt_s = now_s + sleepForS;
     const targetRunAt_ms = targetRunAt_s * 1000;
 
     await wakeupStore.create({
       id: `wkp_${randomID()}`,
       threadId: ctx.threadId,
-      runAt: targetRunAt_ms,
+      sleepFor: sleepForS,
       reason: reason ?? null,
     });
 

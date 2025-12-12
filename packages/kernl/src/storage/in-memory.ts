@@ -562,11 +562,23 @@ export class InMemoryWakeupStore implements WakeupStore {
 
   async create(input: NewScheduledWakeup): Promise<ScheduledWakeup> {
     const now = Date.now();
+    const nowS = Math.floor(now / 1000);
+
+    // Support both new (sleepFor) and legacy (runAt) fields.
+    const sleepForS =
+      typeof input.sleepFor === "number"
+        ? Math.max(0, Math.floor(input.sleepFor))
+        : typeof input.runAt === "number"
+          ? Math.max(0, Math.floor(input.runAt / 1000) - nowS)
+          : 0;
+
+    const runAt = nowS * 1000 + sleepForS * 1000;
 
     const record: ScheduledWakeup = {
       id: input.id,
       threadId: input.threadId,
-      runAt: input.runAt,
+      runAt,
+      sleepFor: sleepForS,
       reason: input.reason ?? null,
       woken: false,
       claimedAt: null,
