@@ -1,5 +1,12 @@
 # @kernl-sdk/server
 
+## 0.0.11
+
+### Patch Changes
+
+- Updated dependencies [ae11e54]
+  - kernl@0.8.3
+
 ## 0.0.10
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @kernl/core
 
+## 0.8.3
+
+### Patch Changes
+
+- ae11e54: Replace pino logger with console-based implementation to reduce dependencies
+
 ## 0.8.2
 
 ### Patch Changes
