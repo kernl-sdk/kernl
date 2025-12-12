@@ -29,6 +29,12 @@ export interface Migration {
  */
 export const MIGRATIONS: Migration[] = [
   {
+    id: "000_enable_vector",
+    async up(ctx) {
+      await ctx.client.query("CREATE EXTENSION IF NOT EXISTS vector");
+    },
+  },
+  {
     id: "001_threads",
     async up(ctx) {
       await ctx.createTable(TABLE_THREADS);
