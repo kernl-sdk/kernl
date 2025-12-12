@@ -9,6 +9,7 @@
 import type { Kernl } from "@/kernl";
 import type { ScheduledWakeup } from "@/wakeup";
 import { getLogger } from "@/lib/logger";
+import { message } from "@kernl-sdk/protocol";
 
 import type { WakeupSchedulerOptions, WakeupSchedulerState } from "./types";
 
@@ -150,6 +151,18 @@ export class WakeupScheduler {
       if (!thread) {
         throw new Error(`Thread ${threadId} not found`);
       }
+
+      // Append a user message to signal wakeup and continuation
+      const wakeupMessage = wakeup.reason
+        ? `[Sleep period complete - reason: ${wakeup.reason}] You have woken up. Continue with your task.`
+        : "[Sleep period complete] You have woken up. Continue with your task.";
+
+      thread.append(
+        message({
+          role: "user",
+          text: wakeupMessage,
+        }),
+      );
 
       // Resume thread execution (thread.execute continues from where it left off)
       await this.kernl.schedule(thread);
