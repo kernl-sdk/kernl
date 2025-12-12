@@ -62,7 +62,8 @@ import { postgres } from "@kernl-sdk/pg";
 
 const kernl = new Kernl({
   storage: {
-    db: postgres({ connstr: process.env.DATABASE_URL }), // this is all you need to configure persistence
+    // this is all you need to configure persistence
+    db: postgres({ connstr: process.env.DATABASE_URL }),
   },
 });
 
@@ -84,7 +85,8 @@ const jarvis = new Agent({
   name: "J.A.R.V.I.S.",
   model: anthropic("claude-sonnet-4-5"),
   instructions: "Help Tony Stark save the world from destruction.",
-  memory: { enabled: true }, // this enables Jarvis to see and search its own memories, across threads
+  // this enables Jarvis to see and search its own memories, across threads
+  memory: { enabled: true }, 
 });
 
 await jarvis.memories.create({
