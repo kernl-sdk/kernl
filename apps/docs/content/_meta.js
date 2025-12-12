@@ -8,6 +8,7 @@ export default {
   index: "Overview",
   architecture: "Architecture",
   "getting-started": "Getting Started",
+  marketplace: "Marketplace",
   guides: "Guides",
   concepts: "Concepts",
   reference: "Reference",

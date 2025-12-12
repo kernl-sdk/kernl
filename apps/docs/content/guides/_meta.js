@@ -1,3 +1,3 @@
 export default {
-  chatbot: 'Chatbot - AI SDK'
+  'chatbot-ai-sdk': 'Chatbot - AI SDK'
 }
