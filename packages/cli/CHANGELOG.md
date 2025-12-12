@@ -1,5 +1,11 @@
 # @kernl/cli
 
+## 0.3.4
+
+### Patch Changes
+
+- aa7d704: Update default template tsconfig for bundler resolution
+
 ## 0.3.3
 
 ### Patch Changes
