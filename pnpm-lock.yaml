@@ -347,8 +347,8 @@ importers:
   packages/create-kernl:
     dependencies:
       '@kernl-sdk/cli':
-        specifier: ^0.3.0
-        version: 0.3.2
+        specifier: ^0.3.4
+        version: 0.3.4
       commander:
         specifier: ^14.0.2
         version: 14.0.2
@@ -1552,8 +1552,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@kernl-sdk/cli@0.3.2':
-    resolution: {integrity: sha512-eo3FiL8YykW+r+t3RTb9kdhClp6P4wCaTVXdaoCMcWpW13W4zg9I6hT7j/YiQkcaX/7hXWykwXQX0Qbz+RXEcA==}
+  '@kernl-sdk/cli@0.3.4':
+    resolution: {integrity: sha512-mJVRp0NeYLLxn70Vv6MPzQWUT4XETjv7WLDLpWvvQPgaStDkmBdSK98JSChDTbR8X0EU3xhKX7Pd0CwTkIEafA==}
     hasBin: true
 
   '@kernl-sdk/protocol@0.2.8':
@@ -7341,7 +7341,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@kernl-sdk/cli@0.3.2':
+  '@kernl-sdk/cli@0.3.4':
     dependencies:
       '@antfu/ni': 28.0.0
       '@clack/prompts': 0.11.0

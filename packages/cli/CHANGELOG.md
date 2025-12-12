@@ -1,5 +1,16 @@
 # @kernl/cli
 
+## 0.4.0
+
+### Minor Changes
+
+- Add provider selection and concrete dependency versions
+  - Add required provider selection prompt (Anthropic, OpenAI, Google)
+  - Add optional API key prompt with .env generation
+  - Generate jarvis.ts dynamically based on selected provider
+  - Install only the chosen @ai-sdk/\* package
+  - Use concrete versions instead of "latest" for all dependencies
+
 ## 0.3.4
 
 ### Patch Changes

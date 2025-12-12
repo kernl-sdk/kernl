@@ -1,6 +1,6 @@
 {
   "name": "create-kernl",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Create a new kernl application",
   "keywords": [
     "kernl",
@@ -41,7 +41,7 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "@kernl-sdk/cli": "^0.3.0",
+    "@kernl-sdk/cli": "^0.3.4",
     "commander": "^14.0.2"
   },
   "devDependencies": {
