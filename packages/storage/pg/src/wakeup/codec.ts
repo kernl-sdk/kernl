@@ -22,18 +22,28 @@ export const NewScheduledWakeupCodec: Codec<
   ScheduledWakeupRecord
 > = {
   encode(input) {
-    const nowMs = Date.now();
-    const runAtS = Math.floor(input.runAt / 1000);
+    // Store timestamps in epoch *seconds* to keep the DB representation stable.
+    const nowS = Math.floor(Date.now() / 1000);
+
+    // Back-compat: allow either `sleepFor` (seconds) or legacy `runAt` (ms epoch).
+    const anyInput = input as any;
+    const sleepForS =
+      typeof anyInput.sleepFor === "number"
+        ? Math.max(0, Math.floor(anyInput.sleepFor))
+        : Math.max(0, Math.floor(anyInput.runAt / 1000) - nowS);
+
+    const wakeupAtS = nowS + sleepForS;
 
     return {
       id: input.id,
       thread_id: input.threadId,
-      run_at_s: runAtS,
+      sleep_for: sleepForS,
+      wakeup_at: wakeupAtS,
       reason: input.reason ?? null,
       woken: false,
       claimed_at_s: null,
-      created_at: nowMs,
-      updated_at: nowMs,
+      created_at: nowS,
+      updated_at: nowS,
       error: null,
     };
   },
@@ -51,19 +61,40 @@ export const ScheduledWakeupCodec: Codec<
   ScheduledWakeupRecord
 > = {
   encode(wakeup) {
-    const runAtS = Math.floor(wakeup.runAt / 1000);
+    const anyWakeup = wakeup as any;
+
+    const wakeupAtMs = anyWakeup.wakeupAt ?? anyWakeup.runAt;
+    const wakeupAtS = Math.floor(wakeupAtMs / 1000);
+
+    // Domain timestamps are typically ms; DB stores seconds.
+    const createdAtS =
+      typeof anyWakeup.createdAt === "number"
+        ? Math.floor(anyWakeup.createdAt / 1000)
+        : wakeupAtS;
+
+    const updatedAtS =
+      typeof anyWakeup.updatedAt === "number"
+        ? Math.floor(anyWakeup.updatedAt / 1000)
+        : createdAtS;
+
+    const sleepForS =
+      typeof anyWakeup.sleepFor === "number"
+        ? Math.max(0, Math.floor(anyWakeup.sleepFor))
+        : Math.max(0, wakeupAtS - createdAtS);
+
     const claimedAtS =
-      wakeup.claimedAt != null ? Math.floor(wakeup.claimedAt / 1000) : null;
+      anyWakeup.claimedAt != null ? Math.floor(anyWakeup.claimedAt / 1000) : null;
 
     return {
       id: wakeup.id,
       thread_id: wakeup.threadId,
-      run_at_s: runAtS,
+      sleep_for: sleepForS,
+      wakeup_at: wakeupAtS,
       reason: wakeup.reason,
       woken: wakeup.woken,
       claimed_at_s: claimedAtS,
-      created_at: wakeup.createdAt,
-      updated_at: wakeup.updatedAt,
+      created_at: createdAtS,
+      updated_at: updatedAtS,
       error: wakeup.error,
     };
   },
@@ -72,13 +103,16 @@ export const ScheduledWakeupCodec: Codec<
     return {
       id: record.id,
       threadId: record.thread_id,
-      runAt: record.run_at_s * 1000,
+      // Back-compat: expose legacy `runAt` in ms while the DB stores seconds.
+      runAt: record.wakeup_at * 1000,
+      // New: also expose the stored duration (seconds).
+      sleepFor: record.sleep_for,
       reason: record.reason,
       woken: record.woken,
       claimedAt:
         record.claimed_at_s != null ? record.claimed_at_s * 1000 : null,
-      createdAt: record.created_at,
-      updatedAt: record.updated_at,
+      createdAt: record.created_at * 1000,
+      updatedAt: record.updated_at * 1000,
       error: record.error,
     };
   },

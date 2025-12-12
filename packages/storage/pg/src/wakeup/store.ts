@@ -57,13 +57,14 @@ export class PGWakeupStore implements WakeupStore {
 
     const result = await this.db.query<ScheduledWakeupRecord>(
       `INSERT INTO ${KERNL_SCHEMA_NAME}.scheduled_wakeups
-       (id, thread_id, run_at_s, reason, woken, claimed_at_s, created_at, updated_at, error)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+       (id, thread_id, sleep_for, wakeup_at, reason, woken, claimed_at_s, created_at, updated_at, error)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
        RETURNING *`,
       [
         row.id,
         row.thread_id,
-        row.run_at_s,
+        row.sleep_for,
+        row.wakeup_at,
         row.reason,
         row.woken,
         row.claimed_at_s,
@@ -135,7 +136,6 @@ export class PGWakeupStore implements WakeupStore {
   ): Promise<ScheduledWakeup[]> {
     await this.ensureInit();
 
-    const nowMsNum = toMs(nowMs);
     const nowS = toSeconds(nowMs);
 
     const result = await this.db.query<ScheduledWakeupRecord>(
@@ -145,19 +145,19 @@ export class PGWakeupStore implements WakeupStore {
         FROM ${KERNL_SCHEMA_NAME}.scheduled_wakeups
         WHERE woken = FALSE
           AND claimed_at_s IS NULL
-          AND run_at_s <= $1
-        ORDER BY run_at_s ASC
+          AND wakeup_at <= $1
+        ORDER BY wakeup_at ASC
         LIMIT $2
         FOR UPDATE SKIP LOCKED
       )
       UPDATE ${KERNL_SCHEMA_NAME}.scheduled_wakeups AS sw
       SET claimed_at_s = $1,
-          updated_at = $3
+          updated_at = $1
       FROM due
       WHERE sw.id = due.id
       RETURNING sw.*;
       `,
-      [nowS, limit, nowMsNum],
+      [nowS, limit],
     );
 
     return result.rows.map((row) =>

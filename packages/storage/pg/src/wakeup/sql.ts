@@ -30,9 +30,25 @@ export const PATCH: Codec<PatchInput, SQLClause> = {
     const params: unknown[] = [];
     let idx = startIdx;
 
-    if (patch.runAt !== undefined) {
-      sets.push(`run_at_s = $${idx++}`);
-      params.push(Math.floor(patch.runAt / 1000));
+    // Back-compat: allow either `wakeupAt` (ms), legacy `runAt` (ms), and/or `sleepFor` (seconds).
+    const anyPatch = patch as any;
+    const wakeupAtMs = anyPatch.wakeupAt ?? anyPatch.runAt;
+
+    if (wakeupAtMs !== undefined) {
+      const wakeupAtS = Math.floor(wakeupAtMs / 1000);
+      const wakeupIdx = idx++;
+      sets.push(`wakeup_at = $${wakeupIdx}`);
+      params.push(wakeupAtS);
+
+      // If caller did not explicitly set sleepFor, keep it consistent with wakeup_at and created_at.
+      if (anyPatch.sleepFor === undefined) {
+        sets.push(`sleep_for = GREATEST(0, $${wakeupIdx} - created_at)`);
+      }
+    }
+
+    if (anyPatch.sleepFor !== undefined) {
+      sets.push(`sleep_for = $${idx++}`);
+      params.push(Math.max(0, Math.floor(anyPatch.sleepFor)));
     }
 
     if (patch.reason !== undefined) {
@@ -57,10 +73,10 @@ export const PATCH: Codec<PatchInput, SQLClause> = {
       params.push(patch.error);
     }
 
-    // Always bump updated_at in ms, matching memory's PATCH behavior.
-    const nowMs = patch.updatedAt ?? Date.now();
+    // Always bump updated_at in epoch seconds.
+    const nowS = Math.floor(((patch as any).updatedAt ?? Date.now()) / 1000);
     sets.push(`updated_at = $${idx++}`);
-    params.push(nowMs);
+    params.push(nowS);
 
     return {
       sql: sets.join(", "),
