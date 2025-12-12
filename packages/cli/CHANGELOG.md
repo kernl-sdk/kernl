@@ -1,5 +1,11 @@
 # @kernl/cli
 
+## 0.3.3
+
+### Patch Changes
+
+- 06ac0b3: Fix CLI version flag to read from package.json and correct bin name mapping
+
 ## 0.3.2
 
 ### Patch Changes
