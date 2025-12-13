@@ -41,7 +41,7 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "@kernl-sdk/cli": "^0.4.0",
+    "@kernl-sdk/cli": "workspace:^",
     "commander": "^14.0.2"
   },
   "devDependencies": {
