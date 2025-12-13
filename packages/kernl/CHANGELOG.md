@@ -1,5 +1,11 @@
 # @kernl/core
 
+## 0.8.4
+
+### Patch Changes
+
+- e90b227: Make memory embedding opt-in with config warnings
+
 ## 0.8.3
 
 ### Patch Changes
