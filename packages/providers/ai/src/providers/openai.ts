@@ -1,4 +1,4 @@
-import { openai as createOpenAIModel } from "@ai-sdk/openai";
+import { openai as _openai } from "@ai-sdk/openai";
 import { AISDKLanguageModel } from "../language-model";
 import { AISDKEmbeddingModel } from "../embedding-model";
 import { registerEmbeddingProvider } from "@kernl-sdk/retrieval";
@@ -15,11 +15,12 @@ import { registerEmbeddingProvider } from "@kernl-sdk/retrieval";
  * ```
  */
 export function openai(modelId: string) {
-  const model = createOpenAIModel(modelId);
+  const model = _openai(modelId);
   return new AISDKLanguageModel(model);
 }
 
 // Auto-register OpenAI embedding provider
-registerEmbeddingProvider("openai", (id) =>
-  new AISDKEmbeddingModel(createOpenAIModel.embedding(id)),
+registerEmbeddingProvider(
+  "openai",
+  (id) => new AISDKEmbeddingModel(_openai.embedding(id)),
 );

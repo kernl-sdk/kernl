@@ -1,4 +1,4 @@
-import { anthropic as createAnthropicModel } from "@ai-sdk/anthropic";
+import { anthropic as _anthropic } from "@ai-sdk/anthropic";
 import { AISDKLanguageModel } from "../language-model";
 
 /**
@@ -13,7 +13,7 @@ import { AISDKLanguageModel } from "../language-model";
  * ```
  */
 export function anthropic(modelId: string) {
-  const model = createAnthropicModel(modelId);
+  const model = _anthropic(modelId);
   return new AISDKLanguageModel(model);
 }
 

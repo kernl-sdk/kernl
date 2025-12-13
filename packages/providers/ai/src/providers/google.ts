@@ -1,4 +1,4 @@
-import { google as createGoogleModel } from "@ai-sdk/google";
+import { google as _google } from "@ai-sdk/google";
 import { AISDKLanguageModel } from "../language-model";
 import { AISDKEmbeddingModel } from "../embedding-model";
 import { registerEmbeddingProvider } from "@kernl-sdk/retrieval";
@@ -15,11 +15,12 @@ import { registerEmbeddingProvider } from "@kernl-sdk/retrieval";
  * ```
  */
 export function google(modelId: string) {
-  const model = createGoogleModel(modelId);
+  const model = _google(modelId);
   return new AISDKLanguageModel(model);
 }
 
 // Auto-register Google embedding provider
-registerEmbeddingProvider("google", (id) =>
-  new AISDKEmbeddingModel(createGoogleModel.textEmbedding(id)),
+registerEmbeddingProvider(
+  "google",
+  (id) => new AISDKEmbeddingModel(_google.textEmbedding(id)),
 );

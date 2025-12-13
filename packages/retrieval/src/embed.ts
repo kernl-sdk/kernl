@@ -85,7 +85,9 @@ export async function embedMany(options: {
   for (let i = 0; i < batches.length; i += concurrency) {
     const chunk = batches.slice(i, i + concurrency);
     const batchResults = await Promise.all(
-      chunk.map((batch) => embedBatch(model, batch, maxRetries, options.abortSignal)),
+      chunk.map((batch) =>
+        embedBatch(model, batch, maxRetries, options.abortSignal),
+      ),
     );
     results.push(...batchResults.flat());
   }
@@ -160,6 +162,7 @@ function parseModel(model: string): [string, string] {
 
 type EmbeddingFactory = (id: string) => EmbeddingModel<any>;
 
+// (TODO): this needs to be considered why this should be here..
 const PROVIDERS: Record<string, EmbeddingFactory> = {};
 
 /**
