@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import { Pool } from "pg";
 import { Kernl, Agent } from "kernl";
 import type { LanguageModel } from "@kernl-sdk/protocol";
+import type { SearchHit } from "@kernl-sdk/retrieval";
 import "@kernl-sdk/ai/openai"; // Register OpenAI embedding provider
 
 import { postgres, pgvector } from "../index";
@@ -38,7 +39,7 @@ describe.sequential(
           vector: pgvector({ pool }),
         },
         memory: {
-          embeddingModel: "openai/text-embedding-3-small",
+          embedding: "openai/text-embedding-3-small",
           dimensions: 1536,
         },
       });
@@ -149,7 +150,7 @@ describe.sequential(
       expect(results.length).toBeGreaterThan(0);
 
       // Should find TypeScript-related memories with higher scores
-      const ids = results.map((r) => r.document?.id);
+      const ids = results.map((r: SearchHit) => r.document?.id);
       expect(ids).toContain("m1"); // Direct match
       expect(ids).toContain("m3"); // Related to TypeScript
     });
@@ -255,7 +256,7 @@ describe.sequential(
           vector: pgvector({ pool }),
         },
         memory: {
-          embeddingModel: "openai/text-embedding-3-small",
+          embedding: "openai/text-embedding-3-small",
           dimensions: 1536,
         },
       });
@@ -292,7 +293,7 @@ describe.sequential(
       });
 
       expect(results.length).toBeGreaterThan(0);
-      const match = results.find((r) => r.document?.id === "m1");
+      const match = results.find((r: SearchHit) => r.document?.id === "m1");
       expect(match).toBeDefined();
       expect(match?.document?.text).toBe("Updated content about cats");
     });
@@ -313,16 +314,73 @@ describe.sequential(
         metadata: { version: 2, updated: true },
       });
 
-      // Verify metadata updated in vector index
-      const vectorResult = await pool.query(
-        'SELECT metadata FROM "kernl"."memories_sindex" WHERE id = $1',
+      // Verify metadata updated in primary DB (metadata is not indexed)
+      const dbResult = await pool.query(
+        'SELECT metadata FROM "kernl"."memories" WHERE id = $1',
         ["m1"],
       );
 
-      expect(vectorResult.rows[0].metadata).toEqual({
+      expect(dbResult.rows[0].metadata).toEqual({
         version: 2,
         updated: true,
       });
+    });
+
+    it("isolates memories by agentId", async () => {
+      // Register two agents
+      const model = {
+        spec: "1.0" as const,
+        provider: "test",
+        modelId: "test-model",
+      } as unknown as LanguageModel;
+
+      const agent1 = new Agent({
+        id: "test-agent-1",
+        name: "Test Agent 1",
+        instructions: () => "test instructions",
+        model,
+      });
+      const agent2 = new Agent({
+        id: "test-agent-2",
+        name: "Test Agent 2",
+        instructions: () => "test instructions",
+        model,
+      });
+      kernl.register(agent1);
+      kernl.register(agent2);
+
+      // Create memories for each agent in the same namespace
+      await agent1.memories.create({
+        namespace: "shared-ns",
+        collection: "facts",
+        content: { text: "Agent 1 knows about cats" },
+      });
+
+      await agent2.memories.create({
+        namespace: "shared-ns",
+        collection: "facts",
+        content: { text: "Agent 2 knows about cats" },
+      });
+
+      // Search from agent1 - should only see agent1's memory
+      const results1 = await agent1.memories.search({
+        query: "cats",
+        filter: { scope: { namespace: "shared-ns" } },
+        limit: 10,
+      });
+
+      // Search from agent2 - should only see agent2's memory
+      const results2 = await agent2.memories.search({
+        query: "cats",
+        filter: { scope: { namespace: "shared-ns" } },
+        limit: 10,
+      });
+
+      expect(results1).toHaveLength(1);
+      expect(results1[0].document?.agentId).toBe("test-agent-1");
+
+      expect(results2).toHaveLength(1);
+      expect(results2[0].document?.agentId).toBe("test-agent-2");
     });
 
     it("creates memories with multimodal content", async () => {
@@ -348,7 +406,7 @@ describe.sequential(
       });
 
       expect(results.length).toBeGreaterThan(0);
-      const match = results.find((r) => r.document?.id === "m1");
+      const match = results.find((r: SearchHit) => r.document?.id === "m1");
       expect(match).toBeDefined();
     });
   },

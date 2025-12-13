@@ -41,11 +41,12 @@ export const ObjectTextCodec = {
  * Encoder that converts MemoryByte to IndexableByte.
  *
  * Extracts canonical text from content and computes embeddings.
+ * If no embedder is provided, skips embedding and tvec will be undefined.
  */
 export class MemoryByteEncoder implements MemoryByteCodec {
-  private readonly embedder: EmbeddingModel<string>;
+  private readonly embedder?: EmbeddingModel<string>;
 
-  constructor(embedder: EmbeddingModel<string>) {
+  constructor(embedder?: EmbeddingModel<string>) {
     this.embedder = embedder;
   }
 
@@ -55,9 +56,6 @@ export class MemoryByteEncoder implements MemoryByteCodec {
    * - Produces `objtext` string projection for FTS indexing
    * - Combines text + objtext for embedding input
    * - Returns text (fallback to objtext if no text provided)
-   *
-   * Note: metadata is NOT set here - it comes from record.metadata
-   * via the domain codec, not from MemoryByte.object.
    */
   async encode(byte: MemoryByte): Promise<IndexableByte> {
     const objtext = byte.object
@@ -67,8 +65,9 @@ export class MemoryByteEncoder implements MemoryByteCodec {
     // (TODO): this behavior deserves consideration - do we always want to merge text + object?
     //
     // combine text + object for richer embedding
+    // skip embedding if no embedder configured (embed returns null)
     const combined = [byte.text, objtext].filter(Boolean).join("\n");
-    const tvec = combined ? await this.embed(combined) : undefined;
+    const tvec = combined ? await this.embed(combined) : null;
 
     // TODO: embed other modalities (image, audio, video)
     //
@@ -79,7 +78,7 @@ export class MemoryByteEncoder implements MemoryByteCodec {
     return {
       text: byte.text ?? objtext, // fallback to projection if no text
       objtext,
-      tvec,
+      tvec: tvec ?? undefined,
     };
   }
 
@@ -92,10 +91,19 @@ export class MemoryByteEncoder implements MemoryByteCodec {
 
   /**
    * Embed a text string.
-   * Exposed for query embedding.
+   *
+   * @returns Embedding vector, or null if no embedder configured.
+   * @throws If embedder returns empty embedding.
    */
-  async embed(text: string): Promise<number[]> {
+  async embed(text: string): Promise<number[] | null> {
+    if (!this.embedder) {
+      return null;
+    }
     const result = await this.embedder.embed({ values: [text] });
-    return result.embeddings[0] ?? [];
+    const embedding = result.embeddings[0];
+    if (!embedding || embedding.length === 0) {
+      throw new Error("Embedder returned empty embedding");
+    }
+    return embedding;
   }
 }

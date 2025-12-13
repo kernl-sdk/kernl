@@ -16,10 +16,11 @@ import {
   buildMemoryIndexSchema,
 } from "@/memory";
 
+import { logger } from "@/lib/logger";
+
 import type { ThreadExecuteResult, ThreadStreamEvent } from "@/thread/types";
 import type { AgentOutputType } from "@/agent/types";
-
-import type { KernlOptions } from "./types";
+import type { KernlOptions, MemoryOptions, StorageOptions } from "./types";
 
 /**
  * The kernl - manages agent processes, scheduling, and task lifecycle.
@@ -34,6 +35,14 @@ export class Kernl extends KernlHooks<UnknownContext, AgentOutputType> {
   readonly storage: KernlStorage;
   athreads: Map<string, Thread<any, any>> = new Map(); /* active threads */
 
+  private readonly _memopts: MemoryOptions | undefined;
+  private readonly _storopts: StorageOptions | undefined;
+
+  private warnings = {
+    embedding: false, // "Embeddings are not configured. If you want memories to auto-embed text content..."
+    vector: false, // "No vector storage configured. The memories.search() function will not be..."
+  }; /* tracks warnings that have been logged */
+
   // --- public API ---
   readonly threads: RThreads;
   readonly agents: RAgents;
@@ -41,38 +50,15 @@ export class Kernl extends KernlHooks<UnknownContext, AgentOutputType> {
 
   constructor(options: KernlOptions = {}) {
     super();
+
+    this._memopts = options.memory;
+    this._storopts = options.storage;
+
     this.storage = options.storage?.db ?? new InMemoryStorage();
     this.storage.bind({ agents: this._agents, models: this._models });
     this.threads = new RThreads(this.storage.threads);
     this.agents = new RAgents(this._agents);
-
-    // initialize memory
-    const embeddingModel =
-      options.memory?.embeddingModel ?? "openai/text-embedding-3-small";
-    const embedder =
-      typeof embeddingModel === "string"
-        ? resolveEmbeddingModel<string>(embeddingModel)
-        : embeddingModel;
-    const encoder = new MemoryByteEncoder(embedder);
-
-    const vector = options.storage?.vector;
-    const indexId = options.memory?.indexId ?? "memories_sindex";
-    const dimensions = options.memory?.dimensions ?? 1536;
-    const providerOptions = options.memory?.indexProviderOptions ?? { schema: "kernl" };
-
-    this.memories = new Memory({
-      store: this.storage.memories,
-      search:
-        vector !== undefined
-          ? new MemoryIndexHandle({
-              index: vector,
-              indexId,
-              schema: buildMemoryIndexSchema({ dimensions }),
-              providerOptions,
-            })
-          : undefined,
-      encoder,
-    });
+    this.memories = this.initializeMemory();
   }
 
   /**
@@ -81,6 +67,25 @@ export class Kernl extends KernlHooks<UnknownContext, AgentOutputType> {
   register(agent: Agent): void {
     this._agents.set(agent.id, agent);
     agent.bind(this);
+
+    // memory config warnings (log once)
+    if (agent.memory.enabled) {
+      if (!this._memopts?.embedding && !this.warnings.embedding) {
+        logger.warn(
+          "Embeddings are not configured. If you want memories to auto-embed text content, " +
+            "pass an embedding model into the memory config in new Kernl()",
+        );
+        this.warnings.embedding = true;
+      }
+
+      if (!this._storopts?.vector && !this.warnings.vector) {
+        logger.warn(
+          "No vector storage configured. The memories.search() function will not be " +
+            "available. To enable memory search, pass storage.vector in new Kernl()",
+        );
+        this.warnings.vector = true;
+      }
+    }
 
     // (TODO): implement exhaustive model registry in protocol/ package
     //
@@ -151,5 +156,42 @@ export class Kernl extends KernlHooks<UnknownContext, AgentOutputType> {
     } finally {
       this.athreads.delete(thread.tid);
     }
+  }
+
+  // --- private utils ---
+
+  /**
+   * @internal
+   *
+   * Initialize the memory system based on the storage + memory configuration.
+   */
+  private initializeMemory(): Memory {
+    const embeddingModel = this._memopts?.embedding;
+    const embedder = embeddingModel
+      ? typeof embeddingModel === "string"
+        ? resolveEmbeddingModel<string>(embeddingModel)
+        : embeddingModel
+      : undefined;
+    const encoder = new MemoryByteEncoder(embedder);
+
+    const vector = this._storopts?.vector;
+    const indexId = this._memopts?.indexId ?? "memories_sindex";
+    const dimensions = this._memopts?.dimensions ?? 1536;
+    const providerOptions = this._memopts?.indexProviderOptions ?? {
+      schema: "kernl",
+    };
+
+    return new Memory({
+      store: this.storage.memories,
+      search: vector
+        ? new MemoryIndexHandle({
+            index: vector,
+            indexId,
+            schema: buildMemoryIndexSchema({ dimensions }),
+            providerOptions,
+          })
+        : undefined,
+      encoder,
+    });
   }
 }

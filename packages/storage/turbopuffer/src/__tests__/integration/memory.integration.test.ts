@@ -55,7 +55,7 @@ describe.sequential(
           }),
         },
         memory: {
-          embeddingModel: "openai/text-embedding-3-small",
+          embedding: "openai/text-embedding-3-small",
           dimensions: 1536,
           indexId: vectorIndexId,
         },
@@ -348,6 +348,58 @@ describe.sequential(
 
       expect(results.length).toBe(1);
       expect(results[0].document?.id).toBe(id1);
+    });
+
+    it("isolates memories by agentId", async () => {
+      const ns = uid("ns");
+
+      // Register a second agent
+      const model2 = {
+        spec: "1.0" as const,
+        provider: "test",
+        modelId: "test-model",
+      } as unknown as LanguageModel;
+
+      const agent2 = new Agent({
+        id: "test-agent-2",
+        name: "Test Agent 2",
+        instructions: () => "test instructions",
+        model: model2,
+      });
+      kernl.register(agent2);
+
+      // Create memories for each agent in the same namespace
+      await agent.memories.create({
+        namespace: ns,
+        collection: "facts",
+        content: { text: "Agent 1 knows about cats" },
+      });
+
+      await agent2.memories.create({
+        namespace: ns,
+        collection: "facts",
+        content: { text: "Agent 2 knows about cats" },
+      });
+
+      // Search from agent1 - should only see agent1's memory
+      const results1 = await agent.memories.search({
+        query: "cats",
+        filter: { scope: { namespace: ns } },
+        limit: 10,
+      });
+
+      // Search from agent2 - should only see agent2's memory
+      const results2 = await agent2.memories.search({
+        query: "cats",
+        filter: { scope: { namespace: ns } },
+        limit: 10,
+      });
+
+      expect(results1).toHaveLength(1);
+      expect(results1[0].document?.agentId).toBe("test-agent");
+
+      expect(results2).toHaveLength(1);
+      expect(results2[0].document?.agentId).toBe("test-agent-2");
     });
   },
 );

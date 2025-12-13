@@ -150,5 +150,68 @@ describe("MemoryByteEncoder", () => {
 
       expect(vec).toEqual([12, 0, 0]); // "search query".length = 12
     });
+
+    it("returns null when no embedder configured", async () => {
+      const encoder = new MemoryByteEncoder(); // no embedder
+
+      const vec = await encoder.embed("search query");
+
+      expect(vec).toBeNull();
+    });
+
+    it("throws when embedder returns empty embedding", async () => {
+      const embedder = {
+        provider: "test",
+        modelId: "test-embedder",
+        embed: vi.fn(async () => ({
+          embeddings: [[]], // empty embedding
+        })),
+      } as unknown as EmbeddingModel<string>;
+      const encoder = new MemoryByteEncoder(embedder);
+
+      await expect(encoder.embed("test")).rejects.toThrow(
+        "Embedder returned empty embedding",
+      );
+    });
+
+    it("throws when embedder returns undefined embedding", async () => {
+      const embedder = {
+        provider: "test",
+        modelId: "test-embedder",
+        embed: vi.fn(async () => ({
+          embeddings: [], // no embeddings at all
+        })),
+      } as unknown as EmbeddingModel<string>;
+      const encoder = new MemoryByteEncoder(embedder);
+
+      await expect(encoder.embed("test")).rejects.toThrow(
+        "Embedder returned empty embedding",
+      );
+    });
+  });
+
+  describe("without embedder", () => {
+    it("returns undefined tvec when encoding with no embedder", async () => {
+      const encoder = new MemoryByteEncoder(); // no embedder
+
+      const byte: MemoryByte = { text: "Hello world" };
+      const result = await encoder.encode(byte);
+
+      expect(result.text).toBe("Hello world");
+      expect(result.tvec).toBeUndefined();
+    });
+
+    it("still produces objtext projection without embedder", async () => {
+      const encoder = new MemoryByteEncoder(); // no embedder
+
+      const byte: MemoryByte = {
+        object: { preference: "coffee", shots: 2 },
+      };
+      const result = await encoder.encode(byte);
+
+      expect(result.text).toContain("preference: coffee");
+      expect(result.objtext).toContain("preference: coffee");
+      expect(result.tvec).toBeUndefined();
+    });
   });
 });

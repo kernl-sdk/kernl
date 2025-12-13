@@ -75,7 +75,12 @@ export interface IndexableByte {
  * Encoder that converts MemoryByte to IndexableByte with embeddings.
  */
 export interface MemoryByteCodec extends AsyncCodec<MemoryByte, IndexableByte> {
-  embed(text: string): Promise<number[]>;
+  /**
+   * Embed a text string.
+   *
+   * @returns Embedding vector, or null if no embedder configured.
+   */
+  embed(text: string): Promise<number[] | null>;
 }
 
 // -------------------
@@ -294,5 +299,4 @@ export interface IndexMemoryRecordPatch {
   collection?: string;
   timestamp?: number;
   updatedAt?: number;
-  metadata?: JSONObject | null;
 }

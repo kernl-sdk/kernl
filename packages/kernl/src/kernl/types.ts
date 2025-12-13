@@ -35,9 +35,10 @@ export interface MemoryOptions {
    * - A string like "openai/text-embedding-3-small" (resolved via provider registry)
    * - An EmbeddingModel instance
    *
-   * @default "openai/text-embedding-3-small"
+   * If not provided, memories will not auto-embed text content and
+   * semantic search will not be available.
    */
-  embeddingModel?: string | EmbeddingModel<string>;
+  embedding?: string | EmbeddingModel<string>;
 
   /**
    * Logical index ID used by the search backend.

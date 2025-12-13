@@ -110,7 +110,7 @@ export const PATCH_CODEC: Codec<MemoryRecordUpdate, IndexMemoryRecordPatch> = {
     if (update.collection !== undefined) patch.collection = update.collection;
     if (update.timestamp !== undefined) patch.timestamp = update.timestamp;
     if (update.updatedAt !== undefined) patch.updatedAt = update.updatedAt;
-    if (update.metadata !== undefined) patch.metadata = update.metadata;
+    // metadata is stored in primary DB only, not indexed
 
     return patch;
   },
