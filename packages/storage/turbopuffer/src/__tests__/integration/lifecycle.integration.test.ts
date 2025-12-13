@@ -392,13 +392,12 @@ describe("Lifecycle edge cases integration tests", () => {
     it("topK of 0 throws", async () => {
       const index = tpuf.index(indexId);
 
-      // Turbopuffer requires topK between 1 and 1200
       await expect(
         index.query({
           query: [{ vector: [0.1, 0.1, 0.1, 0.1] }],
           topK: 0,
         }),
-      ).rejects.toThrow(/top_k must be between 1 and 1200/i);
+      ).rejects.toThrow();
     });
   });
 

@@ -342,7 +342,7 @@ describe("Query modes integration tests", () => {
       expect(hits[0].document).toHaveProperty("priority");
     });
 
-    it("include: false returns no attributes", async () => {
+    it("include: false returns only id", async () => {
       const hits = await index.query({
         query: [{ vector: [1.0, 0.0, 0.0, 0.0] }],
         topK: 1,
@@ -350,8 +350,9 @@ describe("Query modes integration tests", () => {
       });
 
       expect(hits.length).toBe(1);
-      // document should be undefined or empty
-      expect(hits[0].document).toBeUndefined();
+      // Turbopuffer always returns id, but no other attributes
+      const { id, ...rest } = hits[0].document ?? {};
+      expect(Object.keys(rest).length).toBe(0);
     });
 
     it("include: [fields] returns only specified fields", async () => {
@@ -370,7 +371,7 @@ describe("Query modes integration tests", () => {
       expect(hits[0].document).not.toHaveProperty("priority");
     });
 
-    it("include: [] returns no attributes", async () => {
+    it("include: [] returns only id", async () => {
       const hits = await index.query({
         query: [{ vector: [1.0, 0.0, 0.0, 0.0] }],
         topK: 1,
@@ -378,11 +379,9 @@ describe("Query modes integration tests", () => {
       });
 
       expect(hits.length).toBe(1);
-      // Empty include array should return no fields
-      expect(
-        hits[0].document === undefined ||
-          Object.keys(hits[0].document).length === 0,
-      ).toBe(true);
+      // Turbopuffer always returns id, but no other attributes
+      const { id, ...rest } = hits[0].document ?? {};
+      expect(Object.keys(rest).length).toBe(0);
     });
   });
 
