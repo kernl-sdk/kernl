@@ -66,6 +66,9 @@ importers:
       '@radix-ui/react-tabs':
         specifier: ^1.1.13
         version: 1.1.13(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@vercel/analytics':
+        specifier: ^1.6.1
+        version: 1.6.1(next@16.0.8(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react@19.2.1)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -347,8 +350,8 @@ importers:
   packages/create-kernl:
     dependencies:
       '@kernl-sdk/cli':
-        specifier: ^0.4.0
-        version: 0.4.0
+        specifier: workspace:^
+        version: link:../cli
       commander:
         specifier: ^14.0.2
         version: 14.0.2
@@ -1551,10 +1554,6 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
-
-  '@kernl-sdk/cli@0.4.0':
-    resolution: {integrity: sha512-XCZCygtHZNCzC6tMN7aLx5kwUB7geUrMKDMPJ0i8Q8LpXIxWVUDFWp2cuqM4hmLUN8QjJHfAlgln1JHgV6CceQ==}
-    hasBin: true
 
   '@kernl-sdk/protocol@0.2.8':
     resolution: {integrity: sha512-MzYs8I7+yaJNNDdxZt3pcU3o7p4rFj41qhFqhH7xmVjnW+pGV5HqTYKbrcejZ5KqMznlCwybgxMuZhzTogU8tw==}
@@ -2890,6 +2889,32 @@ packages:
     resolution: {integrity: sha512-lrW200hZdbfRtztbygyaq/6jP6AKE8qQN2KvPcJ+x7wiD038YtnYtZ82IMNJ69GJibV7bwL3y9FgK+5w/pYt6g==}
     cpu: [x64]
     os: [win32]
+
+  '@vercel/analytics@1.6.1':
+    resolution: {integrity: sha512-oH9He/bEM+6oKlv3chWuOOcp8Y6fo6/PSro8hEkgCW3pu9/OiCXiUpRUogDh3Fs3LH2sosDrx8CxeOLBEE+afg==}
+    peerDependencies:
+      '@remix-run/react': ^2
+      '@sveltejs/kit': ^1 || ^2
+      next: '>= 13'
+      react: ^18 || ^19 || ^19.0.0-rc
+      svelte: '>= 4'
+      vue: ^3
+      vue-router: ^4
+    peerDependenciesMeta:
+      '@remix-run/react':
+        optional: true
+      '@sveltejs/kit':
+        optional: true
+      next:
+        optional: true
+      react:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+      vue-router:
+        optional: true
 
   '@vercel/oidc@3.0.3':
     resolution: {integrity: sha512-yNEQvPcVrK9sIe637+I0jD6leluPxzwJKx/Haw6F4H77CdDsszUn5V3o96LPziXkSNE2B83+Z3mjqGKBK/R6Gg==}
@@ -7341,15 +7366,6 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@kernl-sdk/cli@0.4.0':
-    dependencies:
-      '@antfu/ni': 28.0.0
-      '@clack/prompts': 0.11.0
-      commander: 14.0.2
-      fast-glob: 3.3.3
-      picocolors: 1.1.1
-      zod: 4.1.13
-
   '@kernl-sdk/protocol@0.2.8':
     dependencies:
       '@kernl-sdk/shared': 0.3.0
@@ -8692,6 +8708,11 @@ snapshots:
 
   '@unrs/resolver-binding-win32-x64-msvc@1.11.1':
     optional: true
+
+  '@vercel/analytics@1.6.1(next@16.0.8(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react@19.2.1)':
+    optionalDependencies:
+      next: 16.0.8(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      react: 19.2.1
 
   '@vercel/oidc@3.0.3': {}
 

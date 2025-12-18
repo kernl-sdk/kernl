@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/next";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Scrollbar } from "@/components/scrollbar";
@@ -65,6 +66,7 @@ export default function RootLayout({
             },
           }}
         />
+        <Analytics />
         <Script
           id="reb2b"
           dangerouslySetInnerHTML={{
