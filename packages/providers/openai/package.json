@@ -1,0 +1,54 @@
+{
+  "name": "@kernl-sdk/openai",
+  "version": "0.1.0",
+  "description": "OpenAI provider for kernl",
+  "keywords": [
+    "kernl",
+    "openai",
+    "realtime",
+    "voice",
+    "ai"
+  ],
+  "author": "dremnik",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kernl-sdk/kernl.git",
+    "directory": "packages/providers/openai"
+  },
+  "homepage": "https://github.com/kernl-sdk/kernl#readme",
+  "bugs": {
+    "url": "https://github.com/kernl-sdk/kernl/issues"
+  },
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc && tsc-alias --resolve-full-paths",
+    "dev": "tsc --watch",
+    "check-types": "tsc --noEmit",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:run": "vitest run"
+  },
+  "dependencies": {
+    "@kernl-sdk/protocol": "workspace:*",
+    "@kernl-sdk/shared": "workspace:*",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/json-schema": "^7.0.15",
+    "@types/node": "^24.10.0",
+    "@types/ws": "^8.18.0",
+    "tsc-alias": "^1.8.10",
+    "typescript": "5.9.2",
+    "vitest": "^4.0.8"
+  }
+}
