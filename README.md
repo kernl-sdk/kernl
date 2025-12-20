@@ -25,6 +25,8 @@ kernl init my-project
 
 ## Usage
 
+### Agent
+
 ```ts
 import { Agent, Kernl } from "kernl";
 import { anthropic } from "@kernl-sdk/ai/anthropic";
@@ -46,7 +48,7 @@ const result = await jarvis.run("Remember: I prefer dark mode.");
 console.log(result.response);
 ```
 
-### Realtime Voice
+### Realtime / voice
 
 ```ts
 import { RealtimeAgent, RealtimeSession } from "kernl";
@@ -57,6 +59,7 @@ const agent = new RealtimeAgent({
   name: "Watson",
   instructions: "You are a helpful voice assistant. Be concise.",
   toolkits: [math],
+  memory: { enabled: true }
 });
 
 const session = new RealtimeSession(agent, {
