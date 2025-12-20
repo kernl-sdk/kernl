@@ -6,6 +6,7 @@
  * Defined here so that it can be used as default and for testing.
  */
 
+import { Agent } from "@/agent";
 import { Thread } from "@/thread";
 import { Context } from "@/context";
 import { STOPPED } from "@kernl-sdk/protocol";
@@ -241,8 +242,15 @@ export class InMemoryThreadStore implements ThreadStore {
       );
     }
 
+    // safety: threads only exist for llm agents
+    if (agent.kind !== "llm") {
+      throw new Error(
+        `Thread ${data.tid} references non-llm agent ${data.agentId} (kind: ${agent.kind})`,
+      );
+    }
+
     return new Thread({
-      agent,
+      agent: agent as Agent,
       tid: data.tid,
       context: new Context(data.namespace, data.context),
       model,

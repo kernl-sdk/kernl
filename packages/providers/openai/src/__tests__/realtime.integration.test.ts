@@ -101,7 +101,7 @@ describe.skipIf(!OPENAI_API_KEY)("OpenAI Realtime Integration", () => {
     }
   });
 
-  it("should handle tool calling", async () => {
+  it("should handle tool calling", { timeout: 10000 }, async () => {
     const conn = await model.connect();
     const events: RealtimeServerEvent[] = [];
 

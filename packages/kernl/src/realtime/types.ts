@@ -5,42 +5,19 @@ import {
 } from "@kernl-sdk/protocol";
 
 import { Context, UnknownContext } from "@/context";
-import { BaseToolkit } from "@/tool";
+import type { BaseAgentConfig } from "@/agent/base";
 
 import type { RealtimeChannel } from "./channel";
 
 /**
  * Configuration for a realtime agent.
  */
-export interface RealtimeAgentConfig<TContext = UnknownContext> {
+export interface RealtimeAgentConfig<TContext = UnknownContext>
+  extends BaseAgentConfig<TContext> {
   /**
-   * Unique identifier for the agent.
+   * The realtime model to use for this agent.
    */
-  id: string;
-
-  /**
-   * Display name for the agent.
-   */
-  name: string;
-
-  /**
-   * A brief description of the agent's purpose.
-   */
-  description?: string;
-
-  /**
-   * The instructions for the agent. Describes what the agent should do.
-   *
-   * Can be a static string or a function that dynamically generates instructions.
-   */
-  instructions:
-    | string
-    | ((context: Context<TContext>) => Promise<string> | string);
-
-  /**
-   * Toolkits available to the agent.
-   */
-  toolkits?: BaseToolkit<TContext>[];
+  model: RealtimeModel;
 
   /**
    * Voice configuration for the agent.
@@ -68,9 +45,9 @@ export interface RealtimeAgentVoiceConfig {
  */
 export interface RealtimeSessionOptions<TContext = UnknownContext> {
   /**
-   * The realtime model to connect to.
+   * Override the agent's default model for this session.
    */
-  model: RealtimeModel;
+  model?: RealtimeModel;
 
   /**
    * Audio I/O channel (e.g., BrowserChannel, TwilioChannel).

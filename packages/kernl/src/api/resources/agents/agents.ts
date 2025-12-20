@@ -1,4 +1,4 @@
-import type { Agent } from "@/agent";
+import type { BaseAgent } from "@/agent/base";
 import type { AgentOutputType } from "@/agent/types";
 import type { UnknownContext } from "@/context";
 import type { TextOutput } from "@/thread/types";
@@ -11,7 +11,7 @@ import type { TextOutput } from "@/thread/types";
  * Note: agents are code, not persisted data; this is process-local.
  */
 export class RAgents {
-  constructor(private readonly registry: Map<string, Agent>) {}
+  constructor(private readonly registry: Map<string, BaseAgent>) {}
 
   /**
    * Get a live Agent instance by id.
@@ -22,9 +22,9 @@ export class RAgents {
   get<
     TContext = UnknownContext,
     TOutput extends AgentOutputType = TextOutput,
-  >(id: string): Agent<TContext, TOutput> | undefined {
+  >(id: string): BaseAgent<TContext, TOutput> | undefined {
     const agent = this.registry.get(id);
-    return agent as Agent<TContext, TOutput> | undefined;
+    return agent as BaseAgent<TContext, TOutput> | undefined;
   }
 
   /**
@@ -40,8 +40,8 @@ export class RAgents {
    * Since this is a heterogeneous collection, we expose the widest safe
    * type parameters here.
    */
-  list(): Agent<UnknownContext, AgentOutputType>[] {
-    return Array.from(this.registry.values()) as Agent<
+  list(): BaseAgent<UnknownContext, AgentOutputType>[] {
+    return Array.from(this.registry.values()) as BaseAgent<
       UnknownContext,
       AgentOutputType
     >[];

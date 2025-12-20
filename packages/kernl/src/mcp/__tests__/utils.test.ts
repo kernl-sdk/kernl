@@ -63,7 +63,7 @@ describe("mcpToFunctionTool", () => {
     expect(functionTool.parameters).toBeDefined();
   });
 
-  it("should handle tools without inputSchema (undefined parameters)", () => {
+  it("should handle tools without inputSchema (empty object parameters)", () => {
     const server = createMockServer();
     // In practice, MCP SDK tools require inputSchema, but our function handles
     // the case where it might not be present. We use 'as any' to test this edge case.
@@ -75,7 +75,9 @@ describe("mcpToFunctionTool", () => {
     const functionTool = mcpToFunctionTool(server, mcpTool);
 
     expect(functionTool.id).toBe("no_params");
-    expect(functionTool.parameters).toBeUndefined();
+    // When no inputSchema, we use an empty z.object({}) to match AI SDK behavior
+    expect(functionTool.parameters).toBeDefined();
+    expect(functionTool.parameters?.def.type).toBe("object");
   });
 
   it("should invoke server.callTool with correct params", async () => {

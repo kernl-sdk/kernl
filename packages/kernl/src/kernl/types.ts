@@ -1,7 +1,7 @@
 import { LanguageModel, EmbeddingModel } from "@kernl-sdk/protocol";
 import { SearchIndex } from "@kernl-sdk/retrieval";
 
-import { Agent } from "@/agent";
+import { BaseAgent } from "@/agent/base";
 import { KernlStorage } from "@/storage";
 
 /**
@@ -87,10 +87,10 @@ export interface KernlOptions {
 /**
  * Agent registry interface.
  *
- * Satisfied by Map<string, Agent>.
+ * Satisfied by Map<string, BaseAgent>.
  */
 export interface AgentRegistry {
-  get(id: string): Agent<any> | undefined;
+  get(id: string): BaseAgent<any> | undefined;
 }
 
 /**

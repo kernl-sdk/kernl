@@ -1,7 +1,7 @@
 import type { LanguageModel } from "@kernl-sdk/protocol";
 import { resolveEmbeddingModel } from "@kernl-sdk/retrieval";
 
-import { Agent } from "@/agent";
+import { BaseAgent } from "@/agent/base";
 import { UnknownContext } from "@/context";
 import { KernlHooks } from "@/lifecycle";
 import type { Thread } from "@/thread";
@@ -29,7 +29,7 @@ import type { KernlOptions, MemoryOptions, StorageOptions } from "./types";
  * tracing.
  */
 export class Kernl extends KernlHooks<UnknownContext, AgentOutputType> {
-  private readonly _agents: Map<string, Agent> = new Map();
+  private readonly _agents: Map<string, BaseAgent> = new Map();
   private readonly _models: Map<string, LanguageModel> = new Map();
 
   readonly storage: KernlStorage;
@@ -64,7 +64,7 @@ export class Kernl extends KernlHooks<UnknownContext, AgentOutputType> {
   /**
    * Registers a new agent with the kernl instance.
    */
-  register(agent: Agent): void {
+  register(agent: BaseAgent): void {
     this._agents.set(agent.id, agent);
     agent.bind(this);
 
@@ -87,12 +87,12 @@ export class Kernl extends KernlHooks<UnknownContext, AgentOutputType> {
       }
     }
 
-    // (TODO): implement exhaustive model registry in protocol/ package
-    //
-    // auto-populate model registry for storage hydration
-    const key = `${agent.model.provider}/${agent.model.modelId}`;
-    if (!this._models.has(key)) {
-      this._models.set(key, agent.model);
+    // auto-populate model registry for storage hydration (llm agents only - for now)
+    if (agent.kind === "llm") {
+      const key = `${agent.model.provider}/${agent.model.modelId}`;
+      if (!this._models.has(key)) {
+        this._models.set(key, agent.model as LanguageModel);
+      }
     }
   }
 

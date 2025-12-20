@@ -60,7 +60,7 @@ export class RealtimeSession<TContext = UnknownContext> extends EventEmitter {
 
   constructor(
     agent: RealtimeAgent<TContext>,
-    options: RealtimeSessionOptions<TContext>,
+    options: RealtimeSessionOptions<TContext> = {},
   ) {
     super();
 
@@ -71,7 +71,7 @@ export class RealtimeSession<TContext = UnknownContext> extends EventEmitter {
     }
 
     this.agent = agent;
-    this.model = options.model;
+    this.model = options.model ?? agent.model;
     this.channel = options.channel ?? null;
     this.context = options.context ?? new Context("kernl", {} as TContext);
     this.options = options;

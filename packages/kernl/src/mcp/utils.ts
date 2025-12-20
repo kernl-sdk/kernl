@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { UnknownContext } from "@/context";
-import { tool } from "@/tool";
+import { tool } from "@/tool/tool";
 
 import { MCPServer } from "./base";
 import type { MCPTool, MCPToolFilter } from "./types";

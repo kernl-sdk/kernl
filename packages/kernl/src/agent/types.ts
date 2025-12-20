@@ -163,3 +163,8 @@ export interface AgentMemoryConfig {
    */
   enabled: boolean;
 }
+
+/**
+ * Agent kind discriminator.
+ */
+export type AgentKind = "llm" | "realtime";

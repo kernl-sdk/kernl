@@ -167,10 +167,10 @@ describe("FunctionToolkit", () => {
       const serialized = (await toolkit.list()).map((tool: any) => tool.serialize());
       expect(serialized).toHaveLength(1);
       expect(serialized[0]).toEqual({
-        type: "hosted-tool",
+        kind: "provider-defined",
         id: anotherHostedTool.id,
         name: anotherHostedTool.name,
-        providerData: undefined,
+        args: {},
       });
     });
   });
