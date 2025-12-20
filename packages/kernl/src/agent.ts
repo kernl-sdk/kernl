@@ -23,6 +23,7 @@ import {
   type ResolvedAgentResponse,
 } from "./guardrail";
 import { AgentHooks } from "./lifecycle";
+import type { BaseAgent } from "./agent/base";
 import type {
   AgentMemoryCreate,
   AgentMemoryUpdate,
@@ -51,7 +52,7 @@ export class Agent<
     TOutput extends AgentOutputType = TextOutput,
   >
   extends AgentHooks<TContext, TOutput>
-  implements AgentConfig<TContext, TOutput>
+  implements AgentConfig<TContext, TOutput>, BaseAgent<TContext>
 {
   private kernl?: Kernl;
 
