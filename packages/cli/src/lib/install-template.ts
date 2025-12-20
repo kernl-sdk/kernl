@@ -119,8 +119,8 @@ export const jarvis = new Agent({
       start: "tsx src/index.ts",
     },
     dependencies: {
-      kernl: "^0.8.3",
-      "@kernl-sdk/ai": "^0.3.0",
+      kernl: `^${KERNL_VERSION}`,
+      "@kernl-sdk/ai": `^${KERNL_AI_VERSION}`,
       [providerConfig.pkg]: providerConfig.version,
       zod: "^4.1.12",
     },
