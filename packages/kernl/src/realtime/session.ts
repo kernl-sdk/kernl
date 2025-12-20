@@ -129,22 +129,48 @@ export class RealtimeSession<TContext = UnknownContext> extends EventEmitter {
 
   /**
    * Handle incoming events from the connection.
+   *
+   * Maps protocol events to simplified user-facing events:
+   * - 'audio' - audio output from assistant
+   * - 'transcript' - speech transcriptions (user or assistant)
+   * - 'text' - text output from assistant
+   * - 'error' - errors
    */
   private onEvent(event: RealtimeServerEvent): void {
-    this.emit(event.kind, event);
-
     switch (event.kind) {
+      // Audio output → 'audio'
       case "audio.output.delta":
         this.channel?.sendAudio(event.audio);
+        this.emit("audio", event);
         break;
-      case "session.created":
-        this.id = event.session.id;
+      case "audio.output.done":
+        this.emit("audio", event);
         break;
+
+      // Speech transcriptions → 'transcript'
+      case "transcript.input":
+      case "transcript.output":
+        this.emit("transcript", event);
+        break;
+
+      // Text output → 'text'
+      case "text.output":
+        this.emit("text", event);
+        break;
+
+      // Errors → 'error'
+      case "session.error":
+        this.emit("error", event.error);
+        break;
+
+      // Tool calls - handled internally
       case "tool.call":
         this.performActions(event);
         break;
-      case "session.error":
-        this.emit("error", new Error(event.error.message));
+
+      // Session lifecycle - internal state
+      case "session.created":
+        this.id = event.session.id;
         break;
     }
   }

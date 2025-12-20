@@ -65,12 +65,12 @@ const session = new RealtimeSession(agent, {
 
 await session.connect();
 
-session.on("text.output", (event) => {
-  console.log("Assistant:", event.text);
+session.on("audio", (e) => {
+  // play audio to speakers
 });
 
-session.on("audio.output.delta", (event) => {
-  // stream audio to speakers
+session.on("text", (e) => {
+  console.log(e.text);
 });
 ```
 
