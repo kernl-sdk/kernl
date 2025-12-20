@@ -46,6 +46,34 @@ const result = await jarvis.run("Remember: I prefer dark mode.");
 console.log(result.response);
 ```
 
+### Realtime Voice
+
+```ts
+import { RealtimeAgent, RealtimeSession } from "kernl";
+import { openai } from "@kernl-sdk/openai";
+
+const agent = new RealtimeAgent({
+  id: "watson",
+  name: "Watson",
+  instructions: "You are a helpful voice assistant. Be concise.",
+  toolkits: [math],
+});
+
+const session = new RealtimeSession(agent, {
+  model: openai.realtime("gpt-realtime"),
+});
+
+await session.connect();
+
+session.on("text.output", (event) => {
+  console.log("Assistant:", event.text);
+});
+
+session.on("audio.output.delta", (event) => {
+  // stream audio to speakers
+});
+```
+
 ## Learn more
 
 - [Documentation](https://docs.kernl.sh)
