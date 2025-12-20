@@ -2,6 +2,7 @@ import assert from "assert";
 import type { Pool, PoolClient } from "pg";
 
 import {
+  Agent,
   Context,
   type AgentRegistry,
   type ModelRegistry,
@@ -371,8 +372,15 @@ export class PGThreadStore implements ThreadStore {
       );
     }
 
+    // safety: threads only exist for llm agents
+    if (agent.kind !== "llm") {
+      throw new Error(
+        `Thread ${record.id} references non-llm agent ${record.agent_id} (kind: ${agent.kind})`,
+      );
+    }
+
     return new Thread({
-      agent,
+      agent: agent as Agent,
       history: events,
       context: new Context(record.namespace, record.context),
       model,

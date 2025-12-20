@@ -1,5 +1,13 @@
 # @kernl/ai
 
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [572ae80]
+  - @kernl-sdk/protocol@0.3.0
+  - @kernl-sdk/retrieval@0.1.4
+
 ## 0.3.0
 
 ### Minor Changes

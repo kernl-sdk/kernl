@@ -1,5 +1,14 @@
 # @kernl/protocol
 
+## 0.3.0
+
+### Minor Changes
+
+- 572ae80: Add realtime voice agent support with memory capabilities.
+  - **protocol**: Add realtime model and event types for voice agents
+  - **kernl**: Extract BaseAgent class shared by Agent and RealtimeAgent, enabling memory support for realtime agents. Add `kind` discriminator for type narrowing.
+  - **openai**: Add OpenAI realtime voice provider with WebSocket-based streaming
+
 ## 0.2.8
 
 ### Patch Changes
