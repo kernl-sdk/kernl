@@ -1,4 +1,4 @@
-import type { Agent } from "@/agent";
+import type { BaseAgent } from "@/agent/base";
 import type { Context, UnknownContext } from "@/context";
 
 import { MCPServer } from "@/mcp/base";
@@ -32,13 +32,13 @@ export abstract class BaseToolkit<TContext = UnknownContext> {
   /**
    * The agent this toolkit is bound to (if any)
    */
-  protected agent?: Agent<TContext, any>;
+  protected agent?: BaseAgent<TContext>;
 
   /**
    * Bind this toolkit to an agent.
-   * Called by Agent constructor.
+   * Called by agent constructor.
    */
-  bind(agent: Agent<TContext, any>): void {
+  bind(agent: BaseAgent<TContext>): void {
     this.agent = agent;
   }
 
@@ -216,7 +216,8 @@ export class MCPToolkit<
       const mcpTools = await this.server.listTools();
 
       for (const mcpTool of mcpTools) {
-        const tool = mcpToFunctionTool(this.server, mcpTool);
+        // safety: MCP tools are context-agnostic (external servers)
+        const tool = mcpToFunctionTool(this.server, mcpTool) as Tool<TContext>;
         this.cache.set(tool.id, tool);
       }
 

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Context, UnknownContext } from "@/context";
+import type { BaseAgent } from "@/agent/base";
 
 import { ModelBehaviorError } from "@/lib/error";
 import { logger } from "@/lib/logger";
@@ -61,7 +62,7 @@ export abstract class BaseTool<TContext = UnknownContext> {
   /**
    * Determines whether the tool should be exposed to the model for the current run.
    */
-  abstract isEnabled(context: Context<TContext>, agent: any): Promise<boolean>;
+  abstract isEnabled(context: Context<TContext>, agent: BaseAgent<TContext>): Promise<boolean>;
 
   /**
    * Serialize this tool for sending to the model

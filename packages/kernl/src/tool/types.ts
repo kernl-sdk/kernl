@@ -1,6 +1,6 @@
 import { z, type ZodType } from "zod";
 
-import { Agent } from "@/agent";
+import type { BaseAgent } from "@/agent/base";
 import { Context, UnknownContext } from "@/context";
 import { MCPServer } from "@/mcp/base";
 import type { ToolCallState } from "@kernl-sdk/protocol";
@@ -79,7 +79,7 @@ export type ToolConfig<
  */
 export interface ToolkitFilterContext<TContext = UnknownContext> {
   context: Context<TContext>;
-  agent: Agent<TContext, any>;
+  agent: BaseAgent<TContext>;
   toolkitId: string;
 }
 
@@ -227,12 +227,12 @@ export type ToolApprovalFunction<TParameters extends ToolInputParameters> = (
 
 export type ToolEnabledFunction<TContext = UnknownContext> = (
   context: Context<TContext>,
-  agent: Agent<any, any>, // (TODO): why would we need to take an agent here?
+  agent: BaseAgent<TContext>,
 ) => Promise<boolean>;
 
 export type ToolEnabledPredicate<TContext = UnknownContext> = (args: {
   context: Context<TContext>;
-  agent: Agent<any, any>; // (TODO): why take an agent here? other options?
+  agent: BaseAgent<TContext>;
 }) => boolean | Promise<boolean>;
 
 type ToolEnabledOption<Context = UnknownContext> =
