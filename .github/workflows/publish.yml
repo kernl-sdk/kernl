@@ -1,19 +1,17 @@
-name: Publish Packages
+name: Release
 
 on:
   push:
     branches:
       - master
-    paths:
-      - "**/package.json"
-      - "pnpm-lock.yaml"
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
+  pull-requests: write
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,5 +32,12 @@ jobs:
       - name: Build packages
         run: pnpm build
 
-      - name: Publish to npm
-        run: pnpm changeset publish
+      - name: Create Release PR or Publish
+        uses: changesets/action@v1
+        with:
+          publish: pnpm changeset publish
+          version: pnpm changeset version
+          commit: "chore: release versions"
+          title: "chore: release versions"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
