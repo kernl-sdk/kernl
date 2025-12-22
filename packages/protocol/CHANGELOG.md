@@ -1,5 +1,12 @@
 # @kernl/protocol
 
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [25e46e7]
+  - @kernl-sdk/shared@0.3.1
+
 ## 0.3.0
 
 ### Minor Changes
