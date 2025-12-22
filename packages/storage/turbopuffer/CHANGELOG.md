@@ -1,5 +1,13 @@
 # @kernl-sdk/turbopuffer
 
+## 0.1.6
+
+### Patch Changes
+
+- Updated dependencies [25e46e7]
+  - @kernl-sdk/shared@0.3.1
+  - @kernl-sdk/retrieval@0.1.5
+
 ## 0.1.5
 
 ### Patch Changes

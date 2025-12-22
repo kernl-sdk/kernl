@@ -1,5 +1,20 @@
 # @kernl/core
 
+## 0.9.1
+
+### Patch Changes
+
+- 25e46e7: Move zod to peerDependencies to prevent version conflicts
+
+  Consumers should add `zod` as a direct dependency in their project. This ensures
+  a single zod instance is used across all packages, avoiding type incompatibilities
+  that could cause TypeScript to hang during type checking.
+
+- Updated dependencies [25e46e7]
+  - @kernl-sdk/shared@0.3.1
+  - @kernl-sdk/protocol@0.3.1
+  - @kernl-sdk/retrieval@0.1.5
+
 ## 0.9.0
 
 ### Minor Changes
