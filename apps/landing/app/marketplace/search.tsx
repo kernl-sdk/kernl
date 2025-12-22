@@ -21,11 +21,13 @@ interface MarketplaceSearchProps {
 export function MarketplaceSearch({ toolkits }: MarketplaceSearchProps) {
   const [query, setQuery] = useState("");
 
-  const filtered = toolkits.filter(
-    (t) =>
-      t.title.toLowerCase().includes(query.toLowerCase()) ||
-      t.description.toLowerCase().includes(query.toLowerCase()),
-  );
+  const filtered = toolkits
+    .filter(
+      (t) =>
+        t.title.toLowerCase().includes(query.toLowerCase()) ||
+        t.description.toLowerCase().includes(query.toLowerCase()),
+    )
+    .sort((a, b) => a.title.localeCompare(b.title));
 
   return (
     <>
