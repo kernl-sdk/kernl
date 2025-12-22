@@ -46,6 +46,7 @@ export const toolkits: RegistryItem[] = [
     type: "registry:toolkit",
     title: "AgentMail",
     description: "Email API for AI agents - send, receive, and manage emails",
+    icon: "https://registry.kernl.sh/icons/agentmail.svg",
     category: "communication",
     dependencies: ["agentmail"],
     env: ["AGENTMAIL_API_KEY"],
