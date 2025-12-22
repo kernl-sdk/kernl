@@ -1,6 +1,7 @@
 ---
 "kernl": patch
 "@kernl-sdk/shared": patch
+"@kernl-sdk/storage": patch
 ---
 
 Move zod to peerDependencies to prevent version conflicts

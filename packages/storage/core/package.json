@@ -40,12 +40,15 @@
     "@types/node": "^24.10.0",
     "tsc-alias": "^1.8.10",
     "typescript": "5.9.2",
-    "vitest": "^4.0.8"
+    "vitest": "^4.0.8",
+    "zod": "^4.1.8"
   },
   "dependencies": {
     "kernl": "workspace:*",
     "@kernl-sdk/protocol": "workspace:*",
-    "@kernl-sdk/shared": "workspace:*",
-    "zod": "^4.1.12"
+    "@kernl-sdk/shared": "workspace:*"
+  },
+  "peerDependencies": {
+    "zod": "^4.1.8"
   }
 }
