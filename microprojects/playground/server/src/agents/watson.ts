@@ -1,7 +1,7 @@
 import { Agent } from "kernl";
 import { openai } from "@kernl-sdk/ai/openai";
 
-import { agentmail } from "@/toolkits/agentmail";
+import { alai } from "@/toolkits/alai";
 
 export const watson = new Agent({
   id: "watson",
@@ -23,5 +23,5 @@ When asked for summaries or reports:
 `,
   model: openai("gpt-5.1"),
   memory: { enabled: true },
-  toolkits: [agentmail],
+  toolkits: [alai],
 });
