@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { tool } from "kernl";
 
-import { am } from "../index";
+import { am } from "../client";
 
 export const replyToMessage = tool({
   id: "agentmail_messages_reply",

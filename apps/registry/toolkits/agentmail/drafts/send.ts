@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { tool } from "kernl";
 
-import { am } from "../index";
+import { am } from "../client";
 
 export const sendDraft = tool({
   id: "agentmail_drafts_send",

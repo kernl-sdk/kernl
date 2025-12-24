@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { tool } from "kernl";
 
-import { am } from "../index";
+import { am } from "../client";
 
 export const sendMessage = tool({
   id: "agentmail_messages_send",
@@ -30,7 +30,6 @@ export const sendMessage = tool({
     return {
       message_id: message.messageId,
       thread_id: message.threadId,
-      subject: message.subject,
     };
   },
 });

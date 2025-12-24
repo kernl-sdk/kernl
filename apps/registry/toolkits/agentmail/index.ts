@@ -1,5 +1,4 @@
 import { Toolkit } from "kernl";
-import { AgentMailClient } from "agentmail";
 
 import { sendMessage } from "./messages/send";
 import { listMessages } from "./messages/list";
@@ -17,10 +16,6 @@ import { updateMessage } from "./messages/update";
 
 import { listThreads } from "./threads/list";
 import { getThread } from "./threads/get";
-
-export const am = new AgentMailClient({
-  apiKey: process.env.AGENTMAIL_API_KEY,
-});
 
 export const agentmail = new Toolkit({
   id: "agentmail",
