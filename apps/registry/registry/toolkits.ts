@@ -62,7 +62,7 @@ export const toolkits: RegistryItem[] = [
     icon: "https://registry.kernl.sh/icons/agentmail.svg",
     category: "communication",
     dependencies: ["agentmail@^0.1.13"],
-    env: ["AGENTMAIL_API_KEY"],
+    env: ["AGENTMAIL_API_KEY", "AGENTMAIL_INBOX_ID"],
     files: [
       { path: "toolkits/agentmail/index.ts" },
       { path: "toolkits/agentmail/client.ts" },

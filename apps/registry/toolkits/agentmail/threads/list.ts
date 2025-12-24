@@ -1,22 +1,14 @@
 import { z } from "zod";
 import { tool } from "kernl";
 
-import { am } from "../client";
+import { am, INBOX_ID } from "../client";
 
 export const listThreads = tool({
   id: "agentmail_threads_list",
-  description:
-    "List threads. Provide inbox_id to list threads in a specific inbox, or omit for org-wide listing.",
-  parameters: z.object({
-    inbox_id: z
-      .string()
-      .optional()
-      .describe("The inbox to list threads from. Omit for org-wide listing."),
-  }),
-  execute: async (ctx, params) => {
-    const result = params.inbox_id
-      ? await am.inboxes.threads.list(params.inbox_id)
-      : await am.threads.list();
+  description: "List threads in the inbox",
+  parameters: z.object({}),
+  execute: async () => {
+    const result = await am.inboxes.threads.list(INBOX_ID);
 
     return {
       count: result.count,

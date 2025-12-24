@@ -1,13 +1,12 @@
 import { z } from "zod";
 import { tool } from "kernl";
 
-import { am } from "../client";
+import { am, INBOX_ID } from "../client";
 
 export const updateDraft = tool({
   id: "agentmail_drafts_update",
   description: "Update a draft email before sending",
   parameters: z.object({
-    inbox_id: z.string().describe("The inbox the draft belongs to"),
     draft_id: z.string().describe("The draft ID to update"),
     to: z.array(z.string()).optional().describe("Updated recipient email addresses"),
     subject: z.string().optional().describe("Updated email subject line"),
@@ -17,7 +16,7 @@ export const updateDraft = tool({
     bcc: z.array(z.string()).optional().describe("Updated BCC recipients"),
   }),
   execute: async (ctx, params) => {
-    const draft = await am.inboxes.drafts.update(params.inbox_id, params.draft_id, {
+    const draft = await am.inboxes.drafts.update(INBOX_ID, params.draft_id, {
       to: params.to,
       subject: params.subject,
       text: params.text,

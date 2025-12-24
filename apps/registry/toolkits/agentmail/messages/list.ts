@@ -1,16 +1,14 @@
 import { z } from "zod";
 import { tool } from "kernl";
 
-import { am } from "../client";
+import { am, INBOX_ID } from "../client";
 
 export const listMessages = tool({
   id: "agentmail_messages_list",
-  description: "List all messages in an inbox",
-  parameters: z.object({
-    inbox_id: z.string().describe("The inbox to list messages from"),
-  }),
-  execute: async (ctx, params) => {
-    const result = await am.inboxes.messages.list(params.inbox_id);
+  description: "List all messages in the inbox",
+  parameters: z.object({}),
+  execute: async () => {
+    const result = await am.inboxes.messages.list(INBOX_ID);
 
     return {
       count: result.count,

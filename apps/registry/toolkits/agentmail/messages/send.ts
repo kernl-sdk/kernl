@@ -1,13 +1,12 @@
 import { z } from "zod";
 import { tool } from "kernl";
 
-import { am } from "../client";
+import { am, INBOX_ID } from "../client";
 
 export const sendMessage = tool({
   id: "agentmail_messages_send",
   description: "Send a new email message, creating a new thread",
   parameters: z.object({
-    inbox_id: z.string().describe("The inbox to send from (e.g. 'outreach@agentmail.to')"),
     to: z.string().describe("Recipient email address"),
     subject: z.string().describe("Email subject line"),
     text: z.string().describe("Plain text body of the email"),
@@ -17,7 +16,7 @@ export const sendMessage = tool({
     labels: z.array(z.string()).optional().describe("Labels to apply to the message"),
   }),
   execute: async (ctx, params) => {
-    const message = await am.inboxes.messages.send(params.inbox_id, {
+    const message = await am.inboxes.messages.send(INBOX_ID, {
       to: params.to,
       subject: params.subject,
       text: params.text,

@@ -1,6 +1,6 @@
-import { describe, it, expect, afterAll } from "vitest";
+import { describe, it, expect } from "vitest";
 import { Context } from "kernl";
-import { skipIfNoCredentials, cleanup, TEST_INBOX_ID, trackThread } from "./setup";
+import { skipIfNoCredentials } from "./setup";
 
 import { sendMessage } from "../messages/send";
 import { listMessages } from "../messages/list";
@@ -9,14 +9,10 @@ import { getMessage } from "../messages/get";
 describe.skipIf(skipIfNoCredentials())("agentmail messages", () => {
   const ctx = new Context();
 
-  afterAll(cleanup);
-
   it("send message", async () => {
-    // Send message via tool
     const sendResult = await sendMessage.invoke(
       ctx,
       JSON.stringify({
-        inbox_id: TEST_INBOX_ID,
         to: `test-${Date.now()}@example.com`,
         subject: `Tool Test ${Date.now()}`,
         text: "Message sent via tool.invoke() integration test",
@@ -29,16 +25,10 @@ describe.skipIf(skipIfNoCredentials())("agentmail messages", () => {
     expect(sent.thread_id).toBeDefined();
 
     console.log(`\n✅ Sent message: ${sent.message_id}\n`);
-    trackThread(sent.thread_id);
   });
 
   it("list messages in inbox", async () => {
-    const listResult = await listMessages.invoke(
-      ctx,
-      JSON.stringify({
-        inbox_id: TEST_INBOX_ID,
-      }),
-    );
+    const listResult = await listMessages.invoke(ctx, JSON.stringify({}));
 
     expect(listResult.state).toBe("completed");
     const list = listResult.result as any;
@@ -49,13 +39,7 @@ describe.skipIf(skipIfNoCredentials())("agentmail messages", () => {
   });
 
   it("get specific message from list", async () => {
-    // First list to get an existing message
-    const listResult = await listMessages.invoke(
-      ctx,
-      JSON.stringify({
-        inbox_id: TEST_INBOX_ID,
-      }),
-    );
+    const listResult = await listMessages.invoke(ctx, JSON.stringify({}));
 
     expect(listResult.state).toBe("completed");
     const list = listResult.result as any;
@@ -67,13 +51,9 @@ describe.skipIf(skipIfNoCredentials())("agentmail messages", () => {
 
     const firstMessage = list.messages[0];
 
-    // Get the message via tool
     const getResult = await getMessage.invoke(
       ctx,
-      JSON.stringify({
-        inbox_id: TEST_INBOX_ID,
-        message_id: firstMessage.id,
-      }),
+      JSON.stringify({ message_id: firstMessage.id }),
     );
 
     expect(getResult.state).toBe("completed");
