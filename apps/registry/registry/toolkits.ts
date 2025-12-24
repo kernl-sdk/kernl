@@ -84,8 +84,9 @@ export const toolkits: RegistryItem[] = [
   {
     name: "bundlesocial",
     type: "registry:toolkit",
-    title: "Bundle Social",
-    description: "Social media API for scheduling and publishing posts across multiple platforms",
+    title: "bundle.social",
+    description:
+      "Social media API for scheduling and publishing posts across multiple platforms",
     icon: "https://registry.kernl.sh/icons/bundlesocial.svg",
     category: "communication",
     dependencies: ["bundlesocial@^2.31.0"],
