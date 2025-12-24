@@ -5,14 +5,19 @@
   "type": "module",
   "scripts": {
     "build": "tsx build.ts",
-    "typecheck": "NODE_OPTIONS='--max-old-space-size=4096' tsc --noEmit"
+    "typecheck": "NODE_OPTIONS='--max-old-space-size=4096' tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@types/node": "^22",
+    "agentmail": "^0.1.13",
+    "bundlesocial": "^2.31.0",
     "fast-glob": "^3.3.2",
     "kernl": "workspace:*",
     "tsx": "^4.19.0",
     "typescript": "^5",
+    "vitest": "^4.0.8",
     "zod": "^4.1.12"
   }
 }
