@@ -74,7 +74,7 @@ export const toolkits: RegistryItem[] = [
   {
     name: "turbopuffer",
     type: "registry:toolkit",
-    title: "Turbopuffer",
+    title: "turbopuffer",
     description: "Vector database for semantic search and retrieval",
     icon: "https://registry.kernl.sh/icons/turbopuffer.svg",
     category: "search",
