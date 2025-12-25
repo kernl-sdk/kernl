@@ -81,4 +81,20 @@ export const toolkits: RegistryItem[] = [
       { path: "toolkits/agentmail/threads/get.ts" },
     ],
   },
+  {
+    name: "turbopuffer",
+    type: "registry:toolkit",
+    title: "Turbopuffer",
+    description: "Vector database for semantic search and retrieval",
+    icon: "https://registry.kernl.sh/icons/turbopuffer.svg",
+    category: "search",
+    dependencies: ["@kernl-sdk/turbopuffer@^0.1.6"],
+    env: ["TURBOPUFFER_API_KEY", "TURBOPUFFER_REGION"],
+    files: [
+      { path: "toolkits/turbopuffer/index.ts" },
+      { path: "toolkits/turbopuffer/client.ts" },
+      { path: "toolkits/turbopuffer/search.ts" },
+      { path: "toolkits/turbopuffer/upsert.ts" },
+    ],
+  },
 ];

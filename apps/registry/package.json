@@ -10,6 +10,7 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
+    "@kernl-sdk/turbopuffer": "workspace:*",
     "@types/node": "^22",
     "agentmail": "^0.1.13",
     "bundlesocial": "^2.31.0",
