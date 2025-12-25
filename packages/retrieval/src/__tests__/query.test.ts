@@ -27,7 +27,10 @@ describe("planQuery", () => {
 
       expect(result.degraded).toBe(false);
       expect(result.warnings).toBeUndefined();
-      expect(result.input.query?.[0]).toEqual({ text: "hello", tvec: [0.1, 0.2] });
+      expect(result.input.query?.[0]).toEqual({
+        text: "hello",
+        tvec: [0.1, 0.2],
+      });
     });
 
     it("drops text when hybrid not supported", () => {
@@ -37,16 +40,15 @@ describe("planQuery", () => {
       );
 
       expect(result.degraded).toBe(true);
-      expect(result.warnings).toContain("hybrid not supported, using vector-only");
+      expect(result.warnings).toContain(
+        "hybrid not supported, using vector-only",
+      );
       expect(result.input.query?.[0]).toEqual({ tvec: [0.1, 0.2] });
       expect(result.input.query?.[0]).not.toHaveProperty("text");
     });
 
     it("keeps vector-only query unchanged", () => {
-      const result = planQuery(
-        { query: [{ tvec: [0.1, 0.2] }] },
-        vectorOnly,
-      );
+      const result = planQuery({ query: [{ tvec: [0.1, 0.2] }] }, vectorOnly);
 
       expect(result.degraded).toBe(false);
       expect(result.input.query?.[0]).toEqual({ tvec: [0.1, 0.2] });
@@ -71,7 +73,9 @@ describe("planQuery", () => {
       );
 
       expect(result.degraded).toBe(true);
-      expect(result.warnings).toContain("multi-signal not supported, using first signal");
+      expect(result.warnings).toContain(
+        "multi-signal not supported, using first signal",
+      );
       expect(result.input.query).toHaveLength(1);
       expect(result.input.query?.[0]).toEqual({ tvec: [0.1] });
     });
@@ -97,18 +101,18 @@ describe("planQuery", () => {
   });
 
   describe("passthrough", () => {
-    it("preserves filter and topK", () => {
+    it("preserves filter and limit", () => {
       const result = planQuery(
         {
           query: [{ tvec: [0.1] }],
           filter: { status: "active" },
-          topK: 10,
+          limit: 10,
         },
         vectorOnly,
       );
 
       expect(result.input.filter).toEqual({ status: "active" });
-      expect(result.input.topK).toBe(10);
+      expect(result.input.limit).toBe(10);
     });
   });
 });
@@ -125,7 +129,7 @@ describe("normalizeQuery", () => {
   });
 
   it("passes through SearchQuery unchanged", () => {
-    const input = { query: [{ tvec: [0.1] }], topK: 5 };
+    const input = { query: [{ tvec: [0.1] }], limit: 5 };
     const result = normalizeQuery(input);
     expect(result).toEqual(input);
   });
@@ -135,6 +139,8 @@ describe("normalizeQuery", () => {
   });
 
   it("throws on explicit empty query array", () => {
-    expect(() => normalizeQuery({ query: [] })).toThrow("No ranking signals provided");
+    expect(() => normalizeQuery({ query: [] })).toThrow(
+      "No ranking signals provided",
+    );
   });
 });

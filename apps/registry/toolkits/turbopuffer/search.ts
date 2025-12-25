@@ -49,7 +49,7 @@ export const search = tool({
     // const hits = await ns.query({
     //   query: [{ vector: embedding }],
     //   filter: params.filter,
-    //   topK: params.limit,
+    //   limit: params.limit,
     // });
 
     // Option 2: Full-text search (BM25)
@@ -60,7 +60,7 @@ export const search = tool({
     return await ns.query({
       query: [params.query],
       filter: params.filter,
-      topK: params.limit,
+      limit: params.limit,
     });
   },
 });

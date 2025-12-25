@@ -67,7 +67,7 @@ export function sqlize(query: SearchQuery, config: SqlizeConfig): SqlizedQuery {
       schema: config.schema,
       table: config.table,
     },
-    limit: { topK: query.topK ?? 10, offset: query.offset ?? 0 },
+    limit: { limit: query.limit ?? 10, offset: query.offset ?? 0 },
   };
 }
 
@@ -106,7 +106,7 @@ export interface OrderInput {
 }
 
 export interface LimitInput {
-  topK: number;
+  limit: number;
   offset: number;
   startIdx: number;
 }

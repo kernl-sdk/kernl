@@ -210,7 +210,7 @@ describe.sequential("PGSearchIndex", () => {
 
       const results = await handle.query({
         query: [{ embedding: [0.1, 0.2, 0.3] }],
-        topK: 1,
+        limit: 1,
       });
 
       expect(results).toHaveLength(1);

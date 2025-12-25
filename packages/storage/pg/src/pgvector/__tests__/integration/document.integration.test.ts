@@ -93,7 +93,7 @@ describe.sequential("pgvector document operations integration tests", () => {
       // Verify document was inserted
       const hits = await handle.query({
         query: [{ embedding: [0.1, 0.2, 0.3, 0.4] }],
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits).toHaveLength(1);
@@ -162,7 +162,7 @@ describe.sequential("pgvector document operations integration tests", () => {
       // Verify update
       const hits = await handle.query({
         filter: { id: "doc-1" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].document?.title).toBe("Updated Title");
@@ -244,7 +244,7 @@ describe.sequential("pgvector document operations integration tests", () => {
       // Verify count
       const hits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 1000,
+        limit: 1000,
       });
 
       expect(hits).toHaveLength(100);
@@ -264,7 +264,7 @@ describe.sequential("pgvector document operations integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: "vec-test" },
-        topK: 1,
+        limit: 1,
       });
 
       // Vector values should be preserved (within floating point precision)
@@ -298,7 +298,7 @@ describe.sequential("pgvector document operations integration tests", () => {
 
       const hits = await nullHandle.query({
         filter: { id: "doc-null" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].document?.title).toBe("Has Title");
@@ -343,7 +343,7 @@ describe.sequential("pgvector document operations integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: "patch-1" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].document?.title).toBe("Updated Title");
@@ -363,7 +363,7 @@ describe.sequential("pgvector document operations integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: "patch-1" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].document?.title).toBe("New Title");
@@ -382,7 +382,7 @@ describe.sequential("pgvector document operations integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: "patch-1" },
-        topK: 1,
+        limit: 1,
       });
 
       const stored = hits[0].document?.embedding;
@@ -399,7 +399,7 @@ describe.sequential("pgvector document operations integration tests", () => {
 
       const hits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 10,
+        limit: 10,
       });
 
       const doc1 = hits.find((h) => h.id === "patch-1");
@@ -438,7 +438,7 @@ describe.sequential("pgvector document operations integration tests", () => {
 
       const hits = await nullHandle.query({
         filter: { id: "doc-1" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].document?.subtitle).toBeNull();
@@ -467,7 +467,7 @@ describe.sequential("pgvector document operations integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: "patch-1" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].document?.title).toBe("Updated");
@@ -527,7 +527,7 @@ describe.sequential("pgvector document operations integration tests", () => {
       // Verify deletion
       const hits = await handle.query({
         filter: { id: "del-1" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits).toHaveLength(0);
@@ -541,7 +541,7 @@ describe.sequential("pgvector document operations integration tests", () => {
       // Verify only del-3 remains
       const hits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits).toHaveLength(1);
@@ -570,7 +570,7 @@ describe.sequential("pgvector document operations integration tests", () => {
 
       const hits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits).toHaveLength(0);
@@ -594,7 +594,7 @@ describe.sequential("pgvector document operations integration tests", () => {
 
       const hits = await handle.query({
         filter: { views: 0 },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits).toHaveLength(1);
@@ -613,7 +613,7 @@ describe.sequential("pgvector document operations integration tests", () => {
 
       const hits = await handle.query({
         filter: { views: -50 },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits).toHaveLength(1);
@@ -642,12 +642,12 @@ describe.sequential("pgvector document operations integration tests", () => {
 
       const trueHits = await handle.query({
         filter: { published: true },
-        topK: 10,
+        limit: 10,
       });
 
       const falseHits = await handle.query({
         filter: { published: false },
-        topK: 10,
+        limit: 10,
       });
 
       expect(trueHits).toHaveLength(1);
@@ -668,7 +668,7 @@ describe.sequential("pgvector document operations integration tests", () => {
 
       const hits = await handle.query({
         filter: { title: "" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits).toHaveLength(1);
@@ -687,7 +687,7 @@ describe.sequential("pgvector document operations integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: "unicode-test" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].document?.title).toBe("Hello 世界 🌍");
@@ -708,7 +708,7 @@ describe.sequential("pgvector document operations integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: "long-string" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].document?.content).toBe(longString);

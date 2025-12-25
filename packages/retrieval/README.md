@@ -17,7 +17,7 @@ const docs: IndexHandle = search.index('docs');
 const hits = await docs.query({
   query: [{ text: 'search query', tvec: [0.1, 0.2, ...] }],
   filter: { category: 'technical' },
-  topK: 10,
+  limit: 10,
 });
 
 // upsert documents

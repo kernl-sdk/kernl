@@ -27,7 +27,7 @@ describe("sqlize", () => {
       schema: "public",
       table: "docs",
     });
-    expect(result.limit).toEqual({ topK: 10, offset: 0 });
+    expect(result.limit).toEqual({ limit: 10, offset: 0 });
   });
 
   it("throws on multi-signal fusion (not supported by pgvector)", () => {
@@ -78,19 +78,19 @@ describe("sqlize", () => {
     const result = sqlize(
       {
         query: [{ embedding: [0.1, 0.2] }],
-        topK: 25,
+        limit: 25,
         offset: 50,
       },
       { pkey: "id", schema: "public", table: "docs" },
     );
 
-    expect(result.limit).toEqual({ topK: 25, offset: 50 });
+    expect(result.limit).toEqual({ limit: 25, offset: 50 });
   });
 
   it("uses default pagination values", () => {
     const result = sqlize({ query: [{ embedding: [0.1, 0.2] }] }, { pkey: "id", schema: "public", table: "docs" });
 
-    expect(result.limit).toEqual({ topK: 10, offset: 0 });
+    expect(result.limit).toEqual({ limit: 10, offset: 0 });
   });
 
   it("passes binding through to all inputs", () => {
@@ -131,7 +131,7 @@ describe("sqlize", () => {
       {
         filter: { status: "active" },
         orderBy: { field: "created_at", direction: "desc" },
-        topK: 100,
+        limit: 100,
       },
       { pkey: "id", schema: "public", table: "docs" },
     );
@@ -196,7 +196,7 @@ describe("sqlize", () => {
       };
 
       const result = sqlize(
-        { filter: { status: "active" }, topK: 50 },
+        { filter: { status: "active" }, limit: 50 },
         { pkey: "id", schema: "public", table: "docs", binding },
       );
 
@@ -211,7 +211,7 @@ describe("sqlize", () => {
       const result = sqlize(
         {
           orderBy: { field: "created_at", direction: "asc" },
-          topK: 20,
+          limit: 20,
         },
         { pkey: "id", schema: "public", table: "docs" },
       );
@@ -222,7 +222,7 @@ describe("sqlize", () => {
         field: "created_at",
         direction: "asc",
       });
-      expect(result.limit).toEqual({ topK: 20, offset: 0 });
+      expect(result.limit).toEqual({ limit: 20, offset: 0 });
     });
   });
 
@@ -257,7 +257,7 @@ describe("sqlize", () => {
           query: [{ embedding: [0.1, 0.2, 0.3] }],
           filter: { status: "active", views: { $gt: 100 } },
           orderBy: { field: "created_at", direction: "desc" },
-          topK: 50,
+          limit: 50,
           offset: 25,
         },
         { pkey: "doc_id", schema: "public", table: "documents", binding },
@@ -275,7 +275,7 @@ describe("sqlize", () => {
         direction: "desc",
       });
       expect(result.order.binding).toBe(binding);
-      expect(result.limit).toEqual({ topK: 50, offset: 25 });
+      expect(result.limit).toEqual({ limit: 50, offset: 25 });
     });
 
     it("handles undefined filter", () => {
@@ -324,7 +324,7 @@ describe("full pipeline integration", () => {
       {
         query: [{ embedding: vector }],
         filter: { status: "active", views: { $gt: 100 } },
-        topK: 25,
+        limit: 25,
         offset: 50,
       },
       { pkey: "doc_id", schema: "public", table: "documents", binding },
@@ -375,7 +375,7 @@ describe("full pipeline integration", () => {
           $or: [{ featured: true }, { views: { $gte: 1000 } }],
         },
         orderBy: { field: "created_at", direction: "desc" },
-        topK: 10,
+        limit: 10,
       },
       { pkey: "id", schema: "public", table: "docs" },
     );
@@ -423,7 +423,7 @@ describe("full pipeline integration", () => {
           ],
           deleted_at: null,
         },
-        topK: 5,
+        limit: 5,
       },
       { pkey: "id", schema: "public", table: "docs" },
     );
@@ -465,7 +465,7 @@ describe("full pipeline integration", () => {
     };
 
     const query = sqlize(
-      { query: [{ embedding: vector }], topK: 10 },
+      { query: [{ embedding: vector }], limit: 10 },
       { pkey: "id", schema: "public", table: "docs", binding },
     );
 
@@ -496,7 +496,7 @@ describe("full pipeline integration", () => {
     };
 
     const query = sqlize(
-      { query: [{ embedding: vector }], topK: 10 },
+      { query: [{ embedding: vector }], limit: 10 },
       { pkey: "id", schema: "public", table: "docs", binding },
     );
 
@@ -518,7 +518,7 @@ describe("full pipeline integration", () => {
       {
         query: [{ embedding: [0.1, 0.2] }],
         filter: { a: 1, b: 2, c: 3 },
-        topK: 10,
+        limit: 10,
         offset: 20,
       },
       { pkey: "id", schema: "public", table: "docs" },
@@ -533,7 +533,7 @@ describe("full pipeline integration", () => {
     // Verify no gaps in indices
     // SELECT: $1 (vector)
     // WHERE: $2, $3, $4 (a, b, c)
-    // LIMIT: $5, $6 (topK, offset)
+    // LIMIT: $5, $6 (limit, offset)
 
     expect(select.params).toHaveLength(1); // $1
     expect(whereStartIdx).toBe(2);

@@ -97,7 +97,7 @@ export class Memory {
     return this._search.query({
       query: [{ text: q.query, tvec: tvec ?? undefined }],
       filter: q.filter ? MEMORY_FILTER.encode(q.filter) : undefined,
-      topK: q.limit ?? 20,
+      limit: q.limit ?? 20,
     });
   }
 

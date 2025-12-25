@@ -115,7 +115,7 @@ export interface IndexHandle<TDocument = UnknownDocument> {
    * await index.query({
    *   query: [{ content: "fox" }],
    *   filter: { published: true },
-   *   topK: 20,
+   *   limit: 20,
    * });
    * ```
    */

@@ -229,7 +229,7 @@ describe.sequential(
       expect(results[0].document?.id).toBe(id1);
     });
 
-    it("respects topK limit", async () => {
+    it("respects limit", async () => {
       const ns = uid("ns");
 
       await agent.memories.create({

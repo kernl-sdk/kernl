@@ -1,7 +1,7 @@
 /**
  * Query behavior integration tests for pgvector.
  *
- * Tests vector search, topK behavior, offset pagination, orderBy,
+ * Tests vector search, limit behavior, offset pagination, orderBy,
  * and result structure against real PostgreSQL.
  */
 
@@ -135,7 +135,7 @@ describe.sequential("pgvector query integration tests", () => {
       // Query with basis vector 1 - should match vec-1 best
       const hits = await handle.query({
         query: [{ embedding: [1.0, 0.0, 0.0, 0.0] }],
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits.length).toBeGreaterThan(0);
@@ -146,7 +146,7 @@ describe.sequential("pgvector query integration tests", () => {
       // Query with basis vector 2
       const hits = await handle.query({
         query: [{ embedding: [0.0, 1.0, 0.0, 0.0] }],
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits.length).toBeGreaterThan(0);
@@ -162,7 +162,7 @@ describe.sequential("pgvector query integration tests", () => {
       // Query with mix of basis 1 and 2 - should prefer vec-5 which has [0.5, 0.5, 0, 0]
       const hits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.0, 0.0] }],
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits.length).toBeGreaterThan(0);
@@ -172,7 +172,7 @@ describe.sequential("pgvector query integration tests", () => {
     it("returns high similarity score for exact match", async () => {
       const hits = await handle.query({
         query: [{ embedding: [1.0, 0.0, 0.0, 0.0] }],
-        topK: 1,
+        limit: 1,
       });
 
       // Cosine similarity of identical vectors should be very close to 1
@@ -182,7 +182,7 @@ describe.sequential("pgvector query integration tests", () => {
     it("returns lower similarity for orthogonal vectors", async () => {
       const hits = await handle.query({
         query: [{ embedding: [1.0, 0.0, 0.0, 0.0] }],
-        topK: 10,
+        limit: 10,
       });
 
       // Find vec-4 which is orthogonal to query
@@ -196,7 +196,7 @@ describe.sequential("pgvector query integration tests", () => {
       // Already normalized
       const hits = await handle.query({
         query: [{ embedding: [0.707, 0.707, 0.0, 0.0] }],
-        topK: 3,
+        limit: 3,
       });
 
       // Should still find vec-5 as best match
@@ -207,7 +207,7 @@ describe.sequential("pgvector query integration tests", () => {
       // Not normalized (should still work with cosine similarity)
       const hits = await handle.query({
         query: [{ embedding: [2.0, 2.0, 0.0, 0.0] }],
-        topK: 3,
+        limit: 3,
       });
 
       // Should still find vec-5 as best match
@@ -216,42 +216,42 @@ describe.sequential("pgvector query integration tests", () => {
   });
 
   // ============================================================
-  // TOPK BEHAVIOR
+  // LIMIT BEHAVIOR
   // ============================================================
 
-  describe("topK behavior", () => {
-    it("topK smaller than doc count returns exactly topK", async () => {
+  describe("limit behavior", () => {
+    it("limit smaller than doc count returns exactly limit", async () => {
       const hits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 3,
+        limit: 3,
       });
 
       expect(hits.length).toBe(3);
     });
 
-    it("topK larger than doc count returns all docs", async () => {
+    it("limit larger than doc count returns all docs", async () => {
       const hits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 100,
+        limit: 100,
       });
 
       expect(hits.length).toBe(6);
     });
 
-    it("topK of 1 returns single best match", async () => {
+    it("limit of 1 returns single best match", async () => {
       const hits = await handle.query({
         query: [{ embedding: [1.0, 0.0, 0.0, 0.0] }],
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits.length).toBe(1);
       expect(hits[0].id).toBe("vec-1");
     });
 
-    it("topK with filter returns limited filtered results", async () => {
+    it("limit with filter returns limited filtered results", async () => {
       const hits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 1,
+        limit: 1,
         filter: { category: "db" },
       });
 
@@ -259,10 +259,10 @@ describe.sequential("pgvector query integration tests", () => {
       expect(hits[0].document?.category).toBe("db");
     });
 
-    it("topK of 0 returns empty array", async () => {
+    it("limit of 0 returns empty array", async () => {
       const hits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 0,
+        limit: 0,
       });
 
       expect(hits.length).toBe(0);
@@ -278,13 +278,13 @@ describe.sequential("pgvector query integration tests", () => {
       // Get all results
       const allHits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 10,
+        limit: 10,
       });
 
       // Get results with offset
       const offsetHits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 10,
+        limit: 10,
         offset: 2,
       });
 
@@ -292,10 +292,10 @@ describe.sequential("pgvector query integration tests", () => {
       expect(offsetHits[0].id).toBe(allHits[2].id);
     });
 
-    it("offset with topK limits correctly", async () => {
+    it("offset with limit limits correctly", async () => {
       const hits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 2,
+        limit: 2,
         offset: 2,
       });
 
@@ -305,7 +305,7 @@ describe.sequential("pgvector query integration tests", () => {
     it("offset beyond result count returns empty", async () => {
       const hits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 10,
+        limit: 10,
         offset: 100,
       });
 
@@ -316,21 +316,21 @@ describe.sequential("pgvector query integration tests", () => {
       // Page 1
       const page1 = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 2,
+        limit: 2,
         offset: 0,
       });
 
       // Page 2
       const page2 = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 2,
+        limit: 2,
         offset: 2,
       });
 
       // Page 3
       const page3 = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 2,
+        limit: 2,
         offset: 4,
       });
 
@@ -348,13 +348,13 @@ describe.sequential("pgvector query integration tests", () => {
       // 2 docs in "ml" category
       const allMl = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 10,
+        limit: 10,
         filter: { category: "ml" },
       });
 
       const offsetMl = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 10,
+        limit: 10,
         offset: 1,
         filter: { category: "ml" },
       });
@@ -373,7 +373,7 @@ describe.sequential("pgvector query integration tests", () => {
     it("orders by integer field ascending", async () => {
       const hits = await handle.query({
         orderBy: { field: "priority", direction: "asc" },
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits.length).toBe(6);
@@ -391,7 +391,7 @@ describe.sequential("pgvector query integration tests", () => {
     it("orders by integer field descending", async () => {
       const hits = await handle.query({
         orderBy: { field: "priority", direction: "desc" },
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits[0].document?.priority).toBe(6);
@@ -402,7 +402,7 @@ describe.sequential("pgvector query integration tests", () => {
       // Note: We can still order by the "score" field even though it's excluded from the result
       const hits = await handle.query({
         orderBy: { field: "priority", direction: "desc" },
-        topK: 10,
+        limit: 10,
       });
 
       // Verify descending order by priority
@@ -416,7 +416,7 @@ describe.sequential("pgvector query integration tests", () => {
     it("orders by string field", async () => {
       const hits = await handle.query({
         orderBy: { field: "title", direction: "asc" },
-        topK: 10,
+        limit: 10,
       });
 
       // Verify alphabetical order
@@ -431,7 +431,7 @@ describe.sequential("pgvector query integration tests", () => {
       const hits = await handle.query({
         filter: { category: "ml" },
         orderBy: { field: "priority", direction: "desc" },
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits.length).toBe(2);
@@ -439,10 +439,10 @@ describe.sequential("pgvector query integration tests", () => {
       expect(hits[1].document?.priority).toBe(1);
     });
 
-    it("orderBy with topK limits after ordering", async () => {
+    it("orderBy with limit limits after ordering", async () => {
       const hits = await handle.query({
         orderBy: { field: "priority", direction: "asc" },
-        topK: 3,
+        limit: 3,
       });
 
       expect(hits.length).toBe(3);
@@ -454,7 +454,7 @@ describe.sequential("pgvector query integration tests", () => {
     it("orderBy with offset", async () => {
       const hits = await handle.query({
         orderBy: { field: "priority", direction: "asc" },
-        topK: 2,
+        limit: 2,
         offset: 2,
       });
 
@@ -472,7 +472,7 @@ describe.sequential("pgvector query integration tests", () => {
     it("filter-only query returns all matching docs", async () => {
       const hits = await handle.query({
         filter: { category: "db" },
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits.length).toBe(2);
@@ -484,7 +484,7 @@ describe.sequential("pgvector query integration tests", () => {
     it("empty query with orderBy returns ordered docs", async () => {
       const hits = await handle.query({
         orderBy: { field: "priority", direction: "asc" },
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits.length).toBe(6);
@@ -495,7 +495,7 @@ describe.sequential("pgvector query integration tests", () => {
       const hits = await handle.query({
         filter: { category: "search" },
         orderBy: { field: "priority", direction: "desc" },
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits.length).toBe(2);
@@ -513,7 +513,7 @@ describe.sequential("pgvector query integration tests", () => {
     it("results have required fields", async () => {
       const hits = await handle.query({
         query: [{ embedding: [1.0, 0.0, 0.0, 0.0] }],
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits.length).toBe(1);
@@ -527,7 +527,7 @@ describe.sequential("pgvector query integration tests", () => {
     it("score is a valid number", async () => {
       const hits = await handle.query({
         query: [{ embedding: [1.0, 0.0, 0.0, 0.0] }],
-        topK: 5,
+        limit: 5,
       });
 
       for (const hit of hits) {
@@ -539,7 +539,7 @@ describe.sequential("pgvector query integration tests", () => {
     it("document fields are included by default", async () => {
       const hits = await handle.query({
         query: [{ embedding: [1.0, 0.0, 0.0, 0.0] }],
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].document).toBeDefined();
@@ -556,7 +556,7 @@ describe.sequential("pgvector query integration tests", () => {
     it("index field matches query index", async () => {
       const hits = await handle.query({
         query: [{ embedding: [1.0, 0.0, 0.0, 0.0] }],
-        topK: 5,
+        limit: 5,
       });
 
       for (const hit of hits) {
@@ -574,7 +574,7 @@ describe.sequential("pgvector query integration tests", () => {
       const hits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
         filter: { category: "nonexistent" },
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits).toEqual([]);
@@ -583,17 +583,17 @@ describe.sequential("pgvector query integration tests", () => {
     it("offset beyond result count returns empty array", async () => {
       const hits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 10,
+        limit: 10,
         offset: 1000,
       });
 
       expect(hits).toEqual([]);
     });
 
-    it("topK 0 returns empty array", async () => {
+    it("limit 0 returns empty array", async () => {
       const hits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 0,
+        limit: 0,
       });
 
       expect(hits).toEqual([]);
@@ -625,7 +625,7 @@ describe.sequential("pgvector query integration tests", () => {
 
       const hits = await eucHandle.query({
         query: [{ embedding: [1, 0, 0, 0] }],
-        topK: 3,
+        limit: 3,
       });
 
       expect(hits[0].id).toBe("e1"); // Exact match
@@ -656,7 +656,7 @@ describe.sequential("pgvector query integration tests", () => {
 
       const hits = await dotHandle.query({
         query: [{ embedding: [1, 1, 0, 0] }],
-        topK: 3,
+        limit: 3,
       });
 
       // Dot product: d1=1, d2=1, d3=1

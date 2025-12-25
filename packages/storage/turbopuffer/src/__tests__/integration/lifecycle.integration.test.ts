@@ -182,7 +182,7 @@ describe("Lifecycle edge cases integration tests", () => {
       // Query and verify final state
       const hits = await index.query({
         query: [{ vector: [0.3, 0.3, 0.3, 0.3] }],
-        topK: 10,
+        limit: 10,
         filter: { id: "overwrite-test" },
         include: ["content", "count"],
       });
@@ -205,7 +205,7 @@ describe("Lifecycle edge cases integration tests", () => {
 
       const hits = await index.query({
         query: [{ vector: [0.1, 0.1, 0.1, 0.1] }],
-        topK: 10,
+        limit: 10,
         filter: { id: "minimal-doc" },
       });
 
@@ -311,7 +311,7 @@ describe("Lifecycle edge cases integration tests", () => {
       // Verify exists
       let hits = await index.query({
         query: [{ vector: [0.9, 0.9, 0.9, 0.9] }],
-        topK: 10,
+        limit: 10,
         filter: { id: "to-delete" },
       });
       expect(hits.length).toBe(1);
@@ -324,7 +324,7 @@ describe("Lifecycle edge cases integration tests", () => {
       // Verify gone
       hits = await index.query({
         query: [{ vector: [0.9, 0.9, 0.9, 0.9] }],
-        topK: 10,
+        limit: 10,
         filter: { id: "to-delete" },
       });
       expect(hits.length).toBe(0);
@@ -361,7 +361,7 @@ describe("Lifecycle edge cases integration tests", () => {
 
       const hits = await index.query({
         query: [{ vector: [0.1, 0.2, 0.3, 0.4] }],
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits).toEqual([]);
@@ -382,20 +382,20 @@ describe("Lifecycle edge cases integration tests", () => {
       // Query with filter that matches nothing
       const hits = await index.query({
         query: [{ vector: [0.1, 0.1, 0.1, 0.1] }],
-        topK: 10,
+        limit: 10,
         filter: { id: "nonexistent-id" },
       });
 
       expect(hits).toEqual([]);
     });
 
-    it("topK of 0 throws", async () => {
+    it("limit of 0 throws", async () => {
       const index = tpuf.index(indexId);
 
       await expect(
         index.query({
           query: [{ vector: [0.1, 0.1, 0.1, 0.1] }],
-          topK: 0,
+          limit: 0,
         }),
       ).rejects.toThrow();
     });
@@ -453,7 +453,7 @@ describe("Lifecycle edge cases integration tests", () => {
       await expect(
         index.query({
           query: [{ vector: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8] }], // 8 dims
-          topK: 10,
+          limit: 10,
         }),
       ).rejects.toThrow();
 

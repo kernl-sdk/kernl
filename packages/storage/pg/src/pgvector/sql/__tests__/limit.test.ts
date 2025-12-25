@@ -5,7 +5,7 @@ describe("SQL_LIMIT", () => {
   describe("encode", () => {
     it("builds LIMIT clause", () => {
       const result = SQL_LIMIT.encode({
-        topK: 10,
+        limit: 10,
         offset: 0,
         startIdx: 1,
       });
@@ -15,7 +15,7 @@ describe("SQL_LIMIT", () => {
 
     it("respects startIdx for parameter numbering", () => {
       const result = SQL_LIMIT.encode({
-        topK: 10,
+        limit: 10,
         offset: 0,
         startIdx: 5,
       });
@@ -25,7 +25,7 @@ describe("SQL_LIMIT", () => {
 
     it("includes OFFSET when offset > 0", () => {
       const result = SQL_LIMIT.encode({
-        topK: 10,
+        limit: 10,
         offset: 20,
         startIdx: 1,
       });
@@ -35,7 +35,7 @@ describe("SQL_LIMIT", () => {
 
     it("skips OFFSET when offset is 0", () => {
       const result = SQL_LIMIT.encode({
-        topK: 25,
+        limit: 25,
         offset: 0,
         startIdx: 3,
       });
@@ -46,7 +46,7 @@ describe("SQL_LIMIT", () => {
     it("handles pagination correctly", () => {
       // Page 1: offset 0
       const page1 = SQL_LIMIT.encode({
-        topK: 20,
+        limit: 20,
         offset: 0,
         startIdx: 1,
       });
@@ -55,7 +55,7 @@ describe("SQL_LIMIT", () => {
 
       // Page 2: offset 20
       const page2 = SQL_LIMIT.encode({
-        topK: 20,
+        limit: 20,
         offset: 20,
         startIdx: 1,
       });
@@ -64,7 +64,7 @@ describe("SQL_LIMIT", () => {
 
       // Page 3: offset 40
       const page3 = SQL_LIMIT.encode({
-        topK: 20,
+        limit: 20,
         offset: 40,
         startIdx: 1,
       });
@@ -76,7 +76,7 @@ describe("SQL_LIMIT", () => {
       // Simulating: SELECT uses $1, WHERE uses $2-$4
       // LIMIT should start at $5
       const result = SQL_LIMIT.encode({
-        topK: 10,
+        limit: 10,
         offset: 50,
         startIdx: 5,
       });
@@ -85,9 +85,9 @@ describe("SQL_LIMIT", () => {
     });
 
     describe("edge values", () => {
-      it("handles topK: 0", () => {
+      it("handles limit: 0", () => {
         const result = SQL_LIMIT.encode({
-          topK: 0,
+          limit: 0,
           offset: 0,
           startIdx: 1,
         });
@@ -96,9 +96,9 @@ describe("SQL_LIMIT", () => {
         expect(result.params).toEqual([0]);
       });
 
-      it("handles topK: 1", () => {
+      it("handles limit: 1", () => {
         const result = SQL_LIMIT.encode({
-          topK: 1,
+          limit: 1,
           offset: 0,
           startIdx: 1,
         });
@@ -106,9 +106,9 @@ describe("SQL_LIMIT", () => {
         expect(result.params).toEqual([1]);
       });
 
-      it("handles very large topK", () => {
+      it("handles very large limit", () => {
         const result = SQL_LIMIT.encode({
-          topK: 1000000,
+          limit: 1000000,
           offset: 0,
           startIdx: 1,
         });
@@ -118,7 +118,7 @@ describe("SQL_LIMIT", () => {
 
       it("handles very large offset", () => {
         const result = SQL_LIMIT.encode({
-          topK: 10,
+          limit: 10,
           offset: 999999,
           startIdx: 1,
         });
@@ -128,7 +128,7 @@ describe("SQL_LIMIT", () => {
 
       it("handles very large startIdx", () => {
         const result = SQL_LIMIT.encode({
-          topK: 10,
+          limit: 10,
           offset: 20,
           startIdx: 50,
         });
@@ -136,9 +136,9 @@ describe("SQL_LIMIT", () => {
         expect(result.params).toEqual([10, 20]);
       });
 
-      it("handles startIdx: 1 with both topK and offset", () => {
+      it("handles startIdx: 1 with both limit and offset", () => {
         const result = SQL_LIMIT.encode({
-          topK: 25,
+          limit: 25,
           offset: 100,
           startIdx: 1,
         });
@@ -150,7 +150,7 @@ describe("SQL_LIMIT", () => {
     describe("offset boundary", () => {
       it("includes OFFSET when offset is exactly 1", () => {
         const result = SQL_LIMIT.encode({
-          topK: 10,
+          limit: 10,
           offset: 1,
           startIdx: 1,
         });
@@ -160,7 +160,7 @@ describe("SQL_LIMIT", () => {
 
       it("does not include OFFSET when offset is exactly 0", () => {
         const result = SQL_LIMIT.encode({
-          topK: 10,
+          limit: 10,
           offset: 0,
           startIdx: 1,
         });

@@ -31,9 +31,9 @@ export const QUERY = {
       params.rank_by = buildRankBy(signals, query.max !== undefined);
     }
 
-    // top K
-    if (query.topK !== undefined) {
-      params.top_k = query.topK;
+    // limit
+    if (query.limit !== undefined) {
+      params.top_k = query.limit;
     }
 
     // filters

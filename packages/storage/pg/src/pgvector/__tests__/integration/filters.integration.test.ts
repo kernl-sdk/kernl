@@ -183,7 +183,7 @@ describe.sequential("pgvector filter integration tests", () => {
   async function queryIds(filter: Filter): Promise<string[]> {
     const hits = await handle.query({
       query: [{ embedding: QUERY_VECTOR }],
-      topK: 100,
+      limit: 100,
       filter,
     });
     return hits.map((h) => h.id).sort();
@@ -616,7 +616,7 @@ describe.sequential("pgvector filter integration tests", () => {
     it("filtered results have correct field values", async () => {
       const hits = await handle.query({
         query: [{ embedding: QUERY_VECTOR }],
-        topK: 100,
+        limit: 100,
         filter: { status: "pending" },
       });
 
@@ -634,7 +634,7 @@ describe.sequential("pgvector filter integration tests", () => {
     it("complex filter returns expected documents with correct data", async () => {
       const hits = await handle.query({
         query: [{ embedding: QUERY_VECTOR }],
-        topK: 100,
+        limit: 100,
         filter: {
           $and: [{ num: { $gte: 20, $lte: 50 } }, { flag: true }],
         },
@@ -651,10 +651,10 @@ describe.sequential("pgvector filter integration tests", () => {
       }
     });
 
-    it("combining filter + topK limits correctly", async () => {
+    it("combining filter + limit limits correctly", async () => {
       const hits = await handle.query({
         query: [{ embedding: QUERY_VECTOR }],
-        topK: 2,
+        limit: 2,
         filter: { status: "active" },
       });
 

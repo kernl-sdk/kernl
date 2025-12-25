@@ -49,7 +49,7 @@ import { INDEX_SCHEMA, SIMILARITY } from "./convert";
  *
  * const hits = await docs.query({
  *   query: [{ vector: [0.1, 0.2, ...] }],
- *   topK: 10,
+ *   limit: 10,
  * });
  * ```
  */

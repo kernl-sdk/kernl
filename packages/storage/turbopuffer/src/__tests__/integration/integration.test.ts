@@ -176,7 +176,7 @@ describe("TurbopufferSearchIndex integration", () => {
       // Verify via query
       const hits = await index.query({
         query: [{ vector: vec }],
-        topK: 10,
+        limit: 10,
         include: ["category"],
       });
 
@@ -201,7 +201,7 @@ describe("TurbopufferSearchIndex integration", () => {
       // Verify via query
       const hits = await index.query({
         query: [{ vector: vec }],
-        topK: 10,
+        limit: 10,
         include: ["category"],
       });
 
@@ -233,7 +233,7 @@ describe("TurbopufferSearchIndex integration", () => {
       // Verify via query with filter
       const hits = await index.query({
         query: [{ vector: new Array(384).fill(0.3) }],
-        topK: 10,
+        limit: 10,
         filter: { category: "test" },
         include: true,
       });
@@ -257,7 +257,7 @@ describe("TurbopufferSearchIndex integration", () => {
 
       const hits = await index.query({
         query: [{ vector: new Array(384).fill(0.1) }],
-        topK: 5,
+        limit: 5,
       });
 
       expect(hits.length).toBeGreaterThan(0);
@@ -271,7 +271,7 @@ describe("TurbopufferSearchIndex integration", () => {
 
       const hits = await index.query({
         query: [{ vector: new Array(384).fill(0.1) }],
-        topK: 5,
+        limit: 5,
         include: ["content", "category"],
       });
 
@@ -286,7 +286,7 @@ describe("TurbopufferSearchIndex integration", () => {
 
       const hits = await index.query({
         query: [{ vector: new Array(384).fill(0.3) }],
-        topK: 10,
+        limit: 10,
         filter: { category: "test" },
         include: ["category"],
       });
@@ -302,7 +302,7 @@ describe("TurbopufferSearchIndex integration", () => {
 
       const hits = await index.query({
         query: [{ vector: new Array(384).fill(0.3) }],
-        topK: 10,
+        limit: 10,
         filter: {
           $and: [
             { category: "test" },
@@ -335,7 +335,7 @@ describe("TurbopufferSearchIndex integration", () => {
       // Verify it exists
       let hits = await index.query({
         query: [{ vector: vec }],
-        topK: 10,
+        limit: 10,
         filter: { id: "doc-to-delete" },
       });
       expect(hits.some((h) => h.id === "doc-to-delete")).toBe(true);
@@ -346,7 +346,7 @@ describe("TurbopufferSearchIndex integration", () => {
       // Verify it's gone
       hits = await index.query({
         query: [{ vector: vec }],
-        topK: 10,
+        limit: 10,
         filter: { id: "doc-to-delete" },
       });
       expect(hits.some((h) => h.id === "doc-to-delete")).toBe(false);
@@ -377,7 +377,7 @@ describe("TurbopufferSearchIndex integration", () => {
       // Verify they exist
       let hits = await index.query({
         query: [{ vector: vec }],
-        topK: 10,
+        limit: 10,
         filter: { category: "bulk-delete" },
       });
       expect(hits.length).toBeGreaterThanOrEqual(2);
@@ -388,7 +388,7 @@ describe("TurbopufferSearchIndex integration", () => {
       // Verify they're gone
       hits = await index.query({
         query: [{ vector: vec }],
-        topK: 10,
+        limit: 10,
         filter: { category: "bulk-delete" },
       });
       expect(hits.some((h) => h.id === "bulk-del-1")).toBe(false);

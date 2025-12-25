@@ -2,7 +2,7 @@
  * Comprehensive query modes integration tests.
  *
  * Tests vector search, BM25 text search, hybrid queries, fusion modes,
- * topK behavior, include semantics, and rank ordering against real Turbopuffer API.
+ * limit behavior, include semantics, and rank ordering against real Turbopuffer API.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
@@ -138,7 +138,7 @@ describe("Query modes integration tests", () => {
       // Query with basis vector 1 - should match vec-1 best
       const hits = await index.query({
         query: [{ vector: [1.0, 0.0, 0.0, 0.0] }],
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits.length).toBeGreaterThan(0);
@@ -149,7 +149,7 @@ describe("Query modes integration tests", () => {
       // Query with basis vector 2
       const hits = await index.query({
         query: [{ vector: [0.0, 1.0, 0.0, 0.0] }],
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits.length).toBeGreaterThan(0);
@@ -165,7 +165,7 @@ describe("Query modes integration tests", () => {
       // Query with mix of basis 1 and 2 - should prefer vec-5 which has [0.5, 0.5, 0, 0]
       const hits = await index.query({
         query: [{ vector: [0.5, 0.5, 0.0, 0.0] }],
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits.length).toBeGreaterThan(0);
@@ -174,33 +174,33 @@ describe("Query modes integration tests", () => {
   });
 
   // ============================================================
-  // TOPK BEHAVIOR
+  // LIMIT BEHAVIOR
   // ============================================================
 
-  describe("topK behavior", () => {
-    it("topK smaller than doc count returns exactly topK", async () => {
+  describe("limit behavior", () => {
+    it("limit smaller than doc count returns exactly limit", async () => {
       const hits = await index.query({
         query: [{ vector: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 3,
+        limit: 3,
       });
 
       expect(hits.length).toBe(3);
     });
 
-    it("topK larger than doc count returns all docs", async () => {
+    it("limit larger than doc count returns all docs", async () => {
       const hits = await index.query({
         query: [{ vector: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 100,
+        limit: 100,
       });
 
       // We have 6 docs
       expect(hits.length).toBe(6);
     });
 
-    it("topK of 1 returns single best match", async () => {
+    it("limit of 1 returns single best match", async () => {
       const hits = await index.query({
         query: [{ vector: [1.0, 0.0, 0.0, 0.0] }],
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits.length).toBe(1);
@@ -216,7 +216,7 @@ describe("Query modes integration tests", () => {
     it("single field text query finds matching docs", async () => {
       const hits = await index.query({
         query: [{ title: "neural" }],
-        topK: 10,
+        limit: 10,
         include: ["title"],
       });
 
@@ -231,7 +231,7 @@ describe("Query modes integration tests", () => {
     it("content field text query finds matching docs", async () => {
       const hits = await index.query({
         query: [{ content: "transformer" }],
-        topK: 10,
+        limit: 10,
         include: ["content"],
       });
 
@@ -243,7 +243,7 @@ describe("Query modes integration tests", () => {
     it("multi-field text query searches both fields", async () => {
       const hits = await index.query({
         query: [{ title: "database" }, { content: "database" }],
-        topK: 10,
+        limit: 10,
         include: ["title", "content"],
       });
 
@@ -256,7 +256,7 @@ describe("Query modes integration tests", () => {
     it("text query with no matches returns empty", async () => {
       const hits = await index.query({
         query: [{ content: "xyznonexistentkeyword123" }],
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits.length).toBe(0);
@@ -272,7 +272,7 @@ describe("Query modes integration tests", () => {
       await expect(
         index.query({
           query: [{ vector: [1.0, 0.0, 0.0, 0.0] }, { content: "search" }],
-          topK: 10,
+          limit: 10,
         }),
       ).rejects.toThrow(/does not support hybrid/);
     });
@@ -284,7 +284,7 @@ describe("Query modes integration tests", () => {
             { vector: [1.0, 0.0, 0.0, 0.0] },
             { vector: [0.0, 1.0, 0.0, 0.0] },
           ],
-          topK: 10,
+          limit: 10,
         }),
       ).rejects.toThrow(/does not support multi-vector/);
     });
@@ -298,7 +298,7 @@ describe("Query modes integration tests", () => {
     it("Sum fusion combines multiple BM25 signals", async () => {
       const hits = await index.query({
         query: [{ title: "database" }, { content: "database" }],
-        topK: 10,
+        limit: 10,
         include: ["title", "content"],
       });
 
@@ -311,7 +311,7 @@ describe("Query modes integration tests", () => {
     it("Max fusion takes best BM25 signal per doc", async () => {
       const hits = await index.query({
         max: [{ title: "neural" }, { content: "neural" }],
-        topK: 10,
+        limit: 10,
         include: ["title", "content"],
       });
 
@@ -330,7 +330,7 @@ describe("Query modes integration tests", () => {
     it("include: true returns all attributes", async () => {
       const hits = await index.query({
         query: [{ vector: [1.0, 0.0, 0.0, 0.0] }],
-        topK: 1,
+        limit: 1,
         include: true,
       });
 
@@ -345,7 +345,7 @@ describe("Query modes integration tests", () => {
     it("include: false returns only id", async () => {
       const hits = await index.query({
         query: [{ vector: [1.0, 0.0, 0.0, 0.0] }],
-        topK: 1,
+        limit: 1,
         include: false,
       });
 
@@ -358,7 +358,7 @@ describe("Query modes integration tests", () => {
     it("include: [fields] returns only specified fields", async () => {
       const hits = await index.query({
         query: [{ vector: [1.0, 0.0, 0.0, 0.0] }],
-        topK: 1,
+        limit: 1,
         include: ["title", "category"],
       });
 
@@ -374,7 +374,7 @@ describe("Query modes integration tests", () => {
     it("include: [] returns only id", async () => {
       const hits = await index.query({
         query: [{ vector: [1.0, 0.0, 0.0, 0.0] }],
-        topK: 1,
+        limit: 1,
         include: [],
       });
 
@@ -393,7 +393,7 @@ describe("Query modes integration tests", () => {
     it("filter by category", async () => {
       const hits = await index.query({
         query: [{ vector: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 10,
+        limit: 10,
         filter: { category: "ml" },
         include: ["category"],
       });
@@ -407,7 +407,7 @@ describe("Query modes integration tests", () => {
     it("filter by priority range", async () => {
       const hits = await index.query({
         query: [{ vector: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 10,
+        limit: 10,
         filter: { priority: { $gte: 3, $lte: 5 } },
         include: ["priority"],
       });
@@ -422,7 +422,7 @@ describe("Query modes integration tests", () => {
     it("filter with $or", async () => {
       const hits = await index.query({
         query: [{ vector: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 10,
+        limit: 10,
         filter: {
           $or: [{ category: "ml" }, { category: "search" }],
         },
@@ -444,7 +444,7 @@ describe("Query modes integration tests", () => {
     it("results have required fields", async () => {
       const hits = await index.query({
         query: [{ vector: [1.0, 0.0, 0.0, 0.0] }],
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits.length).toBe(1);
@@ -458,7 +458,7 @@ describe("Query modes integration tests", () => {
     it("score is a valid number", async () => {
       const hits = await index.query({
         query: [{ vector: [1.0, 0.0, 0.0, 0.0] }],
-        topK: 5,
+        limit: 5,
       });
 
       for (const hit of hits) {

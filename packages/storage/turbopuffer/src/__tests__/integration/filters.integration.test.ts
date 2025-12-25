@@ -191,7 +191,7 @@ describe("Filter integration tests", () => {
   async function queryIds(filter: Filter): Promise<string[]> {
     const hits = await ns.query({
       query: [{ vector: QUERY_VECTOR }],
-      topK: 100,
+      limit: 100,
       filter,
     });
     return hits.map((h) => h.id).sort();
@@ -518,7 +518,7 @@ describe("Filter integration tests", () => {
     it("filtered results have correct field values", async () => {
       const hits = await ns.query({
         query: [{ vector: QUERY_VECTOR }],
-        topK: 100,
+        limit: 100,
         filter: { status: "pending" },
         include: ["status", "flag", "num"],
       });
@@ -537,7 +537,7 @@ describe("Filter integration tests", () => {
     it("complex filter returns expected documents with correct data", async () => {
       const hits = await ns.query({
         query: [{ vector: QUERY_VECTOR }],
-        topK: 100,
+        limit: 100,
         filter: {
           $and: [{ num: { $gte: 20, $lte: 50 } }, { flag: true }],
         },

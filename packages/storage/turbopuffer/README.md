@@ -44,7 +44,7 @@ await docs.upsert({
 // query with vector search
 const hits = await docs.query({
   query: [{ vector: [0.1, 0.2, ...] }],
-  topK: 10,
+  limit: 10,
   filter: { category: "greeting" },
   include: ["content", "category"], // fields to include in the response
 });

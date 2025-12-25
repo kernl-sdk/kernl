@@ -120,7 +120,7 @@ describe.sequential("PGIndexHandle", () => {
       const handle = search.index("docs");
       const results = await handle.query({
         query: [{ embedding: [0.1, 0.2, 0.3] }],
-        topK: 2,
+        limit: 2,
       });
 
       expect(results).toHaveLength(2);
@@ -136,7 +136,7 @@ describe.sequential("PGIndexHandle", () => {
       const results = await handle.query({
         query: [{ embedding: [0.1, 0.2, 0.3] }],
         filter: { status: "active" },
-        topK: 10,
+        limit: 10,
       });
 
       expect(results).toHaveLength(2);
@@ -152,7 +152,7 @@ describe.sequential("PGIndexHandle", () => {
       const results = await handle.query({
         query: [{ embedding: [0.1, 0.2, 0.3] }],
         filter: { views: { $gte: 100 } },
-        topK: 10,
+        limit: 10,
       });
 
       expect(results.length).toBeGreaterThanOrEqual(2);
@@ -170,7 +170,7 @@ describe.sequential("PGIndexHandle", () => {
         filter: {
           $or: [{ status: "draft" }, { status: "archived" }],
         },
-        topK: 10,
+        limit: 10,
       });
 
       expect(results).toHaveLength(2);
@@ -186,19 +186,19 @@ describe.sequential("PGIndexHandle", () => {
       const results = await handle.query({
         query: [{ embedding: [0.1, 0.2, 0.3] }],
         filter: { status: { $in: ["active", "draft"] } },
-        topK: 10,
+        limit: 10,
       });
 
       expect(results).toHaveLength(3);
     });
 
-    it("respects topK limit", async () => {
+    it("respects limit", async () => {
       await insertDocs();
 
       const handle = search.index("docs");
       const results = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5] }],
-        topK: 2,
+        limit: 2,
       });
 
       expect(results).toHaveLength(2);
@@ -212,14 +212,14 @@ describe.sequential("PGIndexHandle", () => {
       // Get first 2
       const page1 = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5] }],
-        topK: 2,
+        limit: 2,
         offset: 0,
       });
 
       // Get next 2
       const page2 = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5] }],
-        topK: 2,
+        limit: 2,
         offset: 2,
       });
 
@@ -235,7 +235,7 @@ describe.sequential("PGIndexHandle", () => {
       const results = await handle.query({
         filter: { status: "active" },
         orderBy: { field: "views", direction: "desc" },
-        topK: 10,
+        limit: 10,
       });
 
       expect(results).toHaveLength(2);
@@ -249,7 +249,7 @@ describe.sequential("PGIndexHandle", () => {
       const handle = search.index("docs");
       const results = await handle.query({
         query: [{ embedding: [0.1, 0.2, 0.3] }],
-        topK: 1,
+        limit: 1,
       });
 
       expect(results[0].document).toHaveProperty("title");
@@ -266,7 +266,7 @@ describe.sequential("PGIndexHandle", () => {
       const results = await handle.query({
         query: [{ embedding: [0.1, 0.2, 0.3] }],
         filter: { status: "nonexistent" },
-        topK: 10,
+        limit: 10,
       });
 
       expect(results).toEqual([]);
@@ -311,7 +311,7 @@ describe.sequential("PGIndexHandle", () => {
       const handle = search.index<DocFields>("typed-docs");
       const results = await handle.query({
         query: [{ embedding: [0.1, 0.2, 0.3] }],
-        topK: 1,
+        limit: 1,
       });
 
       // TypeScript should allow these without errors

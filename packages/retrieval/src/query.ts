@@ -115,7 +115,7 @@ export interface SearchQuery {
   /** Sort order (for non-ranked queries) */
   orderBy?: OrderBy;
   /** Number of results to return */
-  topK?: number;
+  limit?: number;
   /** Offset for pagination */
   offset?: number;
   /** Minimum score threshold */
@@ -146,14 +146,14 @@ export interface SearchQuery {
  *     { embedding: [...], weight: 0.3 },
  *   ],
  *   filter: { published: true, views: { $gt: 1000 } },
- *   topK: 20,
+ *   limit: 20,
  * }
  *
  * // filter-only query
  * {
  *   filter: { status: "active" },
  *   orderBy: { field: "createdAt", direction: "desc" },
- *   topK: 100,
+ *   limit: 100,
  * }
  * ```
  */
@@ -217,7 +217,7 @@ export function isQueryOptions(input: QueryInput): input is SearchQuery {
     "max" in input ||
     "filter" in input ||
     "orderBy" in input ||
-    "topK" in input
+    "limit" in input
   );
 }
 

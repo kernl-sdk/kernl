@@ -210,29 +210,29 @@ describe("QUERY", () => {
   // ============================================================
 
   describe("query options", () => {
-    describe("topK", () => {
-      it("encodes topK as top_k", () => {
+    describe("limit", () => {
+      it("encodes limit as top_k", () => {
         const result = QUERY.encode({
           query: [{ vector: [0.1] }],
-          topK: 10,
+          limit: 10,
         });
 
         expect(result.top_k).toBe(10);
       });
 
-      it("encodes topK of 1", () => {
+      it("encodes limit of 1", () => {
         const result = QUERY.encode({
           query: [{ vector: [0.1] }],
-          topK: 1,
+          limit: 1,
         });
 
         expect(result.top_k).toBe(1);
       });
 
-      it("encodes large topK", () => {
+      it("encodes large limit", () => {
         const result = QUERY.encode({
           query: [{ vector: [0.1] }],
-          topK: 10000,
+          limit: 10000,
         });
 
         expect(result.top_k).toBe(10000);
@@ -342,7 +342,7 @@ describe("QUERY", () => {
       it("encodes all options together", () => {
         const result = QUERY.encode({
           query: [{ vector: [0.1, 0.2] }],
-          topK: 20,
+          limit: 20,
           filter: { category: "news" },
           include: ["title", "summary"],
         });
@@ -405,7 +405,7 @@ describe("QUERY", () => {
       // Direct codec call with empty array returns params without rank_by.
       const result = QUERY.encode({
         query: [],
-        topK: 10,
+        limit: 10,
       });
 
       expect(result.rank_by).toBeUndefined();
@@ -414,7 +414,7 @@ describe("QUERY", () => {
 
     it("returns params without rank_by when no query or max", () => {
       const result = QUERY.encode({
-        topK: 10,
+        limit: 10,
         filter: { status: "active" },
       });
 

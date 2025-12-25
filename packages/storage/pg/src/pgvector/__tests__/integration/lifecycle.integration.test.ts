@@ -107,7 +107,7 @@ describe.sequential("pgvector index lifecycle integration tests", () => {
 
       const hits = await handle.query({
         query: [{ embedding: [1, 0, 0, 0] }],
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits).toHaveLength(3);
@@ -120,7 +120,7 @@ describe.sequential("pgvector index lifecycle integration tests", () => {
       const hits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
         filter: { published: true },
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits).toHaveLength(2);
@@ -140,7 +140,7 @@ describe.sequential("pgvector index lifecycle integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: "doc-1" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].document?.views).toBe(500);
@@ -154,7 +154,7 @@ describe.sequential("pgvector index lifecycle integration tests", () => {
 
       const hits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits).toHaveLength(2);
@@ -253,7 +253,7 @@ describe.sequential("pgvector index lifecycle integration tests", () => {
 
       const hits = await handle.query({
         query: [{ embedding: [0.1, 0.2, 0.3, 0.4] }],
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits).toHaveLength(2);
@@ -322,7 +322,7 @@ describe.sequential("pgvector index lifecycle integration tests", () => {
       const handle = pgvec.index("custom_binding");
       const hits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits).toHaveLength(1);
@@ -366,12 +366,12 @@ describe.sequential("pgvector index lifecycle integration tests", () => {
       // Query each
       const hitsA = await handleA.query({
         query: [{ embedding: [1, 0, 0, 0] }],
-        topK: 10,
+        limit: 10,
       });
 
       const hitsB = await handleB.query({
         query: [{ embedding: [0, 1, 0, 0] }],
-        topK: 10,
+        limit: 10,
       });
 
       expect(hitsA).toHaveLength(1);
@@ -385,7 +385,7 @@ describe.sequential("pgvector index lifecycle integration tests", () => {
 
       const stillExists = await handleB.query({
         query: [{ embedding: [0, 1, 0, 0] }],
-        topK: 10,
+        limit: 10,
       });
       expect(stillExists).toHaveLength(1);
 
@@ -489,7 +489,7 @@ describe.sequential("pgvector index lifecycle integration tests", () => {
 
       const hits = await handle.query({
         query: [{ embedding: vec }],
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits).toHaveLength(1);
@@ -520,7 +520,7 @@ describe.sequential("pgvector index lifecycle integration tests", () => {
       // Query on first vector field
       const hits = await handle.query({
         query: [{ title_embedding: [1, 0, 0, 0] }],
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits).toHaveLength(1);
@@ -559,7 +559,7 @@ describe.sequential("pgvector index lifecycle integration tests", () => {
       const handle2 = pgvec2.index("persist_test");
       const hits = await handle2.query({
         query: [{ embedding: [1, 0, 0, 0] }],
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].document?.name).toBe("Persisted");

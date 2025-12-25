@@ -296,7 +296,7 @@ describe("convert", () => {
     it("encodes vector search query", () => {
       const result = QUERY.encode({
         query: [{ vector: [0.1, 0.2, 0.3] }],
-        topK: 10,
+        limit: 10,
       });
 
       expect(result.rank_by).toEqual(["vector", "ANN", [0.1, 0.2, 0.3]]);
@@ -306,7 +306,7 @@ describe("convert", () => {
     it("encodes text search query", () => {
       const result = QUERY.encode({
         query: [{ content: "hello world" }],
-        topK: 5,
+        limit: 5,
       });
 
       expect(result.rank_by).toEqual(["content", "BM25", "hello world"]);
@@ -316,7 +316,7 @@ describe("convert", () => {
     it("encodes multi-field text search as Sum", () => {
       const result = QUERY.encode({
         query: [{ title: "search term" }, { body: "search term" }],
-        topK: 10,
+        limit: 10,
       });
 
       expect(result.rank_by).toEqual([
@@ -331,7 +331,7 @@ describe("convert", () => {
     it("encodes filter", () => {
       const result = QUERY.encode({
         query: [{ vector: [0.1] }],
-        topK: 5,
+        limit: 5,
         filter: { category: { $eq: "news" } },
       });
 
@@ -341,7 +341,7 @@ describe("convert", () => {
     it("encodes include fields array", () => {
       const result = QUERY.encode({
         query: [{ vector: [0.1] }],
-        topK: 5,
+        limit: 5,
         include: ["title", "content"],
       });
 
@@ -351,7 +351,7 @@ describe("convert", () => {
     it("encodes include as boolean", () => {
       const result = QUERY.encode({
         query: [{ vector: [0.1] }],
-        topK: 5,
+        limit: 5,
         include: true,
       });
 

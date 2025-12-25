@@ -74,7 +74,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
       // Table should still exist and be queryable
       const hits = await handle.query({
         filter: { id: "injection-1" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits).toHaveLength(1);
@@ -91,7 +91,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         filter: { title: "'; DROP TABLE string_edge; --" },
-        topK: 10,
+        limit: 10,
       });
 
       // Should return no results, not crash
@@ -108,7 +108,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: "quotes" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].document?.title).toBe('He said "Hello"');
@@ -125,7 +125,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: "backslash" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].document?.title).toBe("Path\\to\\file");
@@ -141,7 +141,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: "whitespace" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].document?.title).toBe("Line1\nLine2");
@@ -180,7 +180,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: "unicode-edge-2" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits).toHaveLength(1);
@@ -198,7 +198,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: "long" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].document?.title).toHaveLength(100000);
@@ -215,7 +215,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
       // Should not interpret % and _ as wildcards
       const hits = await handle.query({
         filter: { title: { $contains: "100%" } },
-        topK: 10,
+        limit: 10,
       });
 
       expect(hits).toHaveLength(1);
@@ -257,7 +257,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         filter: { int_val: 0 },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits).toHaveLength(1);
@@ -274,7 +274,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         filter: { int_val: { $lt: 0 } },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits).toHaveLength(1);
@@ -292,7 +292,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         filter: { int_val: 2147483647 },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits).toHaveLength(1);
@@ -309,7 +309,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: "precise" },
-        topK: 1,
+        limit: 1,
       });
 
       // Double precision maintains about 15 significant digits
@@ -328,7 +328,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: "extreme-float" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].document?.float_val).toBe(1e308);
@@ -368,7 +368,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
       // pgvector returns NaN for cosine of zero vectors
       const hits = await handle.query({
         filter: { id: "zero-vec" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits).toHaveLength(1);
@@ -382,7 +382,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         query: [{ embedding: [-1, -0.5, 0.5, 1] }],
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].id).toBe("negative-vec");
@@ -397,7 +397,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: "small-vec" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits).toHaveLength(1);
@@ -411,7 +411,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         query: [{ embedding: [1e10, 1e10, 1e10, 1e10] }],
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].id).toBe("large-vec");
@@ -443,7 +443,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await highHandle.query({
         query: [{ embedding: vec }],
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].id).toBe("high-1");
@@ -486,7 +486,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         filter: { optional_field: null },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits).toHaveLength(1);
@@ -511,12 +511,12 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const existsTrue = await handle.query({
         filter: { optional_field: { $exists: true } },
-        topK: 10,
+        limit: 10,
       });
 
       const existsFalse = await handle.query({
         filter: { optional_field: { $exists: false } },
-        topK: 10,
+        limit: 10,
       });
 
       expect(existsTrue).toHaveLength(1);
@@ -541,7 +541,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: "patch-null" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].document?.optional_field).toBeNull();
@@ -583,7 +583,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: uuid },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].id).toBe(uuid);
@@ -600,7 +600,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: longId },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].id).toBe(longId);
@@ -617,7 +617,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: specialId },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].id).toBe(specialId);
@@ -632,7 +632,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
 
       const hits = await handle.query({
         filter: { id: "12345" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits[0].id).toBe("12345");
@@ -650,7 +650,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
       await expect(
         badHandle.query({
           query: [{ embedding: [0.1, 0.1, 0.1, 0.1] }],
-          topK: 10,
+          limit: 10,
         }),
       ).rejects.toThrow();
     });
@@ -671,7 +671,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
       await expect(
         handle.query({
           filter: { nonexistent_column: "value" } as any,
-          topK: 10,
+          limit: 10,
         }),
       ).rejects.toThrow();
     });
@@ -748,7 +748,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
       // Should have completed without errors
       const hits = await handle.query({
         filter: { id: "concurrent-1" },
-        topK: 1,
+        limit: 1,
       });
 
       expect(hits).toHaveLength(1);
@@ -769,12 +769,12 @@ describe.sequential("pgvector edge cases integration tests", () => {
       await Promise.all(upserts);
 
       // Increase ef_search to allow HNSW to explore more candidates
-      // Default is 40, which limits results to ~40 even with topK=100
+      // Default is 40, which limits results to ~40 even with limit=100
       await pool.query("SET hnsw.ef_search = 200");
 
       const hits = await handle.query({
         query: [{ embedding: [0.5, 0.5, 0.5, 0.5] }],
-        topK: 100,
+        limit: 100,
       });
 
       expect(hits).toHaveLength(50);
@@ -793,7 +793,7 @@ describe.sequential("pgvector edge cases integration tests", () => {
       // Query while upserting
       const queryPromise = handle.query({
         query: [{ embedding: [0.1, 0.1, 0.1, 0.1] }],
-        topK: 1000,
+        limit: 1000,
       });
 
       const [, hits] = await Promise.all([upsertPromise, queryPromise]);

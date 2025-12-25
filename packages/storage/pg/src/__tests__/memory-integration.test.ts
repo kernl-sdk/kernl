@@ -202,7 +202,7 @@ describe.sequential(
       expect(results[0].document?.id).toBe("m1");
     });
 
-    it("respects topK limit", async () => {
+    it("respects limit", async () => {
       await kernl.memories.create({
         id: "m1",
         scope: { namespace: "test" },
