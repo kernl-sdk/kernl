@@ -2,10 +2,7 @@ import { describe, it, expect } from "vitest";
 import { Context } from "kernl";
 import { skipIfNoCredentials } from "./setup";
 
-import { createDraft } from "../drafts/create";
-import { getDraft } from "../drafts/get";
-import { listDrafts } from "../drafts/list";
-import { deleteDraft } from "../drafts/delete";
+import { createDraft, getDraft, listDrafts, deleteDraft } from "../drafts";
 
 describe.skipIf(skipIfNoCredentials())("agentmail drafts", () => {
   const ctx = new Context();
@@ -41,7 +38,9 @@ describe.skipIf(skipIfNoCredentials())("agentmail drafts", () => {
     expect(listResult.state).toBe("completed");
     const list = listResult.result as any;
     expect(list.drafts).toBeDefined();
-    expect(list.drafts.some((d: any) => d.draft_id === created.draft_id)).toBe(true);
+    expect(list.drafts.some((d: any) => d.draft_id === created.draft_id)).toBe(
+      true,
+    );
 
     const deleteResult = await deleteDraft.invoke(
       ctx,

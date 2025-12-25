@@ -1,8 +1,37 @@
 import { z } from "zod";
 import { tool } from "kernl";
 
-import { am } from "../client";
+import { am, INBOX_ID } from "./client";
 
+/**
+ * @tool
+ *
+ * Lists threads in the inbox.
+ */
+export const listThreads = tool({
+  id: "agentmail_threads_list",
+  description: "List threads in the inbox",
+  parameters: z.object({}),
+  execute: async () => {
+    const result = await am.inboxes.threads.list(INBOX_ID);
+
+    return {
+      count: result.count,
+      threads: result.threads?.map((t) => ({
+        id: t.threadId,
+        subject: t.subject,
+        message_count: t.messageCount,
+        updated_at: t.updatedAt,
+      })),
+    };
+  },
+});
+
+/**
+ * @tool
+ *
+ * Gets a thread with all its messages.
+ */
 export const getThread = tool({
   id: "agentmail_threads_get",
   description: "Get a thread with all its messages",

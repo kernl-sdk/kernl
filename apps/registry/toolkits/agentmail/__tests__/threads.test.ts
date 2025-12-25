@@ -2,8 +2,7 @@ import { describe, it, expect } from "vitest";
 import { Context } from "kernl";
 import { skipIfNoCredentials } from "./setup";
 
-import { listThreads } from "../threads/list";
-import { getThread } from "../threads/get";
+import { listThreads, getThread } from "../threads";
 
 describe.skipIf(skipIfNoCredentials())("agentmail threads", () => {
   const ctx = new Context();

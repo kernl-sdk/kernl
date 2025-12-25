@@ -25,6 +25,11 @@ const FilterSchema = z
   })
   .optional();
 
+/**
+ * @tool
+ *
+ * Searches documents by semantic similarity or full-text match.
+ */
 export const search = tool({
   id: "turbopuffer_search",
   description: "Search documents by semantic similarity or text",

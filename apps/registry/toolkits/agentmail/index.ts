@@ -1,21 +1,23 @@
 import { Toolkit } from "kernl";
 
-import { sendMessage } from "./messages/send";
-import { listMessages } from "./messages/list";
-import { getMessage } from "./messages/get";
-import { replyToMessage } from "./messages/reply";
+import {
+  sendMessage,
+  listMessages,
+  getMessage,
+  replyToMessage,
+  updateMessage,
+} from "./messages";
 
-import { createDraft } from "./drafts/create";
-import { getDraft } from "./drafts/get";
-import { sendDraft } from "./drafts/send";
-import { listDrafts } from "./drafts/list";
-import { updateDraft } from "./drafts/update";
-import { deleteDraft } from "./drafts/delete";
+import {
+  createDraft,
+  getDraft,
+  listDrafts,
+  sendDraft,
+  updateDraft,
+  deleteDraft,
+} from "./drafts";
 
-import { updateMessage } from "./messages/update";
-
-import { listThreads } from "./threads/list";
-import { getThread } from "./threads/get";
+import { listThreads, getThread } from "./threads";
 
 export const agentmail = new Toolkit({
   id: "agentmail",
@@ -25,13 +27,13 @@ export const agentmail = new Toolkit({
     listMessages,
     getMessage,
     replyToMessage,
+    updateMessage,
     createDraft,
     getDraft,
-    sendDraft,
     listDrafts,
+    sendDraft,
     updateDraft,
     deleteDraft,
-    updateMessage,
     listThreads,
     getThread,
   ],

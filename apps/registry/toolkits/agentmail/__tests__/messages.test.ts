@@ -2,9 +2,7 @@ import { describe, it, expect } from "vitest";
 import { Context } from "kernl";
 import { skipIfNoCredentials } from "./setup";
 
-import { sendMessage } from "../messages/send";
-import { listMessages } from "../messages/list";
-import { getMessage } from "../messages/get";
+import { sendMessage, listMessages, getMessage } from "../messages";
 
 describe.skipIf(skipIfNoCredentials())("agentmail messages", () => {
   const ctx = new Context();

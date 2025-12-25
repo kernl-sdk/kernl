@@ -14,6 +14,11 @@ const DocumentSchema = z.object({
   category: z.string().optional().describe("Document category"),
 });
 
+/**
+ * @tool
+ *
+ * Inserts or updates a document in the search index.
+ */
 export const upsert = tool({
   id: "turbopuffer_upsert",
   description: "Insert or update a document in the search index",
