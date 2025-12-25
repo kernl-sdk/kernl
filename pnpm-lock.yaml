@@ -139,6 +139,9 @@ importers:
 
   apps/registry:
     devDependencies:
+      '@kernl-sdk/turbopuffer':
+        specifier: workspace:*
+        version: link:../../packages/storage/turbopuffer
       '@types/node':
         specifier: ^22
         version: 22.19.2
@@ -187,9 +190,6 @@ importers:
       '@kernl-sdk/turbopuffer':
         specifier: workspace:*
         version: link:../../../packages/storage/turbopuffer
-      agentmail:
-        specifier: ^0.1.13
-        version: 0.1.13
       kernl:
         specifier: workspace:*
         version: link:../../../packages/kernl
