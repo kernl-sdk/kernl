@@ -96,6 +96,11 @@ const slideRanges = [
 ] as const;
 const exportFormats = ["link", "id", "pdf"] as const;
 
+/**
+ * @tool
+ *
+ * Creates a presentation from text content using Alai's AI.
+ */
 export const createPresentation = tool({
   id: "alai_create_presentation",
   description:
