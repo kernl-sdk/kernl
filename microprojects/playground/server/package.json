@@ -13,7 +13,6 @@
     "@kernl-sdk/pg": "workspace:*",
     "@kernl-sdk/server": "workspace:*",
     "@kernl-sdk/turbopuffer": "workspace:*",
-    "agentmail": "^0.1.13",
     "kernl": "workspace:*",
     "zod": "^4.1.12"
   },
