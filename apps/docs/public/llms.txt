@@ -15,6 +15,8 @@
 - [Context](https://docs.kernl.sh/concepts/context): Passing runtime data (user info, session state, feature flags) into agent execution. Type-safe context.
 - [Memory](https://docs.kernl.sh/concepts/memory): Memory hierarchy (working, short-term, long-term). Manual and autonomous memory operations.
 - [Threads](https://docs.kernl.sh/concepts/threads): Execution state management. Creating, resuming, and persisting threads. Namespaces for multi-tenancy.
+- [Toolkits](https://docs.kernl.sh/concepts/toolkits): Tool collections. Standard Toolkit for TypeScript functions, MCPToolkit for MCP server integration.
+- [Realtime / Voice](https://docs.kernl.sh/concepts/realtime): Voice-enabled agents with real-time audio streaming. Browser (direct connection) and Node.js (server-side) patterns.
 
 ## API Reference
 
@@ -22,3 +24,4 @@
 - [Context](https://docs.kernl.sh/reference/context): Context class API reference.
 - [Memory](https://docs.kernl.sh/reference/memory): Memory API reference.
 - [Threads](https://docs.kernl.sh/reference/threads): Thread management API—get, list, history, pagination, and filtering.
+- [Realtime / Voice](https://docs.kernl.sh/reference/realtime): RealtimeAgent and RealtimeSession API reference.

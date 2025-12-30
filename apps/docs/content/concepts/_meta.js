@@ -3,5 +3,6 @@ export default {
   threads: 'Threads',
   toolkits: 'Toolkits',
   context: 'Context',
-  memory: 'Memory'
+  memory: 'Memory',
+  realtime: 'Realtime / Voice'
 }
