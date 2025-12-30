@@ -9,6 +9,7 @@ import { logreq } from "./lib/logger";
 /* routes */
 import { agents } from "./api/agents/route";
 import { threads } from "./api/threads/route";
+import { realtime } from "./api/realtime/route";
 import { health } from "./api/health/route";
 
 /**
@@ -43,6 +44,7 @@ export function hono(
   // --- routes ---
   app.route(`${prefix}/agents`, agents);
   app.route(`${prefix}/threads`, threads);
+  app.route(`${prefix}/realtime`, realtime);
   app.route("/health", health);
 
   return app;

@@ -1,6 +1,21 @@
+import { TypedEmitter } from "@kernl-sdk/shared";
 import { SharedProviderMetadata } from "@/provider";
 import { RealtimeClientEvent, RealtimeServerEvent } from "./events";
-import { RealtimeConnectOptions, TransportStatus } from "./types";
+import {
+  RealtimeConnectOptions,
+  TransportStatus,
+  ClientCredential,
+} from "./types";
+
+/**
+ * Events emitted by a realtime connection.
+ */
+export type RealtimeConnectionEvents = {
+  event: [event: RealtimeServerEvent];
+  status: [status: TransportStatus];
+  error: [error: Error];
+  interrupted: [];
+};
 
 /**
  * A realtime model that can establish bidirectional streaming connections.
@@ -28,6 +43,14 @@ export interface RealtimeModel {
    * Establish a connection and return a connection instance.
    */
   connect(options?: RealtimeConnectOptions): Promise<RealtimeConnection>;
+
+  /**
+   * Create ephemeral credential for client-side connections.
+   *
+   * Call server-side where API key is available, pass result to client.
+   * Client then uses credential in connect() options.
+   */
+  authenticate(): Promise<ClientCredential>;
 }
 
 /**
@@ -35,7 +58,8 @@ export interface RealtimeModel {
  *
  * One connection per session. Providers implement this interface.
  */
-export interface RealtimeConnection {
+export interface RealtimeConnection
+  extends TypedEmitter<RealtimeConnectionEvents> {
   /**
    * Current connection status.
    */
@@ -82,20 +106,6 @@ export interface RealtimeConnection {
    * Convenience for sending response.cancel event.
    */
   interrupt(): void;
-
-  // --- event subscription ---
-
-  on(event: "event", listener: (event: RealtimeServerEvent) => void): this;
-  on(event: "status", listener: (status: TransportStatus) => void): this;
-  on(event: "error", listener: (error: Error) => void): this;
-
-  off(event: "event", listener: (event: RealtimeServerEvent) => void): this;
-  off(event: "status", listener: (status: TransportStatus) => void): this;
-  off(event: "error", listener: (error: Error) => void): this;
-
-  once(event: "event", listener: (event: RealtimeServerEvent) => void): this;
-  once(event: "status", listener: (status: TransportStatus) => void): this;
-  once(event: "error", listener: (error: Error) => void): this;
 }
 
 /**

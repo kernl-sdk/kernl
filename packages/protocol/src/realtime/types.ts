@@ -1,5 +1,41 @@
+import { TypedEmitter } from "@kernl-sdk/shared";
 import { SharedProviderOptions } from "@/provider";
 import { LanguageModelTool } from "@/language-model";
+
+/**
+ * Events emitted by a realtime channel.
+ */
+export type RealtimeChannelEvents = {
+  audio: [audio: string];
+  commit: [];
+  interrupt: [];
+};
+
+/**
+ * Base interface for audio I/O channels.
+ *
+ * Channels bridge between audio sources (browser mic, Twilio, Discord)
+ * and the realtime session. They handle audio capture/playback and emit
+ * events that the session listens to.
+ */
+export interface RealtimeChannel extends TypedEmitter<RealtimeChannelEvents> {
+  /**
+   * Send audio to be played/transmitted by the channel.
+   * Called by session when audio is received from the model.
+   */
+  sendAudio(audio: string): void;
+
+  /**
+   * Interrupt current audio playback.
+   * Called by session when response is cancelled.
+   */
+  interrupt(): void;
+
+  /**
+   * Clean up resources and close the channel.
+   */
+  close(): void;
+}
 
 export interface RealtimeConnectOptions {
   /**
@@ -21,6 +57,47 @@ export interface RealtimeConnectOptions {
    * Provider-specific options.
    */
   providerOptions?: SharedProviderOptions;
+
+  /**
+   * Ephemeral credential for client-side connections.
+   *
+   * Obtained from model.authenticate() on the server.
+   * When provided, used instead of the model's API key.
+   */
+  credential?: ClientCredential;
+
+  /**
+   * WebSocket constructor for browser/Node compatibility.
+   *
+   * Defaults to globalThis.WebSocket (available in browsers and Node 22+).
+   * For Node.js <22, provide the 'ws' package.
+   *
+   * @example
+   * ```ts
+   * import WebSocket from 'ws';
+   * await model.connect({ websocket: WebSocket });
+   * ```
+   */
+  websocket?: WebSocketConstructor;
+}
+
+/**
+ * WebSocket constructor type for cross-platform compatibility.
+ */
+export type WebSocketConstructor = new (
+  url: string | URL,
+  protocols?: string | string[],
+) => WebSocketLike;
+
+/**
+ * Minimal WebSocket interface matching the standard WebSocket API.
+ */
+export interface WebSocketLike {
+  readonly readyState: number;
+  send(data: string | ArrayBuffer): void;
+  close(code?: number, reason?: string): void;
+  addEventListener(type: string, listener: (event: unknown) => void): void;
+  removeEventListener(type: string, listener: (event: unknown) => void): void;
 }
 
 /**
@@ -219,21 +296,16 @@ export interface RealtimeSession {
 /**
  * Error from a realtime session.
  */
-export interface RealtimeError {
-  /**
-   * Error code.
-   */
-  code: string;
+export class RealtimeError extends Error {
+  readonly code: string;
+  readonly details?: Record<string, unknown>;
 
-  /**
-   * Human-readable error message.
-   */
-  message: string;
-
-  /**
-   * Additional error details.
-   */
-  details?: Record<string, unknown>;
+  constructor(code: string, message: string, details?: Record<string, unknown>) {
+    super(message);
+    this.name = "RealtimeError";
+    this.code = code;
+    this.details = details;
+  }
 }
 
 /**
@@ -274,3 +346,24 @@ export type TransportStatus =
   | "connected"
   | "reconnecting"
   | "closed";
+
+/**
+ * A client credential for browser-based realtime connections.
+ *
+ * Created server-side via model.authenticate(), passed to client
+ * for secure connection without exposing API keys.
+ */
+export type ClientCredential =
+  | {
+      /** Ephemeral token for auth header (OpenAI style). */
+      readonly kind: "token";
+      token: string;
+      expiresAt: Date;
+    }
+  | {
+      /** Signed URL to connect directly (ElevenLabs style). */
+      readonly kind: "url";
+      url: string;
+      expiresAt: Date;
+    };
+

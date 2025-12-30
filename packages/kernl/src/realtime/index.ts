@@ -1,4 +1,4 @@
 export * from "./types";
-export * from "./channel";
 export * from "./agent";
 export * from "./session";
+export * from "./transport";

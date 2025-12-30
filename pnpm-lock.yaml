@@ -212,6 +212,12 @@ importers:
       '@ai-sdk/react':
         specifier: ^2.0.93
         version: 2.0.106(react@19.2.1)(zod@4.1.13)
+      '@kernl-sdk/openai':
+        specifier: workspace:^
+        version: link:../../../packages/providers/openai
+      '@kernl-sdk/react':
+        specifier: workspace:^
+        version: link:../../../packages/react
       '@radix-ui/react-avatar':
         specifier: ^1.1.11
         version: 1.1.11(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -242,6 +248,9 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.7)(react@19.2.1)
+      '@radix-ui/react-tabs':
+        specifier: ^1.1.13
+        version: 1.1.13(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@radix-ui/react-tooltip':
         specifier: ^1.2.8
         version: 1.2.8(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -266,6 +275,9 @@ importers:
       embla-carousel-react:
         specifier: ^8.6.0
         version: 8.6.0(react@19.2.1)
+      kernl:
+        specifier: workspace:^
+        version: link:../../../packages/kernl
       lucide-react:
         specifier: ^0.553.0
         version: 0.553.0(react@19.2.1)
@@ -305,6 +317,9 @@ importers:
       use-stick-to-bottom:
         specifier: ^1.1.1
         version: 1.1.1(react@19.2.1)
+      zod:
+        specifier: 4.1.13
+        version: 4.1.13
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.0.0
@@ -457,13 +472,13 @@ importers:
     devDependencies:
       '@ai-sdk/anthropic':
         specifier: 3.0.0-beta.53
-        version: 3.0.0-beta.53(zod@4.1.13)
+        version: 3.0.0-beta.53(zod@4.2.1)
       '@ai-sdk/google':
         specifier: 3.0.0-beta.43
-        version: 3.0.0-beta.43(zod@4.1.13)
+        version: 3.0.0-beta.43(zod@4.2.1)
       '@ai-sdk/openai':
         specifier: 3.0.0-beta.57
-        version: 3.0.0-beta.57(zod@4.1.13)
+        version: 3.0.0-beta.57(zod@4.2.1)
       '@ai-sdk/provider':
         specifier: 3.0.0-beta.15
         version: 3.0.0-beta.15
@@ -472,7 +487,7 @@ importers:
         version: 24.10.1
       ai:
         specifier: ^5.0.93
-        version: 5.0.106(zod@4.1.13)
+        version: 5.0.106(zod@4.2.1)
       tsc-alias:
         specifier: ^1.8.10
         version: 1.8.16
@@ -514,6 +529,34 @@ importers:
         specifier: ^4.0.8
         version: 4.0.9(@types/debug@4.1.12)(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
+  packages/react:
+    dependencies:
+      '@kernl-sdk/protocol':
+        specifier: workspace:*
+        version: link:../protocol
+      '@kernl-sdk/shared':
+        specifier: workspace:*
+        version: link:../shared
+      kernl:
+        specifier: workspace:*
+        version: link:../kernl
+    devDependencies:
+      '@types/node':
+        specifier: ^24.10.0
+        version: 24.10.1
+      '@types/react':
+        specifier: ^19.1.8
+        version: 19.2.7
+      react:
+        specifier: ^19.1.0
+        version: 19.2.1
+      tsc-alias:
+        specifier: ^1.8.10
+        version: 1.8.16
+      typescript:
+        specifier: 5.9.2
+        version: 5.9.2
+
   packages/retrieval:
     dependencies:
       '@kernl-sdk/protocol':
@@ -547,6 +590,9 @@ importers:
       '@kernl-sdk/ai':
         specifier: workspace:*
         version: link:../providers/ai
+      '@kernl-sdk/openai':
+        specifier: workspace:*
+        version: link:../providers/openai
       ai:
         specifier: ^5.0.93
         version: 5.0.106(zod@4.1.13)
@@ -6429,6 +6475,9 @@ packages:
   zod@4.1.13:
     resolution: {integrity: sha512-AvvthqfqrAhNH9dnfmrfKzX5upOdjUVJYFqNSlkmGf64gRaTzlPwz99IHYnVs28qYAybvAlBV+H7pn0saFY4Ig==}
 
+  zod@4.2.1:
+    resolution: {integrity: sha512-0wZ1IRqGGhMP76gLqz8EyfBXKk0J2qo2+H3fi4mcUP/KtTocoX08nmIAHl1Z2kJIZbZee8KOpBCSNPRgauucjw==}
+
   zustand@4.5.7:
     resolution: {integrity: sha512-CHOUy7mu3lbD6o6LJLfllpjkzhHXSBlX8B9+qPddUsIfeF5S/UZ5q0kmCsnRqT1UHFQZchNFDDzMbQsuesHWlw==}
     engines: {node: '>=12.7.0'}
@@ -6477,6 +6526,16 @@ snapshots:
       - arktype
       - effect
 
+  '@ai-sdk/anthropic@3.0.0-beta.53(zod@4.2.1)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.0-beta.16
+      '@ai-sdk/provider-utils': 4.0.0-beta.33(zod@4.2.1)
+      zod: 4.2.1
+    transitivePeerDependencies:
+      - '@valibot/to-json-schema'
+      - arktype
+      - effect
+
   '@ai-sdk/gateway@2.0.18(zod@4.1.13)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
@@ -6484,11 +6543,18 @@ snapshots:
       '@vercel/oidc': 3.0.5
       zod: 4.1.13
 
-  '@ai-sdk/google@3.0.0-beta.43(zod@4.1.13)':
+  '@ai-sdk/gateway@2.0.18(zod@4.2.1)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.18(zod@4.2.1)
+      '@vercel/oidc': 3.0.5
+      zod: 4.2.1
+
+  '@ai-sdk/google@3.0.0-beta.43(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0-beta.16
-      '@ai-sdk/provider-utils': 4.0.0-beta.33(zod@4.1.13)
-      zod: 4.1.13
+      '@ai-sdk/provider-utils': 4.0.0-beta.33(zod@4.2.1)
+      zod: 4.2.1
     transitivePeerDependencies:
       - '@valibot/to-json-schema'
       - arktype
@@ -6504,6 +6570,16 @@ snapshots:
       - arktype
       - effect
 
+  '@ai-sdk/openai@3.0.0-beta.57(zod@4.2.1)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.0-beta.16
+      '@ai-sdk/provider-utils': 4.0.0-beta.33(zod@4.2.1)
+      zod: 4.2.1
+    transitivePeerDependencies:
+      - '@valibot/to-json-schema'
+      - arktype
+      - effect
+
   '@ai-sdk/provider-utils@3.0.18(zod@4.1.13)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
@@ -6511,12 +6587,26 @@ snapshots:
       eventsource-parser: 3.0.6
       zod: 4.1.13
 
+  '@ai-sdk/provider-utils@3.0.18(zod@4.2.1)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.0
+      '@standard-schema/spec': 1.0.0
+      eventsource-parser: 3.0.6
+      zod: 4.2.1
+
   '@ai-sdk/provider-utils@4.0.0-beta.33(zod@4.1.13)':
     dependencies:
       '@ai-sdk/provider': 3.0.0-beta.16
       '@standard-schema/spec': 1.0.0
       eventsource-parser: 3.0.6
       zod: 4.1.13
+
+  '@ai-sdk/provider-utils@4.0.0-beta.33(zod@4.2.1)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.0-beta.16
+      '@standard-schema/spec': 1.0.0
+      eventsource-parser: 3.0.6
+      zod: 4.2.1
 
   '@ai-sdk/provider@2.0.0':
     dependencies:
@@ -8692,6 +8782,14 @@ snapshots:
       '@ai-sdk/provider-utils': 3.0.18(zod@4.1.13)
       '@opentelemetry/api': 1.9.0
       zod: 4.1.13
+
+  ai@5.0.106(zod@4.2.1):
+    dependencies:
+      '@ai-sdk/gateway': 2.0.18(zod@4.2.1)
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.18(zod@4.2.1)
+      '@opentelemetry/api': 1.9.0
+      zod: 4.2.1
 
   ajv-formats@3.0.1(ajv@8.17.1):
     optionalDependencies:
@@ -13082,6 +13180,8 @@ snapshots:
   zod@3.25.76: {}
 
   zod@4.1.13: {}
+
+  zod@4.2.1: {}
 
   zustand@4.5.7(@types/react@19.2.7)(react@19.2.1):
     dependencies:

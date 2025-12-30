@@ -28,7 +28,9 @@ const envSchema = z.object({
  * import { env } from '@/env';
  * console.log(env.LOG_LEVEL);
  */
-export const env = envSchema.parse(process.env);
+export const env = envSchema.parse(
+  typeof process !== "undefined" ? process.env : {},
+);
 
 /**
  * Type of the validated environment variables

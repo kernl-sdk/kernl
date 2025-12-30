@@ -24,12 +24,14 @@ export class KernlClient {
   readonly threads: ThreadsResource;
   readonly agents: AgentsResource;
   readonly toolkits: ToolkitsResource;
+  readonly realtime: RealtimeResource;
 
   constructor(baseUrl: string = BASE_URL) {
     const http = new HttpClient(baseUrl);
     this.threads = new ThreadsResource(http);
     this.agents = new AgentsResource(http);
     this.toolkits = new ToolkitsResource(http);
+    this.realtime = new RealtimeResource(http);
   }
 }
 
@@ -74,6 +76,23 @@ class ToolkitsResource {
 
   get(id: string) {
     return this.http.get<Toolkit>(`/toolkits/${id}`);
+  }
+}
+
+export interface CredentialResponse {
+  credential:
+    | { kind: "token"; token: string; expiresAt: string }
+    | { kind: "url"; url: string; expiresAt: string };
+}
+
+class RealtimeResource {
+  constructor(private http: HttpClient) {}
+
+  credential(provider: string, modelId: string) {
+    return this.http.post<CredentialResponse>("/realtime/credential", {
+      provider,
+      modelId,
+    });
   }
 }
 

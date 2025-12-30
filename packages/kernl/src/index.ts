@@ -8,11 +8,20 @@ export type {
 export { Agent } from "./agent";
 export { Context } from "./context";
 
+// --- realtime ---
+
+export { RealtimeAgent, RealtimeSession, WebSocketTransport } from "./realtime";
+export type {
+  RealtimeAgentConfig,
+  RealtimeAgentVoiceConfig,
+  RealtimeSessionOptions,
+  WebSocketTransportOptions,
+} from "./realtime";
+
 // --- tools --
 
 export { tool, Toolkit, FunctionToolkit, MCPToolkit } from "./tool";
 export { MCPServerSSE } from "./mcp/sse";
-export { MCPServerStdio } from "./mcp/stdio";
 export { MCPServerStreamableHttp } from "./mcp/http";
 
 // --- threads ---

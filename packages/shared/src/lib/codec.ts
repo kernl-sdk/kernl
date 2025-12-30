@@ -139,3 +139,48 @@ export const base64urlToBytes = z.codec(
     encode: (bytes) => z.util.uint8ArrayToBase64url(bytes),
   },
 );
+
+// --- Audio codecs ---
+
+/**
+ * Codec for converting between PCM16 (Int16Array) and Float32 audio samples.
+ */
+export const pcm16ToFloat32: Codec<Int16Array, Float32Array> = {
+  encode: (pcm16) => {
+    const float32 = new Float32Array(pcm16.length);
+    for (let i = 0; i < pcm16.length; i++) {
+      float32[i] = pcm16[i] / (pcm16[i] < 0 ? 0x8000 : 0x7fff);
+    }
+    return float32;
+  },
+  decode: (float32) => {
+    const pcm16 = new Int16Array(float32.length);
+    for (let i = 0; i < float32.length; i++) {
+      const s = Math.max(-1, Math.min(1, float32[i]));
+      pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+    }
+    return pcm16;
+  },
+};
+
+/**
+ * Codec for converting between base64 string and Int16Array (PCM16 audio).
+ */
+export const base64ToPcm16: Codec<string, Int16Array> = {
+  encode: (base64) => {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return new Int16Array(bytes.buffer);
+  },
+  decode: (pcm16) => {
+    const bytes = new Uint8Array(pcm16.buffer);
+    let binary = "";
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  },
+};

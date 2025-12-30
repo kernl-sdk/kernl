@@ -1,4 +1,4 @@
-import { EventEmitter } from "node:events";
+import { Emitter } from "@kernl-sdk/shared";
 
 import { Agent } from "./agent";
 import { Context, UnknownContext } from "./context";
@@ -7,56 +7,6 @@ import type { ToolCall } from "@kernl-sdk/protocol";
 
 import { AgentOutputType } from "@/agent/types";
 import { TextOutput } from "@/thread/types";
-
-export type EventEmitterEvents = Record<string, any[]>;
-
-/**
- * Generic typed event emitter that wraps Node's EventEmitter with type safety
- */
-class TypedEventEmitter<
-  EventTypes extends EventEmitterEvents = Record<string, any[]>,
-> extends EventEmitter {
-  // Overload for typed events
-  on<K extends keyof EventTypes>(
-    event: K,
-    listener: (...args: EventTypes[K]) => void,
-  ): this;
-  // Fallback for compatibility with parent
-  on(event: string | symbol, listener: (...args: any[]) => void): this;
-  on(event: any, listener: any): this {
-    return super.on(event, listener);
-  }
-
-  // Overload for typed events
-  off<K extends keyof EventTypes>(
-    event: K,
-    listener: (...args: EventTypes[K]) => void,
-  ): this;
-  // Fallback for compatibility with parent
-  off(event: string | symbol, listener: (...args: any[]) => void): this;
-  off(event: any, listener: any): this {
-    return super.off(event, listener);
-  }
-
-  // Overload for typed events
-  emit<K extends keyof EventTypes>(event: K, ...args: EventTypes[K]): boolean;
-  // Fallback for compatibility with parent
-  emit(event: string | symbol, ...args: any[]): boolean;
-  emit(event: any, ...args: any[]): boolean {
-    return super.emit(event, ...args);
-  }
-
-  // Overload for typed events
-  once<K extends keyof EventTypes>(
-    event: K,
-    listener: (...args: EventTypes[K]) => void,
-  ): this;
-  // Fallback for compatibility with parent
-  once(event: string | symbol, listener: (...args: any[]) => void): this;
-  once(event: any, listener: any): this {
-    return super.once(event, listener);
-  }
-}
 
 export type AgentHookEvents<
   TContext = UnknownContext,
@@ -108,7 +58,7 @@ export type AgentHookEvents<
 export class AgentHooks<
   TContext = UnknownContext,
   TOutput extends AgentOutputType = TextOutput,
-> extends TypedEventEmitter<AgentHookEvents<TContext, TOutput>> {}
+> extends Emitter<AgentHookEvents<TContext, TOutput>> {}
 
 /**
  * Events emitted by the kernl during execution.
@@ -178,4 +128,4 @@ export type KernlHookEvents<
 export class KernlHooks<
   TContext = UnknownContext,
   TOutput extends AgentOutputType = TextOutput,
-> extends TypedEventEmitter<KernlHookEvents<TContext, TOutput>> {}
+> extends Emitter<KernlHookEvents<TContext, TOutput>> {}

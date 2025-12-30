@@ -1,11 +1,12 @@
 import type { Codec } from "@kernl-sdk/shared/lib";
 import { randomID } from "@kernl-sdk/shared/lib";
-import type {
-  RealtimeClientEvent,
-  RealtimeServerEvent,
-  RealtimeSessionConfig,
-  TurnDetectionConfig,
-  LanguageModelItem,
+import {
+  RealtimeError,
+  type RealtimeClientEvent,
+  type RealtimeServerEvent,
+  type RealtimeSessionConfig,
+  type TurnDetectionConfig,
+  type LanguageModelItem,
 } from "@kernl-sdk/protocol";
 
 import type {
@@ -60,14 +61,9 @@ export const SESSION_CONFIG: Codec<RealtimeSessionConfig, OpenAISessionConfig> =
      */
     encode(config) {
       return {
+        type: "realtime",
         instructions: config.instructions,
-        modalities: config.modalities,
         voice: config.voice?.voiceId,
-        input_audio_format: config.audio?.inputFormat?.mimeType,
-        output_audio_format: config.audio?.outputFormat?.mimeType,
-        turn_detection: config.turnDetection
-          ? TURN_DETECTION.encode(config.turnDetection)
-          : undefined,
         tools: config.tools
           ?.filter((t) => t.kind === "function")
           .map((t) => ({
@@ -76,6 +72,7 @@ export const SESSION_CONFIG: Codec<RealtimeSessionConfig, OpenAISessionConfig> =
             description: t.description,
             parameters: t.parameters,
           })),
+        tool_choice: config.tools?.length ? "auto" : undefined,
       };
     },
 
@@ -318,7 +315,7 @@ export const SERVER_EVENT: Codec<
       case "error":
         return {
           kind: "session.error",
-          error: { code: event.error.code, message: event.error.message },
+          error: new RealtimeError(event.error.code, event.error.message),
         };
 
       case "input_audio_buffer.committed":

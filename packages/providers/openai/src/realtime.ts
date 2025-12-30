@@ -1,18 +1,21 @@
-import { EventEmitter } from "node:events";
-import WebSocket from "ws";
-
+import { Emitter } from "@kernl-sdk/shared";
 import type {
   RealtimeModel,
   RealtimeConnection,
+  RealtimeConnectionEvents,
   RealtimeConnectOptions,
   RealtimeClientEvent,
   TransportStatus,
+  ClientCredential,
+  WebSocketLike,
 } from "@kernl-sdk/protocol";
 
 import { CLIENT_EVENT, SERVER_EVENT } from "./convert/event";
 import type { OpenAIServerEvent } from "./convert/types";
 
 const OPENAI_REALTIME_URL = "wss://api.openai.com/v1/realtime";
+const OPENAI_CLIENT_SECRETS_URL =
+  "https://api.openai.com/v1/realtime/client_secrets";
 
 /**
  * Options for creating an OpenAI realtime model.
@@ -37,31 +40,94 @@ export class OpenAIRealtimeModel implements RealtimeModel {
   readonly provider = "openai";
   readonly modelId: string;
 
-  private apiKey: string;
+  private apiKey: string | null;
   private baseUrl: string;
 
   constructor(modelId: string, options?: OpenAIRealtimeOptions) {
     this.modelId = modelId;
-    this.apiKey = options?.apiKey ?? process.env.OPENAI_API_KEY ?? "";
+    this.apiKey =
+      options?.apiKey ??
+      (typeof process !== "undefined" ? process.env?.OPENAI_API_KEY : null) ??
+      null;
     this.baseUrl = options?.baseUrl ?? OPENAI_REALTIME_URL;
+  }
 
+  /**
+   * Create ephemeral credential for client-side connections.
+   *
+   * Must be called server-side where API key is available.
+   */
+  async authenticate(): Promise<ClientCredential> {
     if (!this.apiKey) {
-      throw new Error("OpenAI API key is required");
+      throw new Error(
+        "API key required for authenticate(). " +
+          "Call this server-side where OPENAI_API_KEY is available.",
+      );
     }
+
+    const res = await fetch(OPENAI_CLIENT_SECRETS_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${this.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        session: { type: "realtime", model: this.modelId },
+      }),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Failed to create credential: ${res.status} ${text}`);
+    }
+
+    const data = (await res.json()) as { value: string };
+    return {
+      kind: "token",
+      token: data.value,
+      expiresAt: new Date(Date.now() + 60_000), // ~60s TTL
+    };
   }
 
   /**
    * Establish a WebSocket connection to the OpenAI realtime API.
    */
   async connect(options?: RealtimeConnectOptions): Promise<RealtimeConnection> {
+    const credential = options?.credential;
+
+    if (credential && credential.kind !== "token") {
+      throw new Error(
+        `OpenAI requires token credentials, got "${credential.kind}".`,
+      );
+    }
+
+    const authToken = credential?.token ?? this.apiKey;
+
+    if (!authToken) {
+      throw new Error(
+        "No API key or credential provided. " +
+          "Either set OPENAI_API_KEY or pass a credential from authenticate().",
+      );
+    }
+
+    // Use injectable WebSocket or globalThis.WebSocket
+    const WS = options?.websocket ?? globalThis.WebSocket;
+    if (!WS) {
+      throw new Error(
+        "No WebSocket available. In Node.js <22, use WebSocketTransport with the 'ws' package:\n" +
+          "  import WebSocket from 'ws';\n" +
+          "  import { WebSocketTransport } from 'kernl';\n" +
+          "  new RealtimeSession(agent, { transport: new WebSocketTransport({ websocket: WebSocket }), ... })",
+      );
+    }
+
     const url = `${this.baseUrl}?model=${this.modelId}`;
 
-    const ws = new WebSocket(url, {
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-        "OpenAI-Beta": "realtime=v1",
-      },
-    });
+    // Use subprotocol auth (works in browsers and Node)
+    // Note: Don't include openai-beta.realtime-v1 when using ephemeral tokens -
+    // the version is encoded in the token itself
+    const protocols = ["realtime", `openai-insecure-api-key.${authToken}`];
+    const ws = new WS(url, protocols);
 
     const connection = new OpenAIRealtimeConnection(ws);
 
@@ -70,18 +136,16 @@ export class OpenAIRealtimeModel implements RealtimeModel {
         return reject(new Error("Connection aborted"));
       }
 
-      const cleanup = () => {
-        ws.off("open", onOpen);
-        ws.off("error", onError);
-        options?.abort?.removeEventListener("abort", onAbort);
-      };
-
       const onOpen = () => {
         cleanup();
         resolve();
       };
-      const onError = (err: Error) => {
+      const onError = (event: unknown) => {
         cleanup();
+        const err =
+          event instanceof Error
+            ? event
+            : new Error("WebSocket connection failed");
         reject(err);
       };
       const onAbort = () => {
@@ -90,30 +154,32 @@ export class OpenAIRealtimeModel implements RealtimeModel {
         reject(new Error("Connection aborted"));
       };
 
-      ws.on("open", onOpen);
-      ws.on("error", onError);
+      const cleanup = () => {
+        ws.removeEventListener("open", onOpen);
+        ws.removeEventListener("error", onError);
+        options?.abort?.removeEventListener("abort", onAbort);
+      };
+
+      ws.addEventListener("open", onOpen);
+      ws.addEventListener("error", onError);
       options?.abort?.addEventListener("abort", onAbort);
     });
-
-    if (options?.sessionConfig) {
-      connection.send({
-        kind: "session.update",
-        config: options.sessionConfig,
-      });
-    }
 
     return connection;
   }
 }
 
+// WebSocket readyState constants
+const WS_OPEN = 1;
+
 /**
  * OpenAI realtime connection implementation.
  */
 class OpenAIRealtimeConnection
-  extends EventEmitter
+  extends Emitter<RealtimeConnectionEvents>
   implements RealtimeConnection
 {
-  private ws: WebSocket;
+  private ws: WebSocketLike;
   private _status: TransportStatus = "connecting";
   private _muted = false;
   private _sessionId: string | null = null;
@@ -125,13 +191,18 @@ class OpenAIRealtimeConnection
   private audlenms: number = 0;
   private responding: boolean = false;
 
-  constructor(socket: WebSocket) {
+  constructor(socket: WebSocketLike) {
     super();
     this.ws = socket;
 
-    socket.on("message", (data) => {
+    socket.addEventListener("message", (event: unknown) => {
       try {
-        const raw = JSON.parse(data.toString()) as OpenAIServerEvent;
+        // Browser sends MessageEvent with data property
+        const data =
+          event && typeof event === "object" && "data" in event
+            ? (event as { data: string }).data
+            : String(event);
+        const raw = JSON.parse(data) as OpenAIServerEvent;
 
         // track audio state for interruption handling
         if (raw.type === "response.output_audio.delta") {
@@ -154,30 +225,31 @@ class OpenAIRealtimeConnection
           this.interrupt();
         }
 
-        const event = SERVER_EVENT.decode(raw);
-        if (event) {
-          if (event.kind === "session.created") {
-            this._sessionId = event.session.id;
+        const event_ = SERVER_EVENT.decode(raw);
+        if (event_) {
+          if (event_.kind === "session.created") {
+            this._sessionId = event_.session.id;
           }
-          this.emit("event", event);
+          this.emit("event", event_);
         }
       } catch (err) {
         this.emit("error", err instanceof Error ? err : new Error(String(err)));
       }
     });
 
-    socket.on("open", () => {
+    socket.addEventListener("open", () => {
       this._status = "connected";
       this.emit("status", this._status);
     });
 
-    socket.on("close", () => {
+    socket.addEventListener("close", () => {
       this._status = "closed";
       this.reset();
       this.emit("status", this._status);
     });
 
-    socket.on("error", (err) => {
+    socket.addEventListener("error", (event: unknown) => {
+      const err = event instanceof Error ? event : new Error("WebSocket error");
       this.emit("error", err);
     });
   }
@@ -199,7 +271,7 @@ class OpenAIRealtimeConnection
    */
   send(event: RealtimeClientEvent): void {
     const encoded = CLIENT_EVENT.encode(event);
-    if (encoded && this.ws.readyState === WebSocket.OPEN) {
+    if (encoded && this.ws.readyState === WS_OPEN) {
       this.ws.send(JSON.stringify(encoded));
     }
   }
@@ -241,7 +313,7 @@ class OpenAIRealtimeConnection
       const elapsed = Date.now() - this.faudtime;
       const endms = Math.max(0, Math.floor(Math.min(elapsed, this.audlenms)));
 
-      if (this.ws.readyState === WebSocket.OPEN) {
+      if (this.ws.readyState === WS_OPEN) {
         this.ws.send(
           JSON.stringify({
             type: "conversation.item.truncate",
@@ -253,6 +325,7 @@ class OpenAIRealtimeConnection
       }
     }
 
+    this.emit("interrupted");
     this.reset();
   }
 

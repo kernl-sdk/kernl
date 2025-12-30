@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@ai-sdk/react": "^2.0.93",
+    "@kernl-sdk/openai": "workspace:^",
+    "@kernl-sdk/react": "workspace:^",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -20,6 +22,7 @@
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@radix-ui/react-use-controllable-state": "^1.2.2",
     "@xyflow/react": "^12.9.3",
@@ -28,6 +31,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "embla-carousel-react": "^8.6.0",
+    "kernl": "workspace:^",
     "lucide-react": "^0.553.0",
     "motion": "^12.23.25",
     "nanoid": "^5.1.6",
@@ -40,7 +44,8 @@
     "swr": "^2.3.7",
     "tailwind-merge": "^3.4.0",
     "tokenlens": "^1.3.1",
-    "use-stick-to-bottom": "^1.1.1"
+    "use-stick-to-bottom": "^1.1.1",
+    "zod": "4.1.13"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",

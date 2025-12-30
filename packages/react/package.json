@@ -1,0 +1,54 @@
+{
+  "name": "@kernl-sdk/react",
+  "version": "0.0.1",
+  "description": "React bindings for kernl",
+  "keywords": [
+    "kernl",
+    "react",
+    "ai",
+    "realtime",
+    "voice"
+  ],
+  "author": "dremnik",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kernl-sdk/kernl.git",
+    "directory": "packages/react"
+  },
+  "homepage": "https://github.com/kernl-sdk/kernl#readme",
+  "bugs": {
+    "url": "https://github.com/kernl-sdk/kernl/issues"
+  },
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc && tsc-alias --resolve-full-paths",
+    "dev": "tsc --watch",
+    "lint": "eslint src/",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "kernl": "workspace:*",
+    "@kernl-sdk/protocol": "workspace:*",
+    "@kernl-sdk/shared": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^18 || ^19"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.1.8",
+    "react": "^19.1.0",
+    "tsc-alias": "^1.8.10",
+    "typescript": "5.9.2"
+  }
+}

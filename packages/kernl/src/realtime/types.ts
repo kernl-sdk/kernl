@@ -2,12 +2,12 @@ import {
   RealtimeModel,
   RealtimeTransport,
   RealtimeConnectOptions,
+  RealtimeChannel,
+  ClientCredential,
 } from "@kernl-sdk/protocol";
 
 import { Context, UnknownContext } from "@/context";
 import type { BaseAgentConfig } from "@/agent/base";
-
-import type { RealtimeChannel } from "./channel";
 
 /**
  * Configuration for a realtime agent.
@@ -65,6 +65,14 @@ export interface RealtimeSessionOptions<TContext = UnknownContext> {
    * Context for this session.
    */
   context?: Context<TContext>;
+
+  /**
+   * Ephemeral credential for client-side connections.
+   *
+   * Obtained from model.authenticate() on the server.
+   * Shorthand for connectOptions.credential.
+   */
+  credential?: ClientCredential;
 
   /**
    * Options passed to model.connect() or transport.connect().

@@ -226,10 +226,13 @@ export function Chat({
                       }
 
                       if (isToolUIPart(part)) {
+                        // Extract tool name from toolName prop, or from type (e.g. "tool-get_thread")
                         const toolTitle =
                           "toolName" in part
                             ? String(part.toolName)
-                            : part.toolCallId;
+                            : part.type.startsWith("tool-")
+                              ? part.type.replace(/^tool-/, "")
+                              : part.toolCallId;
 
                         return (
                           <Tool key={`${m.id}-${i}`}>

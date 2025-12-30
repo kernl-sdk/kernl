@@ -82,7 +82,6 @@ MCPToolkit handles connection lifecycle automatically — connects lazily on fir
 |--------|-----------|--------------|
 | `MCPServerStreamableHttp` | HTTP with streaming | 2025-03-26 (recommended) |
 | `MCPServerSSE` | Server-Sent Events | 2024-11-05 (legacy) |
-| `MCPServerStdio` | Stdio | For local processes |
 
 Most modern MCP servers support the streamable HTTP protocol. Use `MCPServerSSE` only for servers that haven't upgraded yet.
 
