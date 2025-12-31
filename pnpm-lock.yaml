@@ -655,9 +655,6 @@ importers:
       '@kernl-sdk/ai':
         specifier: workspace:*
         version: link:../providers/ai
-      '@kernl-sdk/elevenlabs':
-        specifier: workspace:*
-        version: link:../providers/elevenlabs
       '@kernl-sdk/openai':
         specifier: workspace:*
         version: link:../providers/openai

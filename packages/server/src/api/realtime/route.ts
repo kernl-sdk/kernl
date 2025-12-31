@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { openai } from "@kernl-sdk/openai";
-import { elevenlabs } from "@kernl-sdk/elevenlabs";
 import { xai } from "@kernl-sdk/xai";
 
 import { ValidationError } from "@/lib/error";
@@ -30,14 +29,6 @@ realtime.post("/credential", zValidator("json", CredentialBody), async (c) => {
     case "openai": {
       const model = openai.realtime(modelId);
       credential = await model.authenticate();
-      break;
-    }
-    case "elevenlabs": {
-      if (!agentId) {
-        throw new ValidationError("agentId is required for ElevenLabs");
-      }
-      const model = elevenlabs(modelId);
-      credential = await model.authenticate({ agentId });
       break;
     }
     case "xai": {
