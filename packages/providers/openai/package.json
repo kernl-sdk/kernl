@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/openai",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "OpenAI provider for kernl",
   "keywords": [
     "kernl",

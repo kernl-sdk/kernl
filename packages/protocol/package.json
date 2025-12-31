@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/protocol",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Protocol specification for kernl",
   "keywords": [
     "kernl",

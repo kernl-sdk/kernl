@@ -1,5 +1,15 @@
 # @kernl-sdk/server
 
+## 0.0.15
+
+### Patch Changes
+
+- Updated dependencies [f593374]
+  - kernl@0.10.0
+  - @kernl-sdk/openai@0.3.0
+  - @kernl-sdk/xai@0.2.0
+  - @kernl-sdk/ai@0.3.3
+
 ## 0.0.14
 
 ### Patch Changes
