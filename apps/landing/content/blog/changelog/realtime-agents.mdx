@@ -1,0 +1,97 @@
+---
+title: Realtime Voice Agents
+slug: realtime-agents
+date: 2025-12-31
+author: dremnik
+category: changelog
+excerpt: Build voice-enabled AI agents with real-time audio streaming.
+---
+
+The future is voice. Build agents that speak and listen in real-time.
+
+```ts
+import { RealtimeAgent } from "kernl";
+import { openai } from "@kernl-sdk/openai";
+
+const jarvis = new RealtimeAgent({
+  id: "jarvis",
+  name: "Jarvis",
+  instructions: "You are a helpful voice assistant. Be concise.",
+  voice: { voiceId: "alloy" },
+});
+```
+
+We're launching with three realtime providers:
+
+- **OpenAI** — GPT-4o realtime with WebSocket streaming
+- **xAI** — Grok realtime with OpenAI-compatible protocol
+- **ElevenLabs** — Ultra-low latency conversational AI
+
+Each provider uses ephemeral credentials—your API keys stay on the server, audio streams directly from the browser.
+
+## React hooks
+
+For browser apps, use the React package:
+
+```tsx
+import { useRealtime, useBrowserAudio, LiveWaveform } from "@kernl-sdk/react";
+import { openai } from "@kernl-sdk/openai";
+
+import { jarvis } from "@/agents/jarvis";
+
+function VoiceAgent() {
+  const { channel } = useBrowserAudio();
+  const { status, connect, disconnect, mute, unmute } = useRealtime(jarvis, {
+    model: openai.realtime("gpt-realtime"),
+    channel,
+  });
+
+  return (
+    <div>
+      <LiveWaveform audio={channel} active={status === "connected"} />
+      <button onClick={() => connect(credential)}>Start</button>
+    </div>
+  );
+}
+```
+
+`useBrowserAudio` handles microphone access and audio playback. `useRealtime` manages the WebSocket connection and session state. `LiveWaveform` visualizes the audio stream.
+
+## Tools with context
+
+Realtime agents support tools. For client-side tools that need React state, pass context:
+
+```tsx
+const addToCart = tool({
+  id: "add_to_cart",
+  parameters: z.object({ productId: z.string() }),
+  execute: async (ctx, { productId }) => {
+    ctx.context.addToCart(productId); // access React state
+    return "Added to cart";
+  },
+});
+
+// In your component
+const { connect } = useRealtime(agent, {
+  model: openai.realtime("gpt-realtime"),
+  channel,
+  ctx: { addToCart: (id) => setCart((prev) => [...prev, id]) },
+});
+```
+
+## Server-side sessions
+
+For Twilio, Discord, or custom audio sources, create sessions on the server:
+
+```ts
+import { RealtimeSession } from "kernl";
+
+const session = new RealtimeSession(jarvis, {
+  model: openai.realtime("gpt-realtime"),
+  channel: twilioChannel,
+});
+
+await session.connect();
+```
+
+Channels abstract audio I/O—swap providers without changing your agent logic.
