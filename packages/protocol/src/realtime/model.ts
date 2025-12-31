@@ -1,8 +1,10 @@
 import { TypedEmitter } from "@kernl-sdk/shared";
+
 import { SharedProviderMetadata } from "@/provider";
 import { RealtimeClientEvent, RealtimeServerEvent } from "./events";
 import {
   RealtimeConnectOptions,
+  RealtimeAuthenticateOptions,
   TransportStatus,
   ClientCredential,
 } from "./types";
@@ -49,8 +51,12 @@ export interface RealtimeModel {
    *
    * Call server-side where API key is available, pass result to client.
    * Client then uses credential in connect() options.
+   *
+   * @param options - Provider-specific options (e.g., agentId for ElevenLabs)
    */
-  authenticate(): Promise<ClientCredential>;
+  authenticate(
+    options?: RealtimeAuthenticateOptions,
+  ): Promise<ClientCredential>;
 }
 
 /**

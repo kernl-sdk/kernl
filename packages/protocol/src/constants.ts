@@ -73,3 +73,12 @@ export const ZOMBIE = "zombie";
  * Final cleanup in progress, about to be fully deleted.
  */
 export const DEAD = "dead";
+
+// ----------------------------
+// WebSocket ready states
+// ----------------------------
+
+export const WS_CONNECTING = 0;
+export const WS_OPEN = 1;
+export const WS_CLOSING = 2;
+export const WS_CLOSED = 3;

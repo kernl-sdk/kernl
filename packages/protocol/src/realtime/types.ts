@@ -82,6 +82,18 @@ export interface RealtimeConnectOptions {
 }
 
 /**
+ * Options for authenticating with a realtime provider.
+ *
+ * Provider-specific options can be added via extension.
+ */
+export interface RealtimeAuthenticateOptions {
+  /**
+   * Agent ID for providers that use pre-configured agents (e.g., ElevenLabs).
+   */
+  agentId?: string;
+}
+
+/**
  * WebSocket constructor type for cross-platform compatibility.
  */
 export type WebSocketConstructor = new (
