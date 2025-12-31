@@ -197,6 +197,11 @@ export class RealtimeSession<
       instructions: await this.agent.instructions(this.context),
       tools: tools.map((t) => t.serialize()),
       voice: this.agent.voice,
+      turnDetection: { mode: "server_vad" },
+      audio: {
+        inputFormat: { mimeType: "audio/pcm", sampleRate: 24000 },
+        outputFormat: { mimeType: "audio/pcm", sampleRate: 24000 },
+      },
     };
   }
 

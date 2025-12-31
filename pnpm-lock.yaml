@@ -212,12 +212,18 @@ importers:
       '@ai-sdk/react':
         specifier: ^2.0.93
         version: 2.0.106(react@19.2.1)(zod@4.1.13)
+      '@kernl-sdk/elevenlabs':
+        specifier: workspace:^
+        version: link:../../../packages/providers/elevenlabs
       '@kernl-sdk/openai':
         specifier: workspace:^
         version: link:../../../packages/providers/openai
       '@kernl-sdk/react':
         specifier: workspace:^
         version: link:../../../packages/react
+      '@kernl-sdk/xai':
+        specifier: workspace:^
+        version: link:../../../packages/providers/xai
       '@radix-ui/react-avatar':
         specifier: ^1.1.11
         version: 1.1.11(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -498,7 +504,66 @@ importers:
         specifier: ^4.0.8
         version: 4.0.9(@types/debug@4.1.12)(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
+  packages/providers/elevenlabs:
+    dependencies:
+      '@kernl-sdk/protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@kernl-sdk/shared':
+        specifier: workspace:*
+        version: link:../../shared
+      ws:
+        specifier: ^8.18.0
+        version: 8.18.3
+    devDependencies:
+      '@types/node':
+        specifier: ^24.10.0
+        version: 24.10.1
+      '@types/ws':
+        specifier: ^8.18.0
+        version: 8.18.1
+      tsc-alias:
+        specifier: ^1.8.10
+        version: 1.8.16
+      typescript:
+        specifier: 5.9.2
+        version: 5.9.2
+      vitest:
+        specifier: ^4.0.8
+        version: 4.0.9(@types/debug@4.1.12)(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+
   packages/providers/openai:
+    dependencies:
+      '@kernl-sdk/protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@kernl-sdk/shared':
+        specifier: workspace:*
+        version: link:../../shared
+      ws:
+        specifier: ^8.18.0
+        version: 8.18.3
+    devDependencies:
+      '@types/json-schema':
+        specifier: ^7.0.15
+        version: 7.0.15
+      '@types/node':
+        specifier: ^24.10.0
+        version: 24.10.1
+      '@types/ws':
+        specifier: ^8.18.0
+        version: 8.18.1
+      tsc-alias:
+        specifier: ^1.8.10
+        version: 1.8.16
+      typescript:
+        specifier: 5.9.2
+        version: 5.9.2
+      vitest:
+        specifier: ^4.0.8
+        version: 4.0.9(@types/debug@4.1.12)(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+
+  packages/providers/xai:
     dependencies:
       '@kernl-sdk/protocol':
         specifier: workspace:*
@@ -590,9 +655,15 @@ importers:
       '@kernl-sdk/ai':
         specifier: workspace:*
         version: link:../providers/ai
+      '@kernl-sdk/elevenlabs':
+        specifier: workspace:*
+        version: link:../providers/elevenlabs
       '@kernl-sdk/openai':
         specifier: workspace:*
         version: link:../providers/openai
+      '@kernl-sdk/xai':
+        specifier: workspace:*
+        version: link:../providers/xai
       ai:
         specifier: ^5.0.93
         version: 5.0.106(zod@4.1.13)

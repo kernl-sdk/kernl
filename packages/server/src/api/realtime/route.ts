@@ -2,6 +2,8 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { openai } from "@kernl-sdk/openai";
+import { elevenlabs } from "@kernl-sdk/elevenlabs";
+import { xai } from "@kernl-sdk/xai";
 
 import { ValidationError } from "@/lib/error";
 import type { Variables } from "@/types";
@@ -11,6 +13,7 @@ export const realtime = new Hono<{ Variables: Variables }>();
 const CredentialBody = z.object({
   provider: z.string(),
   modelId: z.string(),
+  agentId: z.string().optional(),
 });
 
 /**
@@ -19,19 +22,32 @@ const CredentialBody = z.object({
  * Get ephemeral credential for browser-side realtime connection.
  */
 realtime.post("/credential", zValidator("json", CredentialBody), async (c) => {
-  const { provider, modelId } = c.req.valid("json");
+  const { provider, modelId, agentId } = c.req.valid("json");
 
-  // Create model based on provider
-  let model;
+  let credential;
+
   switch (provider) {
-    case "openai":
-      model = openai.realtime(modelId);
+    case "openai": {
+      const model = openai.realtime(modelId);
+      credential = await model.authenticate();
       break;
+    }
+    case "elevenlabs": {
+      if (!agentId) {
+        throw new ValidationError("agentId is required for ElevenLabs");
+      }
+      const model = elevenlabs(modelId);
+      credential = await model.authenticate({ agentId });
+      break;
+    }
+    case "xai": {
+      const model = xai.realtime();
+      credential = await model.authenticate();
+      break;
+    }
     default:
       throw new ValidationError(`Unsupported realtime provider: ${provider}`);
   }
-
-  const credential = await model.authenticate();
 
   // Handle different credential types
   if (credential.kind === "token") {
