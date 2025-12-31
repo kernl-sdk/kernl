@@ -1,4 +1,4 @@
-import { OpenAIRealtimeModel, type OpenAIRealtimeOptions } from "./realtime";
+import { OpenAIRealtimeModel, type OpenAIRealtimeOptions } from "./realtime/model";
 
 /**
  * OpenAI provider interface.

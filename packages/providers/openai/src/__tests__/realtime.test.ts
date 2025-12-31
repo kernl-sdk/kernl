@@ -5,7 +5,7 @@ import type {
   RealtimeServerEvent,
   TransportStatus,
 } from "@kernl-sdk/protocol";
-import type { OpenAIServerEvent } from "../convert/types";
+import type { OpenAIServerEvent } from "../realtime/protocol";
 
 // Track mock WebSocket instances
 const wsInstances: TestWebSocket[] = [];
@@ -42,7 +42,7 @@ vi.mock("ws", () => {
 });
 
 // Import after mock
-import { OpenAIRealtimeModel } from "../realtime";
+import { OpenAIRealtimeModel } from "../realtime/model";
 
 describe("OpenAIRealtimeModel", () => {
   beforeEach(() => {

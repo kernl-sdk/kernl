@@ -4,7 +4,7 @@ import type {
   RealtimeServerEvent,
   RealtimeConnection,
 } from "@kernl-sdk/protocol";
-import { OpenAIRealtimeModel } from "../realtime";
+import { OpenAIRealtimeModel } from "../realtime/model";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 

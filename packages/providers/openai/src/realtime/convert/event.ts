@@ -16,7 +16,7 @@ import type {
   OpenAITurnDetection,
   OpenAIItem,
   OpenAIContentPart,
-} from "./types";
+} from "../protocol";
 
 /**
  * Codec for turn detection config.
