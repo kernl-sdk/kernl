@@ -1,0 +1,222 @@
+# MCP works great — until you actually ship.
+
+Don't get me wrong — the idea of a USB-C for tools is compelling. It's likely inevitable in some form. But MCP today is still immature. It works well for the use cases around which it was designed (Claude Code, Cursor — local, single-tenant clients with a clear user scope), but it has serious limitations when it comes to building production systems.
+
+When you're building, you need to move fast. You need to iterate, break things, rebuild. A nascent protocol with fundamental gaps will slow you down.
+
+I'll focus on a couple clear issues that almost every production app will hit:
+
+- Context propagation
+- Tool schema variability
+
+### Context propagation
+
+MCP, defined today, doesn't offer clear semantics / primitives around tool modulation based on execution context.
+
+Let me illustrate with a couple of examples. Let's take what would seem to be a very simple tool definition that you might use when building a RAG agent with Turbopuffer:
+
+```ts
+import { tool } from "kernl";
+
+const search = tool({
+  id: "turbopuffer_search",
+  description: "Search documents",
+  parameters: z.object({
+    namespace: z.string().describe("The namespace to search"),
+    query: z.string().describe("Search query"),
+    limit: z.number().default(10),
+  }),
+  execute: async (ctx, { namespace, query }) => {
+    const ns = tpuf.namespace(namespace); // <- namespace chosen by LLM
+    return await ns.query({
+      query: [{ text: query }],
+      limit: params.limit,
+    });
+  },
+});
+```
+
+Those of you who've built RAG agents might already see what's wrong with this choice.. in many cases we don't want the namespace to be controlled by the LLM. You would probably use `namespace` to segment your documents by tenant or some other contextual identifier (in this case, the auth context of who is making the request).
+
+So your tool body would more likely look like this:
+
+```ts
+const search = tool({
+  // ...
+  execute: async (ctx, { query }) => {
+    const ns = tpuf.namespace(ctx.user.orgId); // <- namespace comes from orgId
+    return await ns.query({
+      query: [{ text: query }],
+      limit: params.limit,
+    });
+  },
+});
+```
+
+Same story with a code interpreter. You want a consistent sandbox per agent thread, not one chosen stochastically by the model:
+
+```ts
+export const interpreter = tool({
+  id: "code_interpreter",
+  description:
+    "Run Python code in a stateful interpreter. Variables and imports persist across calls.",
+  parameters: z.object({
+    code: z.string().describe("Python code to execute"),
+    timeout: z
+      .number()
+      .optional()
+      .describe("Timeout in seconds (default: 600)"),
+  }),
+  execute: async (ctx, { code, timeout }) => {
+    // we want the sandbox to be consistent for the entire run, not chosen by the LLM
+    if (ctx.sandboxId) {
+      const sandbox = await sandboxes.get(ctx.sandboxId);
+
+      if (sandbox.state !== "started") {
+        await sandbox.start();
+      }
+
+      return sandbox;
+    }
+
+    // auto-provision a new sandbox for the run + store ID in ctx
+    const sandbox = await sandboxes.create({
+      language: "python",
+    });
+
+    ctx.sandboxId = sandbox.id;
+
+    return await sandbox.codeInterpreter.runCode(code, {
+      timeout,
+    });
+  },
+});
+```
+
+MCP simply has no concept of "this value is required by the API but shouldn't be chosen by the LLM." You'll end up with hacky workarounds — separate connections per tenant, duct tape everywhere — when a simple function tool would have been far simpler.
+
+This need for granular control is the _norm_, not the exception.
+
+### Tool schema variability
+
+The other problem I want to highlight is a little less obvious but equally important: tool schema variability. 
+
+Let's come back to the `turbopuffer_search` example that we started earlier. 
+
+We brushed over this issue earlier without mention, and at first it might not have been immediately obvious: there actually _isn't_ a one-size-fits-all tool implementation here, because the structure of the queries in Turbopuffer depend on the shape of the index you are querying. So it would be up to the developer to decide contextually how to implement the query schema for the model to use based on their knowledge of how they have decided to structure the index:
+
+```ts
+const search = tool({
+  id: "turbopuffer_search",
+  description: "Search documents by semantic similarity or text",
+  parameters: z.object({
+    query: QuerySchema.describe("Search query by field"), // <- this is variable
+    filter: FilterSchema.describe("Filter criteria"),
+    limit: z.number().default(10).describe("Maximum results to return"),
+  }),
+  execute: async (ctx, params) => {
+    const ns = tpuf.namespace(ctx.user.orgId);
+    return await ns.query({
+      query: [{ text: params.query }], // <- this is unrealistic as a one-size-fits-all
+      filter: params.filter,
+      limit: params.limit,
+    });
+  },
+});
+```
+
+In reality, you might have documents in the index with this structure:
+
+```ts
+interface DocumentA {
+  id: string;
+  text: string;
+  vector: number[];
+}
+```
+
+or you might have: 
+
+```ts
+interface DocumentB {
+  id: string;
+  title: string;
+  content: string;
+  tags: string[];
+}
+```
+
+So your query schema has to match. How would Turbopuffer ship an MCP with a standard tool shape when the schema is inherently variable?
+
+Now in case I still haven't convinced you, I'll give you one more example of how the tool implementation might change depending on use case.
+
+It gets worse. Turbopuffer doesn't support server-side hybrid search — their docs suggest running two queries and joining client-side. Would a hypothetical MCP support vector or text search? Where would embedding happen? It normally happens on the client:
+
+```ts
+import { embed } from "kernl";
+
+const search = tool({
+  id: "turbopuffer_search",
+  description: "Search documents by semantic similarity or text",
+  parameters: z.object({
+    query: QuerySchema.describe("Search query by field"),
+    filter: FilterSchema.describe("Filter criteria"),
+    limit: z.number().default(10).describe("Maximum results to return"),
+  }),
+  execute: async (ctx, params) => {
+    const ns = tpuf.namespace(ctx.user.orgId);
+
+    // Option 1: Vector search (embed the query first)
+     const { embedding } = await embed({
+       model: "openai/text-embedding-3-small",
+       text: params.query,
+     });
+    // const hits = await ns.query({
+    //   query: [{ vector: embedding }],
+    //   filter: params.filter,
+    //   limit: params.limit,
+    // });
+
+    // Option 2: Full-text search (BM25)
+    return await ns.query({
+      query: [{ text: params.query }],
+      filter: params.filter,
+      limit: params.limit,
+    });
+  },
+});
+```
+
+You wouldn't want to give the LLM the responsibility of calling some embed tool first .. and neither would Turbopuffer want to be running embeddings on their own server — so we are at an impasse. 
+
+Again, I want to emphasize: these aren't edge cases. This is what building agents actually looks like.
+
+**So what should I do?**
+
+Hopefully by now you are convinced that MCP might not be the right choice as a builder if your goal is to move fast + iterate quickly. But if not MCP, what options are you left with? I think about fast iteration as a function of ownership. The more that you can own in your stack, the less dependencies you have - the faster you will be able to adapt to changes as you learn through trial + error. I say that within reason, and I would certainly not go so far as to recommend avoiding frameworks. Do not reinvent the wheel, but reach for control + ownership where there is a clear reason to do so. This is one of those cases.
+
+This is exactly why we built the toolkit marketplace for kernl. Instead of connecting to a remote MCP server, you install the source code directly into your project:
+
+```bash
+kernl add toolkit turbopuffer
+```
+
+That's it. The toolkit lands in your `toolkits/` directory as plain TypeScript files — no package dependency, no remote server. Just code you own.
+
+```ts
+import { turbopuffer } from "@/toolkits/turbopuffer";
+
+const agent = new Agent({
+  id: "rag-agent",
+  model: anthropic("claude-sonnet-4-5"),
+  toolkits: [turbopuffer],
+});
+```
+
+Need to inject `ctx.user.orgId` as the namespace? Open the file and change it. Need to add an embedding step before the vector search? Add it. Need to modify the schema to match your index structure? It's your code now.
+
+This is the shadcn model applied to agent tooling: you get a sensible starting point that actually works, with full freedom to adapt it to your specific needs. No waiting for upstream PRs, no forking repos, no duct tape.
+
+The ecosystem is moving too fast to bet on a single protocol. Own your stack, stay flexible, and move at the speed the moment demands.
+
+If you are looking for a framework that will help you do exactly that, check out kernl (kernl.sh). Minimalism is at the heart of its design ethos, and reducing dependencies as far as possible is a central tenet of the framework. You should be in charge of your destiny, and we give you the levers to do that where you need them.
