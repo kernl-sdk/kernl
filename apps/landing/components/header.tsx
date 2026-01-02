@@ -68,7 +68,7 @@ export function Header() {
         {/* Social icons */}
         <div className="flex items-center gap-5">
           <a
-            href="https://discord.gg/2gk86Jd3H9"
+            href="https://discord.gg/xYJ9aX6cRc"
             target="_blank"
             rel="noopener noreferrer"
             className="text-muted-foreground transition-colors hover:text-foreground"
@@ -165,7 +165,7 @@ export function Header() {
         {/* Social links at bottom of mobile menu */}
         <div className="absolute bottom-0 left-0 flex items-center gap-5 px-4 pb-8">
           <a
-            href="https://discord.gg/2gk86Jd3H9"
+            href="https://discord.gg/xYJ9aX6cRc"
             target="_blank"
             rel="noopener noreferrer"
             className="text-muted-foreground transition-colors hover:text-foreground"
