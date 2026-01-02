@@ -148,8 +148,6 @@ interface DocumentB {
 
 So your query schema has to match. How would Turbopuffer ship an MCP with a standard tool shape when the schema is inherently variable?
 
-Now in case I still haven't convinced you, I'll give you one more example of how the tool implementation might change depending on use case.
-
 It gets worse. Turbopuffer doesn't support server-side hybrid search — their docs suggest running two queries and joining client-side. Would a hypothetical MCP support vector or text search? Where would embedding happen? It normally happens on the client:
 
 ```ts
@@ -219,4 +217,4 @@ This is the shadcn model applied to agent tooling: you get a sensible starting p
 
 The ecosystem is moving too fast to bet on a single protocol. Own your stack, stay flexible, and move at the speed the moment demands.
 
-If you are looking for a framework that will help you do exactly that, check out kernl (kernl.sh). Minimalism is at the heart of its design ethos, and reducing dependencies as far as possible is a central tenet of the framework. You should be in charge of your destiny, and we give you the levers to do that where you need them.
+If you are looking for a framework that will help you do exactly that, check out kernl (kernl.sh).
