@@ -222,17 +222,92 @@ const myTool = tool({
 
 ### MCP Integration
 
+Three MCP server types available:
+
+**MCPServerStdio** - Local process via stdio:
 ```typescript
-import { MCPToolkit, MCPServerSSE } from "kernl";
+import { MCPServerStdio } from "kernl/internal";
+
+const server = new MCPServerStdio({
+  id: "filesystem",
+  command: "npx",
+  args: ["-y", "@modelcontextprotocol/server-filesystem", "/path"],
+  env: { /* optional env vars */ }
+});
+```
+
+**MCPServerSSE** - Server-Sent Events:
+```typescript
+import { MCPServerSSE } from "kernl";
 
 const server = new MCPServerSSE({
   id: "my-mcp",
   url: "http://localhost:3001/sse",
+  authProvider: optionalAuthProvider
+});
+```
+
+**MCPServerStreamableHttp** - HTTP with streaming:
+```typescript
+import { MCPServerStreamableHttp } from "kernl";
+
+const server = new MCPServerStreamableHttp({
+  id: "remote-mcp",
+  url: "https://api.example.com/mcp",
+  requestInit: { headers: { Authorization: "Bearer ..." } }
+});
+```
+
+### Guardrails
+
+Validate input/output and halt execution when triggered:
+
+```typescript
+import { defineInputGuardrail, defineOutputGuardrail } from "kernl";
+
+const inputGuard = defineInputGuardrail({
+  name: "content-filter",
+  execute: async ({ agent, input, context }) => ({
+    tripwireTriggered: containsProhibitedContent(input),
+    outputInfo: { reason: "prohibited content" }
+  })
 });
 
-const toolkit = new MCPToolkit({
-  id: "mcp-tools",
-  server,
+const outputGuard = defineOutputGuardrail({
+  name: "pii-filter",
+  execute: async ({ agent, agentOutput, context }) => ({
+    tripwireTriggered: containsPII(agentOutput),
+    outputInfo: { /* details */ }
+  })
+});
+
+const agent = new Agent({
+  // ...
+  inputGuardrails: [inputGuard],
+  outputGuardrails: [outputGuard]
+});
+```
+
+### Lifecycle Hooks
+
+Event-based hooks for agent lifecycle:
+
+**AgentHooks** (per-agent):
+- `agent_start` - Agent begins execution
+- `agent_end` - Agent completes
+- `agent_tool_start` - Tool call begins
+- `agent_tool_end` - Tool call completes
+
+**KernlHooks** (global):
+- Same events plus `agent_handoff` for agent-to-agent transfers
+
+```typescript
+agent.on("agent_tool_start", (context, tool, { toolCall }) => {
+  console.log(`Calling ${tool.id}`);
+});
+
+kernl.on("agent_end", (context, agent, output) => {
+  console.log(`${agent.name} finished`);
 });
 ```
 
