@@ -366,11 +366,20 @@ import { Thread, THREAD_STATES } from "kernl/internal";
 import type { ThreadEvent, ThreadState } from "kernl/internal";
 ```
 
+## Build Tooling
+
+- **Root:** Turborepo orchestration (`turbo run build`)
+- **Most packages:** `tsc && tsc-alias --resolve-full-paths`
+- **CLI package:** `tsup` bundler
+
+## Dependencies
+
+- **Zod:** v4 (`^4.1.8`) - Note: API differences from Zod 3
+- **pnpm:** v9.0.0+ (via `packageManager` field)
+- **Node.js:** >= 18
+
 ## Conventions
 
-- Use pnpm (v9.0.0+), Node.js >= 18
 - Method names: linux style, lowercase short words
-- Read `/docs/` specs before implementing
 - Follow existing codebase patterns
-- If spec is missing, propose addition first
 - Changesets for version management (`.changeset/`)
