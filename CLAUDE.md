@@ -59,6 +59,10 @@ pnpm vitest src/path/to/test.test.ts
 
 # Run playground
 pnpm dev:playground
+
+# CLI commands
+kernl init <name>              # Create new kernl project
+kernl add toolkit <names...>   # Add toolkit(s) from registry
 ```
 
 ## Package Architecture
@@ -352,6 +356,14 @@ describe.skipIf(SKIP)("Integration", () => {
 All packages use `@` as alias for `src/`:
 ```typescript
 import { Agent } from "@/agent";
+```
+
+## Internal Exports
+
+The `kernl/internal` export provides types for internal packages (storage, server):
+```typescript
+import { Thread, THREAD_STATES } from "kernl/internal";
+import type { ThreadEvent, ThreadState } from "kernl/internal";
 ```
 
 ## Conventions
