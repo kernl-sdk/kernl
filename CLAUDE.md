@@ -311,6 +311,42 @@ kernl.on("agent_end", (context, agent, output) => {
 });
 ```
 
+## Testing
+
+**Framework:** Vitest with `globals: true`, `environment: "node"`
+
+**File Organization:**
+- Tests colocated in `src/**/__tests__/` directories
+- Test files: `*.test.ts`
+- Integration tests: `*.integration.test.ts`
+- Fixtures: `__tests__/fixtures/` or `fixtures.ts`
+
+**Mock Patterns:**
+```typescript
+import { mockContext } from "@/tool/__tests__/fixtures";
+import { createMockModel } from "@/thread/__tests__/fixtures/mock-model";
+
+// Create minimal test context
+const ctx = mockContext({ customData: "value" });
+
+// Create mock language model
+const model = createMockModel(async (req) => ({
+  content: [message({ role: "assistant", text: "Response" })],
+  finishReason: "stop",
+  usage: { inputTokens: 2, outputTokens: 2, totalTokens: 4 },
+  warnings: [],
+}));
+```
+
+**Integration Tests:**
+```typescript
+const SKIP = !process.env.OPENAI_API_KEY;
+
+describe.skipIf(SKIP)("Integration", () => {
+  // Tests requiring API keys
+});
+```
+
 ## Import Aliases
 
 All packages use `@` as alias for `src/`:
