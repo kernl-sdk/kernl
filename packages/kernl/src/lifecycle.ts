@@ -22,12 +22,6 @@ export type AgentHookEvents<
    * @param output - The output of the agent
    */
   agent_end: [context: Context<TContext>, output: string];
-  // /**
-  //  * @param context - The context of the run
-  //  * @param agent - The agent that is handing off
-  //  * @param nextAgent - The next agent to run
-  //  */
-  // agent_handoff: [context: Context<TContext>, nextAgent: Agent<any, any>];
   /**
    * @param context - The context of the run
    * @param agent - The agent that is starting a tool
