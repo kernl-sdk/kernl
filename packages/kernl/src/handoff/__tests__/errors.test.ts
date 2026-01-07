@@ -25,6 +25,21 @@ describe("Handoff Errors", () => {
       expect(error.chain).toEqual(chain);
       expect(error.limit).toBe(10);
     });
+
+    it("should serialize to JSON with limit and chain", () => {
+      const chain = [
+        { from: "a", to: "b", message: "test", timestamp: new Date() },
+        { from: "b", to: "c", message: "test2", timestamp: new Date() },
+      ];
+      const error = new MaxHandoffsExceededError(5, chain);
+      const json = error.toJSON();
+
+      expect(json.name).toBe("MaxHandoffsExceededError");
+      expect(json.message).toContain("5");
+      expect(json.limit).toBe(5);
+      expect(json.chain).toEqual(chain);
+      expect(json.traceId).toBeDefined();
+    });
   });
 
   describe("HandoffTargetNotFoundError", () => {
@@ -36,6 +51,26 @@ describe("Handoff Errors", () => {
       expect(error.message).toContain("writer");
       expect(error.message).toContain("analyst");
       expect(error.name).toBe("HandoffTargetNotFoundError");
+    });
+
+    it("should store from, to, and available on error object", () => {
+      const error = new HandoffTargetNotFoundError("researcher", "unknown", ["writer", "analyst"]);
+
+      expect(error.from).toBe("researcher");
+      expect(error.to).toBe("unknown");
+      expect(error.available).toEqual(["writer", "analyst"]);
+    });
+
+    it("should serialize to JSON with from, to, and available", () => {
+      const error = new HandoffTargetNotFoundError("researcher", "unknown", ["writer", "analyst"]);
+      const json = error.toJSON();
+
+      expect(json.name).toBe("HandoffTargetNotFoundError");
+      expect(json.message).toContain("researcher");
+      expect(json.from).toBe("researcher");
+      expect(json.to).toBe("unknown");
+      expect(json.available).toEqual(["writer", "analyst"]);
+      expect(json.traceId).toBeDefined();
     });
   });
 });
