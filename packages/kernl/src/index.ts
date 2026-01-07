@@ -1,6 +1,7 @@
 export { Kernl } from "./kernl";
 export type {
   KernlOptions,
+  KernlRunOptions,
   StorageOptions,
   AgentRegistry,
   ModelRegistry,
@@ -60,6 +61,14 @@ export type {
   KernlStorage,
   Transaction,
 } from "./storage";
+
+// --- handoffs ---
+export type {
+  HandoffResult,
+  HandoffRecord,
+  HandoffRunResult,
+} from "./handoff";
+export { isHandoffResult, MaxHandoffsExceededError } from "./handoff";
 
 // --- memory ---
 export { Memory, MemoryByteEncoder } from "./memory";

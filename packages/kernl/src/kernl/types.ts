@@ -105,3 +105,14 @@ export interface AgentRegistry {
 export interface ModelRegistry {
   get(key: string): LanguageModel | undefined;
 }
+
+/**
+ * Options for Kernl.run() method.
+ */
+export interface KernlRunOptions {
+  /**
+   * Maximum number of handoffs allowed before throwing MaxHandoffsExceededError.
+   * @default 10
+   */
+  maxHandoffs?: number;
+}
