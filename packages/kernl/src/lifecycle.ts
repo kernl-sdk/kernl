@@ -7,6 +7,7 @@ import type { ToolCall } from "@kernl-sdk/protocol";
 
 import { AgentOutputType } from "@/agent/types";
 import { TextOutput } from "@/thread/types";
+import type { HandoffResult } from "@/handoff";
 
 export type AgentHookEvents<
   TContext = UnknownContext,
@@ -21,12 +22,6 @@ export type AgentHookEvents<
    * @param output - The output of the agent
    */
   agent_end: [context: Context<TContext>, output: string];
-  // /**
-  //  * @param context - The context of the run
-  //  * @param agent - The agent that is handing off
-  //  * @param nextAgent - The next agent to run
-  //  */
-  // agent_handoff: [context: Context<TContext>, nextAgent: Agent<any, any>];
   /**
    * @param context - The context of the run
    * @param agent - The agent that is starting a tool
@@ -88,13 +83,13 @@ export type KernlHookEvents<
   ];
   /**
    * @param context - The context of the run
-   * @param fromAgent - The agent that is handing off
-   * @param toAgent - The next agent to run
+   * @param agent - The agent that initiated the handoff
+   * @param handoff - The handoff result containing from, to, and message
    */
   agent_handoff: [
     context: Context<TContext>,
-    fromAgent: Agent<any, any>,
-    toAgent: Agent<any, any>,
+    agent: Agent<TContext, TOutput>,
+    handoff: HandoffResult,
   ];
   /**
    * @param context - The context of the run

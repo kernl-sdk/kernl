@@ -12,26 +12,22 @@
 
 ---
 
-# Rule: Read the Docs First
+# Rule: Follow Established Patterns
 
 **You must do this before proposing designs, writing code, or editing files:**
 
-## 1) Read the canonical specs in `/docs/`
-Review the relevant files and design constraints before you suggest anything.
-
-## 2) Follow established codebase patterns
+## 1) Follow established codebase patterns
 - **Examine existing code** to understand established patterns, conventions, and architectural decisions
 - **Maintain consistency** with existing naming conventions, file structures, and coding patterns
-- **Reuse existing patterns** rather than inventing new ones unless the spec explicitly requires deviation
-- If you must deviate from existing patterns, explicitly justify why based on the `/docs/` specifications
+- **Reuse existing patterns** rather than inventing new ones unless explicitly required
+- If you must deviate from existing patterns, explicitly justify why
 
-## 3) If the spec is missing or ambiguous
-- **Stop and propose a spec addition** first (succinct ADR-style note). Do not implement until the spec gap is resolved.
-- Offer a default, but mark it as **"Proposed addition to /docs"**.
+## 2) If requirements are ambiguous
+- **Ask clarifying questions** before implementing
+- If proposing new patterns, explain the rationale
 
 ## Checklists
 
 ### Before coding
-- [ ] I looked up the relevant `/docs/*` file(s).
-- [ ] I examined existing codebase patterns for similar functionality.
-- [ ] I verified my approach is consistent with established conventions.
+- [ ] I examined existing codebase patterns for similar functionality
+- [ ] I verified my approach is consistent with established conventions

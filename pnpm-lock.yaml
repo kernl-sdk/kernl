@@ -215,9 +215,6 @@ importers:
       '@ai-sdk/react':
         specifier: ^2.0.93
         version: 2.0.106(react@19.2.1)(zod@4.1.13)
-      '@kernl-sdk/elevenlabs':
-        specifier: workspace:^
-        version: link:../../../packages/providers/elevenlabs
       '@kernl-sdk/openai':
         specifier: workspace:^
         version: link:../../../packages/providers/openai
@@ -438,6 +435,9 @@ importers:
       tsc-alias:
         specifier: ^1.8.10
         version: 1.8.16
+      tsx:
+        specifier: ^4.19.0
+        version: 4.21.0
       typescript:
         specifier: 5.9.2
         version: 5.9.2
