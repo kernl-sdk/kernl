@@ -56,6 +56,7 @@
     "@kernl-sdk/ai": "workspace:*",
     "@types/node": "^24.10.0",
     "tsc-alias": "^1.8.10",
+    "tsx": "^4.19.0",
     "typescript": "5.9.2",
     "vitest": "^4.0.8",
     "zod": "^4.1.8"
