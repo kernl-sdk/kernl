@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { COMPLETED } from "@kernl-sdk/protocol";
+import { COMPLETED, FAILED } from "@kernl-sdk/protocol";
 import { createHandoffTool } from "../tool";
 import { isHandoffResult } from "../types";
-import { Context } from "@/context";
+import { mockContext } from "@/tool/__tests__/fixtures";
 
 describe("createHandoffTool", () => {
   it("should create a tool with id 'handoff'", () => {
@@ -18,7 +18,7 @@ describe("createHandoffTool", () => {
 
   it("should return a HandoffResult when executed", async () => {
     const tool = createHandoffTool("researcher", ["writer", "analyst"]);
-    const ctx = new Context("test", {});
+    const ctx = mockContext();
 
     const input = JSON.stringify({ to: "writer", message: "Here are findings" });
     const result = await tool.invoke(ctx, input);
@@ -33,8 +33,18 @@ describe("createHandoffTool", () => {
     });
   });
 
-  it("should have empty array when no other agents available", () => {
+  it("should indicate no agents available in description when list is empty", () => {
     const tool = createHandoffTool("solo", []);
-    expect(tool.description).toContain("Transfer");
+    expect(tool.description).toContain("no other agents currently available");
+  });
+
+  it("should fail validation when handing off to an agent not in the available list", async () => {
+    const tool = createHandoffTool("researcher", ["writer", "analyst"]);
+    const ctx = mockContext();
+
+    const input = JSON.stringify({ to: "unknown-agent", message: "test" });
+    const result = await tool.invoke(ctx, input);
+
+    expect(result.state).toBe(FAILED);
   });
 });

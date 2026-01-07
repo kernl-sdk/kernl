@@ -26,7 +26,7 @@ export function createHandoffTool(agentId: string, availableAgents: string[]) {
         .string()
         .describe("Context and instructions for the target agent"),
     }),
-    execute: async (_context, params): Promise<HandoffResult> => {
+    execute: async (_ctx, params): Promise<HandoffResult> => {
       return {
         kind: "handoff",
         to: params.to,
