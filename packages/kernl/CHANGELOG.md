@@ -1,5 +1,11 @@
 # @kernl/core
 
+## 0.11.1
+
+### Patch Changes
+
+- e1a7848: Export lifecycle event types from package root
+
 ## 0.11.0
 
 ### Minor Changes
