@@ -1,10 +1,13 @@
 import { z } from "zod";
 import { tool, Toolkit, Context } from "kernl";
 
-import { getSandbox, type SandboxContext } from "./client";
+import { getSandbox, getGitCredentials, type SandboxContext } from "./client";
 
 /**
  * Clone a git repository.
+ *
+ * For private repos, set git credentials in context:
+ * `ctx.context.git = { username: "x-access-token", token: "ghp_..." }`
  */
 export const clone = tool({
   id: "daytona_git_clone",
@@ -13,17 +16,11 @@ export const clone = tool({
     url: z.string().describe("Repository URL to clone"),
     path: z.string().describe("Destination path for the clone"),
     branch: z.string().optional().describe("Specific branch to clone"),
-    username: z.string().optional().describe("Git username for private repos"),
-    password: z
-      .string()
-      .optional()
-      .describe("Git password/token for private repos"),
   }),
-  execute: async (
-    ctx: Context<SandboxContext>,
-    { url, path, branch, username, password },
-  ) => {
+  execute: async (ctx: Context<SandboxContext>, { url, path, branch }) => {
     const sandbox = await getSandbox(ctx);
+    const { username, password } = getGitCredentials(ctx);
+
     await sandbox.git.clone(url, path, branch, undefined, username, password);
 
     return { success: true, path };
@@ -141,23 +138,20 @@ export const branch = tool({
 
 /**
  * Pull changes from remote.
+ *
+ * For private repos, set git credentials in context:
+ * `ctx.context.git = { username: "x-access-token", token: "ghp_..." }`
  */
 export const pull = tool({
   id: "daytona_git_pull",
   description: "Pull changes from the remote repository",
   parameters: z.object({
     path: z.string().describe("Path to the git repository"),
-    username: z.string().optional().describe("Git username for private repos"),
-    password: z
-      .string()
-      .optional()
-      .describe("Git password/token for private repos"),
   }),
-  execute: async (
-    ctx: Context<SandboxContext>,
-    { path, username, password },
-  ) => {
+  execute: async (ctx: Context<SandboxContext>, { path }) => {
     const sandbox = await getSandbox(ctx);
+    const { username, password } = getGitCredentials(ctx);
+
     await sandbox.git.pull(path, username, password);
 
     return { success: true };
@@ -166,23 +160,20 @@ export const pull = tool({
 
 /**
  * Push changes to remote.
+ *
+ * For private repos, set git credentials in context:
+ * `ctx.context.git = { username: "x-access-token", token: "ghp_..." }`
  */
 export const push = tool({
   id: "daytona_git_push",
   description: "Push changes to the remote repository",
   parameters: z.object({
     path: z.string().describe("Path to the git repository"),
-    username: z.string().optional().describe("Git username for private repos"),
-    password: z
-      .string()
-      .optional()
-      .describe("Git password/token for private repos"),
   }),
-  execute: async (
-    ctx: Context<SandboxContext>,
-    { path, username, password },
-  ) => {
+  execute: async (ctx: Context<SandboxContext>, { path }) => {
     const sandbox = await getSandbox(ctx);
+    const { username, password } = getGitCredentials(ctx);
+
     await sandbox.git.push(path, username, password);
 
     return { success: true };
