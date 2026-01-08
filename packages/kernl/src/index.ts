@@ -8,6 +8,18 @@ export type {
 export { Agent } from "./agent";
 export { Context } from "./context";
 
+// --- lifecycle hooks ---
+
+export type {
+  LifecycleEvent,
+  ThreadStartEvent,
+  ThreadStopEvent,
+  ModelCallStartEvent,
+  ModelCallEndEvent,
+  ToolCallStartEvent,
+  ToolCallEndEvent,
+} from "./lifecycle";
+
 // --- realtime ---
 
 export { RealtimeAgent, RealtimeSession, WebSocketTransport } from "./realtime";
