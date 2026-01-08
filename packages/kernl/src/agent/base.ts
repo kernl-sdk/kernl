@@ -4,7 +4,7 @@ import type { Context, UnknownContext } from "@/context";
 import type { Tool, BaseToolkit } from "@/tool";
 import { memory } from "@/tool";
 import { MisconfiguredError } from "@/lib/error";
-import { AgentHooks } from "@/lifecycle";
+import { AgentHooks, type AgentHookEvents } from "@/lifecycle";
 import type { Kernl } from "@/kernl";
 import type {
   AgentMemoryCreate,
@@ -99,6 +99,18 @@ export abstract class BaseAgent<
       this.systools.push(toolkit);
       toolkit.bind(this);
     }
+  }
+
+  /**
+   * Emit a lifecycle event to agent and kernl listeners.
+   */
+  emit<K extends keyof AgentHookEvents<TContext, TOutput>>(
+    event: K,
+    ...args: AgentHookEvents<TContext, TOutput>[K]
+  ): boolean {
+    const result = super.emit(event, ...args);
+    this.kernl?.emit(event, ...(args as any));
+    return result;
   }
 
   /**

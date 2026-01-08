@@ -179,7 +179,7 @@ export interface ThreadOptions<
  * Options passed to agent.execute() and agent.stream().
  */
 export interface ThreadExecuteOptions<TContext> {
-  context?: Context<TContext>;
+  context?: TContext;
   model?: LanguageModel;
   task?: Task<TContext>;
   threadId?: string;

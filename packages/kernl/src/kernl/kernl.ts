@@ -2,7 +2,6 @@ import type { LanguageModel } from "@kernl-sdk/protocol";
 import { resolveEmbeddingModel } from "@kernl-sdk/retrieval";
 
 import { BaseAgent } from "@/agent/base";
-import { UnknownContext } from "@/context";
 import { KernlHooks } from "@/lifecycle";
 import type { Thread } from "@/thread";
 import type { ResolvedAgentResponse } from "@/guardrail";
@@ -28,7 +27,7 @@ import type { KernlOptions, MemoryOptions, StorageOptions } from "./types";
  * Orchestrates agent execution, including guardrails, tool calls, session persistence, and
  * tracing.
  */
-export class Kernl extends KernlHooks<UnknownContext, AgentOutputType> {
+export class Kernl extends KernlHooks {
   private readonly _agents: Map<string, BaseAgent> = new Map();
   private readonly _models: Map<string, LanguageModel> = new Map();
 
@@ -103,8 +102,42 @@ export class Kernl extends KernlHooks<UnknownContext, AgentOutputType> {
     thread: Thread<TContext, TOutput>,
   ): Promise<ThreadExecuteResult<ResolvedAgentResponse<TOutput>>> {
     this.athreads.set(thread.tid, thread);
+
+    this.emit("thread.start", {
+      kind: "thread.start",
+      threadId: thread.tid,
+      agentId: thread.agent.id,
+      namespace: thread.namespace,
+      context: thread.context,
+    });
+
     try {
-      return await thread.execute();
+      const result = await thread.execute();
+
+      this.emit("thread.stop", {
+        kind: "thread.stop",
+        threadId: thread.tid,
+        agentId: thread.agent.id,
+        namespace: thread.namespace,
+        context: thread.context,
+        state: thread.state,
+        outcome: "success",
+        result: result.response,
+      });
+
+      return result;
+    } catch (err) {
+      this.emit("thread.stop", {
+        kind: "thread.stop",
+        threadId: thread.tid,
+        agentId: thread.agent.id,
+        namespace: thread.namespace,
+        context: thread.context,
+        state: thread.state,
+        outcome: "error",
+        error: err instanceof Error ? err.message : String(err),
+      });
+      throw err;
     } finally {
       this.athreads.delete(thread.tid);
     }
@@ -135,8 +168,39 @@ export class Kernl extends KernlHooks<UnknownContext, AgentOutputType> {
     thread: Thread<TContext, TOutput>,
   ): AsyncIterable<ThreadStreamEvent> {
     this.athreads.set(thread.tid, thread);
+
+    this.emit("thread.start", {
+      kind: "thread.start",
+      threadId: thread.tid,
+      agentId: thread.agent.id,
+      namespace: thread.namespace,
+      context: thread.context,
+    });
+
     try {
       yield* thread.stream();
+
+      this.emit("thread.stop", {
+        kind: "thread.stop",
+        threadId: thread.tid,
+        agentId: thread.agent.id,
+        namespace: thread.namespace,
+        context: thread.context,
+        state: thread.state,
+        outcome: "success",
+      });
+    } catch (err) {
+      this.emit("thread.stop", {
+        kind: "thread.stop",
+        threadId: thread.tid,
+        agentId: thread.agent.id,
+        namespace: thread.namespace,
+        context: thread.context,
+        state: thread.state,
+        outcome: "error",
+        error: err instanceof Error ? err.message : String(err),
+      });
+      throw err;
     } finally {
       this.athreads.delete(thread.tid);
     }

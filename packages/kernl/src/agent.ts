@@ -13,7 +13,7 @@ import type {
   RThreadHistoryParams,
   RThreadUpdateParams,
 } from "@/api/resources/threads/types";
-import type { Context, UnknownContext } from "./context";
+import { Context, type UnknownContext } from "./context";
 import {
   InputGuardrail,
   OutputGuardrail,
@@ -102,10 +102,14 @@ export class Agent<
 
     // create new thread if not found in storage or no tid provided
     if (!thread) {
+      const ctx = options?.context
+        ? new Context<TContext>(options?.namespace ?? "kernl", options.context)
+        : undefined;
+
       thread = new Thread({
         agent: this,
         input: items,
-        context: options?.context,
+        context: ctx,
         model: options?.model,
         task: options?.task,
         tid: options?.threadId,
@@ -116,6 +120,9 @@ export class Agent<
     }
 
     // resume existing thread from storage
+    if (options?.context) {
+      thread.context.context = options.context;
+    }
     thread.append(...items);
     return this.kernl.schedule(thread);
   }
@@ -163,10 +170,14 @@ export class Agent<
 
     // create new thread if not found in storage or no tid provided
     if (!thread) {
+      const ctx = options?.context
+        ? new Context<TContext>(options?.namespace ?? "kernl", options.context)
+        : undefined;
+
       thread = new Thread({
         agent: this,
         input: items,
-        context: options?.context,
+        context: ctx,
         model: options?.model,
         task: options?.task,
         tid: options?.threadId,
@@ -178,6 +189,9 @@ export class Agent<
     }
 
     // resume existing thread from storage
+    if (options?.context) {
+      thread.context.context = options.context;
+    }
     thread.append(...items);
     yield* this.kernl.scheduleStream(thread);
   }

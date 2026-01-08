@@ -19,6 +19,8 @@ import {
   LanguageModel,
   LanguageModelItem,
   LanguageModelRequest,
+  type LanguageModelUsage,
+  type LanguageModelFinishReason,
 } from "@kernl-sdk/protocol";
 import { randomID, filter } from "@kernl-sdk/shared/lib";
 
@@ -90,8 +92,8 @@ export class Thread<
   readonly tid: string;
   readonly namespace: string;
   readonly agent: Agent<TContext, TOutput>;
-  readonly context: Context<TContext>;
-  readonly model: LanguageModel; /* inherited from the agent unless specified */
+  context: Context<TContext>;
+  model: LanguageModel; /* inherited from the agent unless specified */
   readonly parent: Task<TContext> | null; /* parent task which spawned this thread */
   readonly createdAt: Date;
   readonly updatedAt: Date;
@@ -200,7 +202,7 @@ export class Thread<
    */
   private async *_execute(): AsyncGenerator<ThreadStreamEvent, void> {
     for (;;) {
-      let err = false;
+      let err: Error | undefined = undefined;
 
       if (this.abort?.signal.aborted) {
         return;
@@ -209,7 +211,7 @@ export class Thread<
       const events = [];
       for await (const e of this.tick()) {
         if (e.kind === "error") {
-          err = true;
+          err = e.error;
           logger.error(e.error); // (TODO): onError callback in options
         }
         // we don't want deltas in the history
@@ -220,9 +222,9 @@ export class Thread<
         yield e;
       }
 
-      // if an error event occurred → terminate
+      // if an error event occurred → throw it
       if (err) {
-        return;
+        throw err;
       }
 
       // if model returns a message with no action intentions → terminal state
@@ -276,21 +278,59 @@ export class Thread<
 
     const req = await this.prepareModelRequest(this.history);
 
+    this.agent.emit("model.call.start", {
+      kind: "model.call.start",
+      provider: this.model.provider,
+      modelId: this.model.modelId,
+      settings: req.settings ?? {},
+      threadId: this.tid,
+      agentId: this.agent.id,
+      context: this.context,
+    });
+
+    let usage: LanguageModelUsage | undefined;
+    let finishReason: LanguageModelFinishReason = "unknown";
+
     try {
       if (this.model.stream) {
-        const stream = this.model.stream(req);
-        for await (const event of stream) {
-          yield event; // [text-delta, tool-call, message, reasoning, ...]
+        for await (const event of this.model.stream(req)) {
+          if (event.kind === "finish") {
+            usage = event.usage;
+            finishReason = event.finishReason;
+          }
+          yield event;
         }
       } else {
         // fallback: blocking generate, yield events as batch
         const res = await this.model.generate(req);
+        usage = res.usage;
+        finishReason = res.finishReason;
         for (const event of res.content) {
           yield event;
         }
-        // (TODO): this.stats.usage.add(res.usage)
       }
+
+      this.agent.emit("model.call.end", {
+        kind: "model.call.end",
+        provider: this.model.provider,
+        modelId: this.model.modelId,
+        finishReason,
+        usage,
+        threadId: this.tid,
+        agentId: this.agent.id,
+        context: this.context,
+      });
     } catch (error) {
+      this.agent.emit("model.call.end", {
+        kind: "model.call.end",
+        provider: this.model.provider,
+        modelId: this.model.modelId,
+        finishReason: "error",
+        threadId: this.tid,
+        agentId: this.agent.id,
+        context: this.context,
+      });
+
       yield {
         kind: "error",
         error: error instanceof Error ? error : new Error(String(error)),
@@ -430,6 +470,18 @@ export class Thread<
   private async executeTools(calls: ToolCall[]): Promise<ThreadEventInner[]> {
     return await Promise.all(
       calls.map(async (call: ToolCall) => {
+        const parsedArgs = JSON.parse(call.arguments || "{}");
+
+        this.agent.emit("tool.call.start", {
+          kind: "tool.call.start",
+          threadId: this.tid,
+          agentId: this.agent.id,
+          context: this.context,
+          toolId: call.toolId,
+          callId: call.callId,
+          args: parsedArgs,
+        });
+
         try {
           const tool = this.agent.tool(call.toolId);
           if (!tool) {
@@ -449,6 +501,21 @@ export class Thread<
           ctx.approve(call.callId); // mark this call as approved
           const res = await tool.invoke(ctx, call.arguments, call.callId);
 
+          this.agent.emit("tool.call.end", {
+            kind: "tool.call.end",
+            threadId: this.tid,
+            agentId: this.agent.id,
+            context: this.context,
+            toolId: call.toolId,
+            callId: call.callId,
+            state: res.state,
+            result:
+              typeof res.result === "string"
+                ? res.result
+                : JSON.stringify(res.result),
+            error: res.error,
+          });
+
           return {
             kind: "tool-result" as const,
             callId: call.callId,
@@ -458,6 +525,17 @@ export class Thread<
             error: res.error,
           };
         } catch (error) {
+          this.agent.emit("tool.call.end", {
+            kind: "tool.call.end",
+            threadId: this.tid,
+            agentId: this.agent.id,
+            context: this.context,
+            toolId: call.toolId,
+            callId: call.callId,
+            state: FAILED,
+            error: error instanceof Error ? error.message : String(error),
+          });
+
           return {
             kind: "tool-result" as const,
             callId: call.callId,

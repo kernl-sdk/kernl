@@ -1,131 +1,295 @@
 import { Emitter } from "@kernl-sdk/shared";
 
-import { Agent } from "./agent";
-import { Context, UnknownContext } from "./context";
-import { Tool } from "./tool";
-import type { ToolCall } from "@kernl-sdk/protocol";
+import type {
+  LanguageModelUsage,
+  LanguageModelFinishReason,
+  LanguageModelRequestSettings,
+  ToolCallState,
+} from "@kernl-sdk/protocol";
+import type { Context } from "@/context";
+import type { ThreadState } from "@/thread/types";
 
-import { AgentOutputType } from "@/agent/types";
-import { TextOutput } from "@/thread/types";
+// --- Thread Events ---
 
-export type AgentHookEvents<
-  TContext = UnknownContext,
-  TOutput extends AgentOutputType = TextOutput,
-> = {
+/**
+ * Emitted when a thread starts execution.
+ */
+export interface ThreadStartEvent<TContext = unknown> {
+  readonly kind: "thread.start";
+
   /**
-   * @param context - The context of the run
+   * The thread ID.
    */
-  agent_start: [context: Context<TContext>, agent: Agent<TContext, TOutput>];
+  threadId: string;
+
   /**
-   * @param context - The context of the run
-   * @param output - The output of the agent
+   * The agent executing this thread.
    */
-  agent_end: [context: Context<TContext>, output: string];
-  // /**
-  //  * @param context - The context of the run
-  //  * @param agent - The agent that is handing off
-  //  * @param nextAgent - The next agent to run
-  //  */
-  // agent_handoff: [context: Context<TContext>, nextAgent: Agent<any, any>];
+  agentId: string;
+
   /**
-   * @param context - The context of the run
-   * @param agent - The agent that is starting a tool
-   * @param tool - The tool that is starting
+   * The namespace of the thread.
    */
-  agent_tool_start: [
-    context: Context<TContext>,
-    tool: Tool<any>,
-    details: { toolCall: ToolCall },
-  ];
+  namespace: string;
+
   /**
-   * @param context - The context of the run
-   * @param agent - The agent that is ending a tool
-   * @param tool - The tool that is ending
-   * @param result - The result of the tool
+   * The context for this execution.
    */
-  agent_tool_end: [
-    context: Context<TContext>,
-    tool: Tool<any>,
-    result: string,
-    details: { toolCall: ToolCall },
-  ];
+  context: Context<TContext>;
+}
+
+/**
+ * Emitted when a thread stops execution.
+ */
+export interface ThreadStopEvent<TContext = unknown, TOutput = unknown> {
+  readonly kind: "thread.stop";
+
+  /**
+   * The thread ID.
+   */
+  threadId: string;
+
+  /**
+   * The agent that executed this thread.
+   */
+  agentId: string;
+
+  /**
+   * The namespace of the thread.
+   */
+  namespace: string;
+
+  /**
+   * The context for this execution.
+   */
+  context: Context<TContext>;
+
+  /**
+   * Final state of the thread.
+   */
+  state: ThreadState;
+
+  /**
+   * The outcome of the execution.
+   */
+  outcome: "success" | "error" | "cancelled";
+
+  /**
+   * The result if outcome is "success".
+   */
+  result?: TOutput;
+
+  /**
+   * Error message if outcome is "error".
+   */
+  error?: string;
+}
+
+// --- Model Events ---
+
+/**
+ * Emitted when a model call starts.
+ */
+export interface ModelCallStartEvent<TContext = unknown> {
+  readonly kind: "model.call.start";
+
+  /**
+   * The model provider.
+   */
+  provider: string;
+
+  /**
+   * The model ID.
+   */
+  modelId: string;
+
+  /**
+   * Request settings passed to the model.
+   */
+  settings: LanguageModelRequestSettings;
+
+  /**
+   * Thread ID if called within a thread context.
+   */
+  threadId?: string;
+
+  /**
+   * Agent ID if called within an agent context.
+   */
+  agentId?: string;
+
+  /**
+   * Execution context if available.
+   */
+  context?: Context<TContext>;
+}
+
+/**
+ * Emitted when a model call ends.
+ */
+export interface ModelCallEndEvent<TContext = unknown> {
+  readonly kind: "model.call.end";
+
+  /**
+   * The model provider.
+   */
+  provider: string;
+
+  /**
+   * The model ID.
+   */
+  modelId: string;
+
+  /**
+   * Reason the model stopped generating.
+   */
+  finishReason: LanguageModelFinishReason;
+
+  /**
+   * Token usage for this call.
+   */
+  usage?: LanguageModelUsage;
+
+  /**
+   * Thread ID if called within a thread context.
+   */
+  threadId?: string;
+
+  /**
+   * Agent ID if called within an agent context.
+   */
+  agentId?: string;
+
+  /**
+   * Execution context if available.
+   */
+  context?: Context<TContext>;
+}
+
+// --- Tool Events ---
+
+/**
+ * Emitted when a tool call starts.
+ */
+export interface ToolCallStartEvent<TContext = unknown> {
+  readonly kind: "tool.call.start";
+
+  /**
+   * The thread ID.
+   */
+  threadId: string;
+
+  /**
+   * The agent executing this tool.
+   */
+  agentId: string;
+
+  /**
+   * The context for this execution.
+   */
+  context: Context<TContext>;
+
+  /**
+   * The tool being called.
+   */
+  toolId: string;
+
+  /**
+   * Unique identifier for this call.
+   */
+  callId: string;
+
+  /**
+   * Arguments passed to the tool (parsed JSON).
+   */
+  args: Record<string, unknown>;
+}
+
+/**
+ * Emitted when a tool call ends.
+ */
+export interface ToolCallEndEvent<TContext = unknown> {
+  readonly kind: "tool.call.end";
+
+  /**
+   * The thread ID.
+   */
+  threadId: string;
+
+  /**
+   * The agent that executed this tool.
+   */
+  agentId: string;
+
+  /**
+   * The context for this execution.
+   */
+  context: Context<TContext>;
+
+  /**
+   * The tool that was called.
+   */
+  toolId: string;
+
+  /**
+   * Unique identifier for this call.
+   */
+  callId: string;
+
+  /**
+   * Final state of the tool call.
+   */
+  state: ToolCallState;
+
+  /**
+   * Result if state is "completed".
+   */
+  result?: string;
+
+  /**
+   * Error message if state is "failed", null if successful.
+   */
+  error: string | null;
+}
+
+// --- Union ---
+
+export type LifecycleEvent<TContext = unknown, TOutput = unknown> =
+  | ThreadStartEvent<TContext>
+  | ThreadStopEvent<TContext, TOutput>
+  | ModelCallStartEvent<TContext>
+  | ModelCallEndEvent<TContext>
+  | ToolCallStartEvent<TContext>
+  | ToolCallEndEvent<TContext>;
+
+// --- Event Maps ---
+
+/**
+ * Event map for agent-level lifecycle hooks (typed).
+ */
+export type AgentHookEvents<TContext = unknown, TOutput = unknown> = {
+  "thread.start": [event: ThreadStartEvent<TContext>];
+  "thread.stop": [event: ThreadStopEvent<TContext, TOutput>];
+  "model.call.start": [event: ModelCallStartEvent<TContext>];
+  "model.call.end": [event: ModelCallEndEvent<TContext>];
+  "tool.call.start": [event: ToolCallStartEvent<TContext>];
+  "tool.call.end": [event: ToolCallEndEvent<TContext>];
 };
 
 /**
- * Event emitter that every Agent instance inherits from and that emits events for the lifecycle
- * of the agent.
+ * Event map for Kernl-level lifecycle hooks (untyped).
+ */
+export type KernlHookEvents = AgentHookEvents<unknown, unknown>;
+
+/**
+ * Event emitter for agent-level lifecycle events.
  */
 export class AgentHooks<
-  TContext = UnknownContext,
-  TOutput extends AgentOutputType = TextOutput,
+  TContext = unknown,
+  TOutput = unknown,
 > extends Emitter<AgentHookEvents<TContext, TOutput>> {}
 
 /**
- * Events emitted by the kernl during execution.
- *
- * Unlike AgentHookEvents (which are emitted by individual agents with implicit context),
- * KernlHookEvents explicitly include the agent reference in all events since it needs to
- * coordinate multiple agents and listeners need to know which agent triggered each event.
+ * Event emitter for Kernl-level lifecycle events.
  */
-export type KernlHookEvents<
-  TContext = UnknownContext,
-  TOutput extends AgentOutputType = TextOutput,
-> = {
-  /**
-   * @param context - The context of the run
-   * @param agent - The agent that is starting
-   */
-  agent_start: [context: Context<TContext>, agent: Agent<TContext, TOutput>];
-  /**
-   * @param context - The context of the run
-   * @param agent - The agent that is ending
-   * @param output - The output of the agent
-   */
-  agent_end: [
-    context: Context<TContext>,
-    agent: Agent<TContext, TOutput>,
-    output: string,
-  ];
-  /**
-   * @param context - The context of the run
-   * @param fromAgent - The agent that is handing off
-   * @param toAgent - The next agent to run
-   */
-  agent_handoff: [
-    context: Context<TContext>,
-    fromAgent: Agent<any, any>,
-    toAgent: Agent<any, any>,
-  ];
-  /**
-   * @param context - The context of the run
-   * @param agent - The agent that is starting a tool
-   * @param tool - The tool that is starting
-   */
-  agent_tool_start: [
-    context: Context<TContext>,
-    agent: Agent<TContext, TOutput>,
-    tool: Tool,
-    details: { toolCall: ToolCall },
-  ];
-  /**
-   * @param context - The context of the run
-   * @param agent - The agent that is ending a tool
-   * @param tool - The tool that is ending
-   * @param result - The result of the tool
-   */
-  agent_tool_end: [
-    context: Context<TContext>,
-    agent: Agent<TContext, TOutput>,
-    tool: Tool,
-    result: string,
-    details: { toolCall: ToolCall },
-  ];
-};
-
-/**
- * Event emitter that the kernl uses to emit events for the lifecycle of every agent run.
- */
-export class KernlHooks<
-  TContext = UnknownContext,
-  TOutput extends AgentOutputType = TextOutput,
-> extends Emitter<KernlHookEvents<TContext, TOutput>> {}
+export class KernlHooks extends Emitter<KernlHookEvents> {}
