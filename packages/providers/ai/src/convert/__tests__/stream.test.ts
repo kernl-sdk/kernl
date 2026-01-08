@@ -317,7 +317,7 @@ describe("STREAM_PART codec", () => {
 
       expect(result).toEqual({
         kind: "error",
-        error: "Connection failed",
+        error: new Error("Connection failed"),
       });
     });
 

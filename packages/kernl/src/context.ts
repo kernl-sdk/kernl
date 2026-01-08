@@ -23,6 +23,8 @@ export class Context<TContext = UnknownContext> {
   /**
    * The agent executing this context.
    * Set by the thread during execution.
+   *
+   * NOTE: Primarily used by system tools (e.g., memory) that need agent access.
    */
   agent?: Agent<TContext, any>;
 

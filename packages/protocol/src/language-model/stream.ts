@@ -187,7 +187,7 @@ export interface ErrorEvent extends StreamEventBase {
   /**
    * The error that occurred.
    */
-  error: unknown;
+  error: Error;
 }
 
 /**

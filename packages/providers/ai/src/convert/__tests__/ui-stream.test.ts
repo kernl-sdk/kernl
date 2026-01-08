@@ -520,7 +520,7 @@ describe("toUIMessageStream", () => {
   it("should handle errors in stream", async () => {
     const events: LanguageModelStreamEvent[] = [
       { kind: "text-start", id: "text-1" },
-      { kind: "error", error: "Network timeout" },
+      { kind: "error", error: new Error("Network timeout") },
     ];
 
     async function* generateEvents() {

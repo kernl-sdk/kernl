@@ -160,7 +160,10 @@ export const STREAM_PART: Codec<
       case "error":
         return {
           kind: "error",
-          error: part.error,
+          error:
+            part.error instanceof Error
+              ? part.error
+              : new Error(String(part.error)),
         };
 
       case "raw":

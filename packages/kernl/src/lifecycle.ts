@@ -34,6 +34,8 @@ export interface ThreadStartEvent<TContext = unknown> {
 
   /**
    * The context for this execution.
+   *
+   * NOTE: Includes `context.agent` reference for tools - may be optimized in future.
    */
   context: Context<TContext>;
 }
@@ -61,6 +63,8 @@ export interface ThreadStopEvent<TContext = unknown, TOutput = unknown> {
 
   /**
    * The context for this execution.
+   *
+   * NOTE: Includes `context.agent` reference for tools - may be optimized in future.
    */
   context: Context<TContext>;
 
@@ -120,6 +124,8 @@ export interface ModelCallStartEvent<TContext = unknown> {
 
   /**
    * Execution context if available.
+   *
+   * NOTE: Includes `context.agent` reference for tools - may be optimized in future.
    */
   context?: Context<TContext>;
 }
@@ -162,6 +168,8 @@ export interface ModelCallEndEvent<TContext = unknown> {
 
   /**
    * Execution context if available.
+   *
+   * NOTE: Includes `context.agent` reference for tools - may be optimized in future.
    */
   context?: Context<TContext>;
 }
@@ -186,6 +194,8 @@ export interface ToolCallStartEvent<TContext = unknown> {
 
   /**
    * The context for this execution.
+   *
+   * NOTE: Includes `context.agent` reference for tools - may be optimized in future.
    */
   context: Context<TContext>;
 
@@ -223,6 +233,8 @@ export interface ToolCallEndEvent<TContext = unknown> {
 
   /**
    * The context for this execution.
+   *
+   * NOTE: Includes `context.agent` reference for tools - may be optimized in future.
    */
   context: Context<TContext>;
 
