@@ -409,6 +409,8 @@ export class Thread<
 
   /**
    * Cancel the running thread
+   *
+   * TODO: Emit thread.stop with outcome: 'cancelled' when cancelled
    */
   cancel() {
     this.abort?.abort();
