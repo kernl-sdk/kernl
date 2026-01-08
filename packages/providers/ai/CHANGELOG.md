@@ -1,5 +1,19 @@
 # @kernl/ai
 
+## 0.3.4
+
+### Patch Changes
+
+- bb6ac60: Add lifecycle hooks for observing agent execution
+  - New events: `thread.start`, `thread.stop`, `model.call.start`, `model.call.end`, `tool.call.start`, `tool.call.end`
+  - Subscribe via `agent.on()` or `kernl.on()` for global hooks
+  - Fixed error propagation in thread execution
+  - Normalized `ErrorEvent.error` to always be an `Error` instance
+
+- Updated dependencies [bb6ac60]
+  - @kernl-sdk/protocol@0.4.1
+  - @kernl-sdk/retrieval@0.1.7
+
 ## 0.3.3
 
 ### Patch Changes

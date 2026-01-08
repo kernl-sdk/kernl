@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/storage",
-  "version": "0.1.26",
+  "version": "0.1.27",
   "description": "Core storage abstractions for kernl",
   "keywords": [
     "kernl",
