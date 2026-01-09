@@ -1,5 +1,12 @@
 # @kernl-sdk/react
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies [47e44c0]
+  - kernl@0.11.2
+
 ## 0.1.2
 
 ### Patch Changes
