@@ -54,7 +54,7 @@ describe("Lifecycle Hooks", () => {
       expect(events[0].context).toBeDefined();
     });
 
-    it("emits thread.stop with outcome=success on successful run", async () => {
+    it("emits thread.stop with result on successful run", async () => {
       const events: ThreadStopEvent[] = [];
 
       const model = createMockModel(async () => ({
@@ -83,13 +83,12 @@ describe("Lifecycle Hooks", () => {
         kind: "thread.stop",
         agentId: "test-agent",
         namespace: "kernl",
-        outcome: "success",
         state: "stopped",
         result: "Done",
       });
     });
 
-    it("emits thread.stop with outcome=error on failure", async () => {
+    it("emits thread.stop with error on failure", async () => {
       const events: ThreadStopEvent[] = [];
 
       const model = createMockModel(async () => {
@@ -114,7 +113,6 @@ describe("Lifecycle Hooks", () => {
       expect(events[0]).toMatchObject({
         kind: "thread.stop",
         agentId: "test-agent",
-        outcome: "error",
         error: "Model exploded",
       });
     });
@@ -150,6 +148,49 @@ describe("Lifecycle Hooks", () => {
       expect(agentEvents).toHaveLength(1);
       expect(kernlEvents).toHaveLength(1);
       expect(agentEvents[0].threadId).toBe(kernlEvents[0].threadId);
+    });
+
+    it("agent.on receives thread events (emitted by Thread via agent.emit)", async () => {
+      const agentStartEvents: ThreadStartEvent[] = [];
+      const agentStopEvents: ThreadStopEvent[] = [];
+      const kernlStartEvents: ThreadStartEvent[] = [];
+      const kernlStopEvents: ThreadStopEvent[] = [];
+
+      const model = createMockModel(async () => ({
+        content: [message({ role: "assistant", text: "Done" })],
+        finishReason: "stop",
+        usage: { inputTokens: 2, outputTokens: 2, totalTokens: 4 },
+        warnings: [],
+      }));
+
+      const agent = new Agent({
+        id: "test-agent",
+        name: "Test",
+        instructions: "Test",
+        model,
+      });
+
+      const kernl = new Kernl();
+      kernl.register(agent);
+
+      // Thread events should be receivable via both agent.on and kernl.on
+      agent.on("thread.start", (e) => agentStartEvents.push(e));
+      agent.on("thread.stop", (e) => agentStopEvents.push(e));
+      kernl.on("thread.start", (e) => kernlStartEvents.push(e));
+      kernl.on("thread.stop", (e) => kernlStopEvents.push(e));
+
+      await agent.run("Hello");
+
+      // Both agent and kernl should receive thread events
+      expect(agentStartEvents).toHaveLength(1);
+      expect(agentStopEvents).toHaveLength(1);
+      expect(kernlStartEvents).toHaveLength(1);
+      expect(kernlStopEvents).toHaveLength(1);
+
+      // Same event data
+      expect(agentStartEvents[0].threadId).toBe(kernlStartEvents[0].threadId);
+      expect(agentStopEvents[0].threadId).toBe(kernlStopEvents[0].threadId);
+      expect(agentStopEvents[0].result).toBeDefined();
     });
   });
 

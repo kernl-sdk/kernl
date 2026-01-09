@@ -74,17 +74,12 @@ export interface ThreadStopEvent<TContext = unknown, TOutput = unknown> {
   state: ThreadState;
 
   /**
-   * The outcome of the execution.
-   */
-  outcome: "success" | "error" | "cancelled";
-
-  /**
-   * The result if outcome is "success".
+   * The result of execution (present on success).
    */
   result?: TOutput;
 
   /**
-   * Error message if outcome is "error".
+   * Error message (present on error).
    */
   error?: string;
 }
