@@ -107,6 +107,7 @@ export class Thread<
   private cpbuf: ThreadEvent[]; /* checkpoint buffer - events pending persistence */
   private persisted: boolean; /* indicates thread was hydrated from storage */
   private history: ThreadEvent[] /* history representing the event log for the thread */;
+  private tickres?: ResolvedAgentResponse<TOutput>; /* final result from terminal tick */
 
   private abort?: AbortController;
   private storage?: ThreadStore;
@@ -152,24 +153,17 @@ export class Thread<
     for await (const _event of this.stream()) {
       // just consume the stream (already in history in _execute())
     }
-
-    // filter for language model items
-    const items = this.history
-      .filter((e) => e.kind !== "system")
-      .map((e) => {
-        const { tid, seq, timestamp, metadata, ...item } = e;
-        return item as LanguageModelItem;
-      });
-
-    const text = getFinalResponse(items);
-    assert(text, "_execute continues until text !== null"); // (TODO): consider preventing infinite loops here
-    const parsed = parseFinalResponse(text, this.agent.output);
-
-    return { response: parsed, state: this.state };
+    assert(this.tickres, "_execute continues until tickres is set");
+    return { response: this.tickres, state: this.state };
   }
 
   /**
    * Streaming execution - returns async iterator of events
+   *
+   * All runs (new or resumed) emit:
+   *   - Exactly one thread.start
+   *   - Zero or more model.call.* and tool.call.*
+   *   - Exactly one thread.stop (with result on success, error on failure)
    */
   async *stream(): AsyncIterable<ThreadStreamEvent> {
     if (this.state === RUNNING && this.abort) {
@@ -178,14 +172,42 @@ export class Thread<
 
     this.state = RUNNING;
     this.abort = new AbortController();
+    this.tickres = undefined; // reset for this run
 
     await this.checkpoint(); /* c1: persist RUNNING state + initial input */
+
+    this.agent.emit("thread.start", {
+      kind: "thread.start",
+      threadId: this.tid,
+      agentId: this.agent.id,
+      namespace: this.namespace,
+      context: this.context,
+    });
 
     yield { kind: "stream-start" }; // always yield start immediately
 
     try {
       yield* this._execute();
+
+      this.agent.emit("thread.stop", {
+        kind: "thread.stop",
+        threadId: this.tid,
+        agentId: this.agent.id,
+        namespace: this.namespace,
+        context: this.context,
+        state: STOPPED,
+        result: this.tickres,
+      });
     } catch (err) {
+      this.agent.emit("thread.stop", {
+        kind: "thread.stop",
+        threadId: this.tid,
+        agentId: this.agent.id,
+        namespace: this.namespace,
+        context: this.context,
+        state: STOPPED,
+        error: err instanceof Error ? err.message : String(err),
+      });
       throw err;
     } finally {
       this.state = STOPPED;
@@ -233,6 +255,7 @@ export class Thread<
         const text = getFinalResponse(events);
         if (!text) continue; // run again, policy-dependent? (how to ensure no infinite loop here?)
 
+        this.tickres = parseFinalResponse(text, this.agent.output);
         await this.checkpoint(); /* c2: terminal tick - no tool calls */
 
         // await this.agent.runOutputGuardails(context, state);
@@ -410,7 +433,7 @@ export class Thread<
   /**
    * Cancel the running thread
    *
-   * TODO: Emit thread.stop with outcome: 'cancelled' when cancelled
+   * TODO: Emit thread.stop when cancelled (neither result nor error set)
    */
   cancel() {
     this.abort?.abort();

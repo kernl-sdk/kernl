@@ -113,11 +113,10 @@ export function isPublicEvent(event: ThreadEvent): event is PublicThreadEvent {
  * Returns null if no assistant message with text content is found.
  */
 export function getFinalResponse(items: LanguageModelItem[]): string | null {
-  // Scan backwards for the last assistant message
+  // scan backwards for the last assistant message
   for (let i = items.length - 1; i >= 0; i--) {
     const item = items[i];
     if (item.kind === "message" && item.role === "assistant") {
-      // Extract text from content parts
       for (const part of item.content) {
         if (part.kind === "text") {
           return part.text;
@@ -161,6 +160,6 @@ export function parseFinalResponse<TOutput extends AgentOutputType>(
     }
   }
 
-  // Fallback - should not reach here
+  // fallback - should not reach here
   return text as ResolvedAgentResponse<TOutput>;
 }

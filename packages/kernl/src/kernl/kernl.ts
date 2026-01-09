@@ -102,42 +102,8 @@ export class Kernl extends KernlHooks {
     thread: Thread<TContext, TOutput>,
   ): Promise<ThreadExecuteResult<ResolvedAgentResponse<TOutput>>> {
     this.athreads.set(thread.tid, thread);
-
-    this.emit("thread.start", {
-      kind: "thread.start",
-      threadId: thread.tid,
-      agentId: thread.agent.id,
-      namespace: thread.namespace,
-      context: thread.context,
-    });
-
     try {
-      const result = await thread.execute();
-
-      this.emit("thread.stop", {
-        kind: "thread.stop",
-        threadId: thread.tid,
-        agentId: thread.agent.id,
-        namespace: thread.namespace,
-        context: thread.context,
-        state: thread.state,
-        outcome: "success",
-        result: result.response,
-      });
-
-      return result;
-    } catch (err) {
-      this.emit("thread.stop", {
-        kind: "thread.stop",
-        threadId: thread.tid,
-        agentId: thread.agent.id,
-        namespace: thread.namespace,
-        context: thread.context,
-        state: thread.state,
-        outcome: "error",
-        error: err instanceof Error ? err.message : String(err),
-      });
-      throw err;
+      return await thread.execute();
     } finally {
       this.athreads.delete(thread.tid);
     }
@@ -168,39 +134,8 @@ export class Kernl extends KernlHooks {
     thread: Thread<TContext, TOutput>,
   ): AsyncIterable<ThreadStreamEvent> {
     this.athreads.set(thread.tid, thread);
-
-    this.emit("thread.start", {
-      kind: "thread.start",
-      threadId: thread.tid,
-      agentId: thread.agent.id,
-      namespace: thread.namespace,
-      context: thread.context,
-    });
-
     try {
       yield* thread.stream();
-
-      this.emit("thread.stop", {
-        kind: "thread.stop",
-        threadId: thread.tid,
-        agentId: thread.agent.id,
-        namespace: thread.namespace,
-        context: thread.context,
-        state: thread.state,
-        outcome: "success",
-      });
-    } catch (err) {
-      this.emit("thread.stop", {
-        kind: "thread.stop",
-        threadId: thread.tid,
-        agentId: thread.agent.id,
-        namespace: thread.namespace,
-        context: thread.context,
-        state: thread.state,
-        outcome: "error",
-        error: err instanceof Error ? err.message : String(err),
-      });
-      throw err;
     } finally {
       this.athreads.delete(thread.tid);
     }
