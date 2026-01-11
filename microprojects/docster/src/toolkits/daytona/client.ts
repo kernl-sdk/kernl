@@ -4,11 +4,32 @@ import type { Context } from "kernl";
 export const daytona = new Daytona();
 
 /**
+ * Git credentials for authenticated operations.
+ * Set this in context to enable push/pull to private repos.
+ */
+export interface GitCredentials {
+  username: string;
+  token: string;
+}
+
+/**
  * Daytona context extension for sandbox management.
  */
 export interface SandboxContext {
   sandboxId?: string;
   desktopStarted?: boolean;
+  git?: GitCredentials;
+}
+
+/**
+ * Gets git credentials from context if available.
+ */
+export function getGitCredentials(
+  ctx: Context<SandboxContext>,
+): { username?: string; password?: string } {
+  const { git } = ctx.context;
+  if (!git) return {};
+  return { username: git.username, password: git.token };
 }
 
 /**

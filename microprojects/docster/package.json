@@ -1,25 +1,25 @@
 {
-  "name": "@playground/server",
+  "name": "@docster/action",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "tsx watch --env-file=.env.local src/index.ts",
+    "build": "ncc build src/index.ts -o dist",
     "start": "tsx --env-file=.env.local src/index.ts"
   },
   "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.0",
     "@ai-sdk/anthropic": "3.0.0-beta.53",
-    "@ai-sdk/openai": "3.0.0-beta.57",
     "@daytonaio/sdk": "^0.128.1",
     "@kernl-sdk/ai": "workspace:*",
-    "@kernl-sdk/pg": "workspace:*",
-    "@kernl-sdk/server": "workspace:*",
-    "@kernl-sdk/turbopuffer": "workspace:*",
     "@octokit/rest": "^22.0.1",
     "kernl": "workspace:*",
     "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/node": "^24.10.0",
+    "@vercel/ncc": "^0.38.3",
     "tsx": "^4.19.0",
     "typescript": "5.9.2"
   }

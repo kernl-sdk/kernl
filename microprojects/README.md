@@ -6,5 +6,14 @@ A set of small, production-ready microprojects that show how to use the runtime 
 
 A planning and coordination assistant for small teams.
 
-- Jarvis pulls from Linear and GitHub to surface blockers, unreviewed PRs, priorities, and a snapshot of what’s shipping next.
+- Jarvis pulls from Linear and GitHub to surface blockers, unreviewed PRs, priorities, and a snapshot of what's shipping next.
 - Perfect example of structured-data querying + synthesis.
+
+## 2. Docster — Documentation Sync
+
+Auto-update docs when code changes via PR.
+
+- Two-stage architecture: triager (Sonnet) filters commits, docster (Opus) updates docs
+- Runs as a GitHub Action on push to main/master
+- Creates PRs with doc updates, blocks direct pushes to protected branches
+- Uses Daytona sandbox for git operations, GitHub API for PR creation

@@ -1,32 +1,39 @@
 import { z } from "zod";
 import { tool, Toolkit, Context } from "kernl";
 
-import { getSandbox, type SandboxContext } from "./client";
+import { getSandbox, getGitCredentials, type SandboxContext } from "./client";
+
+const SANDBOX_HOME = "/home/daytona";
 
 /**
  * Clone a git repository.
+ *
+ * For private repos, set git credentials in context:
+ * `ctx.context.git = { username: "x-access-token", token: "ghp_..." }`
  */
 export const clone = tool({
   id: "daytona_git_clone",
   description: "Clone a git repository into the sandbox",
   parameters: z.object({
     url: z.string().describe("Repository URL to clone"),
-    path: z.string().describe("Destination path for the clone"),
-    branch: z.string().optional().describe("Specific branch to clone"),
-    username: z.string().optional().describe("Git username for private repos"),
-    password: z
+    name: z
       .string()
       .optional()
-      .describe("Git password/token for private repos"),
+      .describe("Folder name (defaults to repo name from URL)"),
+    branch: z.string().optional().describe("Specific branch to clone"),
   }),
-  execute: async (
-    ctx: Context<SandboxContext>,
-    { url, path, branch, username, password },
-  ) => {
+  execute: async (ctx: Context<SandboxContext>, { url, name, branch }) => {
     const sandbox = await getSandbox(ctx);
-    await sandbox.git.clone(url, path, branch, undefined, username, password);
+    const { username, password } = getGitCredentials(ctx);
 
-    return { success: true, path };
+    // Extract repo name from URL if not provided
+    const repoName =
+      name ?? url.split("/").pop()?.replace(".git", "") ?? "repo";
+    const fullPath = `${SANDBOX_HOME}/${repoName}`;
+
+    await sandbox.git.clone(url, fullPath, branch, undefined, username, password);
+
+    return { success: true, path: fullPath };
   },
 });
 
@@ -141,51 +148,57 @@ export const branch = tool({
 
 /**
  * Pull changes from remote.
+ *
+ * For private repos, set git credentials in context:
+ * `ctx.context.git = { username: "x-access-token", token: "ghp_..." }`
  */
 export const pull = tool({
   id: "daytona_git_pull",
   description: "Pull changes from the remote repository",
   parameters: z.object({
     path: z.string().describe("Path to the git repository"),
-    username: z.string().optional().describe("Git username for private repos"),
-    password: z
-      .string()
-      .optional()
-      .describe("Git password/token for private repos"),
   }),
-  execute: async (
-    ctx: Context<SandboxContext>,
-    { path, username, password },
-  ) => {
+  execute: async (ctx: Context<SandboxContext>, { path }) => {
     const sandbox = await getSandbox(ctx);
+    const { username, password } = getGitCredentials(ctx);
+
     await sandbox.git.pull(path, username, password);
 
     return { success: true };
   },
 });
 
+const PROTECTED_BRANCHES = ["main", "master"];
+
 /**
  * Push changes to remote.
+ *
+ * For private repos, set git credentials in context:
+ * `ctx.context.git = { username: "x-access-token", token: "ghp_..." }`
+ *
+ * Safety: blocks pushes to main/master branches.
  */
 export const push = tool({
   id: "daytona_git_push",
-  description: "Push changes to the remote repository",
+  description:
+    "Push changes to the remote repository (blocked for main/master)",
   parameters: z.object({
     path: z.string().describe("Path to the git repository"),
-    username: z.string().optional().describe("Git username for private repos"),
-    password: z
-      .string()
-      .optional()
-      .describe("Git password/token for private repos"),
   }),
-  execute: async (
-    ctx: Context<SandboxContext>,
-    { path, username, password },
-  ) => {
+  execute: async (ctx: Context<SandboxContext>, { path }) => {
     const sandbox = await getSandbox(ctx);
+    const { username, password } = getGitCredentials(ctx);
+
+    const status = await sandbox.git.status(path);
+    if (PROTECTED_BRANCHES.includes(status.currentBranch)) {
+      throw new Error(
+        `Cannot push to protected branch '${status.currentBranch}'. Create a feature branch first.`,
+      );
+    }
+
     await sandbox.git.push(path, username, password);
 
-    return { success: true };
+    return { success: true, branch: status.currentBranch };
   },
 });
 

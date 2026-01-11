@@ -1,0 +1,27 @@
+name: "Docster"
+description: "Auto-update docs on code changes"
+author: "kernl-sdk"
+
+branding:
+  icon: "book-open"
+  color: "purple"
+
+inputs:
+  anthropic_api_key:
+    description: "Anthropic API key for Claude"
+    required: true
+  daytona_api_key:
+    description: "Daytona API key for sandbox"
+    required: true
+  github_token:
+    description: "GitHub token for repo access"
+    required: false
+    default: ${{ github.token }}
+  docs_path:
+    description: "Path to documentation folder"
+    required: false
+    default: "docs"
+
+runs:
+  using: "node20"
+  main: "dist/index.js"
