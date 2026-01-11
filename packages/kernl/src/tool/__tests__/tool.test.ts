@@ -186,7 +186,7 @@ describe("FunctionTool", () => {
   describe("isEnabled", () => {
     it("should default to enabled", async () => {
       const ctx = mockContext();
-      const enabled = await simpleStringTool.isEnabled(ctx, null as any);
+      const enabled = await simpleStringTool.isEnabled(ctx);
 
       expect(enabled).toBe(true);
     });
@@ -201,7 +201,7 @@ describe("FunctionTool", () => {
       });
 
       const ctx = mockContext();
-      const enabled = await disabledTool.isEnabled(ctx, null as any);
+      const enabled = await disabledTool.isEnabled(ctx);
 
       expect(enabled).toBe(false);
     });
@@ -224,12 +224,8 @@ describe("FunctionTool", () => {
       const enabledCtx = mockContext<MyContext>({ enabled: true });
       const disabledCtx = mockContext<MyContext>({ enabled: false });
 
-      expect(await conditionalTool.isEnabled(enabledCtx, null as any)).toBe(
-        true,
-      );
-      expect(await conditionalTool.isEnabled(disabledCtx, null as any)).toBe(
-        false,
-      );
+      expect(await conditionalTool.isEnabled(enabledCtx)).toBe(true);
+      expect(await conditionalTool.isEnabled(disabledCtx)).toBe(false);
     });
   });
 });

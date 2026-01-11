@@ -25,8 +25,9 @@ export class Context<TContext = UnknownContext> {
    * Set by the thread during execution.
    *
    * NOTE: Primarily used by system tools (e.g., memory) that need agent access.
+   * Uses `any` to avoid invariance issues when composing toolkits.
    */
-  agent?: Agent<TContext, any>;
+  agent?: Agent<any, any>;
 
   // ----------------------
   // TEMPORARY: Tool approval tracking until actions system is refined

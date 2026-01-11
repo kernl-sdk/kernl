@@ -63,7 +63,7 @@ export class Kernl extends KernlHooks {
   /**
    * Registers a new agent with the kernl instance.
    */
-  register(agent: BaseAgent): void {
+  register(agent: BaseAgent<any>): void {
     this._agents.set(agent.id, agent);
     agent.bind(this);
 

@@ -610,7 +610,7 @@ export class Thread<
     const all = await this.agent.tools(this.context);
     const enabled = await filter(
       all,
-      async (tool) => await tool.isEnabled(this.context, this.agent),
+      async (tool) => await tool.isEnabled(this.context),
     );
     const tools = enabled.map((tool) => tool.serialize());
 
