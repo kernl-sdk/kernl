@@ -1,0 +1,11 @@
+name: Docster
+on: [pull_request, push]
+
+jobs:
+  update-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: kernl-sdk/docster@master
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          daytona_api_key: ${{ secrets.DAYTONA_API_KEY }}
