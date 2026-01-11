@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/xai",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "xAI (Grok) realtime voice provider for kernl",
   "keywords": [
     "kernl",

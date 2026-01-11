@@ -1,5 +1,14 @@
 # @kernl-sdk/server
 
+## 0.0.20
+
+### Patch Changes
+
+- kernl@0.11.4
+- @kernl-sdk/ai@0.3.5
+- @kernl-sdk/openai@0.3.2
+- @kernl-sdk/xai@0.2.2
+
 ## 0.0.19
 
 ### Patch Changes

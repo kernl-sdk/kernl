@@ -1,5 +1,14 @@
 # @kernl/core
 
+## 0.11.4
+
+### Patch Changes
+
+- Updated dependencies [830b52a]
+  - @kernl-sdk/shared@0.4.0
+  - @kernl-sdk/protocol@0.4.2
+  - @kernl-sdk/retrieval@0.1.8
+
 ## 0.11.3
 
 ### Patch Changes
