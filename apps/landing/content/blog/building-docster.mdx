@@ -1,0 +1,300 @@
+---
+title: Building Docster
+slug: building-docster
+date: 2026-01-11
+author: dremnik
+category: guides
+excerpt: How we built a GitHub Action that keeps your docs in sync with your code.
+---
+
+Documentation drift is inevitable. Code evolves, docs don't. PRs get merged, READMEs get stale.
+
+We built Docster to fix this—a GitHub Action that watches your commits and opens PRs to update your docs automatically.
+
+Here's how we built it with kernl in an afternoon.
+
+## The architecture
+
+The naive approach would be to spin up a sandbox for every commit and have an agent analyze the entire codebase. That's expensive and slow.
+
+Instead, we use a two-stage pipeline:
+
+```
+GitHub Action triggers (PR, push)
+           │
+           ▼
+┌─────────────────────────────────┐
+│  Stage 1: Triager               │
+│  Sonnet 4.5 analyzes the diff   │
+│  Returns { needs_updating }     │
+└─────────────────────────────────┘
+           │
+     needs_updating?
+      /          \
+    No            Yes
+     │             │
+     ▼             ▼
+  Exit early   ┌──────────────────────┐
+               │  Stage 2: Docster    │
+               │  Clone repo          │
+               │  Update docs         │
+               │  Open PR             │
+               └──────────────────────┘
+```
+
+Most commits don't need documentation updates. Internal refactors, test changes, dependency bumps—these can skip the expensive sandbox entirely.
+
+Stage 1 is fast and cheap. A quick Sonnet call with the diff and some repo context. Only when it detects a meaningful change does Stage 2 spin up.
+
+## Stage 1: The Triager
+
+The triager's job is simple: look at a diff and decide if docs need updating.
+
+```ts
+import { z } from "zod";
+import { Agent, Toolkit } from "kernl";
+import { anthropic } from "@kernl-sdk/ai/anthropic";
+
+const TriageSchema = z.object({
+  needs_updating: z.boolean(),
+  reason: z.string(),
+});
+
+const triager = new Agent<RepoContext>({
+  id: "triager",
+  name: "Triager",
+  model: anthropic("claude-sonnet-4-5"),
+  instructions: `
+    Analyze code diffs to determine if documentation needs updating.
+
+    When docs NEED updating:
+    - New public APIs added
+    - API signatures changed
+    - Breaking changes or deprecations
+
+    When docs DON'T need updating:
+    - Internal refactors
+    - Bug fixes that don't change behavior
+    - Test changes only
+  `,
+  toolkits: [repoRead],
+  output: TriageSchema,
+});
+```
+
+The `output` schema is the key here. By defining a structured output, we get a typed response we can branch on:
+
+```ts
+const response = await triager.run(prompt, {
+  context: { owner, repo },
+});
+
+if (!response.response.needs_updating) {
+  console.log("No updates needed:", response.response.reason);
+  return;
+}
+```
+
+We give the triager a single tool—`getFileContents`—so it can peek at the README and docs folder to understand what's actually documented before making its decision.
+
+## Stage 2: Docster
+
+When the triager says go, Docster takes over. This is the heavy lifter—it clones the repo into a Daytona sandbox, analyzes the changes, updates the docs, and opens a PR.
+
+```ts
+import { Agent } from "kernl";
+import { anthropic } from "@kernl-sdk/ai/anthropic";
+
+/* toolkits are installed into your source locally */
+import { fs, git, process } from "@/toolkits/daytona";
+import { pulls } from "@/toolkits/github";
+
+const docster = new Agent<DocsterContext>({
+  id: "docster",
+  name: "Docster",
+  model: anthropic("claude-opus-4-5"),
+  instructions: `
+    You update documentation based on code changes.
+
+    1. Clone the repository
+    2. Run git diff HEAD~1 to see what changed
+    3. Explore the docs folder
+    4. Update relevant documentation
+    5. Create branch, commit, push
+    6. Open a pull request
+  `,
+  toolkits: [fs, git, process, pulls],
+});
+```
+
+The toolkits give Docster everything it needs:
+
+- **fs** — read and write files in the sandbox
+- **git** — clone, branch, commit, push
+- **process** — run shell commands
+- **pulls** — create GitHub pull requests
+
+Shoutout to [Daytona](https://daytona.io) for making the sandbox piece trivial. Their SDK exposes clean primitives for filesystem, git, and process operations.
+
+Both toolkits are available in the kernl marketplace:
+
+```bash
+kernl add toolkit github
+kernl add toolkit daytona
+```
+
+The code lands in your `toolkits/` directory as plain TypeScript—no package dependency, no remote server, customizable to your needs.
+
+## A note on context propagation
+
+Docster needs to authenticate with two different services—Daytona for the sandbox, GitHub for creating PRs. Both require sensitive credentials that we absolutely don't want the LLM to see or choose.
+
+With MCP, you'd be stuck. The protocol has no concept of "this value is required by the API but shouldn't be chosen by the model." You'd end up with hacky workarounds—separate connections per tenant, duct tape everywhere.
+
+With function tools, we get context propagation for free:
+
+```ts
+export const push = tool({
+  id: "daytona_git_push",
+  description: "Push commits to remote",
+  parameters: z.object({
+    remote: z.string(),
+    branch: z.string(),
+  }),
+  execute: async (ctx, { remote, branch }) => {
+    // Credentials come from context, not LLM parameters
+    const { username, token } = ctx.context.git;
+
+    await ctx.context.sandbox.git.push(remote, branch, {
+      username,
+      token,
+    });
+  },
+});
+```
+
+The LLM sees `remote` and `branch` as parameters. It never sees the token. Same pattern for GitHub:
+
+```ts
+export const createPullRequest = tool({
+  id: "github_pulls_create",
+  description: "Create a pull request",
+  parameters: z.object({
+    title: z.string(),
+    body: z.string(),
+    head: z.string(),
+    base: z.string(),
+  }),
+  execute: async (ctx, params) => {
+    // owner/repo come from context, not the LLM
+    const { owner, repo } = ctx.context;
+
+    const { data } = await octokit.pulls.create({
+      owner,
+      repo,
+      ...params,
+    });
+    return { number: data.number, url: data.html_url };
+  },
+});
+```
+
+When we invoke the agent, we pass context once at the top level:
+
+```ts
+await docster.run(instructions, {
+  context: {
+    git: { username: "x-access-token", token },
+    owner,
+    repo,
+  },
+});
+```
+
+That context flows through to every tool call. The sandbox client, the GitHub token, the repo coordinates—all injected cleanly without polluting the tool schemas the model sees or creating any security nightmares.
+
+## Wiring it together
+
+The entry point is a GitHub Action that orchestrates both stages:
+
+```ts
+import * as core from "@actions/core";
+import * as github from "@actions/github";
+import { Kernl } from "kernl";
+
+async function main() {
+  const { owner, repo } = github.context.repo;
+  const sha = github.context.sha;
+
+  const kernl = new Kernl();
+  kernl.register(triager);
+  kernl.register(docster);
+
+  // Stage 1: Triage
+  const diff = await getCommitDiff(owner, repo, sha);
+  const triage = await triager.run(`Analyze this diff:\n${diff}`, {
+    context: { owner, repo },
+  });
+
+  if (!triage.response.needs_updating) {
+    core.info("No documentation updates needed.");
+    return;
+  }
+
+  // Stage 2: Update docs
+  await docster.run(`
+    Repository: https://github.com/${owner}/${repo}.git
+    Triage reason: ${triage.response.reason}
+
+    Clone, update docs, and open a PR.
+  `, {
+    context: { owner, repo },
+  });
+}
+```
+
+That's it. Two agents, a handful of tools, and a bit of orchestration.
+
+## Safety first
+
+We built in a guardrail: Docster refuses to push to `main` or `master`. It always creates a feature branch.
+
+```ts
+// in the git toolkit
+export const push = tool({
+  id: "daytona_git_push",
+  execute: async (ctx, { remote, branch }) => {
+    if (branch === "main" || branch === "master") {
+      throw new Error("Cannot push directly to protected branch");
+    }
+    // ...
+  },
+});
+```
+
+Combined with GitHub's branch protection, you get two layers of defense. The agent can't accidentally blow away your main branch.
+
+## Using it
+
+Add the action to your repo:
+
+```yaml
+# .github/workflows/docster.yml
+name: Docster
+on: [pull_request, push]
+
+jobs:
+  update-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: kernl-sdk/docster@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          daytona_api_key: ${{ secrets.DAYTONA_API_KEY }}
+```
+
+When you push a commit that changes a public API, Docster will open a PR updating the relevant docs. Review it like any other PR.
+
+---
+
+The full source lives in [`microprojects/docster`](https://github.com/kernl-sdk/kernl/tree/master/microprojects/docster). You'll also find other production-ready microprojects in the same directory, ready to fork and adapt to your needs.
