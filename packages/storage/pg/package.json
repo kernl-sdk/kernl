@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/pg",
-  "version": "0.1.30",
+  "version": "0.1.31",
   "description": "PostgreSQL storage adapter for kernl",
   "keywords": [
     "kernl",

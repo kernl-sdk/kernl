@@ -1,5 +1,13 @@
 # @kernl/shared
 
+## 0.4.0
+
+### Minor Changes
+
+- 830b52a: Add type-safe Emitter class for event handling
+  - Export Emitter class and TypedEmitter interface
+  - Export EventMap type for defining event signatures
+
 ## 0.3.1
 
 ### Patch Changes
