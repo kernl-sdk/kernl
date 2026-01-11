@@ -7,5 +7,7 @@ jobs:
     steps:
       - uses: kernl-sdk/docster@master
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          daytona_api_key: ${{ secrets.DAYTONA_API_KEY }}
+          docs_path: "apps/docs"
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DAYTONA_API_KEY: ${{ secrets.DAYTONA_API_KEY }}
