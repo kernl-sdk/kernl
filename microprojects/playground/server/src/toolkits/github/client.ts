@@ -3,16 +3,17 @@ import type { Context } from "kernl";
 
 /**
  * GitHub context extension for repository operations.
+ * Fields are optional - tools that need them will throw at runtime if missing.
  */
-export interface RepoContext {
-  owner: string;
-  repo: string;
+export interface GitHubContext {
+  owner?: string;
+  repo?: string;
 }
 
 /**
- * Gets repo info from context.
+ * Gets repo info from context. Throws if owner/repo not set.
  */
-export function getRepo(ctx: Context<RepoContext>): { owner: string; repo: string } {
+export function getRepo(ctx: Context<GitHubContext>): { owner: string; repo: string } {
   const { owner, repo } = ctx.context;
 
   if (!owner || !repo) {

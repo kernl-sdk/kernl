@@ -1,7 +1,12 @@
 import { z } from "zod";
 import { tool, Toolkit, Context } from "kernl";
-import { octokit, getRepo, type RepoContext } from "./client";
+import { octokit, getRepo, type GitHubContext } from "./client";
 
+/**
+ * @tool
+ *
+ * Adds a comment to an issue or pull request.
+ */
 export const addComment = tool({
   id: "github_issues_add_comment",
   description: "Add a comment to an issue or pull request",
@@ -9,30 +14,35 @@ export const addComment = tool({
     issue_number: z.number().describe("Issue or PR number"),
     body: z.string().describe("Comment content"),
   }),
-  execute: async (ctx: Context<RepoContext>, { issue_number, body }) => {
+  execute: async (ctx: Context<GitHubContext>, params) => {
     const { owner, repo } = getRepo(ctx);
     const { data } = await octokit.issues.createComment({
       owner,
       repo,
-      issue_number,
-      body,
+      issue_number: params.issue_number,
+      body: params.body,
     });
     return { id: data.id, url: data.html_url };
   },
 });
 
+/**
+ * @tool
+ *
+ * Retrieves details for a specific issue including labels and assignees.
+ */
 export const getIssue = tool({
   id: "github_issues_get",
   description: "Get issue details",
   parameters: z.object({
     issue_number: z.number().describe("Issue number"),
   }),
-  execute: async (ctx: Context<RepoContext>, { issue_number }) => {
+  execute: async (ctx: Context<GitHubContext>, params) => {
     const { owner, repo } = getRepo(ctx);
     const { data: issue } = await octokit.issues.get({
       owner,
       repo,
-      issue_number,
+      issue_number: params.issue_number,
     });
     return {
       number: issue.number,
@@ -51,37 +61,41 @@ export const getIssue = tool({
   },
 });
 
+/**
+ * @tool
+ *
+ * Creates a new issue with optional labels, assignees, and milestone.
+ */
 export const createIssue = tool({
   id: "github_issues_create",
   description: "Create a new issue",
   parameters: z.object({
     title: z.string().describe("Issue title"),
     body: z.string().optional().describe("Issue body content"),
-    assignees: z
-      .array(z.string())
-      .optional()
-      .describe("Usernames to assign"),
+    assignees: z.array(z.string()).optional().describe("Usernames to assign"),
     labels: z.array(z.string()).optional().describe("Labels to apply"),
     milestone: z.number().optional().describe("Milestone number"),
   }),
-  execute: async (
-    ctx: Context<RepoContext>,
-    { title, body, assignees, labels, milestone },
-  ) => {
+  execute: async (ctx: Context<GitHubContext>, params) => {
     const { owner, repo } = getRepo(ctx);
     const { data } = await octokit.issues.create({
       owner,
       repo,
-      title,
-      body,
-      assignees,
-      labels,
-      milestone,
+      title: params.title,
+      body: params.body,
+      assignees: params.assignees,
+      labels: params.labels,
+      milestone: params.milestone,
     });
     return { number: data.number, url: data.html_url };
   },
 });
 
+/**
+ * @tool
+ *
+ * Updates an existing issue's title, body, state, labels, or assignees.
+ */
 export const updateIssue = tool({
   id: "github_issues_update",
   description: "Update an existing issue",
@@ -94,43 +108,33 @@ export const updateIssue = tool({
       .enum(["completed", "not_planned", "reopened"])
       .optional()
       .describe("Reason for state change"),
-    assignees: z
-      .array(z.string())
-      .optional()
-      .describe("Usernames to assign"),
+    assignees: z.array(z.string()).optional().describe("Usernames to assign"),
     labels: z.array(z.string()).optional().describe("Labels to apply"),
     milestone: z.number().nullable().optional().describe("Milestone number"),
   }),
-  execute: async (
-    ctx: Context<RepoContext>,
-    {
-      issue_number,
-      title,
-      body,
-      state,
-      state_reason,
-      assignees,
-      labels,
-      milestone,
-    },
-  ) => {
+  execute: async (ctx: Context<GitHubContext>, params) => {
     const { owner, repo } = getRepo(ctx);
     const { data } = await octokit.issues.update({
       owner,
       repo,
-      issue_number,
-      title,
-      body,
-      state,
-      state_reason,
-      assignees,
-      labels,
-      milestone,
+      issue_number: params.issue_number,
+      title: params.title,
+      body: params.body,
+      state: params.state,
+      state_reason: params.state_reason,
+      assignees: params.assignees,
+      labels: params.labels,
+      milestone: params.milestone,
     });
     return { number: data.number, url: data.html_url, state: data.state };
   },
 });
 
+/**
+ * @tool
+ *
+ * Lists issues in the repository with optional state and label filters.
+ */
 export const listIssues = tool({
   id: "github_issues_list",
   description: "List issues in the repository",
@@ -149,21 +153,18 @@ export const listIssues = tool({
     page: z.number().optional().describe("Page number"),
     per_page: z.number().optional().describe("Results per page (max 100)"),
   }),
-  execute: async (
-    ctx: Context<RepoContext>,
-    { state, labels, sort, direction, since, page, per_page },
-  ) => {
+  execute: async (ctx: Context<GitHubContext>, params) => {
     const { owner, repo } = getRepo(ctx);
     const { data } = await octokit.issues.listForRepo({
       owner,
       repo,
-      state,
-      labels,
-      sort,
-      direction,
-      since,
-      page,
-      per_page,
+      state: params.state,
+      labels: params.labels,
+      sort: params.sort,
+      direction: params.direction,
+      since: params.since,
+      page: params.page,
+      per_page: params.per_page,
     });
     return data.map((issue) => ({
       number: issue.number,
@@ -179,6 +180,11 @@ export const listIssues = tool({
   },
 });
 
+/**
+ * @tool
+ *
+ * Lists all comments on a specific issue.
+ */
 export const listIssueComments = tool({
   id: "github_issues_list_comments",
   description: "List comments on an issue",
@@ -188,15 +194,15 @@ export const listIssueComments = tool({
     page: z.number().optional().describe("Page number"),
     per_page: z.number().optional().describe("Results per page (max 100)"),
   }),
-  execute: async (ctx: Context<RepoContext>, { issue_number, since, page, per_page }) => {
+  execute: async (ctx: Context<GitHubContext>, params) => {
     const { owner, repo } = getRepo(ctx);
     const { data } = await octokit.issues.listComments({
       owner,
       repo,
-      issue_number,
-      since,
-      page,
-      per_page,
+      issue_number: params.issue_number,
+      since: params.since,
+      page: params.page,
+      per_page: params.per_page,
     });
     return data.map((c) => ({
       id: c.id,
@@ -208,6 +214,11 @@ export const listIssueComments = tool({
   },
 });
 
+/**
+ * @tool
+ *
+ * Searches issues and pull requests using GitHub search syntax.
+ */
 export const searchIssues = tool({
   id: "github_issues_search",
   description: "Search issues and pull requests",
@@ -233,13 +244,13 @@ export const searchIssues = tool({
     page: z.number().optional().describe("Page number"),
     per_page: z.number().optional().describe("Results per page (max 100)"),
   }),
-  execute: async (_ctx, { query, sort, order, page, per_page }) => {
+  execute: async (ctx: Context<GitHubContext>, params) => {
     const { data } = await octokit.search.issuesAndPullRequests({
-      q: query,
-      sort,
-      order,
-      page,
-      per_page,
+      q: params.query,
+      sort: params.sort,
+      order: params.order,
+      page: params.page,
+      per_page: params.per_page,
     });
     return {
       total_count: data.total_count,
@@ -263,7 +274,7 @@ export const searchIssues = tool({
 // - list_issue_types
 // - sub_issue_write
 
-export const issues = new Toolkit<RepoContext>({
+export const issues = new Toolkit<GitHubContext>({
   id: "github_issues",
   description: "GitHub Issues operations",
   tools: [

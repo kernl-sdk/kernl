@@ -3,7 +3,6 @@ export { repos } from "./repos";
 export { pulls } from "./pulls";
 export { issues } from "./issues";
 export { actions } from "./actions";
-export { dependabot } from "./dependabot";
 export { discussions } from "./discussions";
 export { gists } from "./gists";
 export { git } from "./git";

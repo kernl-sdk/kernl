@@ -3,7 +3,7 @@ import * as github from "@actions/github";
 import { Octokit } from "@octokit/rest";
 import { Kernl } from "kernl";
 
-import { triager, type TriageResult } from "@/agents/triage";
+import { triager } from "@/agents/triage";
 import { docster } from "@/agents/docster";
 
 async function getCommitDiff(
@@ -12,7 +12,6 @@ async function getCommitDiff(
   repo: string,
   sha: string,
 ): Promise<string> {
-  // Get the commit with diff
   const { data } = await octokit.repos.getCommit({
     owner,
     repo,
@@ -20,7 +19,7 @@ async function getCommitDiff(
     mediaType: { format: "diff" },
   });
 
-  // When using diff format, data is returned as a string
+  // when using diff format, data is returned as a string
   return data as unknown as string;
 }
 

@@ -12,7 +12,10 @@ export interface RepoContext {
 /**
  * Gets repo info from context.
  */
-export function getRepo(ctx: Context<RepoContext>): { owner: string; repo: string } {
+export function getRepo(ctx: Context<RepoContext>): {
+  owner: string;
+  repo: string;
+} {
   const { owner, repo } = ctx.context;
 
   if (!owner || !repo) {
