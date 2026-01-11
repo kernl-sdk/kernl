@@ -1,7 +1,12 @@
 import { z } from "zod";
-import { tool, Toolkit } from "kernl";
+import { tool, Toolkit, Context } from "kernl";
 import { octokit } from "./client";
 
+/**
+ * @tool
+ *
+ * Searches for GitHub users using GitHub search syntax.
+ */
 export const searchUsers = tool({
   id: "github_users_search",
   description: "Search for GitHub users",
@@ -15,13 +20,13 @@ export const searchUsers = tool({
     page: z.number().optional().describe("Page number"),
     per_page: z.number().optional().describe("Results per page (max 100)"),
   }),
-  execute: async (_ctx, { query, sort, order, page, per_page }) => {
+  execute: async (ctx: Context, params) => {
     const { data } = await octokit.search.users({
-      q: query,
-      sort,
-      order,
-      page,
-      per_page,
+      q: params.query,
+      sort: params.sort,
+      order: params.order,
+      page: params.page,
+      per_page: params.per_page,
     });
     return {
       total_count: data.total_count,

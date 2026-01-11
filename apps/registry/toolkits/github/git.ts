@@ -1,25 +1,31 @@
 import { z } from "zod";
 import { tool, Toolkit, Context } from "kernl";
+import { octokit, getRepo, type GitHubContext } from "./client";
 
-import { octokit, getRepo, type RepoContext } from "./client";
-
+/**
+ * @tool
+ *
+ * Gets a tree (directory listing) from the repository by SHA or ref.
+ */
 export const getTree = tool({
   id: "github_git_get_tree",
   description: "Get a tree from the repository (directory listing)",
   parameters: z.object({
-    tree_sha: z.string().describe("SHA of the tree, branch name, or 'HEAD'"),
+    tree_sha: z
+      .string()
+      .describe("SHA of the tree, branch name, or 'HEAD'"),
     recursive: z
       .boolean()
       .optional()
       .describe("Recursively fetch all nested trees"),
   }),
-  execute: async (ctx: Context<RepoContext>, { tree_sha, recursive }) => {
+  execute: async (ctx: Context<GitHubContext>, params) => {
     const { owner, repo } = getRepo(ctx);
     const { data } = await octokit.git.getTree({
       owner,
       repo,
-      tree_sha,
-      recursive: recursive ? "1" : undefined,
+      tree_sha: params.tree_sha,
+      recursive: params.recursive ? "1" : undefined,
     });
     return {
       sha: data.sha,
@@ -35,7 +41,7 @@ export const getTree = tool({
   },
 });
 
-export const git = new Toolkit<RepoContext>({
+export const git = new Toolkit<GitHubContext>({
   id: "github_git",
   description: "Low-level Git API operations",
   tools: [getTree],

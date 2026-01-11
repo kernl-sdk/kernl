@@ -1,7 +1,13 @@
 import { z } from "zod";
-import { tool, Toolkit } from "kernl";
+import { tool, Toolkit, Context } from "kernl";
+
 import { octokit } from "./client";
 
+/**
+ * @tool
+ *
+ * Creates a new gist with one or more files.
+ */
 export const createGist = tool({
   id: "github_gists_create",
   description: "Create a new gist",
@@ -12,11 +18,11 @@ export const createGist = tool({
       .describe("Files to include (filename -> content)"),
     public: z.boolean().optional().describe("Whether the gist is public"),
   }),
-  execute: async (_ctx, { description, files, public: isPublic }) => {
+  execute: async (ctx: Context, params) => {
     const { data } = await octokit.gists.create({
-      description,
-      files,
-      public: isPublic,
+      description: params.description,
+      files: params.files,
+      public: params.public,
     });
     return {
       id: data.id,
@@ -28,14 +34,19 @@ export const createGist = tool({
   },
 });
 
+/**
+ * @tool
+ *
+ * Retrieves a gist by its ID including file contents.
+ */
 export const getGist = tool({
   id: "github_gists_get",
   description: "Get a gist by ID",
   parameters: z.object({
     gist_id: z.string().describe("Gist ID"),
   }),
-  execute: async (_ctx, { gist_id }) => {
-    const { data } = await octokit.gists.get({ gist_id });
+  execute: async (ctx: Context, params) => {
+    const { data } = await octokit.gists.get({ gist_id: params.gist_id });
     return {
       id: data.id,
       url: data.html_url,
@@ -54,6 +65,11 @@ export const getGist = tool({
   },
 });
 
+/**
+ * @tool
+ *
+ * Lists gists for the authenticated user.
+ */
 export const listGists = tool({
   id: "github_gists_list",
   description: "List gists for the authenticated user",
@@ -62,8 +78,8 @@ export const listGists = tool({
     page: z.number().optional().describe("Page number"),
     per_page: z.number().optional().describe("Results per page (max 100)"),
   }),
-  execute: async (_ctx, { since, page, per_page }) => {
-    const { data } = await octokit.gists.list({ since, page, per_page });
+  execute: async (ctx: Context, params) => {
+    const { data } = await octokit.gists.list(params);
     return data.map((gist) => ({
       id: gist.id,
       url: gist.html_url,
@@ -76,6 +92,11 @@ export const listGists = tool({
   },
 });
 
+/**
+ * @tool
+ *
+ * Updates an existing gist's description or files.
+ */
 export const updateGist = tool({
   id: "github_gists_update",
   description: "Update an existing gist",
@@ -87,12 +108,8 @@ export const updateGist = tool({
       .optional()
       .describe("Files to update (omit content to delete)"),
   }),
-  execute: async (_ctx, { gist_id, description, files }) => {
-    const { data } = await octokit.gists.update({
-      gist_id,
-      description,
-      files,
-    });
+  execute: async (ctx: Context, params) => {
+    const { data } = await octokit.gists.update(params);
     return {
       id: data.id,
       url: data.html_url,

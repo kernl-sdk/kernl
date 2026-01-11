@@ -2,7 +2,6 @@
 export { repos } from "./repos";
 export { pulls } from "./pulls";
 export { issues } from "./issues";
-export { actions } from "./actions";
 export { discussions } from "./discussions";
 export { gists } from "./gists";
 export { git } from "./git";
@@ -15,4 +14,4 @@ export { users } from "./users";
 export { github as mcp } from "./mcp";
 
 // Types
-export type { RepoContext } from "./client";
+export type { GitHubContext } from "./client";

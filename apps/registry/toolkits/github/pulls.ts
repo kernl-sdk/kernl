@@ -1,8 +1,13 @@
 import { z } from "zod";
 import { tool, Toolkit, Context } from "kernl";
 
-import { octokit, getRepo, type RepoContext } from "./client";
+import { octokit, getRepo, type GitHubContext } from "./client";
 
+/**
+ * @tool
+ *
+ * Creates a new pull request from a head branch to a base branch.
+ */
 export const createPullRequest = tool({
   id: "github_pulls_create",
   description: "Create a new pull request",
@@ -17,37 +22,39 @@ export const createPullRequest = tool({
       .optional()
       .describe("Allow maintainer edits"),
   }),
-  execute: async (
-    ctx: Context<RepoContext>,
-    { title, head, base, body, draft, maintainer_can_modify },
-  ) => {
+  execute: async (ctx: Context<GitHubContext>, params) => {
     const { owner, repo } = getRepo(ctx);
     const { data } = await octokit.pulls.create({
       owner,
       repo,
-      title,
-      head,
-      base,
-      body,
-      draft,
-      maintainer_can_modify,
+      title: params.title,
+      head: params.head,
+      base: params.base,
+      body: params.body,
+      draft: params.draft,
+      maintainer_can_modify: params.maintainer_can_modify,
     });
     return { number: data.number, url: data.html_url, state: data.state };
   },
 });
 
+/**
+ * @tool
+ *
+ * Retrieves detailed information about a specific pull request.
+ */
 export const getPullRequest = tool({
   id: "github_pulls_get",
   description: "Get pull request details",
   parameters: z.object({
     pull_number: z.number().describe("Pull request number"),
   }),
-  execute: async (ctx: Context<RepoContext>, { pull_number }) => {
+  execute: async (ctx: Context<GitHubContext>, params) => {
     const { owner, repo } = getRepo(ctx);
     const { data: pr } = await octokit.pulls.get({
       owner,
       repo,
-      pull_number,
+      pull_number: params.pull_number,
     });
     return {
       number: pr.number,
@@ -69,24 +76,34 @@ export const getPullRequest = tool({
   },
 });
 
+/**
+ * @tool
+ *
+ * Fetches the unified diff for a pull request.
+ */
 export const getPullRequestDiff = tool({
   id: "github_pulls_get_diff",
   description: "Get the diff for a pull request",
   parameters: z.object({
     pull_number: z.number().describe("Pull request number"),
   }),
-  execute: async (ctx: Context<RepoContext>, { pull_number }) => {
+  execute: async (ctx: Context<GitHubContext>, params) => {
     const { owner, repo } = getRepo(ctx);
     const { data } = await octokit.pulls.get({
       owner,
       repo,
-      pull_number,
+      pull_number: params.pull_number,
       mediaType: { format: "diff" },
     });
     return data as unknown as string;
   },
 });
 
+/**
+ * @tool
+ *
+ * Lists files changed in a pull request with additions/deletions stats.
+ */
 export const getPullRequestFiles = tool({
   id: "github_pulls_get_files",
   description: "Get the list of files changed in a pull request",
@@ -95,17 +112,14 @@ export const getPullRequestFiles = tool({
     page: z.number().optional().describe("Page number"),
     per_page: z.number().optional().describe("Results per page (max 100)"),
   }),
-  execute: async (
-    ctx: Context<RepoContext>,
-    { pull_number, page, per_page },
-  ) => {
+  execute: async (ctx: Context<GitHubContext>, params) => {
     const { owner, repo } = getRepo(ctx);
     const { data } = await octokit.pulls.listFiles({
       owner,
       repo,
-      pull_number,
-      page,
-      per_page,
+      pull_number: params.pull_number,
+      page: params.page,
+      per_page: params.per_page,
     });
     return data.map((f) => ({
       filename: f.filename,
@@ -117,6 +131,11 @@ export const getPullRequestFiles = tool({
   },
 });
 
+/**
+ * @tool
+ *
+ * Lists pull requests in the repository with optional filters.
+ */
 export const listPullRequests = tool({
   id: "github_pulls_list",
   description: "List pull requests in the repository",
@@ -135,21 +154,18 @@ export const listPullRequests = tool({
     page: z.number().optional().describe("Page number"),
     per_page: z.number().optional().describe("Results per page (max 100)"),
   }),
-  execute: async (
-    ctx: Context<RepoContext>,
-    { state, head, base, sort, direction, page, per_page },
-  ) => {
+  execute: async (ctx: Context<GitHubContext>, params) => {
     const { owner, repo } = getRepo(ctx);
     const { data } = await octokit.pulls.list({
       owner,
       repo,
-      state,
-      head,
-      base,
-      sort,
-      direction,
-      page,
-      per_page,
+      state: params.state,
+      head: params.head,
+      base: params.base,
+      sort: params.sort,
+      direction: params.direction,
+      page: params.page,
+      per_page: params.per_page,
     });
     return data.map((pr) => ({
       number: pr.number,
@@ -167,6 +183,11 @@ export const listPullRequests = tool({
   },
 });
 
+/**
+ * @tool
+ *
+ * Updates a pull request's title, body, state, or base branch.
+ */
 export const updatePullRequest = tool({
   id: "github_pulls_update",
   description: "Update a pull request",
@@ -181,25 +202,27 @@ export const updatePullRequest = tool({
       .optional()
       .describe("Allow maintainer edits"),
   }),
-  execute: async (
-    ctx: Context<RepoContext>,
-    { pull_number, title, body, state, base, maintainer_can_modify },
-  ) => {
+  execute: async (ctx: Context<GitHubContext>, params) => {
     const { owner, repo } = getRepo(ctx);
     const { data } = await octokit.pulls.update({
       owner,
       repo,
-      pull_number,
-      title,
-      body,
-      state,
-      base,
-      maintainer_can_modify,
+      pull_number: params.pull_number,
+      title: params.title,
+      body: params.body,
+      state: params.state,
+      base: params.base,
+      maintainer_can_modify: params.maintainer_can_modify,
     });
     return { number: data.number, url: data.html_url, state: data.state };
   },
 });
 
+/**
+ * @tool
+ *
+ * Merges a pull request using merge, squash, or rebase strategy.
+ */
 export const mergePullRequest = tool({
   id: "github_pulls_merge",
   description: "Merge a pull request",
@@ -215,31 +238,64 @@ export const mergePullRequest = tool({
       .optional()
       .describe("Merge method"),
   }),
-  execute: async (
-    ctx: Context<RepoContext>,
-    { pull_number, commit_title, commit_message, merge_method },
-  ) => {
+  execute: async (ctx: Context<GitHubContext>, params) => {
     const { owner, repo } = getRepo(ctx);
     const { data } = await octokit.pulls.merge({
       owner,
       repo,
-      pull_number,
-      commit_title,
-      commit_message,
-      merge_method,
+      pull_number: params.pull_number,
+      commit_title: params.commit_title,
+      commit_message: params.commit_message,
+      merge_method: params.merge_method,
     });
     return { merged: data.merged, sha: data.sha, message: data.message };
   },
 });
 
-// TODO: Implement remaining pulls tools
-// - add_comment_to_pending_review
-// - pull_request_review_write
-// - request_copilot_review
-// - search_pull_requests
-// - update_pull_request_branch
+/**
+ * @tool
+ *
+ * Searches for pull requests across repositories using GitHub search syntax.
+ */
+export const searchPullRequests = tool({
+  id: "github_pulls_search",
+  description: "Search for pull requests",
+  parameters: z.object({
+    query: z.string().describe("Search query using GitHub search syntax (e.g. 'is:open author:user')"),
+    sort: z
+      .enum(["comments", "reactions", "reactions-+1", "reactions--1", "reactions-smile", "reactions-thinking_face", "reactions-heart", "reactions-tada", "interactions", "created", "updated"])
+      .optional()
+      .describe("Sort field"),
+    order: z.enum(["asc", "desc"]).optional().describe("Sort order"),
+    page: z.number().optional().describe("Page number"),
+    per_page: z.number().optional().describe("Results per page (max 100)"),
+  }),
+  execute: async (ctx: Context<GitHubContext>, params) => {
+    const { data } = await octokit.search.issuesAndPullRequests({
+      q: `${params.query} is:pr`,
+      sort: params.sort,
+      order: params.order,
+      page: params.page,
+      per_page: params.per_page,
+    });
+    return {
+      total_count: data.total_count,
+      items: data.items.map((pr) => ({
+        number: pr.number,
+        title: pr.title,
+        state: pr.state,
+        url: pr.html_url,
+        author: pr.user?.login,
+        repository: pr.repository_url.split("/").slice(-2).join("/"),
+        labels: pr.labels.map((l: any) => l.name),
+        created_at: pr.created_at,
+        updated_at: pr.updated_at,
+      })),
+    };
+  },
+});
 
-export const pulls = new Toolkit<RepoContext>({
+export const pulls = new Toolkit<GitHubContext>({
   id: "github_pulls",
   description: "GitHub Pull Request operations",
   tools: [
@@ -249,6 +305,7 @@ export const pulls = new Toolkit<RepoContext>({
     getPullRequestFiles,
     listPullRequests,
     updatePullRequest,
+    searchPullRequests,
     // mergePullRequest - uncomment if you want agents to be able to merge PRs
   ],
 });
