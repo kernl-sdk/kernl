@@ -30,15 +30,17 @@ export abstract class BaseToolkit<TContext = UnknownContext> {
   abstract readonly description: string;
 
   /**
-   * The agent this toolkit is bound to (if any)
+   * The agent this toolkit is bound to (if any).
+   * Uses `any` to allow toolkits with different context types
+   * to be composed in the same agent.
    */
-  protected agent?: BaseAgent<TContext>;
+  protected agent?: BaseAgent<any>;
 
   /**
    * Bind this toolkit to an agent.
    * Called by agent constructor.
    */
-  bind(agent: BaseAgent<TContext>): void {
+  bind(agent: BaseAgent<any>): void {
     this.agent = agent;
   }
 

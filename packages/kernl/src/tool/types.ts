@@ -227,12 +227,10 @@ export type ToolApprovalFunction<TParameters extends ToolInputParameters> = (
 
 export type ToolEnabledFunction<TContext = UnknownContext> = (
   context: Context<TContext>,
-  agent: BaseAgent<TContext>,
 ) => Promise<boolean>;
 
 export type ToolEnabledPredicate<TContext = UnknownContext> = (args: {
   context: Context<TContext>;
-  agent: BaseAgent<TContext>;
 }) => boolean | Promise<boolean>;
 
 type ToolEnabledOption<Context = UnknownContext> =

@@ -62,7 +62,7 @@ export abstract class BaseTool<TContext = UnknownContext> {
   /**
    * Determines whether the tool should be exposed to the model for the current run.
    */
-  abstract isEnabled(context: Context<TContext>, agent: BaseAgent<TContext>): Promise<boolean>;
+  abstract isEnabled(context: Context<TContext>): Promise<boolean>;
 
   /**
    * Serialize this tool for sending to the model
@@ -117,10 +117,10 @@ export class FunctionTool<
     // setup enabled function
     this.isEnabled =
       typeof config.isEnabled === "function"
-        ? async (context, agent) => {
+        ? async (context) => {
             const predicate =
               config.isEnabled as ToolEnabledPredicate<TContext>;
-            const result = await predicate({ context, agent });
+            const result = await predicate({ context });
             return Boolean(result);
           }
         : async () =>
