@@ -308,7 +308,7 @@ describe("Lifecycle Hooks", () => {
             content: [
               message({ role: "assistant", text: "" }),
               {
-                kind: "tool-call" as const,
+                kind: "tool.call" as const,
                 toolId: "echo",
                 state: IN_PROGRESS,
                 callId: "call_1",
@@ -381,7 +381,7 @@ describe("Lifecycle Hooks", () => {
             content: [
               message({ role: "assistant", text: "" }),
               {
-                kind: "tool-call" as const,
+                kind: "tool.call" as const,
                 toolId: "add",
                 state: IN_PROGRESS,
                 callId: "call_1",
@@ -446,7 +446,7 @@ describe("Lifecycle Hooks", () => {
             content: [
               message({ role: "assistant", text: "" }),
               {
-                kind: "tool-call" as const,
+                kind: "tool.call" as const,
                 toolId: "add",
                 state: IN_PROGRESS,
                 callId: "call_1",
@@ -510,7 +510,7 @@ describe("Lifecycle Hooks", () => {
             content: [
               message({ role: "assistant", text: "" }),
               {
-                kind: "tool-call" as const,
+                kind: "tool.call" as const,
                 toolId: "failing",
                 state: IN_PROGRESS,
                 callId: "call_1",
@@ -576,14 +576,14 @@ describe("Lifecycle Hooks", () => {
             content: [
               message({ role: "assistant", text: "" }),
               {
-                kind: "tool-call" as const,
+                kind: "tool.call" as const,
                 toolId: "tool1",
                 state: IN_PROGRESS,
                 callId: "call_1",
                 arguments: JSON.stringify({ value: "a" }),
               },
               {
-                kind: "tool-call" as const,
+                kind: "tool.call" as const,
                 toolId: "tool2",
                 state: IN_PROGRESS,
                 callId: "call_2",

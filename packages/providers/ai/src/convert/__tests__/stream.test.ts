@@ -16,7 +16,7 @@ describe("STREAM_PART codec", () => {
       const result = STREAM_PART.decode(part);
 
       expect(result).toEqual({
-        kind: "text-start",
+        kind: "text.start",
         id: "text-1",
         providerMetadata: { openai: { data: "value" } },
       });
@@ -33,7 +33,7 @@ describe("STREAM_PART codec", () => {
       const result = STREAM_PART.decode(part);
 
       expect(result).toEqual({
-        kind: "text-delta",
+        kind: "text.delta",
         id: "text-1",
         text: "Hello",
         providerMetadata: undefined,
@@ -50,7 +50,7 @@ describe("STREAM_PART codec", () => {
       const result = STREAM_PART.decode(part);
 
       expect(result).toEqual({
-        kind: "text-end",
+        kind: "text.end",
         id: "text-1",
         providerMetadata: undefined,
       });
@@ -68,7 +68,7 @@ describe("STREAM_PART codec", () => {
       const result = STREAM_PART.decode(part);
 
       expect(result).toEqual({
-        kind: "reasoning-start",
+        kind: "reasoning.start",
         id: "reason-1",
         providerMetadata: undefined,
       });
@@ -85,7 +85,7 @@ describe("STREAM_PART codec", () => {
       const result = STREAM_PART.decode(part);
 
       expect(result).toEqual({
-        kind: "reasoning-delta",
+        kind: "reasoning.delta",
         id: "reason-1",
         text: "thinking...",
         providerMetadata: undefined,
@@ -102,7 +102,7 @@ describe("STREAM_PART codec", () => {
       const result = STREAM_PART.decode(part);
 
       expect(result).toEqual({
-        kind: "reasoning-end",
+        kind: "reasoning.end",
         id: "reason-1",
         providerMetadata: undefined,
       });
@@ -122,9 +122,9 @@ describe("STREAM_PART codec", () => {
       const result = STREAM_PART.decode(part);
 
       expect(result).toEqual({
-        kind: "tool-input-start",
+        kind: "tool.input.start",
         id: "tool-1",
-        toolName: "calculator",
+        toolId: "calculator",
         title: "Calculate",
         providerMetadata: undefined,
       });
@@ -141,7 +141,7 @@ describe("STREAM_PART codec", () => {
       const result = STREAM_PART.decode(part);
 
       expect(result).toEqual({
-        kind: "tool-input-delta",
+        kind: "tool.input.delta",
         id: "tool-1",
         delta: "partial input",
         providerMetadata: undefined,
@@ -158,7 +158,7 @@ describe("STREAM_PART codec", () => {
       const result = STREAM_PART.decode(part);
 
       expect(result).toEqual({
-        kind: "tool-input-end",
+        kind: "tool.input.end",
         id: "tool-1",
         providerMetadata: undefined,
       });
@@ -176,7 +176,7 @@ describe("STREAM_PART codec", () => {
       const result = STREAM_PART.decode(part);
 
       expect(result).toEqual({
-        kind: "tool-call",
+        kind: "tool.call",
         callId: "call-123",
         toolId: "get_weather",
         state: IN_PROGRESS,
@@ -197,7 +197,7 @@ describe("STREAM_PART codec", () => {
       const result = STREAM_PART.decode(part);
 
       expect(result).toEqual({
-        kind: "tool-call",
+        kind: "tool.call",
         callId: "call-empty",
         toolId: "list_issues",
         state: IN_PROGRESS,
@@ -219,7 +219,7 @@ describe("STREAM_PART codec", () => {
       const result = STREAM_PART.decode(part);
 
       expect(result).toEqual({
-        kind: "tool-result",
+        kind: "tool.result",
         callId: "call-123",
         toolId: "get_weather",
         state: "completed",
@@ -242,7 +242,7 @@ describe("STREAM_PART codec", () => {
       const result = STREAM_PART.decode(part);
 
       expect(result).toEqual({
-        kind: "tool-result",
+        kind: "tool.result",
         callId: "call-123",
         toolId: "get_weather",
         state: "failed",
@@ -268,7 +268,7 @@ describe("STREAM_PART codec", () => {
       const result = STREAM_PART.decode(part);
 
       expect(result).toEqual({
-        kind: "stream-start",
+        kind: "stream.start",
         warnings: [
           {
             type: "unsupported-setting",
@@ -426,9 +426,9 @@ describe("convertStream", () => {
     }
 
     expect(events).toHaveLength(4);
-    expect(events[0]).toMatchObject({ kind: "text-start" });
-    expect(events[1]).toMatchObject({ kind: "text-delta", text: "Hello" });
-    expect(events[2]).toMatchObject({ kind: "text-end" });
+    expect(events[0]).toMatchObject({ kind: "text.start" });
+    expect(events[1]).toMatchObject({ kind: "text.delta", text: "Hello" });
+    expect(events[2]).toMatchObject({ kind: "text.end" });
     expect(events[3]).toMatchObject({ kind: "finish", finishReason: "stop" });
   });
 
@@ -466,7 +466,7 @@ describe("convertStream", () => {
     }
 
     expect(events).toHaveLength(2);
-    expect(events[0]).toMatchObject({ kind: "text-delta" });
+    expect(events[0]).toMatchObject({ kind: "text.delta" });
     expect(events[1]).toMatchObject({ kind: "finish" });
   });
 

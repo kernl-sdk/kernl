@@ -74,13 +74,13 @@ export class AISDKLanguageModel implements LanguageModel {
 
     for await (const event of convertStream(stream.stream)) {
       switch (event.kind) {
-        case "text-start": {
+        case "text.start": {
           tbuf[event.id] = "";
           yield event;
           break;
         }
 
-        case "text-delta": {
+        case "text.delta": {
           if (tbuf[event.id] !== undefined) {
             tbuf[event.id] += event.text;
           }
@@ -88,7 +88,7 @@ export class AISDKLanguageModel implements LanguageModel {
           break;
         }
 
-        case "text-end": {
+        case "text.end": {
           const text = tbuf[event.id];
           if (text !== undefined) {
             yield message({
@@ -102,13 +102,13 @@ export class AISDKLanguageModel implements LanguageModel {
           break;
         }
 
-        case "reasoning-start": {
+        case "reasoning.start": {
           rbuf[event.id] = "";
           yield event;
           break;
         }
 
-        case "reasoning-delta": {
+        case "reasoning.delta": {
           if (rbuf[event.id] !== undefined) {
             rbuf[event.id] += event.text;
           }
@@ -116,7 +116,7 @@ export class AISDKLanguageModel implements LanguageModel {
           break;
         }
 
-        case "reasoning-end": {
+        case "reasoning.end": {
           const text = rbuf[event.id];
           if (text !== undefined) {
             yield reasoning({
@@ -130,7 +130,7 @@ export class AISDKLanguageModel implements LanguageModel {
         }
 
         default:
-          // all other events (tool-call, tool-result, finish, etc.) pass through
+          // all other events (tool.call, tool.result, finish, etc.) pass through
           yield event;
           break;
       }

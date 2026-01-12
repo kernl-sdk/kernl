@@ -20,18 +20,18 @@ async function* streamFromResponse(
         if (contentItem.kind === "text") {
           // Yield text-start
           yield {
-            kind: "text-start" as const,
+            kind: "text.start" as const,
             id: item.id,
           };
           // Yield text-delta
           yield {
-            kind: "text-delta" as const,
+            kind: "text.delta" as const,
             id: item.id,
             text: contentItem.text,
           };
           // Yield text-end
           yield {
-            kind: "text-end" as const,
+            kind: "text.end" as const,
             id: item.id,
           };
         }

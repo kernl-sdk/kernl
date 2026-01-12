@@ -96,8 +96,8 @@ export type ThreadRecord = z.infer<typeof ThreadRecordSchema>;
  * Always an object (record) for non-system events. Inner data is validated by protocol layer
  * and is already JSON-serializable. The actual structure depends on the event kind:
  * - message: {role, content, ...}
- * - tool-call: {callId, toolId, state, arguments}
- * - tool-result: {callId, toolId, state, result, error}
+ * - tool.call: {callId, toolId, state, arguments}
+ * - tool.result: {callId, toolId, state, result, error}
  * - reasoning: {text}
  * - system: null (handled separately)
  */
@@ -136,7 +136,7 @@ const ThreadReasoningEventRecordSchema = ThreadEventRecordBaseSchema.extend({
  * Tool call event record.
  */
 const ThreadToolCallEventRecordSchema = ThreadEventRecordBaseSchema.extend({
-  kind: z.literal("tool-call"),
+  kind: z.literal("tool.call"),
   data: ThreadEventInnerSchema, // ToolCall data: {callId, toolId, state, arguments}
 });
 
@@ -144,7 +144,7 @@ const ThreadToolCallEventRecordSchema = ThreadEventRecordBaseSchema.extend({
  * Tool result event record.
  */
 const ThreadToolResultEventRecordSchema = ThreadEventRecordBaseSchema.extend({
-  kind: z.literal("tool-result"),
+  kind: z.literal("tool.result"),
   data: ThreadEventInnerSchema, // ToolResult data: {callId, toolId, state, result, error}
 });
 

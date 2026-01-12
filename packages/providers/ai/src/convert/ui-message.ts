@@ -170,7 +170,7 @@ const TOOL_UI_PART: Codec<
     switch (part.state) {
       case "input-available": {
         const call: ToolCall = {
-          kind: "tool-call",
+          kind: "tool.call",
           callId,
           toolId,
           state: IN_PROGRESS,
@@ -182,7 +182,7 @@ const TOOL_UI_PART: Codec<
 
       case "output-available": {
         const result: ToolResult = {
-          kind: "tool-result",
+          kind: "tool.result",
           callId,
           toolId,
           state: COMPLETED,
@@ -195,7 +195,7 @@ const TOOL_UI_PART: Codec<
 
       case "output-error": {
         const result: ToolResult = {
-          kind: "tool-result",
+          kind: "tool.result",
           callId,
           toolId,
           state: FAILED,
@@ -291,8 +291,8 @@ export function historyToUIMessages(items: LanguageModelItem[]): UIMessage[] {
         const toolMap = new Map<
           string,
           {
-            call?: Extract<LanguageModelItem, { kind: "tool-call" }>;
-            result?: Extract<LanguageModelItem, { kind: "tool-result" }>;
+            call?: Extract<LanguageModelItem, { kind: "tool.call" }>;
+            result?: Extract<LanguageModelItem, { kind: "tool.result" }>;
           }
         >();
         const reasoningParts: Extract<
@@ -303,10 +303,10 @@ export function historyToUIMessages(items: LanguageModelItem[]): UIMessage[] {
         while (j < items.length && items[j].kind !== "message") {
           const next = items[j];
 
-          if (next.kind === "tool-call") {
+          if (next.kind === "tool.call") {
             const existing = toolMap.get(next.callId) || {};
             toolMap.set(next.callId, { ...existing, call: next });
-          } else if (next.kind === "tool-result") {
+          } else if (next.kind === "tool.result") {
             const existing = toolMap.get(next.callId) || {};
             toolMap.set(next.callId, { ...existing, result: next });
           } else if (next.kind === "reasoning") {

@@ -240,7 +240,7 @@ describe.skipIf(SKIP_OPENAI_TESTS)("AISDKLanguageModel - OpenAI", () => {
       }
 
       // Should have text-delta events
-      const textDeltas = events.filter((e) => e.kind === "text-delta");
+      const textDeltas = events.filter((e) => e.kind === "text.delta");
       expect(textDeltas.length).toBeGreaterThan(0);
 
       // Each text-delta should have text
@@ -302,15 +302,15 @@ describe.skipIf(SKIP_OPENAI_TESTS)("AISDKLanguageModel - OpenAI", () => {
       expect(events.length).toBeGreaterThan(0);
 
       // Should have text-delta events (for streaming UX)
-      const textDeltas = events.filter((e) => e.kind === "text-delta");
+      const textDeltas = events.filter((e) => e.kind === "text.delta");
       expect(textDeltas.length).toBeGreaterThan(0);
 
       // Should have text-start event
-      const textStarts = events.filter((e) => e.kind === "text-start");
+      const textStarts = events.filter((e) => e.kind === "text.start");
       expect(textStarts.length).toBeGreaterThan(0);
 
       // Should have text-end event
-      const textEnds = events.filter((e) => e.kind === "text-end");
+      const textEnds = events.filter((e) => e.kind === "text.end");
       expect(textEnds.length).toBeGreaterThan(0);
 
       // Should have complete Message item (for history)
@@ -386,7 +386,7 @@ describe.skipIf(SKIP_OPENAI_TESTS)("AISDKLanguageModel - OpenAI", () => {
       expect(events.length).toBeGreaterThan(0);
 
       // Should have a tool-call event
-      const toolCalls = events.filter((e) => e.kind === "tool-call");
+      const toolCalls = events.filter((e) => e.kind === "tool.call");
       expect(toolCalls.length).toBeGreaterThan(0);
 
       const toolCall = toolCalls[0] as any;
@@ -445,7 +445,7 @@ describe.skipIf(SKIP_OPENAI_TESTS)("AISDKLanguageModel - OpenAI", () => {
 
       // Should have a tool call
       const toolCalls = response.content.filter(
-        (item) => item.kind === "tool-call",
+        (item) => item.kind === "tool.call",
       );
       expect(toolCalls.length).toBeGreaterThan(0);
 
@@ -499,7 +499,7 @@ describe.skipIf(SKIP_OPENAI_TESTS)("AISDKLanguageModel - OpenAI", () => {
 
       // Should have a tool call since it's required
       const toolCalls = response.content.filter(
-        (item) => item.kind === "tool-call",
+        (item) => item.kind === "tool.call",
       );
       expect(toolCalls.length).toBeGreaterThan(0);
     });
@@ -546,7 +546,7 @@ describe.skipIf(SKIP_OPENAI_TESTS)("AISDKLanguageModel - OpenAI", () => {
 
       // Should potentially have multiple tool calls
       const toolCalls = response.content.filter(
-        (item) => item.kind === "tool-call",
+        (item) => item.kind === "tool.call",
       );
       expect(toolCalls.length).toBeGreaterThan(0);
     });
@@ -589,7 +589,7 @@ describe.skipIf(SKIP_OPENAI_TESTS)("AISDKLanguageModel - OpenAI", () => {
 
       // Extract tool calls
       const toolCalls = firstResponse.content.filter(
-        (item) => item.kind === "tool-call",
+        (item) => item.kind === "tool.call",
       );
       expect(toolCalls.length).toBeGreaterThan(0);
 
@@ -608,7 +608,7 @@ describe.skipIf(SKIP_OPENAI_TESTS)("AISDKLanguageModel - OpenAI", () => {
           },
           ...firstResponse.content,
           {
-            kind: "tool-result",
+            kind: "tool.result",
             callId: toolCall.callId,
             toolId: toolCall.toolId,
             state: "completed",
@@ -699,7 +699,7 @@ describe.skipIf(SKIP_OPENAI_TESTS)("AISDKLanguageModel - OpenAI", () => {
 
       // Should have a tool call
       const toolCalls = response.content.filter(
-        (item) => item.kind === "tool-call",
+        (item) => item.kind === "tool.call",
       );
       expect(toolCalls.length).toBeGreaterThan(0);
 
@@ -840,7 +840,7 @@ describe.skipIf(SKIP_OPENAI_TESTS)("AISDKLanguageModel - OpenAI", () => {
       expect(events.length).toBeGreaterThan(0);
 
       // Should have text-delta events for streaming JSON
-      const textDeltas = events.filter((e) => e.kind === "text-delta");
+      const textDeltas = events.filter((e) => e.kind === "text.delta");
       expect(textDeltas.length).toBeGreaterThan(0);
 
       // Should have a complete message with the JSON
@@ -921,7 +921,7 @@ describe.skipIf(SKIP_ANTHROPIC_TESTS)("AISDKLanguageModel - Anthropic", () => {
 
       // Should have a tool call
       const toolCalls = response.content.filter(
-        (item) => item.kind === "tool-call",
+        (item) => item.kind === "tool.call",
       );
       expect(toolCalls.length).toBeGreaterThan(0);
 
@@ -987,7 +987,7 @@ describe.skipIf(SKIP_ANTHROPIC_TESTS)("AISDKLanguageModel - Anthropic", () => {
       expect(events.length).toBeGreaterThan(0);
 
       // Should have a tool-call event
-      const toolCalls = events.filter((e) => e.kind === "tool-call");
+      const toolCalls = events.filter((e) => e.kind === "tool.call");
       expect(toolCalls.length).toBeGreaterThan(0);
 
       const toolCall = toolCalls[0] as any;
@@ -1089,7 +1089,7 @@ describe.skipIf(SKIP_ANTHROPIC_TESTS)("AISDKLanguageModel - Anthropic", () => {
       expect(events.length).toBeGreaterThan(0);
 
       // Should have text-delta events for streaming JSON
-      const textDeltas = events.filter((e) => e.kind === "text-delta");
+      const textDeltas = events.filter((e) => e.kind === "text.delta");
       expect(textDeltas.length).toBeGreaterThan(0);
 
       // Should have a complete message with the JSON
@@ -1265,7 +1265,7 @@ describe.skipIf(SKIP_GOOGLE_TESTS)("AISDKLanguageModel - Google", () => {
       expect(events.length).toBeGreaterThan(0);
 
       // Should have text-delta events for streaming JSON
-      const textDeltas = events.filter((e) => e.kind === "text-delta");
+      const textDeltas = events.filter((e) => e.kind === "text.delta");
       expect(textDeltas.length).toBeGreaterThan(0);
 
       // Should have a complete message with the JSON

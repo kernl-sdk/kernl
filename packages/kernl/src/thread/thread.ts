@@ -184,7 +184,7 @@ export class Thread<
       context: this.context,
     });
 
-    yield { kind: "stream-start" }; // always yield start immediately
+    yield { kind: "stream.start" }; // always yield start immediately
 
     try {
       yield* this._execute();
@@ -470,7 +470,7 @@ export class Thread<
     // (TODO): clean this - approval tracking should be handled differently
     for (const e of toolEvents) {
       if (
-        e.kind === "tool-result" &&
+        e.kind === "tool.result" &&
         (e.state as any) === "requires_approval" // (TODO): fix this
       ) {
         // find the original tool call for this pending approval
@@ -542,7 +542,7 @@ export class Thread<
           });
 
           return {
-            kind: "tool-result" as const,
+            kind: "tool.result" as const,
             callId: call.callId,
             toolId: call.toolId,
             state: res.state,
@@ -562,7 +562,7 @@ export class Thread<
           });
 
           return {
-            kind: "tool-result" as const,
+            kind: "tool.result" as const,
             callId: call.callId,
             toolId: call.toolId,
             state: FAILED,

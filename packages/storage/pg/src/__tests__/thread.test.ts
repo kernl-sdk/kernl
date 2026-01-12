@@ -135,7 +135,7 @@ describe.sequential("PG Thread Lifecycle", () => {
             content: [
               message({ role: "assistant", text: "" }),
               {
-                kind: "tool-call",
+                kind: "tool.call",
                 toolId: "add",
                 callId: "call_1",
                 state: IN_PROGRESS,
@@ -195,14 +195,14 @@ describe.sequential("PG Thread Lifecycle", () => {
 
       const events = eventsResult.rows;
 
-      // Should have: user msg, assistant msg (tick1), tool-call, tool-result, assistant msg (tick2)
+      // Should have: user msg, assistant msg (tick1), tool.call, tool.result, assistant msg (tick2)
       expect(events.length).toBeGreaterThanOrEqual(5);
 
       // Verify event kinds and order
       expect(events[0].kind).toBe("message"); // user
       expect(events[1].kind).toBe("message"); // assistant (tick 1)
-      expect(events[2].kind).toBe("tool-call");
-      expect(events[3].kind).toBe("tool-result");
+      expect(events[2].kind).toBe("tool.call");
+      expect(events[3].kind).toBe("tool.result");
       expect(events[4].kind).toBe("message"); // assistant (tick 2)
 
       // Verify tool result exists and is in correct format

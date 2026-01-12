@@ -193,7 +193,7 @@ describe("ITEM codec", () => {
 
     it("should encode tool call", () => {
       const result = ITEM.encode({
-        kind: "tool-call",
+        kind: "tool.call",
         callId: "call-1",
         toolId: "get_weather",
         state: "completed",
@@ -210,7 +210,7 @@ describe("ITEM codec", () => {
 
     it("should encode tool result", () => {
       const result = ITEM.encode({
-        kind: "tool-result",
+        kind: "tool.result",
         callId: "call-1",
         toolId: "get_weather",
         state: "completed",
@@ -227,7 +227,7 @@ describe("ITEM codec", () => {
 
     it("should encode tool result with error", () => {
       const result = ITEM.encode({
-        kind: "tool-result",
+        kind: "tool.result",
         callId: "call-1",
         toolId: "get_weather",
         state: "completed",
@@ -267,7 +267,7 @@ describe("ITEM codec", () => {
       });
 
       expect(result).toEqual({
-        kind: "tool-call",
+        kind: "tool.call",
         callId: "call-1",
         toolId: "get_weather",
         state: "completed",
@@ -283,7 +283,7 @@ describe("ITEM codec", () => {
       });
 
       expect(result).toEqual({
-        kind: "tool-result",
+        kind: "tool.result",
         callId: "call-1",
         toolId: "",
         state: "completed",

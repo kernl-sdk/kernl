@@ -9,7 +9,7 @@ describe("STREAM_UI_PART codec", () => {
   describe("encode - text events", () => {
     it("should encode text-start event", () => {
       const event: LanguageModelStreamEvent = {
-        kind: "text-start",
+        kind: "text.start",
         id: "text-1",
       };
 
@@ -23,7 +23,7 @@ describe("STREAM_UI_PART codec", () => {
 
     it("should encode text-delta event", () => {
       const event: LanguageModelStreamEvent = {
-        kind: "text-delta",
+        kind: "text.delta",
         id: "text-1",
         text: "Hello world",
       };
@@ -39,7 +39,7 @@ describe("STREAM_UI_PART codec", () => {
 
     it("should encode text-end event", () => {
       const event: LanguageModelStreamEvent = {
-        kind: "text-end",
+        kind: "text.end",
         id: "text-1",
       };
 
@@ -55,7 +55,7 @@ describe("STREAM_UI_PART codec", () => {
   describe("encode - reasoning events", () => {
     it("should encode reasoning-start event", () => {
       const event: LanguageModelStreamEvent = {
-        kind: "reasoning-start",
+        kind: "reasoning.start",
         id: "reason-1",
       };
 
@@ -69,7 +69,7 @@ describe("STREAM_UI_PART codec", () => {
 
     it("should encode reasoning-delta event", () => {
       const event: LanguageModelStreamEvent = {
-        kind: "reasoning-delta",
+        kind: "reasoning.delta",
         id: "reason-1",
         text: "thinking step by step",
       };
@@ -85,7 +85,7 @@ describe("STREAM_UI_PART codec", () => {
 
     it("should encode reasoning-end event", () => {
       const event: LanguageModelStreamEvent = {
-        kind: "reasoning-end",
+        kind: "reasoning.end",
         id: "reason-1",
       };
 
@@ -101,9 +101,9 @@ describe("STREAM_UI_PART codec", () => {
   describe("encode - tool input events", () => {
     it("should encode tool-input-start event", () => {
       const event: LanguageModelStreamEvent = {
-        kind: "tool-input-start",
+        kind: "tool.input.start",
         id: "tool-1",
-        toolName: "calculator",
+        toolId: "calculator",
       };
 
       const result = STREAM_UI_PART.encode(event);
@@ -111,15 +111,15 @@ describe("STREAM_UI_PART codec", () => {
       expect(result).toEqual({
         type: "tool-input-start",
         toolCallId: "tool-1",
-        toolName: "calculator",
+        toolId: "calculator",
       });
     });
 
     it("should encode tool-input-start event with title", () => {
       const event: LanguageModelStreamEvent = {
-        kind: "tool-input-start",
+        kind: "tool.input.start",
         id: "tool-1",
-        toolName: "calculator",
+        toolId: "calculator",
         title: "Calculate sum",
       };
 
@@ -128,14 +128,14 @@ describe("STREAM_UI_PART codec", () => {
       expect(result).toEqual({
         type: "tool-input-start",
         toolCallId: "tool-1",
-        toolName: "calculator",
+        toolId: "calculator",
         title: "Calculate sum",
       });
     });
 
     it("should encode tool-input-delta event", () => {
       const event: LanguageModelStreamEvent = {
-        kind: "tool-input-delta",
+        kind: "tool.input.delta",
         id: "tool-1",
         delta: '{"a": 1',
       };
@@ -151,7 +151,7 @@ describe("STREAM_UI_PART codec", () => {
 
     it("should return null for tool-input-end event", () => {
       const event: LanguageModelStreamEvent = {
-        kind: "tool-input-end",
+        kind: "tool.input.end",
         id: "tool-1",
       };
 
@@ -164,7 +164,7 @@ describe("STREAM_UI_PART codec", () => {
   describe("encode - tool call and result events", () => {
     it("should encode tool-call as tool-input-available", () => {
       const event: LanguageModelStreamEvent = {
-        kind: "tool-call",
+        kind: "tool.call",
         callId: "call-123",
         toolId: "calculator",
         state: COMPLETED,
@@ -176,14 +176,14 @@ describe("STREAM_UI_PART codec", () => {
       expect(result).toEqual({
         type: "tool-input-available",
         toolCallId: "call-123",
-        toolName: "calculator",
+        toolId: "calculator",
         input: { a: 5, b: 3 },
       });
     });
 
     it("should handle tool-call with empty arguments string", () => {
       const event: LanguageModelStreamEvent = {
-        kind: "tool-call",
+        kind: "tool.call",
         callId: "call-empty",
         toolId: "list_issues",
         state: IN_PROGRESS,
@@ -195,14 +195,14 @@ describe("STREAM_UI_PART codec", () => {
       expect(result).toEqual({
         type: "tool-input-available",
         toolCallId: "call-empty",
-        toolName: "list_issues",
+        toolId: "list_issues",
         input: {},
       });
     });
 
     it("should encode successful tool-result as tool-output-available", () => {
       const event: LanguageModelStreamEvent = {
-        kind: "tool-result",
+        kind: "tool.result",
         callId: "call-123",
         toolId: "calculator",
         state: COMPLETED,
@@ -221,7 +221,7 @@ describe("STREAM_UI_PART codec", () => {
 
     it("should encode failed tool-result as tool-output-error", () => {
       const event: LanguageModelStreamEvent = {
-        kind: "tool-result",
+        kind: "tool.result",
         callId: "call-123",
         toolId: "calculator",
         state: FAILED,
@@ -240,7 +240,7 @@ describe("STREAM_UI_PART codec", () => {
 
     it("should handle failed tool-result with null error", () => {
       const event: LanguageModelStreamEvent = {
-        kind: "tool-result",
+        kind: "tool.result",
         callId: "call-123",
         toolId: "calculator",
         state: FAILED,
@@ -261,7 +261,7 @@ describe("STREAM_UI_PART codec", () => {
   describe("encode - stream control events", () => {
     it("should encode stream-start as start", () => {
       const event: LanguageModelStreamEvent = {
-        kind: "stream-start",
+        kind: "stream.start",
       };
 
       const result = STREAM_UI_PART.encode(event);
@@ -356,7 +356,7 @@ describe("STREAM_UI_PART codec", () => {
   describe("encode - providerMetadata omission", () => {
     it("should omit providerMetadata from text events", () => {
       const event: LanguageModelStreamEvent = {
-        kind: "text-delta",
+        kind: "text.delta",
         id: "text-1",
         text: "Hello",
         providerMetadata: {
@@ -376,7 +376,7 @@ describe("STREAM_UI_PART codec", () => {
 
     it("should omit providerMetadata from tool calls", () => {
       const event: LanguageModelStreamEvent = {
-        kind: "tool-call",
+        kind: "tool.call",
         callId: "call-123",
         toolId: "calculator",
         state: COMPLETED,
@@ -391,7 +391,7 @@ describe("STREAM_UI_PART codec", () => {
       expect(result).toEqual({
         type: "tool-input-available",
         toolCallId: "call-123",
-        toolName: "calculator",
+        toolId: "calculator",
         input: { x: 1 },
       });
       expect(result).not.toHaveProperty("providerMetadata");
@@ -416,11 +416,11 @@ describe("STREAM_UI_PART codec", () => {
 describe("toUIMessageStream", () => {
   it("should convert async iterable to readable stream", async () => {
     const events: LanguageModelStreamEvent[] = [
-      { kind: "stream-start" },
-      { kind: "text-start", id: "text-1" },
-      { kind: "text-delta", id: "text-1", text: "Hello" },
-      { kind: "text-delta", id: "text-1", text: " world" },
-      { kind: "text-end", id: "text-1" },
+      { kind: "stream.start" },
+      { kind: "text.start", id: "text-1" },
+      { kind: "text.delta", id: "text-1", text: "Hello" },
+      { kind: "text.delta", id: "text-1", text: " world" },
+      { kind: "text.end", id: "text-1" },
       { kind: "finish", finishReason: "stop", usage: { inputTokens: 10, outputTokens: 5, totalTokens: 15 } },
     ];
 
@@ -453,11 +453,11 @@ describe("toUIMessageStream", () => {
 
   it("should filter out null events", async () => {
     const events: LanguageModelStreamEvent[] = [
-      { kind: "text-start", id: "text-1" },
-      { kind: "text-delta", id: "text-1", text: "Hello" },
-      { kind: "tool-input-end", id: "tool-1" }, // Should be filtered (returns null)
+      { kind: "text.start", id: "text-1" },
+      { kind: "text.delta", id: "text-1", text: "Hello" },
+      { kind: "tool.input.end", id: "tool-1" }, // Should be filtered (returns null)
       { kind: "raw", rawValue: {} }, // Should be filtered (returns null)
-      { kind: "text-end", id: "text-1" },
+      { kind: "text.end", id: "text-1" },
     ];
 
     async function* generateEvents() {
@@ -485,11 +485,11 @@ describe("toUIMessageStream", () => {
 
   it("should handle tool calls and results", async () => {
     const events: LanguageModelStreamEvent[] = [
-      { kind: "tool-input-start", id: "tool-1", toolName: "calculator" },
-      { kind: "tool-input-delta", id: "tool-1", delta: '{"x":' },
-      { kind: "tool-input-delta", id: "tool-1", delta: '5}' },
-      { kind: "tool-call", callId: "tool-1", toolId: "calculator", state: COMPLETED, arguments: '{"x":5}' },
-      { kind: "tool-result", callId: "tool-1", toolId: "calculator", state: COMPLETED, result: 25, error: null },
+      { kind: "tool.input.start", id: "tool-1", toolId: "calculator" },
+      { kind: "tool.input.delta", id: "tool-1", delta: '{"x":' },
+      { kind: "tool.input.delta", id: "tool-1", delta: '5}' },
+      { kind: "tool.call", callId: "tool-1", toolId: "calculator", state: COMPLETED, arguments: '{"x":5}' },
+      { kind: "tool.result", callId: "tool-1", toolId: "calculator", state: COMPLETED, result: 25, error: null },
     ];
 
     async function* generateEvents() {
@@ -509,17 +509,17 @@ describe("toUIMessageStream", () => {
     }
 
     expect(chunks).toEqual([
-      { type: "tool-input-start", toolCallId: "tool-1", toolName: "calculator" },
+      { type: "tool-input-start", toolCallId: "tool-1", toolId: "calculator" },
       { type: "tool-input-delta", toolCallId: "tool-1", inputTextDelta: '{"x":' },
       { type: "tool-input-delta", toolCallId: "tool-1", inputTextDelta: '5}' },
-      { type: "tool-input-available", toolCallId: "tool-1", toolName: "calculator", input: { x: 5 } },
+      { type: "tool-input-available", toolCallId: "tool-1", toolId: "calculator", input: { x: 5 } },
       { type: "tool-output-available", toolCallId: "tool-1", output: 25 },
     ]);
   });
 
   it("should handle errors in stream", async () => {
     const events: LanguageModelStreamEvent[] = [
-      { kind: "text-start", id: "text-1" },
+      { kind: "text.start", id: "text-1" },
       { kind: "error", error: new Error("Network timeout") },
     ];
 

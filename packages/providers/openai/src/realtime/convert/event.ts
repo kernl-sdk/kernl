@@ -124,7 +124,7 @@ export const ITEM: Codec<LanguageModelItem, OpenAIItem> = {
         return { type: "message", role: item.role, content };
       }
 
-      case "tool-call":
+      case "tool.call":
         return {
           type: "function_call",
           call_id: item.callId,
@@ -132,7 +132,7 @@ export const ITEM: Codec<LanguageModelItem, OpenAIItem> = {
           arguments: item.arguments,
         };
 
-      case "tool-result":
+      case "tool.result":
         return {
           type: "function_call_output",
           call_id: item.callId,
@@ -164,7 +164,7 @@ export const ITEM: Codec<LanguageModelItem, OpenAIItem> = {
 
       case "function_call":
         return {
-          kind: "tool-call",
+          kind: "tool.call",
           callId: item.call_id,
           toolId: item.name,
           state: "completed" as const,
@@ -173,7 +173,7 @@ export const ITEM: Codec<LanguageModelItem, OpenAIItem> = {
 
       case "function_call_output":
         return {
-          kind: "tool-result",
+          kind: "tool.result",
           callId: item.call_id,
           toolId: "",
           state: "completed" as const,

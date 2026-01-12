@@ -91,19 +91,19 @@ describe("AISDKLanguageModel", () => {
       expect(events).toHaveLength(7);
 
       // Check delta events
-      expect(events[0]).toMatchObject({ kind: "text-start", id: "text-1" });
+      expect(events[0]).toMatchObject({ kind: "text.start", id: "text-1" });
       expect(events[1]).toMatchObject({
-        kind: "text-delta",
+        kind: "text.delta",
         id: "text-1",
         text: "Hello",
       });
       expect(events[2]).toMatchObject({
-        kind: "text-delta",
+        kind: "text.delta",
         id: "text-1",
         text: " ",
       });
       expect(events[3]).toMatchObject({
-        kind: "text-delta",
+        kind: "text.delta",
         id: "text-1",
         text: "World",
       });
@@ -125,7 +125,7 @@ describe("AISDKLanguageModel", () => {
       expect(messageEvent.id).toBeDefined();
 
       // Check end event (yielded after Message)
-      expect(events[5]).toMatchObject({ kind: "text-end", id: "text-1" });
+      expect(events[5]).toMatchObject({ kind: "text.end", id: "text-1" });
 
       // Check finish event
       expect(events[6]).toMatchObject({ kind: "finish" });
@@ -204,16 +204,16 @@ describe("AISDKLanguageModel", () => {
 
       // Check delta events
       expect(events[0]).toMatchObject({
-        kind: "reasoning-start",
+        kind: "reasoning.start",
         id: "reason-1",
       });
       expect(events[1]).toMatchObject({
-        kind: "reasoning-delta",
+        kind: "reasoning.delta",
         id: "reason-1",
         text: "Let me think",
       });
       expect(events[2]).toMatchObject({
-        kind: "reasoning-delta",
+        kind: "reasoning.delta",
         id: "reason-1",
         text: " about this",
       });
@@ -230,7 +230,7 @@ describe("AISDKLanguageModel", () => {
 
       // Check end event (yielded after Reasoning)
       expect(events[4]).toMatchObject({
-        kind: "reasoning-end",
+        kind: "reasoning.end",
         id: "reason-1",
       });
 
@@ -453,7 +453,7 @@ describe("AISDKLanguageModel", () => {
       expect(events).toHaveLength(2);
 
       expect(events[0]).toMatchObject({
-        kind: "tool-call",
+        kind: "tool.call",
         callId: "call-123",
         toolId: "calculator",
         state: IN_PROGRESS,

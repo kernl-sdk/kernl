@@ -49,60 +49,60 @@ export const STREAM_UI_PART: Codec<
 > = {
   encode: (event: LanguageModelStreamEvent): UIMessageChunk | null => {
     switch (event.kind) {
-      case "text-start":
+      case "text.start":
         return {
           type: "text-start",
           id: event.id,
         };
 
-      case "text-delta":
+      case "text.delta":
         return {
           type: "text-delta",
           id: event.id,
           delta: event.text,
         };
 
-      case "text-end":
+      case "text.end":
         return {
           type: "text-end",
           id: event.id,
         };
 
-      case "reasoning-start":
+      case "reasoning.start":
         return {
           type: "reasoning-start",
           id: event.id,
         };
 
-      case "reasoning-delta":
+      case "reasoning.delta":
         return {
           type: "reasoning-delta",
           id: event.id,
           delta: event.text,
         };
 
-      case "reasoning-end":
+      case "reasoning.end":
         return {
           type: "reasoning-end",
           id: event.id,
         };
 
-      case "tool-input-start":
+      case "tool.input.start":
         return {
           type: "tool-input-start",
           toolCallId: event.id,
-          toolName: event.toolName,
+          toolName: event.toolId,
           ...(event.title != null ? { title: event.title } : {}),
         };
 
-      case "tool-input-delta":
+      case "tool.input.delta":
         return {
           type: "tool-input-delta",
           toolCallId: event.id,
           inputTextDelta: event.delta,
         };
 
-      case "tool-call":
+      case "tool.call":
         return {
           type: "tool-input-available",
           toolCallId: event.callId,
@@ -110,7 +110,7 @@ export const STREAM_UI_PART: Codec<
           input: JSON.parse(event.arguments),
         };
 
-      case "tool-result":
+      case "tool.result":
         // Convert tool result to tool-output-available or tool-output-error
         if (event.state === FAILED) {
           return {
@@ -126,7 +126,7 @@ export const STREAM_UI_PART: Codec<
           output: event.result,
         };
 
-      case "stream-start":
+      case "stream.start":
         return {
           type: "start",
         };
@@ -151,7 +151,7 @@ export const STREAM_UI_PART: Codec<
       case "message":
       case "reasoning":
       // - events without direct UI equivalents -
-      case "tool-input-end":
+      case "tool.input.end":
       case "raw":
         return null;
 

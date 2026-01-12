@@ -268,7 +268,7 @@ describe("Agent.stream() lifecycle", () => {
       events.push(event);
     }
 
-    expect(events[0]).toEqual({ kind: "stream-start" });
+    expect(events[0]).toEqual({ kind: "stream.start" });
   });
 
   it("should have same persistence behavior as run()", async () => {
@@ -305,7 +305,7 @@ describe("Agent.stream() lifecycle", () => {
     // Should have streamed events
     expect(events).toEqual(
       expect.arrayContaining([
-        { kind: "stream-start" },
+        { kind: "stream.start" },
         expect.objectContaining({ kind: "message" }),
       ]),
     );

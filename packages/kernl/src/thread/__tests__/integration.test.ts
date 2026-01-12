@@ -63,15 +63,15 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)("Thread streaming integration", () => {
       expect(events.length).toBeGreaterThan(0);
 
       // Should have text-delta events (for streaming UX)
-      const textDeltas = events.filter((e) => e.kind === "text-delta");
+      const textDeltas = events.filter((e) => e.kind === "text.delta");
       expect(textDeltas.length).toBeGreaterThan(0);
 
       // Should have text-start event
-      const textStarts = events.filter((e) => e.kind === "text-start");
+      const textStarts = events.filter((e) => e.kind === "text.start");
       expect(textStarts.length).toBeGreaterThan(0);
 
       // Should have text-end event
-      const textEnds = events.filter((e) => e.kind === "text-end");
+      const textEnds = events.filter((e) => e.kind === "text.end");
       expect(textEnds.length).toBeGreaterThan(0);
 
       // Should have complete Message item (for history)
@@ -140,9 +140,9 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)("Thread streaming integration", () => {
       // Stream events should include deltas (but history should not)
       const streamDeltas = streamEvents.filter(
         (e: any) =>
-          e.kind === "text-delta" ||
-          e.kind === "text-start" ||
-          e.kind === "text-end",
+          e.kind === "text.delta" ||
+          e.kind === "text.start" ||
+          e.kind === "text.end",
       );
       expect(streamDeltas.length).toBeGreaterThan(0);
 
@@ -216,8 +216,8 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)("Thread streaming integration", () => {
 
       // Should have tool calls
       const toolCalls = events.filter(
-        (e): e is Extract<ThreadStreamEvent, { kind: "tool-call" }> =>
-          e.kind === "tool-call",
+        (e): e is Extract<ThreadStreamEvent, { kind: "tool.call" }> =>
+          e.kind === "tool.call",
       );
       expect(toolCalls.length).toBeGreaterThan(0);
 
@@ -228,8 +228,8 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)("Thread streaming integration", () => {
 
       // Should have tool results
       const toolResults = events.filter(
-        (e): e is Extract<ThreadStreamEvent, { kind: "tool-result" }> =>
-          e.kind === "tool-result",
+        (e): e is Extract<ThreadStreamEvent, { kind: "tool.result" }> =>
+          e.kind === "tool.result",
       );
       expect(toolResults.length).toBeGreaterThan(0);
 
@@ -242,9 +242,9 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)("Thread streaming integration", () => {
 
       // History should contain tool calls and results
       const history = (thread as any).history as ThreadEvent[];
-      const historyToolCalls = history.filter((e) => e.kind === "tool-call");
+      const historyToolCalls = history.filter((e) => e.kind === "tool.call");
       const historyToolResults = history.filter(
-        (e) => e.kind === "tool-result",
+        (e) => e.kind === "tool.result",
       );
 
       expect(historyToolCalls.length).toBe(toolCalls.length);
@@ -309,12 +309,12 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)("Thread streaming integration", () => {
 
       // Find the tool call and result
       const toolCalls = events.filter(
-        (e): e is Extract<ThreadStreamEvent, { kind: "tool-call" }> =>
-          e.kind === "tool-call",
+        (e): e is Extract<ThreadStreamEvent, { kind: "tool.call" }> =>
+          e.kind === "tool.call",
       );
       const toolResults = events.filter(
-        (e): e is Extract<ThreadStreamEvent, { kind: "tool-result" }> =>
-          e.kind === "tool-result",
+        (e): e is Extract<ThreadStreamEvent, { kind: "tool.result" }> =>
+          e.kind === "tool.result",
       );
 
       expect(toolCalls.length).toBeGreaterThan(0);
@@ -336,10 +336,10 @@ describe.skipIf(SKIP_INTEGRATION_TESTS)("Thread streaming integration", () => {
       // Verify history contains both with matching callIds
       const history = (thread as any).history as ThreadEvent[];
       const historyToolCall = history.find(
-        (e) => e.kind === "tool-call" && e.toolId === "multiply",
+        (e) => e.kind === "tool.call" && e.toolId === "multiply",
       );
       const historyToolResult = history.find(
-        (e) => e.kind === "tool-result" && e.toolId === "multiply",
+        (e) => e.kind === "tool.result" && e.toolId === "multiply",
       );
 
       expect(historyToolCall).toBeDefined();

@@ -58,7 +58,7 @@ export function tevent(event: {
  * Check if an event is a tool call
  */
 export function isActionIntention(event: LanguageModelItem): event is ToolCall {
-  return event.kind === "tool-call";
+  return event.kind === "tool.call";
 }
 
 /**
@@ -78,8 +78,8 @@ export function notDelta(event: ThreadStreamEvent): event is LanguageModelItem {
   switch (event.kind) {
     case "message":
     case "reasoning":
-    case "tool-call":
-    case "tool-result":
+    case "tool.call":
+    case "tool.result":
       return true;
 
     // all other events are streaming deltas/control events
@@ -96,8 +96,8 @@ export function isPublicEvent(event: ThreadEvent): event is PublicThreadEvent {
   switch (event.kind) {
     case "message":
     case "reasoning":
-    case "tool-call":
-    case "tool-result":
+    case "tool.call":
+    case "tool.result":
       return true;
 
     case "system":

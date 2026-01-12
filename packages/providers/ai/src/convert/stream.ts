@@ -49,14 +49,14 @@ export const STREAM_PART: Codec<
     switch (part.type) {
       case "text-start":
         return {
-          kind: "text-start",
+          kind: "text.start",
           id: part.id,
           providerMetadata: part.providerMetadata,
         };
 
       case "text-delta":
         return {
-          kind: "text-delta",
+          kind: "text.delta",
           id: part.id,
           text: part.delta,
           providerMetadata: part.providerMetadata,
@@ -64,21 +64,21 @@ export const STREAM_PART: Codec<
 
       case "text-end":
         return {
-          kind: "text-end",
+          kind: "text.end",
           id: part.id,
           providerMetadata: part.providerMetadata,
         };
 
       case "reasoning-start":
         return {
-          kind: "reasoning-start",
+          kind: "reasoning.start",
           id: part.id,
           providerMetadata: part.providerMetadata,
         };
 
       case "reasoning-delta":
         return {
-          kind: "reasoning-delta",
+          kind: "reasoning.delta",
           id: part.id,
           text: part.delta,
           providerMetadata: part.providerMetadata,
@@ -86,23 +86,23 @@ export const STREAM_PART: Codec<
 
       case "reasoning-end":
         return {
-          kind: "reasoning-end",
+          kind: "reasoning.end",
           id: part.id,
           providerMetadata: part.providerMetadata,
         };
 
       case "tool-input-start":
         return {
-          kind: "tool-input-start",
+          kind: "tool.input.start",
           id: part.id,
-          toolName: part.toolName,
+          toolId: part.toolName,
           title: part.title,
           providerMetadata: part.providerMetadata,
         };
 
       case "tool-input-delta":
         return {
-          kind: "tool-input-delta",
+          kind: "tool.input.delta",
           id: part.id,
           delta: part.delta,
           providerMetadata: part.providerMetadata,
@@ -110,14 +110,14 @@ export const STREAM_PART: Codec<
 
       case "tool-input-end":
         return {
-          kind: "tool-input-end",
+          kind: "tool.input.end",
           id: part.id,
           providerMetadata: part.providerMetadata,
         };
 
       case "tool-call":
         return {
-          kind: "tool-call",
+          kind: "tool.call",
           callId: part.toolCallId,
           toolId: part.toolName,
           state: IN_PROGRESS,
@@ -128,7 +128,7 @@ export const STREAM_PART: Codec<
       case "tool-result":
         // provider-defined tools can stream tool results
         return {
-          kind: "tool-result",
+          kind: "tool.result",
           callId: part.toolCallId,
           toolId: part.toolName,
           state: part.isError ? FAILED : COMPLETED,
@@ -139,7 +139,7 @@ export const STREAM_PART: Codec<
 
       case "stream-start":
         return {
-          kind: "stream-start",
+          kind: "stream.start",
           warnings: part.warnings.map(WARNING.decode),
         };
 

@@ -164,7 +164,7 @@ describe("TOOL_CHOICE codec", () => {
 
       expect(result).toEqual({
         type: "tool",
-        toolName: "get_weather",
+        toolId: "get_weather",
       });
     });
   });

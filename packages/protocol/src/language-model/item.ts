@@ -195,7 +195,7 @@ export type Message = SystemMessage | AssistantMessage | UserMessage;
  * Tool calls that the model has generated.
  */
 export interface ToolCall extends LanguageModelItemBase {
-  readonly kind: "tool-call";
+  readonly kind: "tool.call";
 
   /**
    * The identifier of the tool call. It must be unique across all tool calls.
@@ -222,7 +222,7 @@ export interface ToolCall extends LanguageModelItemBase {
  * Result of a tool call that has been executed by the provider.
  */
 export interface ToolResult extends LanguageModelItemBase {
-  readonly kind: "tool-result";
+  readonly kind: "tool.result";
 
   /**
    * The ID of the tool call that this result is associated with.

@@ -109,7 +109,7 @@ describe("MODEL_SETTINGS codec", () => {
       const result = MODEL_SETTINGS.encode(settings);
 
       expect(result).toEqual({
-        toolChoice: { type: "tool", toolName: "get_weather" },
+        toolChoice: { type: "tool", toolId: "get_weather" },
       });
     });
 

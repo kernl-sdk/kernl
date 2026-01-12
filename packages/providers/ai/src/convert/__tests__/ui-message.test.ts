@@ -424,7 +424,7 @@ describe("UIMessageCodec", () => {
 
         expect(result).toHaveLength(1);
         expect(result[0]).toMatchObject({
-          kind: "tool-call",
+          kind: "tool.call",
           callId: "call-1",
           toolId: "calculator",
           state: IN_PROGRESS,
@@ -449,7 +449,7 @@ describe("UIMessageCodec", () => {
 
         expect(result).toHaveLength(1);
         expect(result[0]).toMatchObject({
-          kind: "tool-result",
+          kind: "tool.result",
           callId: "call-1",
           toolId: "calculator",
           state: COMPLETED,
@@ -475,7 +475,7 @@ describe("UIMessageCodec", () => {
 
         expect(result).toHaveLength(1);
         expect(result[0]).toMatchObject({
-          kind: "tool-result",
+          kind: "tool.result",
           callId: "call-1",
           toolId: "calculator",
           state: FAILED,
@@ -525,7 +525,7 @@ describe("UIMessageCodec", () => {
 
         expect(result).toHaveLength(1);
         expect(result[0]).toMatchObject({
-          kind: "tool-call",
+          kind: "tool.call",
           callId: "call-1",
           toolId: "weather",
           providerMetadata: {
@@ -554,7 +554,7 @@ describe("UIMessageCodec", () => {
 
         expect(result).toHaveLength(1);
         expect(result[0]).toMatchObject({
-          kind: "tool-result",
+          kind: "tool.result",
           callId: "call-1",
           toolId: "weather",
           providerMetadata: {
@@ -582,7 +582,7 @@ describe("UIMessageCodec", () => {
 
         expect(result).toHaveLength(1);
         expect(result[0]).toMatchObject({
-          kind: "tool-call",
+          kind: "tool.call",
           callId: "call-1",
           toolId: "screenshot",
           state: IN_PROGRESS,
@@ -608,7 +608,7 @@ describe("UIMessageCodec", () => {
 
         expect(result).toHaveLength(1);
         expect(result[0]).toMatchObject({
-          kind: "tool-result",
+          kind: "tool.result",
           callId: "call-1",
           toolId: "screenshot",
           state: COMPLETED,
@@ -635,7 +635,7 @@ describe("UIMessageCodec", () => {
 
         expect(result).toHaveLength(1);
         expect(result[0]).toMatchObject({
-          kind: "tool-result",
+          kind: "tool.result",
           callId: "call-1",
           toolId: "screenshot",
           state: FAILED,
@@ -673,12 +673,12 @@ describe("UIMessageCodec", () => {
           content: [{ kind: "text", text: "Let me help with that" }],
         });
         expect(result[1]).toMatchObject({
-          kind: "tool-call",
+          kind: "tool.call",
           callId: "call-1",
           toolId: "calculator",
         });
         expect(result[2]).toMatchObject({
-          kind: "tool-call",
+          kind: "tool.call",
           callId: "call-2",
           toolId: "weather",
         });
@@ -713,11 +713,11 @@ describe("UIMessageCodec", () => {
           content: [{ kind: "text", text: "The result is 3" }],
         });
         expect(result[1]).toMatchObject({
-          kind: "tool-result",
+          kind: "tool.result",
           callId: "call-1",
         });
         expect(result[2]).toMatchObject({
-          kind: "tool-call",
+          kind: "tool.call",
           callId: "call-2",
         });
       });
@@ -745,11 +745,11 @@ describe("UIMessageCodec", () => {
 
         expect(result).toHaveLength(2);
         expect(result[0]).toMatchObject({
-          kind: "tool-call",
+          kind: "tool.call",
           toolId: "calculator",
         });
         expect(result[1]).toMatchObject({
-          kind: "tool-call",
+          kind: "tool.call",
           toolId: "screenshot",
         });
       });
@@ -772,7 +772,7 @@ describe("UIMessageCodec", () => {
         });
 
         expect(result[0]).toMatchObject({
-          kind: "tool-result",
+          kind: "tool.result",
           result: "result string",
         });
       });
@@ -793,7 +793,7 @@ describe("UIMessageCodec", () => {
         });
 
         expect(result[0]).toMatchObject({
-          kind: "tool-result",
+          kind: "tool.result",
           result: 42,
         });
       });
@@ -818,7 +818,7 @@ describe("UIMessageCodec", () => {
         });
 
         expect(result[0]).toMatchObject({
-          kind: "tool-result",
+          kind: "tool.result",
           result: {
             temperature: 20,
             condition: "sunny",
@@ -843,7 +843,7 @@ describe("UIMessageCodec", () => {
         });
 
         expect(result[0]).toMatchObject({
-          kind: "tool-result",
+          kind: "tool.result",
           result: ["result1", "result2", "result3"],
         });
       });
@@ -864,7 +864,7 @@ describe("UIMessageCodec", () => {
         });
 
         expect(result[0]).toMatchObject({
-          kind: "tool-result",
+          kind: "tool.result",
           result: null,
         });
       });
@@ -884,7 +884,7 @@ describe("UIMessageCodec", () => {
         });
 
         expect(result[0]).toMatchObject({
-          kind: "tool-call",
+          kind: "tool.call",
           arguments: "{}",
         });
       });
@@ -1448,14 +1448,14 @@ describe("historyToUIMessages", () => {
           content: [{ kind: "text", text: "Let me calculate that." }],
         },
         {
-          kind: "tool-call",
+          kind: "tool.call",
           callId: "call-1",
           toolId: "calculator",
           state: IN_PROGRESS,
           arguments: JSON.stringify({ operation: "add", numbers: [1, 2] }),
         },
         {
-          kind: "tool-result",
+          kind: "tool.result",
           callId: "call-1",
           toolId: "calculator",
           state: COMPLETED,
@@ -1475,7 +1475,7 @@ describe("historyToUIMessages", () => {
             {
               type: "tool-calculator",
               toolCallId: "call-1",
-              toolName: "calculator",
+              toolId: "calculator",
               input: { operation: "add", numbers: [1, 2] },
               state: "output-available",
               output: 3,
@@ -1494,14 +1494,14 @@ describe("historyToUIMessages", () => {
           content: [{ kind: "text", text: "Let me try that." }],
         },
         {
-          kind: "tool-call",
+          kind: "tool.call",
           callId: "call-1",
           toolId: "calculator",
           state: IN_PROGRESS,
           arguments: JSON.stringify({ operation: "divide", numbers: [1, 0] }),
         },
         {
-          kind: "tool-result",
+          kind: "tool.result",
           callId: "call-1",
           toolId: "calculator",
           state: FAILED,
@@ -1521,7 +1521,7 @@ describe("historyToUIMessages", () => {
             {
               type: "tool-calculator",
               toolCallId: "call-1",
-              toolName: "calculator",
+              toolId: "calculator",
               input: { operation: "divide", numbers: [1, 0] },
               state: "output-error",
               errorText: "Division by zero",
@@ -1540,7 +1540,7 @@ describe("historyToUIMessages", () => {
           content: [{ kind: "text", text: "Processing..." }],
         },
         {
-          kind: "tool-call",
+          kind: "tool.call",
           callId: "call-1",
           toolId: "search",
           state: IN_PROGRESS,
@@ -1559,7 +1559,7 @@ describe("historyToUIMessages", () => {
             {
               type: "tool-search",
               toolCallId: "call-1",
-              toolName: "search",
+              toolId: "search",
               input: { query: "weather" },
               state: "input-available",
             },
@@ -1577,14 +1577,14 @@ describe("historyToUIMessages", () => {
           content: [{ kind: "text", text: "I'll use multiple tools." }],
         },
         {
-          kind: "tool-call",
+          kind: "tool.call",
           callId: "call-1",
           toolId: "tool1",
           state: IN_PROGRESS,
           arguments: JSON.stringify({ value: "value-1" }),
         },
         {
-          kind: "tool-result",
+          kind: "tool.result",
           callId: "call-1",
           toolId: "tool1",
           state: COMPLETED,
@@ -1592,14 +1592,14 @@ describe("historyToUIMessages", () => {
           error: null,
         },
         {
-          kind: "tool-call",
+          kind: "tool.call",
           callId: "call-2",
           toolId: "tool2",
           state: IN_PROGRESS,
           arguments: JSON.stringify({ value: "value-2" }),
         },
         {
-          kind: "tool-result",
+          kind: "tool.result",
           callId: "call-2",
           toolId: "tool2",
           state: COMPLETED,
@@ -1607,14 +1607,14 @@ describe("historyToUIMessages", () => {
           error: null,
         },
         {
-          kind: "tool-call",
+          kind: "tool.call",
           callId: "call-3",
           toolId: "tool3",
           state: IN_PROGRESS,
           arguments: JSON.stringify({ value: "value-3" }),
         },
         {
-          kind: "tool-result",
+          kind: "tool.result",
           callId: "call-3",
           toolId: "tool3",
           state: COMPLETED,
@@ -1634,7 +1634,7 @@ describe("historyToUIMessages", () => {
             {
               type: "tool-tool1",
               toolCallId: "call-1",
-              toolName: "tool1",
+              toolId: "tool1",
               input: { value: "value-1" },
               state: "output-available",
               output: "result-1",
@@ -1642,7 +1642,7 @@ describe("historyToUIMessages", () => {
             {
               type: "tool-tool2",
               toolCallId: "call-2",
-              toolName: "tool2",
+              toolId: "tool2",
               input: { value: "value-2" },
               state: "output-available",
               output: "result-2",
@@ -1650,7 +1650,7 @@ describe("historyToUIMessages", () => {
             {
               type: "tool-tool3",
               toolCallId: "call-3",
-              toolName: "tool3",
+              toolId: "tool3",
               input: { value: "value-3" },
               state: "output-available",
               output: "result-3",
@@ -1669,7 +1669,7 @@ describe("historyToUIMessages", () => {
           content: [{ kind: "text", text: "Response" }],
         },
         {
-          kind: "tool-result",
+          kind: "tool.result",
           callId: "orphan-1",
           toolId: "calculator",
           state: COMPLETED,
@@ -1698,14 +1698,14 @@ describe("historyToUIMessages", () => {
           content: [{ kind: "text", text: "Using tool" }],
         },
         {
-          kind: "tool-call",
+          kind: "tool.call",
           callId: "call-1",
           toolId: "search",
           state: IN_PROGRESS,
           arguments: JSON.stringify({ query: "test" }),
         },
         {
-          kind: "tool-result",
+          kind: "tool.result",
           callId: "call-1",
           toolId: "search",
           state: COMPLETED,
@@ -1731,7 +1731,7 @@ describe("historyToUIMessages", () => {
             {
               type: "tool-search",
               toolCallId: "call-1",
-              toolName: "search",
+              toolId: "search",
               input: { query: "test" },
               state: "output-available",
               output: "found it",
@@ -1934,14 +1934,14 @@ describe("historyToUIMessages", () => {
           text: "The image shows numerical data",
         },
         {
-          kind: "tool-call",
+          kind: "tool.call",
           callId: "call-1",
           toolId: "calculator",
           state: IN_PROGRESS,
           arguments: JSON.stringify({ operation: "sum", values: [10, 20, 30] }),
         },
         {
-          kind: "tool-result",
+          kind: "tool.result",
           callId: "call-1",
           toolId: "calculator",
           state: COMPLETED,
@@ -1987,7 +1987,7 @@ describe("historyToUIMessages", () => {
             {
               type: "tool-calculator",
               toolCallId: "call-1",
-              toolName: "calculator",
+              toolId: "calculator",
               input: { operation: "sum", values: [10, 20, 30] },
               state: "output-available",
               output: 60,

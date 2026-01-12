@@ -77,7 +77,7 @@ describe("Thread Persistence", () => {
       //     return {
       //       content: [
       //         message({ role: "assistant", text: "" }),
-      //         { kind: "tool-call", toolId: "test", callId: "call_1", state: IN_PROGRESS, arguments: "{}" },
+      //         { kind: "tool.call", toolId: "test", callId: "call_1", state: IN_PROGRESS, arguments: "{}" },
       //       ],
       //       finishReason: "stop",
       //       usage: { inputTokens: 2, outputTokens: 2, totalTokens: 4 },
@@ -138,7 +138,7 @@ describe("Thread Persistence", () => {
       //     return {
       //       content: [
       //         message({ role: "assistant", text: "" }),
-      //         { kind: "tool-call", toolId: "echo", callId: "call_1", state: IN_PROGRESS, arguments: '{"text":"test"}' },
+      //         { kind: "tool.call", toolId: "echo", callId: "call_1", state: IN_PROGRESS, arguments: '{"text":"test"}' },
       //       ],
       //       finishReason: "stop",
       //       usage: { inputTokens: 2, outputTokens: 2, totalTokens: 4 },
@@ -178,7 +178,7 @@ describe("Thread Persistence", () => {
       //
       // // Find the append call for tick 1 (should include model message, tool-call, and tool-result)
       // const tick1Events = storage.calls.append.find(batch =>
-      //   batch.some(e => e.kind === "tool-result")
+      //   batch.some(e => e.kind === "tool.result")
       // );
       //
       // expect(tick1Events).toBeDefined();
@@ -188,8 +188,8 @@ describe("Thread Persistence", () => {
       // expect(tick1Events).toEqual(
       //   expect.arrayContaining([
       //     expect.objectContaining({ kind: "message", role: "assistant" }),
-      //     expect.objectContaining({ kind: "tool-call", toolId: "echo" }),
-      //     expect.objectContaining({ kind: "tool-result", toolId: "echo", result: "Echo: test" }),
+      //     expect.objectContaining({ kind: "tool.call", toolId: "echo" }),
+      //     expect.objectContaining({ kind: "tool.result", toolId: "echo", result: "Echo: test" }),
       //   ])
       // );
     });
@@ -232,7 +232,7 @@ describe("Thread Persistence", () => {
       // expect(lastUpdate.patch.state).toBe(STOPPED);
       //
       // // Verify stream-start event
-      // expect(events[0]).toEqual({ kind: "stream-start" });
+      // expect(events[0]).toEqual({ kind: "stream.start" });
     });
 
     it.skip("should persist STOPPED state even on model error", async () => {

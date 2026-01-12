@@ -212,7 +212,7 @@ describe("MESSAGE codec", () => {
   describe("encode - tool-call items", () => {
     it("should encode tool-call item", () => {
       const result = MESSAGE.encode({
-        kind: "tool-call",
+        kind: "tool.call",
         callId: "call-123",
         toolId: "get_weather",
         state: "completed",
@@ -225,7 +225,7 @@ describe("MESSAGE codec", () => {
           {
             type: "tool-call",
             toolCallId: "call-123",
-            toolName: "get_weather",
+            toolId: "get_weather",
             input: { city: "SF" },
             providerOptions: undefined,
           },
@@ -235,7 +235,7 @@ describe("MESSAGE codec", () => {
 
     it("should include providerMetadata for tool-call", () => {
       const result = MESSAGE.encode({
-        kind: "tool-call",
+        kind: "tool.call",
         callId: "call-123",
         toolId: "get_weather",
         state: "completed",
@@ -253,7 +253,7 @@ describe("MESSAGE codec", () => {
   describe("encode - tool-result items", () => {
     it("should encode tool-result item", () => {
       const result = MESSAGE.encode({
-        kind: "tool-result",
+        kind: "tool.result",
         callId: "call-123",
         toolId: "get_weather",
         state: "completed",
@@ -267,7 +267,7 @@ describe("MESSAGE codec", () => {
           {
             type: "tool-result",
             toolCallId: "call-123",
-            toolName: "get_weather",
+            toolId: "get_weather",
             output: {
               type: "json",
               value: { temp: 72, conditions: "sunny" },
@@ -280,7 +280,7 @@ describe("MESSAGE codec", () => {
 
     it("should encode tool-result item with error", () => {
       const result = MESSAGE.encode({
-        kind: "tool-result",
+        kind: "tool.result",
         callId: "call-123",
         toolId: "get_weather",
         state: "failed",
@@ -294,7 +294,7 @@ describe("MESSAGE codec", () => {
           {
             type: "tool-result",
             toolCallId: "call-123",
-            toolName: "get_weather",
+            toolId: "get_weather",
             output: {
               type: "error-text",
               value: "Network timeout",

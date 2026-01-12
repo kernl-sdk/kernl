@@ -68,7 +68,7 @@ export const MODEL_RESPONSE: Codec<LanguageModelResponse, AISdkGenerateResult> =
 
           case "tool-call":
             content.push({
-              kind: "tool-call",
+              kind: "tool.call",
               callId: item.toolCallId,
               toolId: item.toolName,
               state: IN_PROGRESS,
@@ -79,7 +79,7 @@ export const MODEL_RESPONSE: Codec<LanguageModelResponse, AISdkGenerateResult> =
 
           case "tool-result":
             content.push({
-              kind: "tool-result",
+              kind: "tool.result",
               callId: item.toolCallId,
               toolId: item.toolName,
               state: item.isError ? FAILED : COMPLETED,

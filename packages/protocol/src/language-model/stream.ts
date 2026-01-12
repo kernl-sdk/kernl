@@ -49,7 +49,7 @@ export interface StreamEventBase {
  * Stream event indicating the start of a text output.
  */
 export interface TextStartEvent extends StreamEventBase {
-  readonly kind: "text-start";
+  readonly kind: "text.start";
   id: string;
 }
 
@@ -57,7 +57,7 @@ export interface TextStartEvent extends StreamEventBase {
  * Stream event indicating the end of a text output.
  */
 export interface TextEndEvent extends StreamEventBase {
-  readonly kind: "text-end";
+  readonly kind: "text.end";
   id: string;
 }
 
@@ -65,7 +65,7 @@ export interface TextEndEvent extends StreamEventBase {
  * Stream event containing a delta (chunk) of text output.
  */
 export interface TextDeltaEvent extends StreamEventBase {
-  readonly kind: "text-delta";
+  readonly kind: "text.delta";
   id: string;
 
   /**
@@ -78,7 +78,7 @@ export interface TextDeltaEvent extends StreamEventBase {
  * Stream event indicating the start of reasoning output.
  */
 export interface ReasoningStartEvent extends StreamEventBase {
-  readonly kind: "reasoning-start";
+  readonly kind: "reasoning.start";
   id: string;
 }
 
@@ -86,7 +86,7 @@ export interface ReasoningStartEvent extends StreamEventBase {
  * Stream event indicating the end of reasoning output.
  */
 export interface ReasoningEndEvent extends StreamEventBase {
-  readonly kind: "reasoning-end";
+  readonly kind: "reasoning.end";
   id: string;
 }
 
@@ -94,7 +94,7 @@ export interface ReasoningEndEvent extends StreamEventBase {
  * Stream event containing a delta (chunk) of reasoning output.
  */
 export interface ReasoningDeltaEvent extends StreamEventBase {
-  readonly kind: "reasoning-delta";
+  readonly kind: "reasoning.delta";
   id: string;
 
   /**
@@ -107,13 +107,13 @@ export interface ReasoningDeltaEvent extends StreamEventBase {
  * Stream event indicating the start of tool input generation.
  */
 export interface ToolInputStartEvent extends StreamEventBase {
-  readonly kind: "tool-input-start";
+  readonly kind: "tool.input.start";
   id: string;
 
   /**
-   * The name of the tool being called.
+   * The identifier of the tool being called.
    */
-  toolName: string;
+  toolId: string;
 
   /**
    * Optional title for the tool call.
@@ -125,7 +125,7 @@ export interface ToolInputStartEvent extends StreamEventBase {
  * Stream event indicating the end of tool input generation.
  */
 export interface ToolInputEndEvent extends StreamEventBase {
-  readonly kind: "tool-input-end";
+  readonly kind: "tool.input.end";
   id: string;
 }
 
@@ -133,7 +133,7 @@ export interface ToolInputEndEvent extends StreamEventBase {
  * Stream event containing a delta (chunk) of tool input.
  */
 export interface ToolInputDeltaEvent extends StreamEventBase {
-  readonly kind: "tool-input-delta";
+  readonly kind: "tool.input.delta";
   id: string;
 
   /**
@@ -146,7 +146,7 @@ export interface ToolInputDeltaEvent extends StreamEventBase {
  * Stream event indicating the start of agent execution.
  */
 export interface StartEvent extends StreamEventBase {
-  readonly kind: "stream-start";
+  readonly kind: "stream.start";
 
   /**
    * Warnings for the call (e.g., unsupported settings).

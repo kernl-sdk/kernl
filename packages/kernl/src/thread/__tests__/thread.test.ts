@@ -194,7 +194,7 @@ describe("Thread", () => {
                 content: [],
               },
               {
-                kind: "tool-call" as const,
+                kind: "tool.call" as const,
                 toolId: "echo",
                 state: IN_PROGRESS,
                 callId: "call_1",
@@ -270,7 +270,7 @@ describe("Thread", () => {
         }),
         // Tool call (tick 1)
         expect.objectContaining({
-          kind: "tool-call",
+          kind: "tool.call",
           toolId: "echo",
           callId: "call_1",
           state: IN_PROGRESS,
@@ -278,7 +278,7 @@ describe("Thread", () => {
         }),
         // Tool result (executed after tick 1)
         expect.objectContaining({
-          kind: "tool-result",
+          kind: "tool.result",
           callId: "call_1",
           toolId: "echo",
           state: COMPLETED,
@@ -312,7 +312,7 @@ describe("Thread", () => {
                 content: [],
               },
               {
-                kind: "tool-call" as const,
+                kind: "tool.call" as const,
                 toolId: "simple",
                 state: IN_PROGRESS,
                 callId: "call_1",
@@ -339,7 +339,7 @@ describe("Thread", () => {
                 content: [],
               },
               {
-                kind: "tool-call" as const,
+                kind: "tool.call" as const,
                 toolId: "simple",
                 state: IN_PROGRESS,
                 callId: "call_2",
@@ -423,7 +423,7 @@ describe("Thread", () => {
                 content: [],
               },
               {
-                kind: "tool-call" as const,
+                kind: "tool.call" as const,
                 toolId: "nonexistent",
                 state: IN_PROGRESS,
                 callId: "call_1",
@@ -476,9 +476,9 @@ describe("Thread", () => {
       const history = (thread as any).history as ThreadEvent[];
 
       // Check that the tool result is an error
-      const toolResult = history.find((e) => e.kind === "tool-result");
+      const toolResult = history.find((e) => e.kind === "tool.result");
       expect(toolResult).toEqual(expect.objectContaining({
-        kind: "tool-result",
+        kind: "tool.result",
         callId: "call_1",
         toolId: "nonexistent",
         state: FAILED,
@@ -504,7 +504,7 @@ describe("Thread", () => {
                 content: [],
               },
               {
-                kind: "tool-call" as const,
+                kind: "tool.call" as const,
                 toolId: "failing",
                 state: IN_PROGRESS,
                 callId: "call_1",
@@ -567,9 +567,9 @@ describe("Thread", () => {
 
       const history = (thread as any).history as ThreadEvent[];
 
-      const toolResult = history.find((e) => e.kind === "tool-result");
+      const toolResult = history.find((e) => e.kind === "tool.result");
       expect(toolResult).toMatchObject({
-        kind: "tool-result",
+        kind: "tool.result",
         callId: "call_1",
         toolId: "failing",
         state: FAILED,
@@ -595,7 +595,7 @@ describe("Thread", () => {
                 content: [],
               },
               {
-                kind: "tool-call" as const,
+                kind: "tool.call" as const,
                 toolId: "add",
                 state: IN_PROGRESS,
                 callId: "call_1",
@@ -655,9 +655,9 @@ describe("Thread", () => {
       // @ts-expect-error
       const history = thread.history as ThreadEvent[];
 
-      const toolResult = history.find((e) => e.kind === "tool-result");
+      const toolResult = history.find((e) => e.kind === "tool.result");
       expect(toolResult).toEqual(expect.objectContaining({
-        kind: "tool-result",
+        kind: "tool.result",
         callId: "call_1",
         toolId: "add",
         state: COMPLETED,
@@ -685,14 +685,14 @@ describe("Thread", () => {
                 content: [],
               },
               {
-                kind: "tool-call" as const,
+                kind: "tool.call" as const,
                 toolId: "tool1",
                 state: IN_PROGRESS,
                 callId: "call_1",
                 arguments: JSON.stringify({ value: "a" }),
               },
               {
-                kind: "tool-call" as const,
+                kind: "tool.call" as const,
                 toolId: "tool2",
                 state: IN_PROGRESS,
                 callId: "call_2",
@@ -761,12 +761,12 @@ describe("Thread", () => {
       const history = (thread as any).history as ThreadEvent[];
 
       // Should have both tool results in history
-      const toolResults = history.filter((e) => e.kind === "tool-result");
+      const toolResults = history.filter((e) => e.kind === "tool.result");
       expect(toolResults).toHaveLength(2);
       expect(toolResults).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            kind: "tool-result",
+            kind: "tool.result",
             callId: "call_1",
             toolId: "tool1",
             state: COMPLETED,
@@ -774,7 +774,7 @@ describe("Thread", () => {
             error: null,
           }),
           expect.objectContaining({
-            kind: "tool-result",
+            kind: "tool.result",
             callId: "call_2",
             toolId: "tool2",
             state: COMPLETED,
@@ -803,7 +803,7 @@ describe("Thread", () => {
                 content: [],
               },
               {
-                kind: "tool-call" as const,
+                kind: "tool.call" as const,
                 toolId: "simple",
                 state: IN_PROGRESS,
                 callId: `call_${callCount}`,
@@ -880,7 +880,7 @@ describe("Thread", () => {
                 content: [],
               },
               {
-                kind: "tool-call" as const,
+                kind: "tool.call" as const,
                 toolId: "simple",
                 state: IN_PROGRESS,
                 callId: "call_1",
@@ -997,7 +997,7 @@ describe("Thread", () => {
                 content: [{ kind: "text" as const, text: "Let me use a tool" }],
               },
               {
-                kind: "tool-call" as const,
+                kind: "tool.call" as const,
                 toolId: "simple",
                 state: IN_PROGRESS,
                 callId: "call_1",

@@ -158,7 +158,7 @@ export const ITEM: Codec<LanguageModelItem, GrokItem> = {
         };
       }
 
-      case "tool-result":
+      case "tool.result":
         return {
           type: "function_call_output",
           call_id: item.callId,
@@ -187,7 +187,7 @@ export const ITEM: Codec<LanguageModelItem, GrokItem> = {
 
       case "function_call_output":
         return {
-          kind: "tool-result",
+          kind: "tool.result",
           callId: item.call_id,
           toolId: "",
           state: "completed" as const,

@@ -106,7 +106,7 @@ export const MESSAGE: Codec<LanguageModelItem, LanguageModelV3Message> = {
         };
       }
 
-      case "tool-call": {
+      case "tool.call": {
         return {
           role: "assistant",
           content: [
@@ -121,7 +121,7 @@ export const MESSAGE: Codec<LanguageModelItem, LanguageModelV3Message> = {
         };
       }
 
-      case "tool-result": {
+      case "tool.result": {
         return {
           role: "tool",
           content: [

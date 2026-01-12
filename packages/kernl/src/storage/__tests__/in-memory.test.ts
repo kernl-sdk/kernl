@@ -367,7 +367,7 @@ describe("InMemoryThreadStore", () => {
     it("should filter by kinds", async () => {
       await store.append([
         {
-          kind: "tool-call",
+          kind: "tool.call",
           id: "tc-1",
           tid: "thread-1",
           seq: 3,
