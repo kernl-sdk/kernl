@@ -1,5 +1,11 @@
 # @kernl-sdk/turbopuffer
 
+## 0.1.10
+
+### Patch Changes
+
+- @kernl-sdk/retrieval@0.1.9
+
 ## 0.1.9
 
 ### Patch Changes

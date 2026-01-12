@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/retrieval",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Generic search and retrieval abstractions for kernl",
   "keywords": [
     "kernl",

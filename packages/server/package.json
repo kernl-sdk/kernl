@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/server",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "private": true,
   "description": "Internal dev server for kernl (experimental)",
   "type": "module",
