@@ -1,5 +1,15 @@
 # @playground/web
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies [8815744]
+  - @kernl-sdk/openai@0.4.0
+  - @kernl-sdk/xai@0.3.0
+  - kernl@0.12.0
+  - @kernl-sdk/react@0.1.6
+
 ## 0.0.3
 
 ### Patch Changes

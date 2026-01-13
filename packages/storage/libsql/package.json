@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/libsql",
-  "version": "0.1.31",
+  "version": "0.1.32",
   "description": "LibSQL storage adapter for kernl",
   "keywords": [
     "kernl",
