@@ -2,13 +2,27 @@ import {
   ToolCall,
   LanguageModel,
   LanguageModelItem,
-  LanguageModelStreamEvent,
   RUNNING,
   STOPPED,
   INTERRUPTIBLE,
   UNINTERRUPTIBLE,
   ZOMBIE,
   DEAD,
+  // Stream event types
+  TextStartEvent,
+  TextEndEvent,
+  TextDeltaEvent,
+  ReasoningStartEvent,
+  ReasoningEndEvent,
+  ReasoningDeltaEvent,
+  ToolInputStartEvent,
+  ToolInputEndEvent,
+  ToolInputDeltaEvent,
+  StartEvent,
+  FinishEvent,
+  AbortEvent,
+  ErrorEvent,
+  RawEvent,
 } from "@kernl-sdk/protocol";
 
 import { Task } from "@/task";
@@ -128,9 +142,41 @@ export type ThreadEvent =
   | ThreadSystemEvent;
 
 /**
- * Stream events - use protocol definition directly.
+ * Incremental content chunks (ephemeral, not persisted).
  */
-export type ThreadStreamEvent = LanguageModelStreamEvent;
+export type StreamDeltaEvent =
+  | TextDeltaEvent
+  | ReasoningDeltaEvent
+  | ToolInputDeltaEvent;
+
+/**
+ * Boundary markers + control flow (ephemeral, not persisted).
+ */
+export type StreamControlEvent =
+  | TextStartEvent
+  | TextEndEvent
+  | ReasoningStartEvent
+  | ReasoningEndEvent
+  | ToolInputStartEvent
+  | ToolInputEndEvent
+  | StartEvent
+  | FinishEvent
+  | AbortEvent
+  | ErrorEvent
+  | RawEvent;
+
+/**
+ * All ephemeral stream types (not persisted to history).
+ */
+export type StreamEvent = StreamDeltaEvent | StreamControlEvent;
+
+/**
+ * Thread stream events = sequenced ThreadEvents + ephemeral StreamEvents.
+ *
+ * Complete items (Message, ToolCall, etc.) are yielded as ThreadEvents with seq.
+ * Deltas and control events are yielded as StreamEvents without seq.
+ */
+export type ThreadStreamEvent = ThreadEvent | StreamEvent;
 
 /**
  * Result of thread execution

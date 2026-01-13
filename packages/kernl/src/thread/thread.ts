@@ -19,6 +19,7 @@ import {
   LanguageModel,
   LanguageModelItem,
   LanguageModelRequest,
+  LanguageModelStreamEvent,
   type LanguageModelUsage,
   type LanguageModelFinishReason,
 } from "@kernl-sdk/protocol";
@@ -33,6 +34,7 @@ import type {
   ThreadStreamEvent,
   ThreadExecuteResult,
   PerformActionsResult,
+  PublicThreadEvent,
 } from "./types";
 import type { AgentOutputType } from "@/agent/types";
 import type { LanguageModelResponseType } from "@kernl-sdk/protocol";
@@ -176,35 +178,15 @@ export class Thread<
 
     await this.checkpoint(); /* c1: persist RUNNING state + initial input */
 
-    this.agent.emit("thread.start", {
-      kind: "thread.start",
-      threadId: this.tid,
-      agentId: this.agent.id,
-      namespace: this.namespace,
-      context: this.context,
-    });
+    this.emit("thread.start");
 
     yield { kind: "stream.start" }; // always yield start immediately
 
     try {
       yield* this._execute();
-
-      this.agent.emit("thread.stop", {
-        kind: "thread.stop",
-        threadId: this.tid,
-        agentId: this.agent.id,
-        namespace: this.namespace,
-        context: this.context,
-        state: STOPPED,
-        result: this.tickres,
-      });
+      this.emit("thread.stop", { state: STOPPED, result: this.tickres });
     } catch (err) {
-      this.agent.emit("thread.stop", {
-        kind: "thread.stop",
-        threadId: this.tid,
-        agentId: this.agent.id,
-        namespace: this.namespace,
-        context: this.context,
+      this.emit("thread.stop", {
         state: STOPPED,
         error: err instanceof Error ? err.message : String(err),
       });
@@ -236,12 +218,14 @@ export class Thread<
           err = e.error;
           logger.error(e.error); // (TODO): onError callback in options
         }
-        // we don't want deltas in the history
+        // complete items get persisted with seq, deltas are ephemeral
         if (notDelta(e)) {
-          events.push(e);
-          this.append(e);
+          const [seqd] = this.append(e);
+          events.push(seqd);
+          yield seqd;
+        } else {
+          yield e;
         }
-        yield e;
       }
 
       // if an error event occurred → throw it
@@ -267,10 +251,10 @@ export class Thread<
       const { actions, pendingApprovals } =
         await this.performActions(intentions);
 
-      // append + yield action events
+      // append + yield action events (sequenced)
       for (const a of actions) {
-        this.append(a);
-        yield a;
+        const [seqd] = this.append(a);
+        yield seqd;
       }
 
       await this.checkpoint(); /* c3: tick complete */
@@ -293,23 +277,16 @@ export class Thread<
    * NOTE: Streaming structured outputs deferred until concrete use cases emerge.
    * For now, we stream text-delta and tool events, final validation happens in _execute().
    */
-  private async *tick(): AsyncGenerator<ThreadStreamEvent> {
+  private async *tick(): AsyncGenerator<LanguageModelStreamEvent> {
     this._tick++;
 
     // (TODO): check limits (if this._tick > this.limits.maxTicks)
     // (TODO): run input guardrails on first tick (if this._tick === 1)
+    // (TODO): compaction if necessary
 
     const req = await this.prepareModelRequest(this.history);
 
-    this.agent.emit("model.call.start", {
-      kind: "model.call.start",
-      provider: this.model.provider,
-      modelId: this.model.modelId,
-      settings: req.settings ?? {},
-      threadId: this.tid,
-      agentId: this.agent.id,
-      context: this.context,
-    });
+    this.emit("model.call.start", { settings: req.settings ?? {} });
 
     let usage: LanguageModelUsage | undefined;
     let finishReason: LanguageModelFinishReason = "unknown";
@@ -333,27 +310,9 @@ export class Thread<
         }
       }
 
-      this.agent.emit("model.call.end", {
-        kind: "model.call.end",
-        provider: this.model.provider,
-        modelId: this.model.modelId,
-        finishReason,
-        usage,
-        threadId: this.tid,
-        agentId: this.agent.id,
-        context: this.context,
-      });
+      this.emit("model.call.end", { finishReason, usage });
     } catch (error) {
-      this.agent.emit("model.call.end", {
-        kind: "model.call.end",
-        provider: this.model.provider,
-        modelId: this.model.modelId,
-        finishReason: "error",
-        threadId: this.tid,
-        agentId: this.agent.id,
-        context: this.context,
-      });
-
+      this.emit("model.call.end", { finishReason: "error" });
       yield {
         kind: "error",
         error: error instanceof Error ? error : new Error(String(error)),
@@ -439,9 +398,31 @@ export class Thread<
     this.abort?.abort();
   }
 
-  // ----------------------------
-  // utils
-  // ----------------------------
+  /**
+   * Emit an agent event with common fields auto-filled.
+   */
+  private emit(kind: string, payload?: Record<string, unknown>): void {
+    const base = {
+      kind,
+      threadId: this.tid,
+      agentId: this.agent.id,
+      context: this.context,
+    };
+
+    let auto = {};
+    switch (kind) {
+      case "thread.start":
+      case "thread.stop":
+        auto = { namespace: this.namespace };
+        break;
+      case "model.call.start":
+      case "model.call.end":
+        auto = { provider: this.model.provider, modelId: this.model.modelId };
+        break;
+    }
+
+    this.agent.emit(kind as any, { ...base, ...auto, ...payload } as any);
+  }
 
   /**
    * Perform the actions returned by the model
@@ -497,11 +478,7 @@ export class Thread<
       calls.map(async (call: ToolCall) => {
         const parsedArgs = JSON.parse(call.arguments || "{}");
 
-        this.agent.emit("tool.call.start", {
-          kind: "tool.call.start",
-          threadId: this.tid,
-          agentId: this.agent.id,
-          context: this.context,
+        this.emit("tool.call.start", {
           toolId: call.toolId,
           callId: call.callId,
           args: parsedArgs,
@@ -526,11 +503,7 @@ export class Thread<
           ctx.approve(call.callId); // mark this call as approved
           const res = await tool.invoke(ctx, call.arguments, call.callId);
 
-          this.agent.emit("tool.call.end", {
-            kind: "tool.call.end",
-            threadId: this.tid,
-            agentId: this.agent.id,
-            context: this.context,
+          this.emit("tool.call.end", {
             toolId: call.toolId,
             callId: call.callId,
             state: res.state,
@@ -550,11 +523,7 @@ export class Thread<
             error: res.error,
           };
         } catch (error) {
-          this.agent.emit("tool.call.end", {
-            kind: "tool.call.end",
-            threadId: this.tid,
-            agentId: this.agent.id,
-            context: this.context,
+          this.emit("tool.call.end", {
             toolId: call.toolId,
             callId: call.callId,
             state: FAILED,

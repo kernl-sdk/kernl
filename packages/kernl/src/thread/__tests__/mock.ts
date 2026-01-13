@@ -4,8 +4,8 @@ import {
   LanguageModelResponse,
   LanguageModelResponseItem,
   LanguageModelItem,
+  LanguageModelStreamEvent,
 } from "@kernl-sdk/protocol";
-import type { ThreadStreamEvent } from "@/thread/types";
 
 /**
  * A mock language model that echoes the user input back as an assistant message.
@@ -54,7 +54,7 @@ export class MockLanguageModel implements LanguageModel {
 
   async *stream(
     request: LanguageModelRequest,
-  ): AsyncIterable<ThreadStreamEvent> {
+  ): AsyncIterable<LanguageModelStreamEvent> {
     // TODO: Implement streaming (not needed for hello world)
     throw new Error("MockLanguageModel.stream() not implemented yet");
   }

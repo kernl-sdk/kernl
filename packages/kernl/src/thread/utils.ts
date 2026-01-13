@@ -4,7 +4,11 @@ import type { ResolvedAgentResponse } from "@/guardrail";
 
 /* lib */
 import { json, randomID } from "@kernl-sdk/shared/lib";
-import { ToolCall, LanguageModelItem } from "@kernl-sdk/protocol";
+import {
+  ToolCall,
+  LanguageModelItem,
+  LanguageModelStreamEvent,
+} from "@kernl-sdk/protocol";
 import { ModelBehaviorError } from "@/lib/error";
 
 /* types */
@@ -12,7 +16,6 @@ import type { AgentOutputType } from "@/agent/types";
 import type {
   ThreadEvent,
   ThreadEventBase,
-  ThreadStreamEvent,
   ActionSet,
   PublicThreadEvent,
 } from "./types";
@@ -21,7 +24,7 @@ import type {
  * Create a ThreadEvent from a LanguageModelItem with thread metadata.
  *
  * @example
- * ```typescript
+ * ```ts
  * tevent({
  *   kind: "message",
  *   seq: 0,
@@ -57,7 +60,9 @@ export function tevent(event: {
 /**
  * Check if an event is a tool call
  */
-export function isActionIntention(event: LanguageModelItem): event is ToolCall {
+export function isActionIntention(
+  event: ThreadEvent,
+): event is ToolCall & ThreadEventBase {
   return event.kind === "tool.call";
 }
 
@@ -65,7 +70,7 @@ export function isActionIntention(event: LanguageModelItem): event is ToolCall {
  * Extract action intentions from a list of events.
  * Returns ActionSet if there are any tool calls, null otherwise.
  */
-export function getIntentions(events: LanguageModelItem[]): ActionSet | null {
+export function getIntentions(events: ThreadEvent[]): ActionSet | null {
   const toolCalls = events.filter(isActionIntention);
   return toolCalls.length > 0 ? { toolCalls } : null;
 }
@@ -74,7 +79,9 @@ export function getIntentions(events: LanguageModelItem[]): ActionSet | null {
  * Check if an event is NOT a delta/start/end event (i.e., a complete item).
  * Returns true for complete items: Message, Reasoning, ToolCall, ToolResult
  */
-export function notDelta(event: ThreadStreamEvent): event is LanguageModelItem {
+export function notDelta(
+  event: LanguageModelStreamEvent,
+): event is LanguageModelItem {
   switch (event.kind) {
     case "message":
     case "reasoning":
@@ -112,7 +119,7 @@ export function isPublicEvent(event: ThreadEvent): event is PublicThreadEvent {
  * Extract the final text response from a list of items.
  * Returns null if no assistant message with text content is found.
  */
-export function getFinalResponse(items: LanguageModelItem[]): string | null {
+export function getFinalResponse(items: ThreadEvent[]): string | null {
   // scan backwards for the last assistant message
   for (let i = items.length - 1; i >= 0; i--) {
     const item = items[i];
