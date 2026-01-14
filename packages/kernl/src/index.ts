@@ -56,6 +56,7 @@ export {
   THREAD_STATES,
   type ThreadState,
   type PublicThreadEvent,
+  type ThreadStreamEvent,
 } from "./thread/types";
 
 // --- storage ---

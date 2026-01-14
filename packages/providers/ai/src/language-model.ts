@@ -13,6 +13,7 @@ import { TOOL } from "./convert/tools";
 import { MODEL_SETTINGS } from "./convert/settings";
 import { MODEL_RESPONSE, RESPONSE_FORMAT } from "./convert/response";
 import { convertStream } from "./convert/stream";
+import { normalizeProvider } from "./util";
 
 /**
  * LanguageModel adapter for the AI SDK LanguageModelV3.
@@ -23,7 +24,7 @@ export class AISDKLanguageModel implements LanguageModel {
   readonly modelId: string;
 
   constructor(private model: LanguageModelV3) {
-    this.provider = model.provider;
+    this.provider = normalizeProvider(model.provider);
     this.modelId = model.modelId;
   }
 

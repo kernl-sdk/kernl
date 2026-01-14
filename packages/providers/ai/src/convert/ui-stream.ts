@@ -1,8 +1,6 @@
 import type { Codec } from "@kernl-sdk/shared/lib";
-import {
-  type LanguageModelStreamEvent,
-  FAILED,
-} from "@kernl-sdk/protocol";
+import { type LanguageModelStreamEvent, FAILED } from "@kernl-sdk/protocol";
+import { type ThreadStreamEvent } from "kernl";
 import { createUIMessageStream, type UIMessageChunk } from "ai";
 
 /**
@@ -19,11 +17,13 @@ import { createUIMessageStream, type UIMessageChunk } from "ai";
  * ```
  */
 export function toUIMessageStream(
-  stream: AsyncIterable<LanguageModelStreamEvent>,
+  stream: AsyncIterable<ThreadStreamEvent | LanguageModelStreamEvent>,
 ): ReadableStream<UIMessageChunk> {
   return createUIMessageStream({
     async execute({ writer }) {
       for await (const event of stream) {
+        if (event.kind === "system") continue;
+
         const chunk = STREAM_UI_PART.encode(event);
         if (chunk) {
           writer.write(chunk);
