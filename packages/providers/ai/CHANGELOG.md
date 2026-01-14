@@ -1,5 +1,19 @@
 # @kernl/ai
 
+## 0.4.1
+
+### Patch Changes
+
+- 58e9db2: Fix provider normalization and ThreadStreamEvent types
+  - Normalize AI SDK provider strings (`anthropic.messages` -> `anthropic`, etc.)
+  - Export `ThreadStreamEvent` from kernl for consumers
+  - Update `toUIMessageStream` to accept `ThreadStreamEvent` from `agent.stream()`
+  - Add `kernl` as dependency to `@kernl-sdk/ai` (breaking circular devDep)
+
+- Updated dependencies [58e9db2]
+- Updated dependencies [320b76a]
+  - kernl@0.12.1
+
 ## 0.4.0
 
 ### Minor Changes
