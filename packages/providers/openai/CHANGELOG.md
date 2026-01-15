@@ -1,5 +1,12 @@
 # @kernl-sdk/openai
 
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [884e513]
+  - @kernl-sdk/protocol@0.5.1
+
 ## 0.4.0
 
 ### Minor Changes

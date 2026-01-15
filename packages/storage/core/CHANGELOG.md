@@ -1,5 +1,14 @@
 # @kernl/storage
 
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies [884e513]
+- Updated dependencies [0576a77]
+  - @kernl-sdk/protocol@0.5.1
+  - kernl@0.12.3
+
 ## 0.2.2
 
 ### Patch Changes

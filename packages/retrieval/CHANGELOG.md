@@ -1,5 +1,12 @@
 # @kernl-sdk/retrieval
 
+## 0.1.10
+
+### Patch Changes
+
+- Updated dependencies [884e513]
+  - @kernl-sdk/protocol@0.5.1
+
 ## 0.1.9
 
 ### Patch Changes

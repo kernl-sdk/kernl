@@ -1,5 +1,23 @@
 # @kernl/ai
 
+## 0.4.4
+
+### Patch Changes
+
+- 884e513: Align with @ai-sdk/provider v3 stable release
+  - Update LanguageModelUsage to nested structure (inputTokens.total, outputTokens.total, etc.)
+  - Update LanguageModelFinishReason to object with unified and raw properties
+  - Rename LanguageModelWarning to SharedWarning with updated structure
+  - Update tool type from "provider-defined" to "provider"
+  - Bump @ai-sdk peer dependencies from beta to stable (^3.0.3)
+
+- 0040d4c: Add OAuth authentication support for OpenAI (Codex) and Anthropic providers
+- Updated dependencies [884e513]
+- Updated dependencies [0576a77]
+  - @kernl-sdk/protocol@0.5.1
+  - kernl@0.12.3
+  - @kernl-sdk/retrieval@0.1.10
+
 ## 0.4.3
 
 ### Patch Changes

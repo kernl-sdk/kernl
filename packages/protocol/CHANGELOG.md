@@ -1,5 +1,16 @@
 # @kernl/protocol
 
+## 0.5.1
+
+### Patch Changes
+
+- 884e513: Align with @ai-sdk/provider v3 stable release
+  - Update LanguageModelUsage to nested structure (inputTokens.total, outputTokens.total, etc.)
+  - Update LanguageModelFinishReason to object with unified and raw properties
+  - Rename LanguageModelWarning to SharedWarning with updated structure
+  - Update tool type from "provider-defined" to "provider"
+  - Bump @ai-sdk peer dependencies from beta to stable (^3.0.3)
+
 ## 0.5.0
 
 ### Minor Changes
