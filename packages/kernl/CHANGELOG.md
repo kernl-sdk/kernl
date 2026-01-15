@@ -1,5 +1,11 @@
 # @kernl/core
 
+## 0.12.2
+
+### Patch Changes
+
+- 11cf6fd: Add ModelRegistry and AgentRegistry classes to fix hydration issues when threads use model overrides. Models are now auto-registered in spawn/schedule methods.
+
 ## 0.12.1
 
 ### Patch Changes
