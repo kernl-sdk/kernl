@@ -25,7 +25,7 @@ import type {
   SortOrder,
 } from "@/storage";
 import type { ThreadEvent, ThreadState } from "@/thread/types";
-import type { AgentRegistry, ModelRegistry } from "@/kernl/types";
+import type { IAgentRegistry, IModelRegistry } from "@/kernl/types";
 import type {
   MemoryStore,
   MemoryRecord,
@@ -47,7 +47,7 @@ export class InMemoryStorage implements KernlStorage {
     this.memories = new InMemoryMemoryStore();
   }
 
-  bind(registries: { agents: AgentRegistry; models: ModelRegistry }): void {
+  bind(registries: { agents: IAgentRegistry; models: IModelRegistry }): void {
     this.threads.bind(registries);
   }
 
@@ -93,10 +93,10 @@ interface ThreadData {
 export class InMemoryThreadStore implements ThreadStore {
   private threads = new Map<string, ThreadData>();
   private events = new Map<string, ThreadEvent[]>(); // tid -> events
-  private registries: { agents: AgentRegistry; models: ModelRegistry } | null =
+  private registries: { agents: IAgentRegistry; models: IModelRegistry } | null =
     null;
 
-  bind(registries: { agents: AgentRegistry; models: ModelRegistry }): void {
+  bind(registries: { agents: IAgentRegistry; models: IModelRegistry }): void {
     this.registries = registries;
   }
 

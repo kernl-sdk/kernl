@@ -1,8 +1,9 @@
 export { Kernl } from "./kernl";
+export { AgentRegistry, ModelRegistry } from "./registry";
 export type {
   KernlOptions,
   StorageOptions,
   MemoryOptions,
-  AgentRegistry,
-  ModelRegistry,
+  IAgentRegistry,
+  IModelRegistry,
 } from "./types";

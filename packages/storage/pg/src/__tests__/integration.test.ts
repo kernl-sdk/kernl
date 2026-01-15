@@ -6,8 +6,8 @@ import { PGThreadStore } from "../thread/store";
 import {
   Agent,
   Context,
-  type AgentRegistry,
-  type ModelRegistry,
+  type IAgentRegistry,
+  type IModelRegistry,
 } from "kernl";
 import { Thread } from "kernl/internal";
 import type { LanguageModel } from "@kernl-sdk/protocol";
@@ -49,10 +49,10 @@ describe.sequential("PGStorage auto-initialization", () => {
       model,
     });
 
-    const agents: AgentRegistry = new Map([["auto-init-agent", agent]]);
-    const models: ModelRegistry = new Map([
+    const agents: IAgentRegistry = new Map([["auto-init-agent", agent]]);
+    const models: IModelRegistry = new Map([
       ["test/auto-init-model", model],
-    ]) as unknown as ModelRegistry;
+    ]) as unknown as IModelRegistry;
 
     storage.bind({ agents, models });
     const store = storage.threads;
@@ -314,10 +314,10 @@ describe.sequential("PGStorage integration", () => {
       model,
     });
 
-    const agents: AgentRegistry = new Map<string, Agent>([["agent-1", agent]]);
-    const models: ModelRegistry = new Map<string, LanguageModel>([
+    const agents: IAgentRegistry = new Map<string, Agent>([["agent-1", agent]]);
+    const models: IModelRegistry = new Map<string, LanguageModel>([
       ["provider/model", model],
-    ]) as unknown as ModelRegistry;
+    ]) as unknown as IModelRegistry;
 
     storage.bind({ agents, models });
     const store = storage.threads;
@@ -510,10 +510,10 @@ describe.sequential("PGStorage integration", () => {
       model,
     });
 
-    const agents: AgentRegistry = new Map<string, Agent>([["agent-1", agent]]);
-    const models: ModelRegistry = new Map<string, LanguageModel>([
+    const agents: IAgentRegistry = new Map<string, Agent>([["agent-1", agent]]);
+    const models: IModelRegistry = new Map<string, LanguageModel>([
       ["provider/model", model],
-    ]) as unknown as ModelRegistry;
+    ]) as unknown as IModelRegistry;
 
     storage.bind({ agents, models });
     const store = storage.threads;
@@ -583,10 +583,10 @@ describe.sequential("PGStorage integration", () => {
       model,
     });
 
-    const agents: AgentRegistry = new Map<string, Agent>([["agent-1", agent]]);
-    const models: ModelRegistry = new Map<string, LanguageModel>([
+    const agents: IAgentRegistry = new Map<string, Agent>([["agent-1", agent]]);
+    const models: IModelRegistry = new Map<string, LanguageModel>([
       ["provider/model", model],
-    ]) as unknown as ModelRegistry;
+    ]) as unknown as IModelRegistry;
 
     storage.bind({ agents, models });
     const store = storage.threads;
@@ -641,10 +641,10 @@ describe.sequential("PGStorage integration", () => {
       model,
     });
 
-    const agents: AgentRegistry = new Map<string, Agent>([["agent-1", agent]]);
-    const models: ModelRegistry = new Map<string, LanguageModel>([
+    const agents: IAgentRegistry = new Map<string, Agent>([["agent-1", agent]]);
+    const models: IModelRegistry = new Map<string, LanguageModel>([
       ["provider/model", model],
-    ]) as unknown as ModelRegistry;
+    ]) as unknown as IModelRegistry;
 
     storage.bind({ agents, models });
     const store = storage.threads;
@@ -710,13 +710,13 @@ describe.sequential("PGStorage integration", () => {
       model,
     });
 
-    const agents: AgentRegistry = new Map<string, Agent>([
+    const agents: IAgentRegistry = new Map<string, Agent>([
       ["agent-1", agent1],
       ["agent-2", agent2],
     ]);
-    const models: ModelRegistry = new Map<string, LanguageModel>([
+    const models: IModelRegistry = new Map<string, LanguageModel>([
       ["provider/model", model],
-    ]) as unknown as ModelRegistry;
+    ]) as unknown as IModelRegistry;
 
     storage.bind({ agents, models });
     const store = storage.threads;
@@ -827,10 +827,10 @@ describe.sequential("PGStorage integration", () => {
       model,
     });
 
-    const agents: AgentRegistry = new Map<string, Agent>([["agent-1", agent]]);
-    const models: ModelRegistry = new Map<string, LanguageModel>([
+    const agents: IAgentRegistry = new Map<string, Agent>([["agent-1", agent]]);
+    const models: IModelRegistry = new Map<string, LanguageModel>([
       ["provider/model", model],
-    ]) as unknown as ModelRegistry;
+    ]) as unknown as IModelRegistry;
 
     storage.bind({ agents, models });
     const store = storage.threads;

@@ -6,8 +6,6 @@ import { KernlHooks } from "@/lifecycle";
 import type { Thread } from "@/thread";
 import type { ResolvedAgentResponse } from "@/guardrail";
 import { InMemoryStorage, type KernlStorage } from "@/storage";
-import { RThreads } from "@/api/resources/threads";
-import { RAgents } from "@/api/resources/agents";
 import {
   Memory,
   MemoryByteEncoder,
@@ -16,10 +14,13 @@ import {
 } from "@/memory";
 
 import { logger } from "@/lib/logger";
-
+import { RThreads } from "@/api/resources/threads";
+import { RAgents } from "@/api/resources/agents";
 import type { ThreadExecuteResult, ThreadStreamEvent } from "@/thread/types";
 import type { AgentOutputType } from "@/agent/types";
+
 import type { KernlOptions, MemoryOptions, StorageOptions } from "./types";
+import { AgentRegistry, ModelRegistry } from "./registry";
 
 /**
  * The kernl - manages agent processes, scheduling, and task lifecycle.
@@ -28,14 +29,13 @@ import type { KernlOptions, MemoryOptions, StorageOptions } from "./types";
  * tracing.
  */
 export class Kernl extends KernlHooks {
-  private readonly _agents: Map<string, BaseAgent> = new Map();
-  private readonly _models: Map<string, LanguageModel> = new Map();
+  private readonly _agents: AgentRegistry;
+  private readonly _models: ModelRegistry;
+  private readonly _memopts: MemoryOptions | undefined;
+  private readonly _storopts: StorageOptions | undefined;
 
   readonly storage: KernlStorage;
   athreads: Map<string, Thread<any, any>> = new Map(); /* active threads */
-
-  private readonly _memopts: MemoryOptions | undefined;
-  private readonly _storopts: StorageOptions | undefined;
 
   private warnings = {
     embedding: false, // "Embeddings are not configured. If you want memories to auto-embed text content..."
@@ -53,18 +53,20 @@ export class Kernl extends KernlHooks {
     this._memopts = options.memory;
     this._storopts = options.storage;
 
+    this._agents = new AgentRegistry();
+    this._models = new ModelRegistry();
     this.storage = options.storage?.db ?? new InMemoryStorage();
     this.storage.bind({ agents: this._agents, models: this._models });
     this.threads = new RThreads(this.storage.threads);
     this.agents = new RAgents(this._agents);
-    this.memories = this.initializeMemory();
+    this.memories = this.initmem();
   }
 
   /**
    * Registers a new agent with the kernl instance.
    */
   register(agent: BaseAgent<any>): void {
-    this._agents.set(agent.id, agent);
+    this._agents.register(agent);
     agent.bind(this);
 
     // memory config warnings (log once)
@@ -88,10 +90,7 @@ export class Kernl extends KernlHooks {
 
     // auto-populate model registry for storage hydration (llm agents only - for now)
     if (agent.kind === "llm") {
-      const key = `${agent.model.provider}/${agent.model.modelId}`;
-      if (!this._models.has(key)) {
-        this._models.set(key, agent.model as LanguageModel);
-      }
+      this._models.register(agent.model as LanguageModel);
     }
   }
 
@@ -101,6 +100,7 @@ export class Kernl extends KernlHooks {
   async spawn<TContext, TOutput extends AgentOutputType>(
     thread: Thread<TContext, TOutput>,
   ): Promise<ThreadExecuteResult<ResolvedAgentResponse<TOutput>>> {
+    this._models.register(thread.model);
     this.athreads.set(thread.tid, thread);
     try {
       return await thread.execute();
@@ -117,6 +117,7 @@ export class Kernl extends KernlHooks {
   async schedule<TContext, TOutput extends AgentOutputType>(
     thread: Thread<TContext, TOutput>,
   ): Promise<ThreadExecuteResult<ResolvedAgentResponse<TOutput>>> {
+    this._models.register(thread.model);
     this.athreads.set(thread.tid, thread);
     try {
       return await thread.execute();
@@ -133,6 +134,7 @@ export class Kernl extends KernlHooks {
   async *spawnStream<TContext, TOutput extends AgentOutputType>(
     thread: Thread<TContext, TOutput>,
   ): AsyncIterable<ThreadStreamEvent> {
+    this._models.register(thread.model);
     this.athreads.set(thread.tid, thread);
     try {
       yield* thread.stream();
@@ -149,6 +151,7 @@ export class Kernl extends KernlHooks {
   async *scheduleStream<TContext, TOutput extends AgentOutputType>(
     thread: Thread<TContext, TOutput>,
   ): AsyncIterable<ThreadStreamEvent> {
+    this._models.register(thread.model);
     this.athreads.set(thread.tid, thread);
     try {
       yield* thread.stream();
@@ -164,7 +167,7 @@ export class Kernl extends KernlHooks {
    *
    * Initialize the memory system based on the storage + memory configuration.
    */
-  private initializeMemory(): Memory {
+  private initmem(): Memory {
     const embeddingModel = this._memopts?.embedding;
     const embedder = embeddingModel
       ? typeof embeddingModel === "string"

@@ -2,7 +2,7 @@
  * Core storage contracts.
  */
 
-import type { AgentRegistry, ModelRegistry } from "@/kernl/types";
+import type { IAgentRegistry, IModelRegistry } from "@/kernl/types";
 import type { ThreadStore } from "./thread";
 import type { MemoryStore } from "@/memory/store";
 
@@ -30,7 +30,7 @@ export interface KernlStorage {
    *
    * Called by Kernl after construction to wire up agent/model lookups.
    */
-  bind(registries: { agents: AgentRegistry; models: ModelRegistry }): void;
+  bind(registries: { agents: IAgentRegistry; models: IModelRegistry }): void;
 
   /**
    * Execute a function within a transaction.

@@ -89,7 +89,7 @@ export interface KernlOptions {
  *
  * Satisfied by Map<string, BaseAgent>.
  */
-export interface AgentRegistry {
+export interface IAgentRegistry {
   get(id: string): BaseAgent<any> | undefined;
 }
 
@@ -102,6 +102,6 @@ export interface AgentRegistry {
  * TODO: Create an exhaustive model registry in the protocol package
  * with all supported models and their metadata.
  */
-export interface ModelRegistry {
+export interface IModelRegistry {
   get(key: string): LanguageModel | undefined;
 }

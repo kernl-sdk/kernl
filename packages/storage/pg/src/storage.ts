@@ -3,8 +3,8 @@ import type { Pool, PoolClient } from "pg";
 
 /* workspace */
 import type {
-  AgentRegistry,
-  ModelRegistry,
+  IAgentRegistry,
+  IModelRegistry,
   KernlStorage,
   Transaction,
 } from "kernl";
@@ -134,7 +134,7 @@ export class PGStorage implements KernlStorage {
   /**
    * Bind runtime registries to storage.
    */
-  bind(registries: { agents: AgentRegistry; models: ModelRegistry }): void {
+  bind(registries: { agents: IAgentRegistry; models: IModelRegistry }): void {
     this.threads.bind(registries);
   }
 

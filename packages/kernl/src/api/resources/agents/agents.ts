@@ -1,7 +1,7 @@
 import { Agent } from "@/agent";
-import type { BaseAgent } from "@/agent/base";
 import type { AgentOutputType } from "@/agent/types";
 import type { UnknownContext } from "@/context";
+import type { AgentRegistry } from "@/kernl/registry";
 import type { TextOutput } from "@/thread/types";
 
 /**
@@ -16,7 +16,7 @@ import type { TextOutput } from "@/thread/types";
  * to realtime agents is needed, add a separate `kernl.realtimeAgents` resource.
  */
 export class RAgents {
-  constructor(private readonly registry: Map<string, BaseAgent>) {}
+  constructor(private readonly registry: AgentRegistry) {}
 
   /**
    * Get a live Agent instance by id.
@@ -57,6 +57,6 @@ export class RAgents {
    * Unregister an agent at runtime.
    */
   unregister(id: string): boolean {
-    return this.registry.delete(id);
+    return this.registry.unregister(id);
   }
 }

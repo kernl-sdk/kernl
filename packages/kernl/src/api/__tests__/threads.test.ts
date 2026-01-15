@@ -4,7 +4,7 @@ import { message, RUNNING } from "@kernl-sdk/protocol";
 
 import { Agent } from "@/agent";
 import { InMemoryThreadStore } from "@/storage/in-memory";
-import type { AgentRegistry, ModelRegistry } from "@/kernl/types";
+import type { IAgentRegistry, IModelRegistry } from "@/kernl/types";
 import type { NewThread } from "@/storage";
 import { tevent } from "@/thread/utils";
 import type { ThreadEvent } from "@/thread/types";
@@ -14,8 +14,8 @@ import type { MThread } from "@/api/models";
 function createTestStore() {
   const store = new InMemoryThreadStore();
 
-  const agents: AgentRegistry & Map<string, Agent> = new Map();
-  const models: ModelRegistry & Map<string, any> = new Map();
+  const agents: IAgentRegistry & Map<string, Agent> = new Map();
+  const models: IModelRegistry & Map<string, any> = new Map();
 
   const model = {
     spec: "1.0" as const,

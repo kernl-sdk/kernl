@@ -4,8 +4,8 @@ import type { Pool, PoolClient } from "pg";
 import {
   Agent,
   Context,
-  type AgentRegistry,
-  type ModelRegistry,
+  type IAgentRegistry,
+  type IModelRegistry,
   type ThreadStore,
   type NewThread,
   type ThreadUpdate,
@@ -32,7 +32,7 @@ import { SQL_WHERE, SQL_ORDER, SQL_UPDATE } from "./sql";
  */
 export class PGThreadStore implements ThreadStore {
   private db: Pool | PoolClient;
-  private registries: { agents: AgentRegistry; models: ModelRegistry } | null;
+  private registries: { agents: IAgentRegistry; models: IModelRegistry } | null;
   private ensureInit: () => Promise<void>;
 
   constructor(db: Pool | PoolClient, ensureInit: () => Promise<void>) {
@@ -46,7 +46,7 @@ export class PGThreadStore implements ThreadStore {
    *
    * (TODO): move into abstract ThreadStore class
    */
-  bind(registries: { agents: AgentRegistry; models: ModelRegistry }): void {
+  bind(registries: { agents: IAgentRegistry; models: IModelRegistry }): void {
     this.registries = registries;
   }
 
