@@ -42,19 +42,6 @@ export const toolkits: RegistryItem[] = [
     files: [{ path: "toolkits/parallel/index.ts" }],
   },
   {
-    name: "alai",
-    type: "registry:toolkit",
-    title: "Alai",
-    description: "Transform text content into fully designed presentations",
-    icon: "https://registry.kernl.sh/icons/alai.svg",
-    category: "productivity",
-    env: ["ALAI_API_KEY"],
-    files: [
-      { path: "toolkits/alai/index.ts" },
-      { path: "toolkits/alai/client.ts" },
-    ],
-  },
-  {
     name: "agentmail",
     type: "registry:toolkit",
     title: "AgentMail",
