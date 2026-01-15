@@ -10,16 +10,14 @@ import { EMBEDDING_SETTINGS } from "./convert/embedding";
 /**
  * EmbeddingModel adapter for the AI SDK EmbeddingModelV3.
  */
-export class AISDKEmbeddingModel<TValue = string>
-  implements EmbeddingModel<TValue>
-{
+export class AISDKEmbeddingModel implements EmbeddingModel<string> {
   readonly spec = "1.0" as const;
   readonly provider: string;
   readonly modelId: string;
   readonly maxEmbeddingsPerCall?: number;
   readonly supportsParallelCalls?: boolean;
 
-  constructor(private model: EmbeddingModelV3<TValue>) {
+  constructor(private model: EmbeddingModelV3) {
     this.provider = model.provider;
     this.modelId = model.modelId;
 
@@ -33,7 +31,7 @@ export class AISDKEmbeddingModel<TValue = string>
   }
 
   async embed(
-    request: EmbeddingModelRequest<TValue>,
+    request: EmbeddingModelRequest<string>,
   ): Promise<EmbeddingModelResponse> {
     const settings = request.settings
       ? EMBEDDING_SETTINGS.encode(request.settings)

@@ -1,52 +1,70 @@
-import { openai as _openai } from "@ai-sdk/openai";
-import { AISDKLanguageModel } from "../language-model";
-import { AISDKEmbeddingModel } from "../embedding-model";
+import {
+  openai as _openai,
+  createOpenAI as _createOpenAI,
+} from "@ai-sdk/openai";
 import { registerEmbeddingProvider } from "@kernl-sdk/retrieval";
 
+import { AISDKLanguageModel } from "../language-model";
+import { AISDKEmbeddingModel } from "../embedding-model";
+import { createOAuthFetch } from "../oauth/openai";
+import type { OpenAIOAuthCredentials } from "../oauth/types";
+
 /**
- * OpenAI model IDs.
+ * OpenAI model IDs (derived from @ai-sdk/openai).
  */
-type OpenAIModelId =
-  | "chatgpt-4o-latest"
-  | "gpt-3.5-turbo-0125"
-  | "gpt-3.5-turbo-1106"
-  | "gpt-3.5-turbo"
-  | "gpt-4-0613"
-  | "gpt-4-turbo-2024-04-09"
-  | "gpt-4-turbo"
-  | "gpt-4.1-2025-04-14"
-  | "gpt-4.1-mini-2025-04-14"
-  | "gpt-4.1-mini"
-  | "gpt-4.1-nano-2025-04-14"
-  | "gpt-4.1-nano"
-  | "gpt-4.1"
-  | "gpt-4"
-  | "gpt-4o-2024-05-13"
-  | "gpt-4o-2024-08-06"
-  | "gpt-4o-2024-11-20"
-  | "gpt-4o-mini-2024-07-18"
-  | "gpt-4o-mini"
-  | "gpt-4o"
-  | "gpt-5-2025-08-07"
-  | "gpt-5-chat-latest"
-  | "gpt-5-codex"
-  | "gpt-5-mini-2025-08-07"
-  | "gpt-5-mini"
-  | "gpt-5-nano-2025-08-07"
-  | "gpt-5-nano"
-  | "gpt-5-pro-2025-10-06"
-  | "gpt-5-pro"
-  | "gpt-5"
-  | "o1-2024-12-17"
-  | "o1"
-  | "o3-2025-04-16"
-  | "o3-mini-2025-01-31"
-  | "o3-mini"
-  | "o3"
-  | (string & {});
+export type OpenAIModelId = Parameters<typeof _openai>[0];
+
+/**
+ * Options for creating a custom OpenAI provider.
+ */
+export interface OpenAIProviderOptions {
+  /** API key for standard authentication */
+  apiKey?: string;
+  /** OAuth credentials for ChatGPT Plus/Pro (Codex) authentication */
+  oauth?: OpenAIOAuthCredentials;
+  /** Custom base URL (ignored for OAuth - uses Codex endpoint) */
+  baseURL?: string;
+  /** Custom headers */
+  headers?: Record<string, string>;
+}
+
+/**
+ * Create a custom OpenAI provider with explicit credentials.
+ *
+ * @example API key auth
+ * ```ts
+ * const openai = createOpenAI({ apiKey: "sk-..." });
+ * const model = openai("gpt-4o");
+ * ```
+ *
+ * @example OAuth auth (ChatGPT Plus/Pro via Codex)
+ * ```ts
+ * const openai = createOpenAI({
+ *   oauth: {
+ *     accessToken: "...",
+ *     refreshToken: "...",
+ *     expiresAt: Date.now() + 3600000,
+ *     accountId: "...", // for org subscriptions
+ *     onRefresh: (tokens) => saveTokens(tokens),
+ *   }
+ * });
+ * const model = openai("gpt-4o");
+ * ```
+ */
+export function createOpenAI(options: OpenAIProviderOptions = {}) {
+  const provider = _createOpenAI({
+    apiKey: options.oauth ? undefined : options.apiKey,
+    baseURL: options.oauth ? undefined : options.baseURL,
+    headers: options.headers,
+    fetch: options.oauth ? createOAuthFetch(options.oauth) : undefined,
+  });
+
+  return (modelId: OpenAIModelId) => new AISDKLanguageModel(provider(modelId));
+}
 
 /**
  * Create a kernl-compatible OpenAI language model.
+ * Uses OPENAI_API_KEY environment variable.
  *
  * @example
  * ```ts
@@ -60,6 +78,9 @@ export function openai(modelId: OpenAIModelId) {
   const model = _openai(modelId);
   return new AISDKLanguageModel(model);
 }
+
+// Re-export types
+export type { OpenAIOAuthCredentials } from "../oauth/types";
 
 // Auto-register OpenAI embedding provider
 registerEmbeddingProvider(

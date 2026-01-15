@@ -51,11 +51,10 @@ describe("AISDKLanguageModel", () => {
                 },
                 {
                   type: "finish",
-                  finishReason: "stop",
+                  finishReason: { unified: "stop", raw: "stop" },
                   usage: {
-                    inputTokens: 5,
-                    outputTokens: 10,
-                    totalTokens: 15,
+                    inputTokens: { total: 5, noCache: 5, cacheRead: undefined, cacheWrite: undefined },
+                    outputTokens: { total: 10, text: 10, reasoning: undefined },
                   },
                   providerMetadata: undefined,
                 },
@@ -163,11 +162,10 @@ describe("AISDKLanguageModel", () => {
                 },
                 {
                   type: "finish",
-                  finishReason: "stop",
+                  finishReason: { unified: "stop", raw: "stop" },
                   usage: {
-                    inputTokens: 5,
-                    outputTokens: 20,
-                    totalTokens: 25,
+                    inputTokens: { total: 5, noCache: 5, cacheRead: undefined, cacheWrite: undefined },
+                    outputTokens: { total: 20, text: 20, reasoning: undefined },
                   },
                   providerMetadata: undefined,
                 },
@@ -272,11 +270,10 @@ describe("AISDKLanguageModel", () => {
                 },
                 {
                   type: "finish",
-                  finishReason: "stop",
+                  finishReason: { unified: "stop", raw: "stop" },
                   usage: {
-                    inputTokens: 5,
-                    outputTokens: 10,
-                    totalTokens: 15,
+                    inputTokens: { total: 5, noCache: 5, cacheRead: undefined, cacheWrite: undefined },
+                    outputTokens: { total: 10, text: 10, reasoning: undefined },
                   },
                   providerMetadata: undefined,
                 },
@@ -353,11 +350,10 @@ describe("AISDKLanguageModel", () => {
                 },
                 {
                   type: "finish",
-                  finishReason: "stop",
+                  finishReason: { unified: "stop", raw: "stop" },
                   usage: {
-                    inputTokens: 5,
-                    outputTokens: 10,
-                    totalTokens: 15,
+                    inputTokens: { total: 5, noCache: 5, cacheRead: undefined, cacheWrite: undefined },
+                    outputTokens: { total: 10, text: 10, reasoning: undefined },
                   },
                   providerMetadata: undefined,
                 },
@@ -413,11 +409,10 @@ describe("AISDKLanguageModel", () => {
                 },
                 {
                   type: "finish",
-                  finishReason: "tool-calls",
+                  finishReason: { unified: "tool-calls", raw: "tool_calls" },
                   usage: {
-                    inputTokens: 5,
-                    outputTokens: 10,
-                    totalTokens: 15,
+                    inputTokens: { total: 5, noCache: 5, cacheRead: undefined, cacheWrite: undefined },
+                    outputTokens: { total: 10, text: 10, reasoning: undefined },
                   },
                   providerMetadata: undefined,
                 },

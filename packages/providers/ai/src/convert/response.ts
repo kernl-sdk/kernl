@@ -8,7 +8,7 @@ import {
   type LanguageModelResponseType,
   type LanguageModelFinishReason,
   type LanguageModelUsage,
-  type LanguageModelWarning,
+  type SharedWarning,
   type SharedProviderMetadata,
 } from "@kernl-sdk/protocol";
 import { randomID } from "@kernl-sdk/shared/lib";
@@ -16,7 +16,7 @@ import type {
   LanguageModelV3Content,
   LanguageModelV3FinishReason,
   LanguageModelV3Usage,
-  LanguageModelV3CallWarning,
+  SharedV3Warning,
   JSONSchema7,
 } from "@ai-sdk/provider";
 
@@ -28,7 +28,7 @@ export interface AISdkGenerateResult {
   finishReason: LanguageModelV3FinishReason;
   usage: LanguageModelV3Usage;
   providerMetadata?: Record<string, unknown>;
-  warnings: Array<LanguageModelV3CallWarning>;
+  warnings: Array<SharedV3Warning>;
 }
 
 export const MODEL_RESPONSE: Codec<LanguageModelResponse, AISdkGenerateResult> =
@@ -147,33 +147,12 @@ const USAGE: Codec<LanguageModelUsage, LanguageModelV3Usage> = {
   decode: (usage) => usage as LanguageModelUsage,
 };
 
-export const WARNING: Codec<LanguageModelWarning, LanguageModelV3CallWarning> =
-  {
-    encode: () => {
-      throw new Error("codec:unimplemented");
-    },
-
-    decode: (warning: LanguageModelV3CallWarning) => {
-      switch (warning.type) {
-        case "unsupported-setting":
-          return {
-            type: "unsupported-setting",
-            setting: warning.setting as any,
-            details: warning.details,
-          };
-        case "other":
-          return {
-            type: "other",
-            message: warning.message,
-          };
-        default:
-          return {
-            type: "other",
-            message: "Unknown warning type",
-          };
-      }
-    },
-  };
+export const WARNING: Codec<SharedWarning, SharedV3Warning> = {
+  encode: () => {
+    throw new Error("codec:unimplemented");
+  },
+  decode: (warning) => warning as SharedWarning,
+};
 
 /**
  * AI SDK response format type.

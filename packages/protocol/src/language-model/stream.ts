@@ -3,7 +3,7 @@ import { SharedProviderMetadata } from "@/provider";
 import type {
   LanguageModelFinishReason,
   LanguageModelUsage,
-  LanguageModelWarning,
+  SharedWarning,
 } from "./model";
 import type { Message, Reasoning, ToolCall, ToolResult } from "./item";
 
@@ -151,7 +151,7 @@ export interface StartEvent extends StreamEventBase {
   /**
    * Warnings for the call (e.g., unsupported settings).
    */
-  warnings?: LanguageModelWarning[];
+  warnings?: SharedWarning[];
 }
 
 /**

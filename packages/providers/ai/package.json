@@ -52,7 +52,7 @@
     "test:run": "vitest run"
   },
   "peerDependencies": {
-    "@ai-sdk/provider": "^3.0.0-beta.15"
+    "@ai-sdk/provider": "^3.0.3"
   },
   "peerDependenciesMeta": {
     "@ai-sdk/anthropic": {
@@ -66,10 +66,10 @@
     }
   },
   "devDependencies": {
-    "@ai-sdk/anthropic": "3.0.0-beta.53",
-    "@ai-sdk/google": "3.0.0-beta.43",
-    "@ai-sdk/openai": "3.0.0-beta.57",
-    "@ai-sdk/provider": "3.0.0-beta.15",
+    "@ai-sdk/anthropic": "^3.0.14",
+    "@ai-sdk/google": "^3.0.9",
+    "@ai-sdk/openai": "^3.0.11",
+    "@ai-sdk/provider": "^3.0.3",
     "@types/node": "^24.10.0",
     "ai": "^5.0.93",
     "tsc-alias": "^1.8.10",

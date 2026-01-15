@@ -40,13 +40,22 @@ export class MockLanguageModel implements LanguageModel {
     ];
 
     // Return with fake usage stats
+    const tokens = this.countTokens(userText);
     return {
       content,
-      finishReason: "stop",
+      finishReason: { unified: "stop", raw: "stop" },
       usage: {
-        inputTokens: this.countTokens(userText),
-        outputTokens: this.countTokens(userText),
-        totalTokens: this.countTokens(userText) * 2,
+        inputTokens: {
+          total: tokens,
+          noCache: tokens,
+          cacheRead: undefined,
+          cacheWrite: undefined,
+        },
+        outputTokens: {
+          total: tokens,
+          text: tokens,
+          reasoning: undefined,
+        },
       },
       warnings: [],
     };

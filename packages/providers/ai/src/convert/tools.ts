@@ -5,13 +5,13 @@ import type {
 } from "@kernl-sdk/protocol";
 import type {
   LanguageModelV3FunctionTool,
-  LanguageModelV3ProviderDefinedTool,
+  LanguageModelV3ProviderTool,
   LanguageModelV3ToolChoice,
 } from "@ai-sdk/provider";
 
 export const TOOL: Codec<
   LanguageModelTool,
-  LanguageModelV3FunctionTool | LanguageModelV3ProviderDefinedTool
+  LanguageModelV3FunctionTool | LanguageModelV3ProviderTool
 > = {
   encode: (tool) => {
     if (tool.kind === "function") {
@@ -23,13 +23,13 @@ export const TOOL: Codec<
         providerOptions: tool.providerOptions,
       } satisfies LanguageModelV3FunctionTool;
     } else {
-      // provider-defined
+      // provider tool
       return {
-        type: "provider-defined",
+        type: "provider",
         id: tool.id,
         name: tool.name,
         args: tool.args,
-      } satisfies LanguageModelV3ProviderDefinedTool;
+      } satisfies LanguageModelV3ProviderTool;
     }
   },
   decode: () => {

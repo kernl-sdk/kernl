@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import type {
   LanguageModelV3FunctionTool,
-  LanguageModelV3ProviderDefinedTool,
+  LanguageModelV3ProviderTool,
   LanguageModelV3ToolChoice,
 } from "@ai-sdk/provider";
 
@@ -96,8 +96,8 @@ describe("TOOL codec", () => {
     });
   });
 
-  describe("encode - provider-defined tools", () => {
-    it("should encode provider-defined tool", () => {
+  describe("encode - provider tools", () => {
+    it("should encode provider tool", () => {
       const result = TOOL.encode({
         kind: "provider-defined",
         id: "mcp.tool-123",
@@ -106,14 +106,14 @@ describe("TOOL codec", () => {
       });
 
       expect(result).toEqual({
-        type: "provider-defined",
+        type: "provider",
         id: "mcp.tool-123",
         name: "custom_mcp_tool",
         args: { param1: "value1" },
       });
     });
 
-    it("should encode provider-defined tool without args", () => {
+    it("should encode provider tool without args", () => {
       const result = TOOL.encode({
         kind: "provider-defined",
         id: "mcp.tool-id",
@@ -122,7 +122,7 @@ describe("TOOL codec", () => {
       });
 
       expect(result).toEqual({
-        type: "provider-defined",
+        type: "provider",
         id: "mcp.tool-id",
         name: "tool_name",
         args: {},

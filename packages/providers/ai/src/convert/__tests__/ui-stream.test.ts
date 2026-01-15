@@ -274,11 +274,10 @@ describe("STREAM_UI_PART codec", () => {
     it("should encode finish event", () => {
       const event: LanguageModelStreamEvent = {
         kind: "finish",
-        finishReason: "stop",
+        finishReason: { unified: "stop", raw: "stop" },
         usage: {
-          inputTokens: 100,
-          outputTokens: 50,
-          totalTokens: 150,
+          inputTokens: { total: 100, noCache: 100, cacheRead: undefined, cacheWrite: undefined },
+          outputTokens: { total: 50, text: 50, reasoning: undefined },
         },
       };
 
@@ -421,7 +420,14 @@ describe("toUIMessageStream", () => {
       { kind: "text.delta", id: "text-1", text: "Hello" },
       { kind: "text.delta", id: "text-1", text: " world" },
       { kind: "text.end", id: "text-1" },
-      { kind: "finish", finishReason: "stop", usage: { inputTokens: 10, outputTokens: 5, totalTokens: 15 } },
+      {
+        kind: "finish",
+        finishReason: { unified: "stop", raw: "stop" },
+        usage: {
+          inputTokens: { total: 10, noCache: 10, cacheRead: undefined, cacheWrite: undefined },
+          outputTokens: { total: 5, text: 5, reasoning: undefined },
+        },
+      },
     ];
 
     async function* generateEvents() {

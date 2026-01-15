@@ -216,13 +216,13 @@ export class Thread<
       for await (const e of this.tick()) {
         if (e.kind === "error") {
           err = e.error;
-          logger.error(e.error); // (TODO): onError callback in options
+          logger.error(err.message); // (TODO): onError callback in options
         }
         // complete items get persisted with seq, deltas are ephemeral
         if (notDelta(e)) {
-          const [seqd] = this.append(e);
-          events.push(seqd);
-          yield seqd;
+          const [eseq] = this.append(e);
+          events.push(eseq);
+          yield eseq;
         } else {
           yield e;
         }
@@ -253,8 +253,8 @@ export class Thread<
 
       // append + yield action events (sequenced)
       for (const a of actions) {
-        const [seqd] = this.append(a);
-        yield seqd;
+        const [eseq] = this.append(a);
+        yield eseq;
       }
 
       await this.checkpoint(); /* c3: tick complete */
@@ -289,7 +289,7 @@ export class Thread<
     this.emit("model.call.start", { settings: req.settings ?? {} });
 
     let usage: LanguageModelUsage | undefined;
-    let finishReason: LanguageModelFinishReason = "unknown";
+    let finishReason: LanguageModelFinishReason = { unified: "other", raw: undefined };
 
     try {
       if (this.model.stream) {

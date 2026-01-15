@@ -85,7 +85,7 @@ export interface LanguageModelResponse {
   /**
    * Warnings for the call, e.g. unsupported settings.
    */
-  warnings: LanguageModelWarning[];
+  warnings: SharedWarning[];
 
   /**
    * Raw response data from the underlying model provider.
@@ -96,14 +96,30 @@ export interface LanguageModelResponse {
 /**
  * Reason why a language model finished generating a response.
  */
-export type LanguageModelFinishReason =
-  | "stop" /* model generated stop sequence */
-  | "length" /* model generated maximum number of tokens */
-  | "content-filter" /* content filter violation stopped the model */
-  | "tool-calls" /* model triggered tool calls */
-  | "error" /* model stopped because of an error */
-  | "other" /* model stopped for other reasons */
-  | "unknown"; /* the model has not transmitted a finish reason */
+export interface LanguageModelFinishReason {
+  /**
+   * Unified finish reason across providers.
+   *
+   * - `stop`: model generated stop sequence
+   * - `length`: model generated maximum number of tokens
+   * - `content-filter`: content filter violation stopped the model
+   * - `tool-calls`: model triggered tool calls
+   * - `error`: model stopped because of an error
+   * - `other`: model stopped for other reasons
+   */
+  unified:
+    | "stop"
+    | "length"
+    | "content-filter"
+    | "tool-calls"
+    | "error"
+    | "other";
+
+  /**
+   * Raw finish reason from the provider.
+   */
+  raw: string | undefined;
+}
 
 /**
  * Usage information for a language model call.
@@ -113,49 +129,96 @@ export type LanguageModelFinishReason =
  */
 export interface LanguageModelUsage {
   /**
-   * The number of input (prompt) tokens used.
+   * Input token usage breakdown.
    */
-  inputTokens: number | undefined;
+  inputTokens: {
+    /**
+     * Total input tokens used.
+     */
+    total: number | undefined;
+
+    /**
+     * Input tokens that were not cached.
+     */
+    noCache: number | undefined;
+
+    /**
+     * Input tokens read from cache.
+     */
+    cacheRead: number | undefined;
+
+    /**
+     * Input tokens written to cache.
+     */
+    cacheWrite: number | undefined;
+  };
 
   /**
-   * The number of output (completion) tokens used.
+   * Output token usage breakdown.
    */
-  outputTokens: number | undefined;
+  outputTokens: {
+    /**
+     * Total output tokens used.
+     */
+    total: number | undefined;
 
-  /**
-   * The total number of tokens as reported by the provider.
-   * This number might be different from the sum of `inputTokens` and `outputTokens`
-   * and e.g. include reasoning tokens or other overhead.
-   */
-  totalTokens: number | undefined;
+    /**
+     * Text generation tokens.
+     */
+    text: number | undefined;
 
-  /**
-   * The number of reasoning tokens used.
-   */
-  reasoningTokens?: number | undefined;
-
-  /**
-   * The number of cached input tokens.
-   */
-  cachedInputTokens?: number | undefined;
+    /**
+     * Reasoning/thinking tokens.
+     */
+    reasoning: number | undefined;
+  };
 }
 
 /**
  * Warning from the model provider for this call. The call will proceed, but e.g.
  * some settings might not be supported, which can lead to suboptimal results.
  */
-export type LanguageModelWarning =
+export type SharedWarning =
   | {
-      type: "unsupported-setting";
-      setting: Omit<keyof LanguageModelRequest, "input">; // (TODO): allow string
+      /**
+       * A feature is not supported by the model.
+       */
+      type: "unsupported";
+
+      /**
+       * The feature that is not supported.
+       */
+      feature: string;
+
+      /**
+       * Additional details about the warning.
+       */
       details?: string;
     }
   | {
-      type: "unsupported-tool";
-      tool: LanguageModelFunctionTool | LanguageModelProviderTool;
+      /**
+       * A compatibility feature is used that might lead to suboptimal results.
+       */
+      type: "compatibility";
+
+      /**
+       * The feature that is used in compatibility mode.
+       */
+      feature: string;
+
+      /**
+       * Additional details about the warning.
+       */
       details?: string;
     }
   | {
+      /**
+       * Other warning.
+       */
       type: "other";
+
+      /**
+       * The message of the warning.
+       */
       message: string;
     };

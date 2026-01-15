@@ -64,9 +64,8 @@ describe.skipIf(SKIP_OPENAI_TESTS)("AISDKLanguageModel - OpenAI", () => {
       expect(response.content).toBeDefined();
       expect(response.content.length).toBeGreaterThan(0);
       expect(response.usage).toBeDefined();
-      expect(response.usage.totalTokens).toBeGreaterThan(0);
-      expect(response.usage.inputTokens).toBeGreaterThan(0);
-      expect(response.usage.outputTokens).toBeGreaterThan(0);
+      expect(response.usage.inputTokens.total).toBeGreaterThan(0);
+      expect(response.usage.outputTokens.total).toBeGreaterThan(0);
 
       // Should have at least one message
       const messages = response.content.filter(
@@ -103,7 +102,7 @@ describe.skipIf(SKIP_OPENAI_TESTS)("AISDKLanguageModel - OpenAI", () => {
       });
 
       expect(response.content).toBeDefined();
-      expect(response.usage.totalTokens).toBeGreaterThan(0);
+      expect(response.usage.inputTokens.total).toBeGreaterThan(0);
     });
 
     it("should handle multi-turn conversations", async () => {
@@ -135,7 +134,7 @@ describe.skipIf(SKIP_OPENAI_TESTS)("AISDKLanguageModel - OpenAI", () => {
       });
 
       expect(response.content).toBeDefined();
-      expect(response.usage.totalTokens).toBeGreaterThan(0);
+      expect(response.usage.inputTokens.total).toBeGreaterThan(0);
 
       // Check that it remembers the name (should mention Alice)
       const assistantMessages = response.content.filter(
@@ -161,7 +160,7 @@ describe.skipIf(SKIP_OPENAI_TESTS)("AISDKLanguageModel - OpenAI", () => {
       });
 
       expect(response.content).toBeDefined();
-      expect(response.usage.totalTokens).toBeGreaterThan(0);
+      expect(response.usage.inputTokens.total).toBeGreaterThan(0);
     });
 
     it("should respect maxTokens setting", async () => {
@@ -181,8 +180,8 @@ describe.skipIf(SKIP_OPENAI_TESTS)("AISDKLanguageModel - OpenAI", () => {
       });
 
       expect(response.content).toBeDefined();
-      expect(response.usage.outputTokens).toBeDefined();
-      expect(response.usage.outputTokens).toBeLessThanOrEqual(20);
+      expect(response.usage.outputTokens.total).toBeDefined();
+      expect(response.usage.outputTokens.total).toBeLessThanOrEqual(20);
     });
   });
 
@@ -216,7 +215,7 @@ describe.skipIf(SKIP_OPENAI_TESTS)("AISDKLanguageModel - OpenAI", () => {
       // Should have usage information
       const finishEvent = finishEvents[0] as any;
       expect(finishEvent.usage).toBeDefined();
-      expect(finishEvent.usage.totalTokens).toBeGreaterThan(0);
+      expect(finishEvent.usage.inputTokens.total).toBeGreaterThan(0);
     });
 
     it("should stream text deltas", async () => {
@@ -1141,7 +1140,7 @@ describe.skipIf(SKIP_GOOGLE_TESTS)("AISDKLanguageModel - Google", () => {
       expect(response.content).toBeDefined();
       expect(response.content.length).toBeGreaterThan(0);
       expect(response.usage).toBeDefined();
-      expect(response.usage.totalTokens).toBeGreaterThan(0);
+      expect(response.usage.inputTokens.total).toBeGreaterThan(0);
 
       const messages = response.content.filter(
         (item) => item.kind === "message",
@@ -1180,7 +1179,7 @@ describe.skipIf(SKIP_GOOGLE_TESTS)("AISDKLanguageModel - Google", () => {
       // Should have usage information
       const finishEvent = finishEvents[0] as any;
       expect(finishEvent.usage).toBeDefined();
-      expect(finishEvent.usage.totalTokens).toBeGreaterThan(0);
+      expect(finishEvent.usage.inputTokens.total).toBeGreaterThan(0);
     });
   });
 

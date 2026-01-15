@@ -1,29 +1,67 @@
-import { anthropic as _anthropic } from "@ai-sdk/anthropic";
+import {
+  anthropic as _anthropic,
+  createAnthropic as _createAnthropic,
+} from "@ai-sdk/anthropic";
 import { AISDKLanguageModel } from "../language-model";
+import { createOAuthFetch } from "../oauth/anthropic";
+import type { OAuthCredentials } from "../oauth/types";
 
 /**
- * Anthropic model IDs.
+ * Anthropic model IDs (derived from @ai-sdk/anthropic).
  */
-export type AnthropicModelId =
-  | "claude-haiku-4-5"
-  | "claude-haiku-4-5-20251001"
-  | "claude-sonnet-4-5"
-  | "claude-sonnet-4-5-20250929"
-  | "claude-opus-4-1"
-  | "claude-opus-4-0"
-  | "claude-sonnet-4-0"
-  | "claude-opus-4-1-20250805"
-  | "claude-opus-4-20250514"
-  | "claude-sonnet-4-20250514"
-  | "claude-3-7-sonnet-latest"
-  | "claude-3-7-sonnet-20250219"
-  | "claude-3-5-haiku-latest"
-  | "claude-3-5-haiku-20241022"
-  | "claude-3-haiku-20240307"
-  | (string & {});
+export type AnthropicModelId = Parameters<typeof _anthropic>[0];
+
+/**
+ * Options for creating a custom Anthropic provider.
+ */
+export interface AnthropicProviderOptions {
+  /** API key for standard authentication */
+  apiKey?: string;
+  /** OAuth credentials for Claude Pro/Max authentication */
+  oauth?: OAuthCredentials;
+  /** Custom base URL */
+  baseURL?: string;
+  /** Custom headers */
+  headers?: Record<string, string>;
+}
+
+/**
+ * Create a custom Anthropic provider with explicit credentials.
+ *
+ * @example API key auth
+ * ```ts
+ * const anthropic = createAnthropic({ apiKey: "sk-..." });
+ * const model = anthropic("claude-sonnet-4-5");
+ * ```
+ *
+ * @example OAuth auth (Claude Pro/Max)
+ * ```ts
+ * const anthropic = createAnthropic({
+ *   oauth: {
+ *     accessToken: "...",
+ *     refreshToken: "...",
+ *     expiresAt: Date.now() + 3600000,
+ *     onRefresh: (tokens) => saveTokens(tokens),
+ *   }
+ * });
+ * const model = anthropic("claude-sonnet-4-5");
+ * ```
+ */
+export function createAnthropic(options: AnthropicProviderOptions = {}) {
+  const provider = _createAnthropic({
+    apiKey: options.oauth ? undefined : options.apiKey,
+    baseURL: options.baseURL,
+    headers: options.headers,
+    fetch: options.oauth ? createOAuthFetch(options.oauth) : undefined,
+  });
+
+  return (modelId: AnthropicModelId) =>
+    new AISDKLanguageModel(provider(modelId));
+}
 
 /**
  * Create a kernl-compatible Anthropic language model.
+ * Uses ANTHROPIC_API_KEY environment variable.
  *
  * @example
  * ```ts
@@ -37,5 +75,8 @@ export function anthropic(modelId: AnthropicModelId) {
   const model = _anthropic(modelId);
   return new AISDKLanguageModel(model);
 }
+
+// Re-export types
+export type { OAuthCredentials } from "../oauth/types";
 
 // Note: Anthropic does not currently support embeddings

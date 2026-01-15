@@ -147,13 +147,7 @@ export const STREAM_PART: Codec<
         return {
           kind: "finish",
           finishReason: part.finishReason as any, // Types should match
-          usage: {
-            inputTokens: part.usage.inputTokens,
-            outputTokens: part.usage.outputTokens,
-            totalTokens: part.usage.totalTokens,
-            reasoningTokens: part.usage.reasoningTokens,
-            cachedInputTokens: part.usage.cachedInputTokens,
-          },
+          usage: part.usage,
           providerMetadata: part.providerMetadata,
         };
 

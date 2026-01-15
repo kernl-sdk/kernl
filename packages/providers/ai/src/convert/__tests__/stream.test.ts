@@ -259,8 +259,8 @@ describe("STREAM_PART codec", () => {
         type: "stream-start",
         warnings: [
           {
-            type: "unsupported-setting",
-            setting: "topK",
+            type: "unsupported",
+            feature: "topK",
           },
         ],
       };
@@ -271,9 +271,8 @@ describe("STREAM_PART codec", () => {
         kind: "stream.start",
         warnings: [
           {
-            type: "unsupported-setting",
-            setting: "topK",
-            details: undefined,
+            type: "unsupported",
+            feature: "topK",
           },
         ],
       });
@@ -282,11 +281,10 @@ describe("STREAM_PART codec", () => {
     it("should decode finish event", () => {
       const part: LanguageModelV3StreamPart = {
         type: "finish",
-        finishReason: "stop",
+        finishReason: { unified: "stop", raw: "stop" },
         usage: {
-          inputTokens: 10,
-          outputTokens: 20,
-          totalTokens: 30,
+          inputTokens: { total: 10, noCache: 8, cacheRead: 2, cacheWrite: undefined },
+          outputTokens: { total: 20, text: 18, reasoning: 2 },
         },
         providerMetadata: undefined,
       };
@@ -295,13 +293,10 @@ describe("STREAM_PART codec", () => {
 
       expect(result).toEqual({
         kind: "finish",
-        finishReason: "stop",
+        finishReason: { unified: "stop", raw: "stop" },
         usage: {
-          inputTokens: 10,
-          outputTokens: 20,
-          totalTokens: 30,
-          reasoningTokens: undefined,
-          cachedInputTokens: undefined,
+          inputTokens: { total: 10, noCache: 8, cacheRead: 2, cacheWrite: undefined },
+          outputTokens: { total: 20, text: 18, reasoning: 2 },
         },
         providerMetadata: undefined,
       });
@@ -405,8 +400,11 @@ describe("convertStream", () => {
       { type: "text-end", id: "text-1", providerMetadata: undefined },
       {
         type: "finish",
-        finishReason: "stop",
-        usage: { inputTokens: 5, outputTokens: 10, totalTokens: 15 },
+        finishReason: { unified: "stop", raw: "stop" },
+        usage: {
+          inputTokens: { total: 5, noCache: 5, cacheRead: undefined, cacheWrite: undefined },
+          outputTokens: { total: 10, text: 10, reasoning: undefined },
+        },
         providerMetadata: undefined,
       },
     ];
@@ -429,7 +427,7 @@ describe("convertStream", () => {
     expect(events[0]).toMatchObject({ kind: "text.start" });
     expect(events[1]).toMatchObject({ kind: "text.delta", text: "Hello" });
     expect(events[2]).toMatchObject({ kind: "text.end" });
-    expect(events[3]).toMatchObject({ kind: "finish", finishReason: "stop" });
+    expect(events[3]).toMatchObject({ kind: "finish", finishReason: { unified: "stop", raw: "stop" } });
   });
 
   it("should filter out null events", async () => {
@@ -445,8 +443,11 @@ describe("convertStream", () => {
       } as any, // This should be filtered out (returns null from default case)
       {
         type: "finish",
-        finishReason: "stop",
-        usage: { inputTokens: 5, outputTokens: 10, totalTokens: 15 },
+        finishReason: { unified: "stop", raw: "stop" },
+        usage: {
+          inputTokens: { total: 5, noCache: 5, cacheRead: undefined, cacheWrite: undefined },
+          outputTokens: { total: 10, text: 10, reasoning: undefined },
+        },
         providerMetadata: undefined,
       },
     ];
