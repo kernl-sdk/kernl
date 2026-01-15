@@ -1,5 +1,11 @@
 # @kernl/ai
 
+## 0.4.3
+
+### Patch Changes
+
+- 933998e: Add model ID types for autocomplete support in provider functions (anthropic, openai, google).
+
 ## 0.4.2
 
 ### Patch Changes
