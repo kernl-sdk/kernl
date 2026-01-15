@@ -71,20 +71,15 @@ export class Agent<
     input: string | LanguageModelItem[],
     options?: ThreadExecuteOptions<TContext>,
   ): Promise<ThreadExecuteResult<ResolvedAgentResponse<TOutput>>> {
+    let thread: Thread<TContext, TOutput> | null = null;
+
     if (!this.kernl) {
       throw new MisconfiguredError(
         `Agent ${this.id} not bound to kernl. Call kernl.register(agent) first.`,
       );
     }
 
-    const items =
-      typeof input === "string"
-        ? [message({ role: "user", text: input })]
-        : input;
     const tid = options?.threadId;
-
-    let thread: Thread<TContext, TOutput> | null = null;
-
     if (tid) {
       // no concurrent execution of same thread - correctness contract
       // TODO: race condition - need to check again after async storage.get()
@@ -99,6 +94,11 @@ export class Agent<
         })) as Thread<TContext, TOutput> | null;
       }
     }
+
+    const items =
+      typeof input === "string"
+        ? [message({ role: "user", text: input })]
+        : input;
 
     // create new thread if not found in storage or no tid provided
     if (!thread) {
@@ -122,6 +122,9 @@ export class Agent<
     // resume existing thread from storage
     if (options?.context) {
       thread.context.context = options.context;
+    }
+    if (options?.model) {
+      thread.model = options.model;
     }
     thread.append(...items);
     return this.kernl.schedule(thread);
@@ -191,6 +194,9 @@ export class Agent<
     // resume existing thread from storage
     if (options?.context) {
       thread.context.context = options.context;
+    }
+    if (options?.model) {
+      thread.model = options.model;
     }
     thread.append(...items);
     yield* this.kernl.scheduleStream(thread);
