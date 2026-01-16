@@ -1,4 +1,4 @@
-<span className="section-label">III.</span>
+<span className="section-label">II.</span>
 
 # Getting Started
 
@@ -91,13 +91,34 @@ export const jarvis = new Agent({
 });
 ```
 
-### Run it
+### Run your agent
+
+There are two ways to run an agent:
+
+**Blocking** — wait for the full response:
+
+```ts
+const result = await jarvis.run("What can you help me with?");
+console.log(result.response);
+```
+
+**Streaming** — receive events as they happen:
+
+```ts
+const stream = jarvis.stream("Tell me a joke");
+
+for await (const event of stream) {
+  if (event.kind === "text-delta") {
+    process.stdout.write(event.text);
+  }
+}
+```
+
+The starter template runs this in `src/index.ts`. Try it:
 
 ```bash
 pnpm start
 ```
-
-This runs the example in `src/index.ts`—sends a message to your agent and prints the response. A minimal 'hello world' so you know the agent works.
 
 </Steps>
 
@@ -128,7 +149,7 @@ Both follow the same pattern: a `server/` running Hono + kernl, and a `web/` fro
 
 ## Next steps
 
-- [Agents](/concepts/agents) — deeper dive into agent configuration
-- [Toolkits](/concepts/toolkits) — create custom toolkits or connect to MCP servers
-- [Memory](/concepts/memory) — give your agent persistent memory
-- [Threads](/concepts/threads) — manage execution state
+- [Agents](/core/agents) — deeper dive into agent configuration
+- [Toolkits](/core/toolkits) — create custom toolkits or connect to MCP servers
+- [Memory](/core/memory) — give your agent persistent memory
+- [Threads](/core/threads) — manage execution state

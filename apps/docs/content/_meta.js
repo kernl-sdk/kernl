@@ -6,11 +6,9 @@ export default {
     },
   },
   index: "Overview",
-  architecture: "Architecture",
-  "getting-started": "Getting Started",
   marketplace: "Marketplace",
+  "getting-started": "Getting Started",
+  core: "Core",
   guides: "Guides",
-  concepts: "Concepts",
   reference: "Reference",
-  glossary: "Glossary",
 };
