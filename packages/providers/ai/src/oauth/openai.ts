@@ -1,20 +1,8 @@
-import { appendFileSync } from "node:fs";
 import type { OpenAIOAuthCredentials } from "./types";
 
 const TOKEN_URL = "https://auth.openai.com/oauth/token";
 const CLIENT_ID = "app_EMoamEEZ73f0CkXaXp7hrann";
 const CODEX_ENDPOINT = "https://chatgpt.com/backend-api/codex/responses";
-
-function debug(msg: string) {
-  try {
-    appendFileSync(
-      "/tmp/popcorn-debug.log",
-      `${new Date().toISOString()} [oauth/fetch] ${msg}\n`,
-    );
-  } catch {
-    // ignore
-  }
-}
 
 interface TokenResponse {
   access_token: string;
@@ -75,31 +63,18 @@ export function createOAuthFetch(creds: OpenAIOAuthCredentials) {
       headers.set("ChatGPT-Account-Id", creds.accountId);
     }
 
-    // Debug: log request
-    const url =
-      typeof input === "string"
-        ? input
-        : input instanceof URL
-          ? input.toString()
-          : input.url;
-    debug(`Request to: ${url}`);
-    debug(`Redirecting to: ${CODEX_ENDPOINT}`);
-
     // Transform request body for Codex API
     // Codex requires "instructions" field instead of developer/system role in input
-    // Codex also requires "store: false"
     let body = init?.body;
     if (body && typeof body === "string") {
       try {
         const parsed = JSON.parse(body);
 
-        // Codex requires store: false
-        parsed.store = false;
-
         // Extract developer/system message as instructions
         if (parsed.input && Array.isArray(parsed.input)) {
           const devIdx = parsed.input.findIndex(
-            (m: any) => m.role === "developer" || m.role === "system",
+            (m: Record<string, unknown>) =>
+              m.role === "developer" || m.role === "system",
           );
           if (devIdx !== -1) {
             const devMsg = parsed.input[devIdx];
@@ -109,21 +84,11 @@ export function createOAuthFetch(creds: OpenAIOAuthCredentials) {
         }
 
         body = JSON.stringify(parsed);
-        debug(`Transformed body: ${body.slice(0, 500)}`);
       } catch {
-        debug(`Failed to transform body`);
+        // ignore parse errors
       }
     }
 
-    const response = await fetch(CODEX_ENDPOINT, { ...init, headers, body });
-
-    // Debug: log response
-    debug(`Response status: ${response.status}`);
-    if (!response.ok) {
-      const text = await response.clone().text();
-      debug(`Error response: ${text.slice(0, 1000)}`);
-    }
-
-    return response;
+    return fetch(CODEX_ENDPOINT, { ...init, headers, body });
   };
 }

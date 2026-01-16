@@ -3,6 +3,7 @@ import type { LanguageModelV3 } from "@ai-sdk/provider";
 import type {
   LanguageModel,
   LanguageModelRequest,
+  LanguageModelRequestSettings,
   LanguageModelResponse,
   LanguageModelStreamEvent,
 } from "@kernl-sdk/protocol";
@@ -23,7 +24,14 @@ export class AISDKLanguageModel implements LanguageModel {
   readonly provider: string;
   readonly modelId: string;
 
-  constructor(private model: LanguageModelV3) {
+  /**
+   * @param model - The underlying AI SDK model
+   * @param settings - Default settings to apply to every request (overridden by per-request settings)
+   */
+  constructor(
+    private model: LanguageModelV3,
+    private settings?: Partial<LanguageModelRequestSettings>,
+  ) {
     this.provider = normalizeProvider(model.provider);
     this.modelId = model.modelId;
   }
@@ -36,15 +44,16 @@ export class AISDKLanguageModel implements LanguageModel {
   ): Promise<LanguageModelResponse> {
     const messages = request.input.map(MESSAGE.encode);
     const tools = request.tools ? request.tools.map(TOOL.encode) : undefined;
-    const settings = MODEL_SETTINGS.encode(request.settings);
+    const merged = { ...this.settings, ...request.settings };
+    const settings = MODEL_SETTINGS.encode(merged);
     const responseFormat = RESPONSE_FORMAT.encode(request.responseType);
 
     const result = await this.model.doGenerate({
       prompt: messages,
       tools,
-      ...settings,
       responseFormat,
       abortSignal: request.abort,
+      ...settings,
     });
 
     return MODEL_RESPONSE.decode(result);
@@ -58,15 +67,16 @@ export class AISDKLanguageModel implements LanguageModel {
   ): AsyncIterable<LanguageModelStreamEvent> {
     const messages = request.input.map(MESSAGE.encode);
     const tools = request.tools ? request.tools.map(TOOL.encode) : undefined;
-    const settings = MODEL_SETTINGS.encode(request.settings);
+    const merged = { ...this.settings, ...request.settings };
+    const settings = MODEL_SETTINGS.encode(merged);
     const responseFormat = RESPONSE_FORMAT.encode(request.responseType);
 
     const stream = await this.model.doStream({
       prompt: messages,
       tools,
-      ...settings,
       responseFormat,
       abortSignal: request.abort,
+      ...settings,
     });
 
     // text + reasoning buffers for delta accumulation

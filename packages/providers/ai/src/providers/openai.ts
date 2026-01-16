@@ -59,7 +59,13 @@ export function createOpenAI(options: OpenAIProviderOptions = {}) {
     fetch: options.oauth ? createOAuthFetch(options.oauth) : undefined,
   });
 
-  return (modelId: OpenAIModelId) => new AISDKLanguageModel(provider(modelId));
+  // OAuth requires store: false - Codex endpoint doesn't persist items
+  const settings = options.oauth
+    ? { providerOptions: { openai: { store: false } } }
+    : undefined;
+
+  return (modelId: OpenAIModelId) =>
+    new AISDKLanguageModel(provider(modelId), settings);
 }
 
 /**
