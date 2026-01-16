@@ -1,5 +1,12 @@
 # @kernl-sdk/server
 
+## 0.0.26
+
+### Patch Changes
+
+- Updated dependencies [098dd36]
+  - @kernl-sdk/ai@0.4.5
+
 ## 0.0.25
 
 ### Patch Changes
