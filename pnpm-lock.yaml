@@ -281,9 +281,6 @@ importers:
       '@kernl-sdk/shared':
         specifier: workspace:*
         version: link:../../../packages/shared
-      '@popcorn/sdk':
-        specifier: workspace:*
-        version: link:../sdk
       '@popcorn/shared':
         specifier: workspace:*
         version: link:../shared
