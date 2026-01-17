@@ -1,0 +1,30 @@
+{
+  "name": "@popcorn/shared",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    "./*": "./src/*.ts",
+    "./bus": "./src/bus/index.ts",
+    "./bus/*": "./src/bus/*.ts",
+    "./cli/*": "./src/cli/*.ts",
+    "./flag/*": "./src/flag/*.ts",
+    "./lsp/*": "./src/lsp/*.ts",
+    "./provider/*": "./src/provider/*.ts",
+    "./tool/*": "./src/tool/*.ts",
+    "./util/*": "./src/util/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "catalog:",
+    "remeda": "^2.33.1",
+    "@opentui/core": "0.1.73"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "@types/bun": "catalog:"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "server0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./app": "./src/app.ts",
+    "./state/events": "./src/state/events.ts"
+  },
+  "scripts": {
+    "dev": "tsx watch --env-file=.env.local src/index.ts",
+    "build": "tsc && tsc-alias --resolve-full-paths",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@discordjs/rest": "^2.4.0",
+    "@hono/node-server": "^1.19.8",
+    "@kernl-sdk/ai": "workspace:*",
+    "@kernl-sdk/protocol": "workspace:*",
+    "@kernl-sdk/shared": "workspace:*",
+    "@popcorn/shared": "workspace:*",
+    "ai": "^5.0.93",
+    "attio-crm": "^0.0.1",
+    "diff": "catalog:",
+    "discord-api-types": "^0.37.119",
+    "fuzzysort": "catalog:",
+    "hono": "^4.11.3",
+    "kernl": "workspace:*",
+    "zod": "^4.1.8"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "@types/diff": "^8.0.0",
+    "@types/node": "^20.11.17",
+    "tsc-alias": "^1.8.16",
+    "tsx": "^4.7.1",
+    "typescript": "^5.8.3"
+  }
+}

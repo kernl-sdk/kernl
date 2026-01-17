@@ -224,8 +224,8 @@ importers:
         specifier: ^1.19.8
         version: 1.19.8(hono@4.11.3)
       '@opentui/solid':
-        specifier: ^0.1.72
-        version: 0.1.72(solid-js@1.9.10)(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10)
+        specifier: 0.1.73
+        version: 0.1.73(solid-js@1.9.10)(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10)
       '@popcorn/sdk':
         specifier: workspace:*
         version: link:../sdk
@@ -281,6 +281,9 @@ importers:
       '@kernl-sdk/shared':
         specifier: workspace:*
         version: link:../../../packages/shared
+      '@popcorn/sdk':
+        specifier: workspace:*
+        version: link:../sdk
       '@popcorn/shared':
         specifier: workspace:*
         version: link:../shared
@@ -331,8 +334,8 @@ importers:
   apps/popcorn/shared:
     dependencies:
       '@opentui/core':
-        specifier: ^0.1.72
-        version: 0.1.72(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10)
+        specifier: 0.1.73
+        version: 0.1.73(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10)
       remeda:
         specifier: ^2.33.1
         version: 2.33.1
@@ -350,11 +353,11 @@ importers:
   apps/popcorn/tui:
     dependencies:
       '@opentui/core':
-        specifier: ^0.1.72
-        version: 0.1.72(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10)
+        specifier: 0.1.73
+        version: 0.1.73(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10)
       '@opentui/solid':
-        specifier: ^0.1.72
-        version: 0.1.72(solid-js@1.9.10)(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10)
+        specifier: 0.1.73
+        version: 0.1.73(solid-js@1.9.10)(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10)
       '@popcorn/sdk':
         specifier: workspace:*
         version: link:../sdk
@@ -381,7 +384,7 @@ importers:
         version: 10.2.0
       opentui-spinner:
         specifier: ^0.0.6
-        version: 0.0.6(@opentui/core@0.1.72(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10))(@opentui/solid@0.1.72(solid-js@1.9.10)(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10))(typescript@5.9.3)
+        version: 0.0.6(@opentui/core@0.1.73(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10))(@opentui/solid@0.1.73(solid-js@1.9.10)(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10))(typescript@5.9.3)
       remeda:
         specifier: ^2.33.1
         version: 2.33.1
@@ -2985,43 +2988,43 @@ packages:
     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
     engines: {node: '>=8.0.0'}
 
-  '@opentui/core-darwin-arm64@0.1.72':
-    resolution: {integrity: sha512-RoU48kOrhLZYDBiXaDu1LXS2bwRdlJlFle8eUQiqJjLRbMIY34J/srBuL0JnAS3qKW4J34NepUQa0l0/S43Q3w==}
+  '@opentui/core-darwin-arm64@0.1.73':
+    resolution: {integrity: sha512-Xnc8S6kGIVcdwqqTq6jk50UVe1QtOXp+B0v4iH85iNW1Ljf198OoA7RcVA+edFb6o01PVwnhIIPtpkB/A4710w==}
     cpu: [arm64]
     os: [darwin]
 
-  '@opentui/core-darwin-x64@0.1.72':
-    resolution: {integrity: sha512-hHUQw8i2LWPToRW1rjAiRqmNf34iJPS9ve9CJDygvFs5JOqUxN5yrfLfKfE+1bQjfFDHnpqW1HUk96iLhkPj8Q==}
+  '@opentui/core-darwin-x64@0.1.73':
+    resolution: {integrity: sha512-RlgxQxu+kxsCZzeXRnpYrqbrpxbG8M/lnDf4sTPWmhXUiuDvY5BdB4YiBY5bv8eNdJ1j9HiMLtx6ZxElEviidA==}
     cpu: [x64]
     os: [darwin]
 
-  '@opentui/core-linux-arm64@0.1.72':
-    resolution: {integrity: sha512-63yml0OQ8tVa0JuDF9lBAWiChX6Q+iDO7lKv7c2n0352n/WyPr3iAgq4uSoH49HXuKeAXY/VwHGjvPzjXD/SDA==}
+  '@opentui/core-linux-arm64@0.1.73':
+    resolution: {integrity: sha512-9I88BdZMB3qtDPtDzFTg1EEt6sAGFSpOEmIIMB3MhqZqoq9+WSEyJZxM0/kff5vt4RJnqG7vz4fKMVRwNrUPGA==}
     cpu: [arm64]
     os: [linux]
 
-  '@opentui/core-linux-x64@0.1.72':
-    resolution: {integrity: sha512-51veiQXNLvzDsFzsEvt71uK7WhiRe2DnvlJSGBSe6aRRHHxjCFYHzYi7t6bitJqtDTUj+EaMPbH81oZ6xy7tyg==}
+  '@opentui/core-linux-x64@0.1.73':
+    resolution: {integrity: sha512-50cGZkCh/i3nzijsjUnkmtWJtnJ6l9WpdIwSJsO2Id7nZdzupT1b6AkgGZdOgNl23MHXpAitmb+MhEAjAimCRA==}
     cpu: [x64]
     os: [linux]
 
-  '@opentui/core-win32-arm64@0.1.72':
-    resolution: {integrity: sha512-1Ep6OcaYTy1RlLOln+LNN7DL1iNyLwLjG2M8aO0pVJKFvxeD5P7rdRzY065E4uhkHeJIHuduUqxvUjD0dyuwbw==}
+  '@opentui/core-win32-arm64@0.1.73':
+    resolution: {integrity: sha512-mFiEeoiim5cmi6qu8CDfeecl9ivuMilfby/GnqTsr9G8e52qfT6nWF2m9Nevh9ebhXK+D/VnVhJIbObc0WIchA==}
     cpu: [arm64]
     os: [win32]
 
-  '@opentui/core-win32-x64@0.1.72':
-    resolution: {integrity: sha512-5QUv91UkOINlkEaPky3kaxmJvshcJMBAX7LZtIroduaKBGpWRA1aogNhPZzp+30WkvgOU7aOtUktAZuFXb9WdQ==}
+  '@opentui/core-win32-x64@0.1.73':
+    resolution: {integrity: sha512-vzWHUi2vgwImuyxl+hlmK0aeCbnwozeuicIcHJE0orPOwp2PAKyR9WO330szAvfIO5ZPbNkjWfh6xIYnASM0lQ==}
     cpu: [x64]
     os: [win32]
 
-  '@opentui/core@0.1.72':
-    resolution: {integrity: sha512-l4WQzubBJ80Q0n77Lxuodjwwm8qj/sOa7IXxEAzzDDXY/7bsIhdSpVhRTt+KevBRlok5J+w/KMKYr8UzkA4/hA==}
+  '@opentui/core@0.1.73':
+    resolution: {integrity: sha512-1OqLlArzUh3QjrYXGro5WKNgoCcacGJaaFvwOHg5lAOoSigFQRiqEUEEJLbSo3pyV8u7XEdC3M0rOP6K+oThzw==}
     peerDependencies:
       web-tree-sitter: 0.25.10
 
-  '@opentui/solid@0.1.72':
-    resolution: {integrity: sha512-hytoLPboL/MTY/BQUnf/HlBuNXTVONney0X+PIQI82wT7kMx7+HHI2wnowpM3dyvA7l6NfORSud2cs9kIUBFBw==}
+  '@opentui/solid@0.1.73':
+    resolution: {integrity: sha512-FBSTiuWl+hHqFxmrJfC93cbJ0PJ4QoFbvRFuD6Gzrea5rH+G7BidjyI8YZuCcNnriDuIYaXTJdvBqe15lgKR1A==}
     peerDependencies:
       solid-js: 1.9.9
 
@@ -9797,15 +9800,15 @@ snapshots:
   '@babel/core@7.28.0':
     dependencies:
       '@ampproject/remapping': 2.3.0
-      '@babel/code-frame': 7.27.1
-      '@babel/generator': 7.28.5
+      '@babel/code-frame': 7.28.6
+      '@babel/generator': 7.28.6
       '@babel/helper-compilation-targets': 7.27.2
-      '@babel/helper-module-transforms': 7.28.3(@babel/core@7.28.0)
+      '@babel/helper-module-transforms': 7.28.6(@babel/core@7.28.0)
       '@babel/helpers': 7.28.4
-      '@babel/parser': 7.28.5
-      '@babel/template': 7.27.2
-      '@babel/traverse': 7.28.5
-      '@babel/types': 7.28.5
+      '@babel/parser': 7.28.6
+      '@babel/template': 7.28.6
+      '@babel/traverse': 7.28.6
+      '@babel/types': 7.28.6
       convert-source-map: 2.0.0
       debug: 4.4.3
       gensync: 1.0.0-beta.2
@@ -9852,7 +9855,7 @@ snapshots:
 
   '@babel/helper-annotate-as-pure@7.27.3':
     dependencies:
-      '@babel/types': 7.28.5
+      '@babel/types': 7.28.6
 
   '@babel/helper-compilation-targets@7.27.2':
     dependencies:
@@ -9880,7 +9883,7 @@ snapshots:
   '@babel/helper-member-expression-to-functions@7.28.5':
     dependencies:
       '@babel/traverse': 7.28.6
-      '@babel/types': 7.28.5
+      '@babel/types': 7.28.6
     transitivePeerDependencies:
       - supports-color
 
@@ -9899,15 +9902,6 @@ snapshots:
     dependencies:
       '@babel/traverse': 7.28.6
       '@babel/types': 7.28.6
-    transitivePeerDependencies:
-      - supports-color
-
-  '@babel/helper-module-transforms@7.28.3(@babel/core@7.28.0)':
-    dependencies:
-      '@babel/core': 7.28.0
-      '@babel/helper-module-imports': 7.27.1
-      '@babel/helper-validator-identifier': 7.28.5
-      '@babel/traverse': 7.28.5
     transitivePeerDependencies:
       - supports-color
 
@@ -9931,7 +9925,7 @@ snapshots:
 
   '@babel/helper-optimise-call-expression@7.27.1':
     dependencies:
-      '@babel/types': 7.28.5
+      '@babel/types': 7.28.6
 
   '@babel/helper-plugin-utils@7.27.1': {}
 
@@ -9948,8 +9942,8 @@ snapshots:
 
   '@babel/helper-skip-transparent-expression-wrappers@7.27.1':
     dependencies:
-      '@babel/traverse': 7.28.5
-      '@babel/types': 7.28.5
+      '@babel/traverse': 7.28.6
+      '@babel/types': 7.28.6
     transitivePeerDependencies:
       - supports-color
 
@@ -11303,25 +11297,25 @@ snapshots:
 
   '@opentelemetry/api@1.9.0': {}
 
-  '@opentui/core-darwin-arm64@0.1.72':
+  '@opentui/core-darwin-arm64@0.1.73':
     optional: true
 
-  '@opentui/core-darwin-x64@0.1.72':
+  '@opentui/core-darwin-x64@0.1.73':
     optional: true
 
-  '@opentui/core-linux-arm64@0.1.72':
+  '@opentui/core-linux-arm64@0.1.73':
     optional: true
 
-  '@opentui/core-linux-x64@0.1.72':
+  '@opentui/core-linux-x64@0.1.73':
     optional: true
 
-  '@opentui/core-win32-arm64@0.1.72':
+  '@opentui/core-win32-arm64@0.1.73':
     optional: true
 
-  '@opentui/core-win32-x64@0.1.72':
+  '@opentui/core-win32-x64@0.1.73':
     optional: true
 
-  '@opentui/core@0.1.72(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10)':
+  '@opentui/core@0.1.73(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10)':
     dependencies:
       bun-ffi-structs: 0.1.2(typescript@5.9.3)
       diff: 8.0.2
@@ -11330,12 +11324,12 @@ snapshots:
       yoga-layout: 3.2.1
     optionalDependencies:
       '@dimforge/rapier2d-simd-compat': 0.17.3
-      '@opentui/core-darwin-arm64': 0.1.72
-      '@opentui/core-darwin-x64': 0.1.72
-      '@opentui/core-linux-arm64': 0.1.72
-      '@opentui/core-linux-x64': 0.1.72
-      '@opentui/core-win32-arm64': 0.1.72
-      '@opentui/core-win32-x64': 0.1.72
+      '@opentui/core-darwin-arm64': 0.1.73
+      '@opentui/core-darwin-x64': 0.1.73
+      '@opentui/core-linux-arm64': 0.1.73
+      '@opentui/core-linux-x64': 0.1.73
+      '@opentui/core-win32-arm64': 0.1.73
+      '@opentui/core-win32-x64': 0.1.73
       bun-webgpu: 0.1.4
       planck: 1.4.2(stage-js@1.0.0-alpha.17)
       three: 0.177.0
@@ -11343,11 +11337,11 @@ snapshots:
       - stage-js
       - typescript
 
-  '@opentui/solid@0.1.72(solid-js@1.9.10)(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10)':
+  '@opentui/solid@0.1.73(solid-js@1.9.10)(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10)':
     dependencies:
       '@babel/core': 7.28.0
       '@babel/preset-typescript': 7.27.1(@babel/core@7.28.0)
-      '@opentui/core': 0.1.72(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10)
+      '@opentui/core': 0.1.73(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10)
       babel-plugin-module-resolver: 5.0.2
       babel-preset-solid: 1.9.9(@babel/core@7.28.0)(solid-js@1.9.10)
       s-js: 0.4.9
@@ -16498,13 +16492,13 @@ snapshots:
       powershell-utils: 0.1.0
       wsl-utils: 0.3.1
 
-  opentui-spinner@0.0.6(@opentui/core@0.1.72(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10))(@opentui/solid@0.1.72(solid-js@1.9.10)(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10))(typescript@5.9.3):
+  opentui-spinner@0.0.6(@opentui/core@0.1.73(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10))(@opentui/solid@0.1.73(solid-js@1.9.10)(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10))(typescript@5.9.3):
     dependencies:
-      '@opentui/core': 0.1.72(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10)
+      '@opentui/core': 0.1.73(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10)
       cli-spinners: 3.3.0
       typescript: 5.9.3
     optionalDependencies:
-      '@opentui/solid': 0.1.72(solid-js@1.9.10)(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10)
+      '@opentui/solid': 0.1.73(solid-js@1.9.10)(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10)
 
   optionator@0.9.4:
     dependencies:

@@ -1,0 +1,36 @@
+{
+  "name": "@popcorn/tui",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./app": "./src/app.tsx"
+  },
+  "main": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@opentui/core": "0.1.73",
+    "@opentui/solid": "0.1.73",
+    "@popcorn/sdk": "workspace:*",
+    "@popcorn/shared": "workspace:*",
+    "@solid-primitives/event-bus": "^1.1.2",
+    "@solid-primitives/scheduled": "^1.4.3",
+    "clipboardy": "^4.0.0",
+    "diff": "catalog:",
+    "fuzzysort": "^3.1.0",
+    "open": "^10.1.0",
+    "opentui-spinner": "^0.0.6",
+    "remeda": "^2.33.1",
+    "solid-js": "catalog:",
+    "strip-ansi": "^7.1.0",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "@types/diff": "^8.0.0",
+    "typescript": "catalog:"
+  }
+}

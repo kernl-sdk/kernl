@@ -1,0 +1,25 @@
+{
+  "name": "@popcorn/cli",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "popcorn": "./src/index.ts"
+  },
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "build": "bun run build.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.8",
+    "@opentui/solid": "0.1.73",
+    "@popcorn/sdk": "workspace:*",
+    "@popcorn/tui": "workspace:*",
+    "server0": "workspace:*",
+    "commander": "^14.0.2"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
+  }
+}
