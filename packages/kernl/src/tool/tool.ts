@@ -84,7 +84,7 @@ export class FunctionTool<
   readonly description: string;
   readonly parameters?: TParameters;
   readonly mode: "blocking" | "async";
-  private execute: ToolExecuteFunction<TContext, TParameters, TResult>;
+  execute: ToolExecuteFunction<TContext, TParameters, TResult>;
 
   errorfn: ToolErrorFunction | null;
   requiresApproval: ToolApprovalFunction<TParameters>;
