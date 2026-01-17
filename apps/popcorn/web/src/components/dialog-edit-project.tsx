@@ -1,14 +1,14 @@
-import { Button } from "@opencode-ai/ui/button"
-import { useDialog } from "@opencode-ai/ui/context/dialog"
-import { Dialog } from "@opencode-ai/ui/dialog"
-import { TextField } from "@opencode-ai/ui/text-field"
-import { Icon } from "@opencode-ai/ui/icon"
+import { Button } from "@popcorn/ui/button"
+import { useDialog } from "@popcorn/ui/context/dialog"
+import { Dialog } from "@popcorn/ui/dialog"
+import { TextField } from "@popcorn/ui/text-field"
+import { Icon } from "@popcorn/ui/icon"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { createStore } from "solid-js/store"
 import { useGlobalSDK } from "@/context/global-sdk"
 import { type LocalProject, getAvatarColors } from "@/context/layout"
 import { getFilename } from "@popcorn/shared/util/path"
-import { Avatar } from "@opencode-ai/ui/avatar"
+import { Avatar } from "@popcorn/ui/avatar"
 
 const AVATAR_COLOR_KEYS = ["pink", "mint", "orange", "purple", "cyan", "lime"] as const
 

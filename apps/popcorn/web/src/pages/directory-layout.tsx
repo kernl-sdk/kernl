@@ -5,7 +5,7 @@ import { SyncProvider, useSync } from "@/context/sync"
 import { LocalProvider } from "@/context/local"
 
 import { base64Decode } from "@popcorn/shared/util/encode"
-import { DataProvider } from "@opencode-ai/ui/context"
+import { DataProvider } from "@popcorn/ui/context"
 import { iife } from "@popcorn/shared/util/iife"
 
 export default function Layout(props: ParentProps) {

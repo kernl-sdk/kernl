@@ -1,10 +1,10 @@
-import { TextField } from "@opencode-ai/ui/text-field"
-import { Logo } from "@opencode-ai/ui/logo"
-import { Button } from "@opencode-ai/ui/button"
+import { TextField } from "@popcorn/ui/text-field"
+import { Logo } from "@popcorn/ui/logo"
+import { Button } from "@popcorn/ui/button"
 import { Component, Show } from "solid-js"
 import { createStore } from "solid-js/store"
 import { usePlatform } from "@/context/platform"
-import { Icon } from "@opencode-ai/ui/icon"
+import { Icon } from "@popcorn/ui/icon"
 
 export type InitError = {
   name: string

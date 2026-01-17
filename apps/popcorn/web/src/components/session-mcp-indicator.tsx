@@ -1,6 +1,6 @@
 import { createMemo, Show } from "solid-js"
-import { Button } from "@opencode-ai/ui/button"
-import { useDialog } from "@opencode-ai/ui/context/dialog"
+import { Button } from "@popcorn/ui/button"
+import { useDialog } from "@popcorn/ui/context/dialog"
 import { useSync } from "@/context/sync"
 import { DialogSelectMcp } from "@/components/dialog-select-mcp"
 

@@ -13,26 +13,6 @@ import { titler } from "@/agents/titler";
 import { createModel } from "@/lib/models";
 import { read as readTool } from "@/toolkits/fs/read";
 
-/**
- * Generate session title asynchronously.
- */
-async function title(
-  message: string,
-  sessionId: string,
-  directory: string,
-): Promise<void> {
-  try {
-    const res = await titler.run(`User message: ${message}`);
-    store.update(sessionId, { title: res.response.trim() });
-    events.emit(directory, {
-      type: "session.updated",
-      properties: { info: store.get(sessionId) },
-    });
-  } catch (err) {
-    console.error("[sessions] titler error:", err);
-  }
-}
-
 type Variables = { kernl: Kernl };
 
 export const sessions = new Hono<{ Variables: Variables }>();
@@ -719,3 +699,23 @@ sessions.get("/:id/todo", async (cx) => {
   const sessionId = cx.req.param("id");
   return cx.json(todoStore.get(sessionId));
 });
+
+/**
+ * Generate session title asynchronously.
+ */
+async function title(
+  message: string,
+  sessionId: string,
+  directory: string,
+): Promise<void> {
+  try {
+    const res = await titler.run(`User message: ${message}`);
+    store.update(sessionId, { title: res.response.trim() });
+    events.emit(directory, {
+      type: "session.updated",
+      properties: { info: store.get(sessionId) },
+    });
+  } catch (err) {
+    console.error("[sessions] titler error:", err);
+  }
+}

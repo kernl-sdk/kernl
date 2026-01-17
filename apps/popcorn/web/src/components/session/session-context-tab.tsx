@@ -5,12 +5,12 @@ import { DateTime } from "luxon"
 import { useSync } from "@/context/sync"
 import { useLayout } from "@/context/layout"
 import { checksum } from "@popcorn/shared/util/encode"
-import { Icon } from "@opencode-ai/ui/icon"
-import { Accordion } from "@opencode-ai/ui/accordion"
-import { StickyAccordionHeader } from "@opencode-ai/ui/sticky-accordion-header"
-import { Code } from "@opencode-ai/ui/code"
-import { Markdown } from "@opencode-ai/ui/markdown"
-import type { AssistantMessage, Message, Part, UserMessage } from "@opencode-ai/sdk/v2/client"
+import { Icon } from "@popcorn/ui/icon"
+import { Accordion } from "@popcorn/ui/accordion"
+import { StickyAccordionHeader } from "@popcorn/ui/sticky-accordion-header"
+import { Code } from "@popcorn/ui/code"
+import { Markdown } from "@popcorn/ui/markdown"
+import type { AssistantMessage, Message, Part, UserMessage } from "@popcorn/sdk/v2/client"
 
 interface SessionContextTabProps {
   messages: () => Message[]

@@ -9,7 +9,7 @@ import { useDiffComponent } from "../context/diff"
 import { getDirectory, getFilename } from "@popcorn/shared/util/path"
 import { For, Match, Show, Switch, type JSX } from "solid-js"
 import { createStore } from "solid-js/store"
-import { type FileDiff } from "@opencode-ai/sdk/v2"
+import { type FileDiff } from "@popcorn/sdk/v2"
 import { PreloadMultiFileDiffResult } from "@pierre/diffs/ssr"
 import { Dynamic } from "solid-js/web"
 

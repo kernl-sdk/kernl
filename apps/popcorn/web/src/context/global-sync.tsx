@@ -17,14 +17,14 @@ import {
   type VcsInfo,
   type PermissionRequest,
   createOpencodeClient,
-} from "@opencode-ai/sdk/v2/client"
+} from "@popcorn/sdk/v2/client"
 import { createStore, produce, reconcile } from "solid-js/store"
 import { Binary } from "@popcorn/shared/util/binary"
 import { retry } from "@popcorn/shared/util/retry"
 import { useGlobalSDK } from "./global-sdk"
 import { ErrorPage, type InitError } from "../pages/error"
 import { batch, createContext, useContext, onCleanup, onMount, type ParentProps, Switch, Match } from "solid-js"
-import { showToast } from "@opencode-ai/ui/toast"
+import { showToast } from "@popcorn/ui/toast"
 import { getFilename } from "@popcorn/shared/util/path"
 
 type State = {

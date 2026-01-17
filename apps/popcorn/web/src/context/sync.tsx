@@ -2,10 +2,10 @@ import { batch, createMemo } from "solid-js"
 import { createStore, produce, reconcile } from "solid-js/store"
 import { Binary } from "@popcorn/shared/util/binary"
 import { retry } from "@popcorn/shared/util/retry"
-import { createSimpleContext } from "@opencode-ai/ui/context"
+import { createSimpleContext } from "@popcorn/ui/context"
 import { useGlobalSync } from "./global-sync"
 import { useSDK } from "./sdk"
-import type { Message, Part } from "@opencode-ai/sdk/v2/client"
+import type { Message, Part } from "@popcorn/sdk/v2/client"
 
 export const { use: useSync, provider: SyncProvider } = createSimpleContext({
   name: "Sync",

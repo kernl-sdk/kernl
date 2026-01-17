@@ -5,7 +5,7 @@ import {
   type PermissionRequest,
   TextPart,
   ToolPart,
-} from "@opencode-ai/sdk/v2/client"
+} from "@popcorn/sdk/v2/client"
 import { useData } from "../context"
 import { useDiffComponent } from "../context/diff"
 import { getDirectory, getFilename } from "@popcorn/shared/util/path"
