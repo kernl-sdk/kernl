@@ -1,5 +1,11 @@
 # @kernl/ai
 
+## 0.4.5
+
+### Patch Changes
+
+- 098dd36: Fix OpenAI OAuth by passing `store: false` via model settings. AISDKLanguageModel now accepts optional default settings that are merged with per-request settings. Remove Anthropic OAuth support (blocked server-side).
+
 ## 0.4.4
 
 ### Patch Changes
