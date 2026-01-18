@@ -13,6 +13,24 @@ type Variables = { kernl: Kernl };
 const agents = new Hono<{ Variables: Variables }>();
 
 /**
+ * GET /agents
+ *
+ * List all registered agents.
+ */
+agents.get("/", async (c) => {
+  const kernl = c.get("kernl");
+  const list = kernl.agents.list();
+
+  return c.json({
+    agents: list.map((a) => ({
+      id: a.id,
+      name: a.name,
+      description: a.description,
+    })),
+  });
+});
+
+/**
  * POST /agents/:id/stream
  *
  * Stream agent execution with real-time updates.

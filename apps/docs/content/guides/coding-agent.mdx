@@ -309,10 +309,21 @@ export const todo = new Toolkit<TodoContext>({
 
 ## Part 4: The API Server
 
-To connect a chat UI, we need an API server. Install the dependencies:
+To connect the [agentic-chatbot](https://github.com/kernl-sdk/agentic-chatbot) UI, you need an API server with these minimum endpoints:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/agents/{agentId}/stream` | Stream agent response (SSE) |
+| `GET` | `/agents` | List available agents |
+| `GET` | `/threads` | List threads (for history) |
+| `GET` | `/threads/{tid}` | Get thread with messages |
+
+> For the full API specification including request/response schemas, see the [OpenAPI spec](https://github.com/kernl-sdk/agentic-chatbot/blob/master/openapi.json) or the [Charger microproject](https://github.com/kernl-sdk/kernl/tree/master/microprojects/charger) for a complete implementation.
+
+Install the dependencies:
 
 ```bash
-pnpm add hono @hono/node-server @hono/zod-validator @kernl-sdk/ai @kernl-sdk/pg ai pino pino-pretty
+pnpm add hono @hono/node-server @hono/zod-validator @kernl-sdk/ai @kernl-sdk/pg ai
 ```
 
 Create the following structure:
@@ -322,34 +333,16 @@ src/
 ├── agents/
 │   └── charger.ts
 ├── api/
-│   ├── agents.ts
-│   └── threads.ts
-├── lib/
-│   └── env.ts
+│   ├── agents/
+│   │   └── route.ts
+│   └── threads/
+│       └── route.ts
 ├── toolkits/
 │   ├── daytona/
 │   ├── parallel/
 │   └── todo/
 ├── app.ts
 └── index.ts
-```
-
-### Environment Validation
-
-```ts
-// src/lib/env.ts
-import { z } from "zod";
-
-const schema = z.object({
-  PORT: z.string().optional().default("3001"),
-  WEB_ORIGIN: z.string().optional().default("http://localhost:3000"),
-  DATABASE_URL: z.string(),
-  ANTHROPIC_API_KEY: z.string(),
-  DAYTONA_API_KEY: z.string(),
-  PARALLEL_API_KEY: z.string(),
-});
-
-export const env = schema.parse(process.env);
 ```
 
 ### Streaming Endpoint
@@ -557,6 +550,7 @@ Create `turbo.json`:
 ```json
 {
   "$schema": "https://turborepo.com/schema.json",
+  "ui": "tui",
   "tasks": {
     "dev": {
       "cache": false,
