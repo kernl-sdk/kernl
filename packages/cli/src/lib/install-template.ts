@@ -9,6 +9,24 @@ import { tryGitInit } from "@/lib/git";
 
 export type Provider = "openai" | "anthropic" | "google";
 
+/**
+ * Fetch the latest version of a package from npm.
+ * Falls back to the baked-in version if fetch fails.
+ */
+async function getLatestVersion(
+  pkg: string,
+  fallback: string,
+): Promise<string> {
+  try {
+    const res = await fetch(`https://registry.npmjs.org/${pkg}/latest`);
+    if (!res.ok) return fallback;
+    const data = (await res.json()) as { version: string };
+    return data.version;
+  } catch {
+    return fallback;
+  }
+}
+
 const PROVIDERS: Record<
   Provider,
   {
@@ -21,21 +39,21 @@ const PROVIDERS: Record<
 > = {
   openai: {
     pkg: "@ai-sdk/openai",
-    version: "^3.0.0-beta.57",
+    version: "^3.0.12",
     fn: "openai",
     model: "gpt-5.1",
     env: "OPENAI_API_KEY",
   },
   anthropic: {
     pkg: "@ai-sdk/anthropic",
-    version: "^3.0.0-beta.53",
+    version: "^3.0.15",
     fn: "anthropic",
     model: "claude-sonnet-4-5",
     env: "ANTHROPIC_API_KEY",
   },
   google: {
     pkg: "@ai-sdk/google",
-    version: "^3.0.0-beta.43",
+    version: "^3.0.10",
     fn: "google",
     model: "gemini-2.5-pro",
     env: "GOOGLE_GENERATIVE_AI_API_KEY",
@@ -108,6 +126,12 @@ export const jarvis = new Agent({
     p.log.step("Project structure created");
   }
 
+  // fetch latest versions from npm (with fallbacks to baked-in versions)
+  const [kernlVersion, aiVersion] = await Promise.all([
+    getLatestVersion("kernl", KERNL_VERSION),
+    getLatestVersion("@kernl-sdk/ai", KERNL_AI_VERSION),
+  ]);
+
   // generate package.json with provider-specific dependency
   const packageJson = {
     name: appName,
@@ -119,8 +143,8 @@ export const jarvis = new Agent({
       start: "tsx src/index.ts",
     },
     dependencies: {
-      kernl: `^${KERNL_VERSION}`,
-      "@kernl-sdk/ai": `^${KERNL_AI_VERSION}`,
+      kernl: `^${kernlVersion}`,
+      "@kernl-sdk/ai": `^${aiVersion}`,
       [providerConfig.pkg]: providerConfig.version,
       zod: "^4.1.12",
     },
