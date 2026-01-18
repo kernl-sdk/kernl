@@ -1,5 +1,12 @@
 # create-kernl
 
+## 0.2.6
+
+### Patch Changes
+
+- Updated dependencies [7ebf24e]
+  - @kernl-sdk/cli@0.6.0
+
 ## 0.2.5
 
 ### Patch Changes
