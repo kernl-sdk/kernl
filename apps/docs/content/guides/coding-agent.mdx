@@ -1,6 +1,6 @@
 <span className="section-label">Guides</span>
 
-# Building Charger - Coding Agent
+# Charger - Coding Agent
 
 We're going to build a production-ready coding agent that can read, write, and execute code in a sandboxed environment using [Daytona](https://daytona.io), all in about 10 minutes.
 
@@ -106,7 +106,32 @@ The `ChargerContext` type is the intersection of all toolkit contexts — this e
 
 ### Daytona Toolkit (from marketplace)
 
-The Daytona toolkit uses **lazy sandbox provisioning** — sandboxes are created on first tool use, not upfront. Here's the key pattern:
+The Daytona toolkit uses **lazy sandbox provisioning** — sandboxes are created on first tool use, not upfront. Here's what a tool looks like:
+
+```ts
+// src/toolkits/daytona/fs.ts
+import { z } from "zod";
+import { tool, type Context } from "kernl";
+import { getSandbox, type SandboxContext } from "./client";
+
+const read = tool({
+  id: "fs_read",
+  description: "Read the contents of a file",
+  parameters: z.object({
+    path: z.string().describe("Path to the file"),
+  }),
+  // ctx contains the thread's persisted state
+  execute: async (ctx: Context<SandboxContext>, { path }) => {
+    // getSandbox creates or reuses the sandbox for this thread
+    const sandbox = await getSandbox(ctx);
+    // Daytona SDK methods for file operations
+    const buffer = await sandbox.fs.downloadFile(path);
+    return buffer.toString("utf-8");
+  },
+});
+```
+
+The magic is in `getSandbox(ctx)` — it lazily provisions sandboxes and stores the ID in context:
 
 ```ts
 // src/toolkits/daytona/client.ts
@@ -118,10 +143,10 @@ export const daytona = new Daytona();
 // Git credentials for private repo operations (clone, push, pull)
 export interface GitCredentials {
   username: string; // For GitHub: "x-access-token"
-  token: string; // For GitHub: personal access token or app token
+  token: string; // Personal access token or app token
 }
 
-// This interface extends the thread context - fields are persisted across requests
+// Extends the thread context - fields are persisted across requests
 export interface SandboxContext {
   sandboxId?: string;
   git?: GitCredentials;
@@ -137,7 +162,6 @@ export function getGitCredentials(ctx: Context<SandboxContext>) {
 export async function getSandbox(
   ctx: Context<SandboxContext>,
 ): Promise<Sandbox> {
-  // ctx.context is the thread's persisted state
   const { context } = ctx;
 
   // Reuse existing sandbox if we have one
@@ -152,20 +176,22 @@ export async function getSandbox(
   // First tool call - create a new sandbox
   const sandbox = await daytona.create({
     language: "typescript",
-    autoStopInterval: 30, // Auto-stop after 30 min idle
+    autoStopInterval: 30,
   });
 
-  // Store ID in context - this gets persisted with the thread
+  // Store ID in context - persisted with the thread
   context.sandboxId = sandbox.id;
   return sandbox;
 }
 ```
 
-Git tools use `getGitCredentials(ctx)` to pass auth to Daytona. To enable private repo access, set credentials in context before the agent runs:
+Because context is persisted with the thread, the sandbox survives across HTTP requests — the entire conversation shares one sandbox.
+
+For private repo access, pass git credentials in the stream call:
 
 ```ts
-// Set git credentials for the thread
-await agent.threads.update(tid, {
+agent.stream(input, {
+  threadId: tid,
   context: {
     git: { username: "x-access-token", token: "ghp_..." },
   },
@@ -173,25 +199,6 @@ await agent.threads.update(tid, {
 ```
 
 Passing credentials through context keeps them out of the LLM's view entirely. The model never sees the token — it just calls `git_clone(url, path)` and the tool injects auth server-side. This prevents accidental leakage in responses or logs.
-
-Every tool calls `getSandbox(ctx)`. The first call creates the sandbox, subsequent calls reuse it. Because context is persisted with the thread, the sandbox survives across HTTP requests.
-
-Example tool using this pattern:
-
-```ts
-const read = tool({
-  id: "fs_read",
-  description: "Read the contents of a file",
-  parameters: z.object({
-    path: z.string().describe("Path to the file"),
-  }),
-  execute: async (ctx: Context<SandboxContext>, { path }) => {
-    const sandbox = await getSandbox(ctx);
-    const buffer = await sandbox.fs.downloadFile(path);
-    return buffer.toString("utf-8");
-  },
-});
-```
 
 ### Parallel Toolkit (from marketplace)
 
