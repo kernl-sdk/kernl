@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/cli",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "CLI for managing kernl applications",
   "keywords": [
     "kernl",
