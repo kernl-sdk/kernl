@@ -1,11 +1,15 @@
 import { Hono } from "hono";
+import { z } from "zod";
 import { Kernl } from "kernl";
 import { historyToUIMessages } from "@kernl-sdk/ai";
 import { zValidator } from "@hono/zod-validator";
 
 import { NotFoundError } from "@/lib/error";
 
-import { ThreadsListQuery } from "./schema";
+const ThreadsListQuery = z.object({
+  agent_id: z.string().optional(),
+  limit: z.coerce.number().int().positive().optional(),
+});
 
 type Variables = { kernl: Kernl };
 

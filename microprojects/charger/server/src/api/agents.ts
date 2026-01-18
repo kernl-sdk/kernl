@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { z } from "zod";
 import { Kernl } from "kernl";
 import { zValidator } from "@hono/zod-validator";
 import { createUIMessageStreamResponse, type UIMessage } from "ai";
@@ -6,7 +7,10 @@ import { UIMessageCodec, toUIMessageStream } from "@kernl-sdk/ai";
 
 import { NotFoundError } from "@/lib/error";
 
-import { StreamAgentBody } from "./schema";
+const StreamAgentBody = z.object({
+  tid: z.string().min(1, "tid is required"),
+  message: z.record(z.string(), z.unknown()),
+});
 
 type Variables = { kernl: Kernl };
 

@@ -9,8 +9,8 @@ import { env } from "@/lib/env";
 
 import { charger } from "@/agents/charger";
 
-import agents from "@/api/agents/route";
-import threads from "@/api/threads/route";
+import agents from "@/api/agents";
+import threads from "@/api/threads";
 
 type Variables = {
   kernl: Kernl;
