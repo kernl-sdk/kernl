@@ -3,7 +3,7 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [],
-  "linked": [],
+  "linked": [["@kernl-sdk/cli", "create-kernl"]],
   "access": "public",
   "baseBranch": "master",
   "updateInternalDependencies": "patch",
