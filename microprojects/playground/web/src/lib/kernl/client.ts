@@ -3,6 +3,7 @@ import type {
   Thread,
   ThreadsListParams,
   ThreadsListResponse,
+  ThreadMessagesResponse,
   Agent,
   AgentsListResponse,
   Toolkit,
@@ -40,7 +41,7 @@ class ThreadsResource {
 
   list(params?: ThreadsListParams) {
     return this.http.get<ThreadsListResponse>("/threads", {
-      agent_id: params?.agentId,
+      agentId: params?.agentId,
       limit: params?.limit,
       cursor: params?.cursor,
     });
@@ -48,6 +49,10 @@ class ThreadsResource {
 
   get(tid: string) {
     return this.http.get<Thread>(`/threads/${tid}`);
+  }
+
+  messages(tid: string) {
+    return this.http.get<ThreadMessagesResponse>(`/threads/${tid}/messages`);
   }
 
   delete(tid: string) {

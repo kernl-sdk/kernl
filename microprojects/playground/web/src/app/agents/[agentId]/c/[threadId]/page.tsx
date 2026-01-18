@@ -10,9 +10,9 @@ export default function ThreadPage() {
     threadId: string;
   }>();
 
-  const { data: thread, isLoading } = useSWR(
-    threadId ? `thread:${threadId}` : null,
-    () => kernl.threads.get(threadId!)
+  const { data: messagesData, isLoading } = useSWR(
+    threadId ? `thread:${threadId}:messages` : null,
+    () => kernl.threads.messages(threadId!),
   );
 
   return (
@@ -20,7 +20,7 @@ export default function ThreadPage() {
       key={threadId}
       agentId={agentId || "echo"}
       threadId={threadId}
-      initialMessages={thread?.history}
+      initialMessages={messagesData?.messages}
       isLoading={isLoading}
     />
   );

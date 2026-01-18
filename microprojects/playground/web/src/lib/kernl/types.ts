@@ -31,7 +31,13 @@ export interface Thread {
   state: string;
   createdAt: string;
   updatedAt: string;
-  history?: UIMessage[];
+}
+
+/**
+ * Response from getting thread messages.
+ */
+export interface ThreadMessagesResponse {
+  messages: UIMessage[];
 }
 
 // ---- agents ----
