@@ -49,6 +49,14 @@ pnpm create kernl@latest charger
 cd charger
 ```
 
+Install the kernl CLI and add the toolkits from the marketplace:
+
+```bash
+npm install -g @kernl-sdk/cli
+kernl add toolkit daytona
+kernl add toolkit parallel
+```
+
 This creates:
 
 ```
@@ -57,8 +65,8 @@ charger/
 │   ├── agents/
 │   │   └── jarvis.ts       # Example agent (we'll replace this)
 │   ├── toolkits/
-│   │   ├── github/         # Example toolkit
-│   │   └── math/           # Example toolkit
+│   │   ├── daytona/        # Sandbox filesystem, process, git
+│   │   └── parallel/       # Web search via MCP
 │   └── index.ts
 ├── kernl.json              # CLI configuration
 ├── package.json
@@ -113,13 +121,6 @@ The `ChargerContext` type is the intersection of all toolkit contexts — this e
 ## Part 3: The Toolkits
 
 ### Daytona Toolkit (from marketplace)
-
-Install the kernl CLI, then add the toolkit:
-
-```bash
-npm install -g @kernl-sdk/cli
-kernl add toolkit daytona
-```
 
 > **Important:** The marketplace toolkits use prefixed IDs like `daytona_fs_read` for namespacing. When copying toolkits into your project, rename these to `fs_read`, `fs_edit`, `git_clone`, etc. The [agentic-chatbot](https://github.com/kernl-sdk/agentic-chatbot) template expects these shorter IDs for specialized UI components like the diff viewer.
 
@@ -219,10 +220,6 @@ Passing credentials through context keeps them out of the LLM's view entirely. T
 > **Diff UI:** The `fs_edit` tool returns a `diff` object with `before`, `after`, and line stats. The agentic-chatbot template uses this to render a side-by-side diff view for code changes.
 
 ### Adding Web Search
-
-```bash
-kernl add toolkit parallel
-```
 
 The Parallel toolkit uses kernl's `MCPToolkit` to connect to an external MCP server:
 

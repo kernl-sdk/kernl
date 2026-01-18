@@ -160,8 +160,10 @@ export const edit = tool({
 
     const [result] = await sandbox.fs.replaceInFiles([path], old, newStr);
 
-    if (!result || result.replacements === 0) {
-      throw new Error(`Edit failed: string not found in ${path}`);
+    if (!result?.success) {
+      throw new Error(
+        `Edit failed: ${result?.error ?? "string not found in " + path}`,
+      );
     }
 
     // Compute diff stats from the strings
