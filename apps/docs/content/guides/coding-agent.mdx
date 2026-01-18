@@ -1,6 +1,6 @@
 <span className="section-label">Guides</span>
 
-# Charger - Coding Agent
+# Charger — A Coding Agent
 
 We're going to build a production-ready coding agent that can read, write, and execute code in a sandboxed environment using [Daytona](https://daytona.io), all in about 10 minutes.
 
@@ -41,21 +41,6 @@ Start by scaffolding a new kernl project:
 pnpm create kernl@latest charger
 cd charger
 ```
-
-Install the kernl CLI globally:
-
-```bash
-npm install -g @kernl-sdk/cli
-```
-
-Install toolkits from the [marketplace](https://www.kernl.sh/marketplace):
-
-```bash
-kernl add toolkit daytona
-kernl add toolkit parallel
-```
-
-This gives us sandbox tools (file system, shell, git) and web search.
 
 ---
 
@@ -105,6 +90,13 @@ The `ChargerContext` type is the intersection of all toolkit contexts — this e
 ## Part 3: The Toolkits
 
 ### Daytona Toolkit (from marketplace)
+
+Install the kernl CLI, then add the toolkit:
+
+```bash
+npm install -g @kernl-sdk/cli
+kernl add toolkit daytona
+```
 
 The Daytona toolkit uses **lazy sandbox provisioning** — sandboxes are created on first tool use, not upfront. Here's what a tool looks like:
 
@@ -201,6 +193,10 @@ agent.stream(input, {
 Passing credentials through context keeps them out of the LLM's view entirely. The model never sees the token — it just calls `git_clone(url, path)` and the tool injects auth server-side. This prevents accidental leakage in responses or logs.
 
 ### Parallel Toolkit (from marketplace)
+
+```bash
+kernl add toolkit parallel
+```
 
 The Parallel toolkit uses kernl's `MCPToolkit` to connect to an external MCP server:
 
