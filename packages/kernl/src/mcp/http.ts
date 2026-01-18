@@ -77,7 +77,6 @@ export class MCPServerStreamableHttp extends BaseMCPServer {
       throw e;
     }
 
-    this.logger.debug(`Connected to MCP server: ${this.id}`);
   }
 
   /**
@@ -107,7 +106,6 @@ export class MCPServerStreamableHttp extends BaseMCPServer {
     }
 
     const response = await this.session.listTools();
-    this.logger.debug(`Listed tools: ${JSON.stringify(response)}`);
     return ListToolsResultSchema.parse(response).tools;
   }
 
@@ -136,12 +134,6 @@ export class MCPServerStreamableHttp extends BaseMCPServer {
     );
 
     const parsed = CallToolResultSchema.parse(response);
-    const result = parsed.content;
-
-    this.logger.debug(
-      `Called tool ${toolName} (args: ${JSON.stringify(args)}, result: ${JSON.stringify(result)})`,
-    );
-
-    return result as CallToolResultContent;
+    return parsed.content as CallToolResultContent;
   }
 }

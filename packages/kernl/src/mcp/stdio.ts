@@ -62,8 +62,6 @@ export class MCPServerStdio extends BaseMCPServer {
       this.serverInitializeResult = {
         serverInfo: { name: this.id, version: "1.0.0" },
       } as InitializeResult;
-
-      this.logger.debug(`Connected to MCP server: ${this.id}`);
     } catch (e) {
       this.logger.error("Error initializing MCP server:", e);
       await this.close();
@@ -82,7 +80,6 @@ export class MCPServerStdio extends BaseMCPServer {
     }
 
     const response = await this.session.listTools();
-    this.logger.debug(`Listed tools: ${JSON.stringify(response)}`);
     return ListToolsResultSchema.parse(response).tools;
   }
 
@@ -111,13 +108,7 @@ export class MCPServerStdio extends BaseMCPServer {
     );
 
     const parsed = CallToolResultSchema.parse(response);
-    const result = parsed.content;
-
-    this.logger.debug(
-      `Called tool ${toolName} (args: ${JSON.stringify(args)}, result: ${JSON.stringify(result)})`,
-    );
-
-    return result as CallToolResultContent;
+    return parsed.content as CallToolResultContent;
   }
 
   /**
