@@ -19,7 +19,7 @@ const stream = jarvis.stream("What's 100 divided by 4, then subtract 10?");
 
 // stream text deltas to console
 for await (const event of stream) {
-  if (event.kind === "text-delta") {
+  if (event.kind === "text.delta") {
     process.stdout.write(event.text);
   }
 }
