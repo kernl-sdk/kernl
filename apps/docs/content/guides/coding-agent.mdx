@@ -82,7 +82,7 @@ import { todo, type TodoContext } from "@/toolkits/todo";
 type ChargerContext = SandboxContext & TodoContext;
 
 export const charger = new Agent<ChargerContext>({
-  id: "charger", // Used in API routes: /v1/agents/charger/stream
+  id: "charger", // Used in API routes: /agents/charger/stream
   name: "Charger",
   description: "A coding assistant with sandbox access",
   model: anthropic("claude-opus-4-5"),
@@ -484,8 +484,8 @@ export function build(): Hono<{ Variables: Variables }> {
     await next();
   });
 
-  app.route("/v1/agents", agents);
-  app.route("/v1/threads", threads);
+  app.route("/agents", agents);
+  app.route("/threads", threads);
 
   return app;
 }
@@ -620,87 +620,13 @@ See the [Charger microproject](https://github.com/kernl-sdk/kernl/tree/master/mi
 
 ---
 
-## Appendix: API Specification
+## API Specification
 
-[ GIVE THIS TO CLAUDE / CURSOR ]
-
-The server exposes the following REST endpoints. The frontend expects these exact routes and response shapes.
-
-```
-Base URL: http://localhost:3001
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ AGENTS                                                                       │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ POST /v1/agents/:id/stream                                                   │
-│                                                                              │
-│ Stream agent responses using Server-Sent Events (SSE).                       │
-│ The frontend uses Vercel AI SDK's useChat with a custom transport.           │
-│                                                                              │
-│ Request:                                                                     │
-│   Content-Type: application/json                                             │
-│   Body: {                                                                    │
-│     "tid": "string",              // Thread ID (UUID)                        │
-│     "message": { ... }            // UIMessage object from AI SDK            │
-│   }                                                                          │
-│                                                                              │
-│ Response:                                                                    │
-│   Content-Type: text/event-stream                                            │
-│   Body: SSE stream (AI SDK UIMessageStream format)                           │
-│                                                                              │
-│ Errors:                                                                      │
-│   404: { "error": "Agent not found" }                                        │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ THREADS                                                                      │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ GET /v1/threads/:tid                                                         │
-│                                                                              │
-│ Get a thread with its message history.                                       │
-│                                                                              │
-│ Response:                                                                    │
-│   {                                                                          │
-│     "tid": "string",                                                         │
-│     "agentId": "string",                                                     │
-│     "title": "string | null",                                                │
-│     "state": "string",                                                       │
-│     "createdAt": "ISO8601",                                                  │
-│     "updatedAt": "ISO8601",                                                  │
-│     "model": { "provider": "string", "modelId": "string" },                  │
-│     "context": { ... },                                                      │
-│     "history": [ UIMessage, ... ]    // Array of AI SDK UIMessage objects    │
-│   }                                                                          │
-│                                                                              │
-│ Errors:                                                                      │
-│   404: { "error": "Thread not found" }                                       │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ GET /v1/threads                                                              │
-│                                                                              │
-│ List threads with optional filtering.                                        │
-│                                                                              │
-│ Query params:                                                                │
-│   agent_id?: string    // Filter by agent                                    │
-│   limit?: number       // Max results                                        │
-│                                                                              │
-│ Response:                                                                    │
-│   {                                                                          │
-│     "threads": [ { tid, agentId, title, state, createdAt, updatedAt }, ... ],│
-│     "count": number                                                          │
-│   }                                                                          │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ DELETE /v1/threads/:tid                                                      │
-│                                                                              │
-│ Delete a thread.                                                             │
-│                                                                              │
-│ Response:                                                                    │
-│   { "success": true }                                                        │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+For the complete API specification, see the [OpenAPI spec](https://github.com/kernl-sdk/agentic-chatbot/blob/master/openapi.json) in the agentic-chatbot template.
 
 **Key implementation notes:**
 
-1. **Thread auto-creation**: The `/v1/agents/:id/stream` endpoint creates the thread if it doesn't exist. The frontend generates a UUID for new conversations.
+1. **Thread auto-creation**: The `/agents/:id/stream` endpoint creates the thread if it doesn't exist. The frontend generates a UUID for new conversations.
 
 2. **UIMessage format**: Messages use the [Vercel AI SDK UIMessage format](https://sdk.vercel.ai/docs/reference/ai-sdk-ui/use-chat#messages). The `historyToUIMessages` helper from `@kernl-sdk/ai` converts kernl's internal format.
 
