@@ -96,13 +96,13 @@ documentation or examples.`,
 
 The toolkits give the agent these capabilities:
 
-| Toolkit     | Tools                                        | Source                    |
-| ----------- | -------------------------------------------- | ------------------------- |
-| **fs**      | read, write, list, mkdir, rm, mv, find, grep | Daytona (marketplace)     |
-| **process** | exec, kill                                   | Daytona (marketplace)     |
-| **git**     | clone, status, commit, push, pull            | Daytona (marketplace)     |
-| **web**     | search, extract                              | Parallel (marketplace)    |
-| **todo**    | read, write                                  | Custom (we'll build this) |
+| Toolkit     | Tools                                              | Source                    |
+| ----------- | -------------------------------------------------- | ------------------------- |
+| **fs**      | read, write, edit, list, mkdir, rm, mv, find, grep | Daytona (marketplace)     |
+| **process** | exec, kill                                         | Daytona (marketplace)     |
+| **git**     | clone, status, commit, push, pull                  | Daytona (marketplace)     |
+| **web**     | search, extract                                    | Parallel (marketplace)    |
+| **todo**    | read, write                                        | Custom (we'll build this) |
 
 The `ChargerContext` type is the intersection of all toolkit contexts — this ensures type safety when tools access shared state.
 
@@ -118,6 +118,8 @@ Install the kernl CLI, then add the toolkit:
 npm install -g @kernl-sdk/cli
 kernl add toolkit daytona
 ```
+
+> **Important:** The marketplace toolkits use prefixed IDs like `daytona_fs_read` for namespacing. When copying toolkits into your project, rename these to `fs_read`, `fs_edit`, `git_clone`, etc. The [agentic-chatbot](https://github.com/kernl-sdk/agentic-chatbot) template expects these shorter IDs for specialized UI components like the diff viewer.
 
 The Daytona toolkit uses **lazy sandbox provisioning** — sandboxes are created on first tool use, not upfront. Here's what a tool looks like:
 
@@ -211,6 +213,8 @@ agent.stream(input, {
 ```
 
 Passing credentials through context keeps them out of the LLM's view entirely. The model never sees the token — it just calls `git_clone(url, path)` and the tool injects auth server-side. This prevents accidental leakage in responses or logs.
+
+> **Diff UI:** The `fs_edit` tool returns a `diff` object with `before`, `after`, and line stats. The agentic-chatbot template uses this to render a side-by-side diff view for code changes.
 
 ### Adding Web Search
 
