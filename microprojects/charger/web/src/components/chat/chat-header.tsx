@@ -1,107 +1,115 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, ChevronDown } from "lucide-react";
+import { Plus, SlidersVertical, History } from "lucide-react";
 
-/* componnents */
+import type { AgentResource } from "@/lib/kernl/types";
+
+/* components */
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme";
-import { ThreadHistory } from "@/components/chat/history-dialog";
+import { Kbd } from "@/components/ui/kbd";
 import {
-  ModelSelector,
-  ModelSelectorTrigger,
-  ModelSelectorContent,
-  ModelSelectorInput,
-  ModelSelectorList,
-  ModelSelectorGroup,
-  ModelSelectorItem,
-  ModelSelectorLogo,
-  ModelSelectorName,
-} from "@/components/ai-elements/model-selector";
-
-const AGENTS = [
-  { id: "jarvis", name: "Jarvis", provider: "openai" },
-  { id: "atlas", name: "Atlas", provider: "anthropic" },
-];
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ChatHeaderProps {
+  agentId: string;
+  agents?: AgentResource[];
+  isAgentLocked?: boolean;
+  onAgentChange: (agentId: string) => void;
   onNewChat: () => void;
-  initialAgent?: string;
-  onAgentChange?: (agentId: string) => void;
-  currentThreadId?: string;
+  onOpenSettings: () => void;
+  onOpenHistory: () => void;
 }
 
 export function ChatHeader({
-  onNewChat,
-  initialAgent,
+  agentId,
+  agents,
+  isAgentLocked,
   onAgentChange,
-  currentThreadId,
+  onNewChat,
+  onOpenSettings,
+  onOpenHistory,
 }: ChatHeaderProps) {
-  const [selectedAgent, setSelectedAgent] = useState(
-    AGENTS.find((a) => a.id === initialAgent) || AGENTS[0],
-  );
-  const [agentSelectorOpen, setAgentSelectorOpen] = useState(false);
+  const currentAgent = agents?.find((a) => a.id === agentId);
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        {/* new chat */}
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={onNewChat}
-          className="cursor-pointer rounded-full"
-        >
-          <Plus className="size-4" />
-        </Button>
-
-        {/* thread history */}
-        <ThreadHistory
-          currentThreadId={currentThreadId}
-          agentId={selectedAgent.id}
-        />
-      </div>
-
-      <div className="flex items-center gap-2">
-        {/* agent selector */}
-        <ModelSelector
-          open={agentSelectorOpen}
-          onOpenChange={setAgentSelectorOpen}
-        >
-          <ModelSelectorTrigger asChild>
-            <Button variant="ghost" size="sm" className="cursor-pointer gap-2">
-              <ModelSelectorLogo provider={selectedAgent.provider} />
-              <span className="text-sm">{selectedAgent.name}</span>
-              <ChevronDown className="size-4" />
+    <header className="flex items-center justify-between px-7 py-5">
+      <div className="flex items-center gap-1">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onNewChat}
+              className="cursor-pointer rounded-full border"
+            >
+              <Plus className="size-4" />
             </Button>
-          </ModelSelectorTrigger>
-          <ModelSelectorContent>
-            <ModelSelectorInput placeholder="Search agents..." />
-            <ModelSelectorList>
-              <ModelSelectorGroup heading="Available Agents">
-                {AGENTS.map((agent) => (
-                  <ModelSelectorItem
-                    key={agent.id}
-                    value={agent.id}
-                    onSelect={() => {
-                      setSelectedAgent(agent);
-                      setAgentSelectorOpen(false);
-                      onAgentChange?.(agent.id);
-                    }}
-                    className="cursor-pointer"
-                  >
-                    <ModelSelectorLogo provider={agent.provider} />
-                    <ModelSelectorName>{agent.name}</ModelSelectorName>
-                  </ModelSelectorItem>
-                ))}
-              </ModelSelectorGroup>
-            </ModelSelectorList>
-          </ModelSelectorContent>
-        </ModelSelector>
-
-        {/* theme toggle */}
-        <ThemeToggle />
+          </TooltipTrigger>
+          <TooltipContent className="flex items-center gap-2">
+            New chat <Kbd className="h-4 min-w-4 text-[10px]">⌘J</Kbd>
+          </TooltipContent>
+        </Tooltip>
+        <Select value={agentId} onValueChange={onAgentChange}>
+          <SelectTrigger className="w-auto min-w-[120px] gap-1 border-none bg-transparent shadow-none hover:bg-accent dark:bg-transparent">
+            <SelectValue placeholder="Select agent">
+              {currentAgent?.name ?? agentId}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent align="start">
+            {agents?.map((agent) => (
+              <SelectItem
+                key={agent.id}
+                value={agent.id}
+                disabled={isAgentLocked && agent.id !== agentId}
+              >
+                {agent.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
-    </div>
+      <div className="flex gap-1">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onOpenSettings}
+              className="cursor-pointer rounded-full"
+            >
+              <SlidersVertical className="size-4.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent className="flex items-center gap-2">
+            Settings <Kbd className="h-4 min-w-4 text-[10px]">S</Kbd>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onOpenHistory}
+              className="cursor-pointer rounded-full"
+            >
+              <History className="size-4.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent className="flex items-center gap-2">
+            History <Kbd className="h-4 min-w-4 text-[10px]">H</Kbd>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    </header>
   );
 }

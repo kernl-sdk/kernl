@@ -9,8 +9,8 @@ import { env } from "@/lib/env";
 
 import { charger } from "@/agents/charger";
 
-import agents from "@/api/v1/agents/route";
-import threads from "@/api/v1/threads/route";
+import agents from "@/api/agents/route";
+import threads from "@/api/threads/route";
 
 type Variables = {
   kernl: Kernl;
@@ -42,8 +42,8 @@ export function build(): Hono<{ Variables: Variables }> {
 
   app.onError(handleError);
 
-  app.route("/v1/agents", agents);
-  app.route("/v1/threads", threads);
+  app.route("/agents", agents);
+  app.route("/threads", threads);
   app.get("/health", (cx) => cx.json({ status: "ok" }));
 
   return app;

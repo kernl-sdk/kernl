@@ -45,9 +45,8 @@ charger/
 │   │   ├── agents/
 │   │   │   └── charger.ts         # The coding agent
 │   │   ├── api/
-│   │   │   └── v1/
-│   │   │       ├── agents/        # POST /v1/agents/:id/stream
-│   │   │       └── threads/       # GET/DELETE /v1/threads
+│   │   │   ├── agents/            # POST /agents/:id/stream
+│   │   │   └── threads/           # GET/DELETE /threads
 │   │   ├── lib/
 │   │   │   ├── env.ts             # Environment validation
 │   │   │   ├── error.ts           # API error classes

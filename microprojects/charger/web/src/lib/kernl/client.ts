@@ -1,6 +1,8 @@
 import {
   KernlApiError,
   type ThreadResource,
+  type ThreadMessagesResponse,
+  type ThreadCreateParams,
   type ListThreadsParams,
   type ListThreadsResponse,
   type AgentResource,
@@ -36,9 +38,22 @@ export class KernlClient {
   }
 
   /**
-   * Threads API :: /v1/threads
+   * Threads API :: /threads
    */
   threads = {
+    /**
+     * Create a new thread
+     *
+     * @example
+     * const thread = await kernl.threads.create({ agentId: "jarvis" });
+     */
+    create: async (params: ThreadCreateParams): Promise<ThreadResource> => {
+      return this.fetch<ThreadResource>("/threads", {
+        method: "POST",
+        body: JSON.stringify(params),
+      });
+    },
+
     /**
      * Get a single thread by ID
      *
@@ -46,7 +61,17 @@ export class KernlClient {
      * const thread = await kernl.threads.get("thread-123");
      */
     get: async (tid: string): Promise<ThreadResource> => {
-      return this.fetch<ThreadResource>(`/v1/threads/${tid}`);
+      return this.fetch<ThreadResource>(`/threads/${tid}`);
+    },
+
+    /**
+     * Get thread messages
+     *
+     * @example
+     * const { messages } = await kernl.threads.messages("thread-123");
+     */
+    messages: async (tid: string): Promise<ThreadMessagesResponse> => {
+      return this.fetch<ThreadMessagesResponse>(`/threads/${tid}/messages`);
     },
 
     /**
@@ -65,31 +90,31 @@ export class KernlClient {
         searchParams.set("offset", params.offset.toString());
       }
       if (params?.agentId) {
-        searchParams.set("agent_id", params.agentId);
+        searchParams.set("agentId", params.agentId);
       }
 
       const query = searchParams.toString();
-      const endpoint = query ? `/v1/threads?${query}` : "/v1/threads";
+      const endpoint = query ? `/threads?${query}` : "/threads";
 
       const response = await this.fetch<ListThreadsResponse>(endpoint);
-      console.log("[KernlClient] /v1/threads response:", response);
+      console.log("[KernlClient] /threads response:", response);
       return response.threads;
     },
   };
 
   /**
-   * Agents API :: /v1/agents
+   * Agents API :: /agents
    */
   agents = {
-    // /**
-    //  * List available agents
-    //  *
-    //  * @example
-    //  * const agents = await kernl.agents.list();
-    //  */
-    // list: async (params?: ListAgentsParams): Promise<AgentResource[]> => {
-    //   return this.fetch<AgentResource[]>("/v1/agents");
-    // },
+    /**
+     * List available agents
+     *
+     * @example
+     * const { agents } = await kernl.agents.list();
+     */
+    list: async (): Promise<{ agents: AgentResource[] }> => {
+      return this.fetch<{ agents: AgentResource[] }>("/agents");
+    },
 
     /**
      * Get a single agent by ID
@@ -98,7 +123,7 @@ export class KernlClient {
      * const agent = await kernl.agents.get("jarvis");
      */
     get: async (agentId: string): Promise<AgentResource> => {
-      return this.fetch<AgentResource>(`/v1/agents/${agentId}`);
+      return this.fetch<AgentResource>(`/agents/${agentId}`);
     },
   };
 }
