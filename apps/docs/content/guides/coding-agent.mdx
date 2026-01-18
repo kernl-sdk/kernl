@@ -1,3 +1,8 @@
+---
+title: "Charger — A Coding Agent"
+description: Build a production-ready coding agent with sandboxed execution in under 10 minutes.
+---
+
 <span className="section-label">Guides</span>
 
 # Charger — A Coding Agent
@@ -40,6 +45,22 @@ Start by scaffolding a new kernl project:
 ```bash
 pnpm create kernl@latest charger
 cd charger
+```
+
+This creates:
+
+```
+charger/
+├── src/
+│   ├── agents/
+│   │   └── jarvis.ts       # Example agent (we'll replace this)
+│   ├── toolkits/
+│   │   ├── github/         # Example toolkit
+│   │   └── math/           # Example toolkit
+│   └── index.ts
+├── kernl.json              # CLI configuration
+├── package.json
+└── tsconfig.json
 ```
 
 ---
@@ -112,7 +133,6 @@ const read = tool({
   parameters: z.object({
     path: z.string().describe("Path to the file"),
   }),
-  // ctx contains the thread's persisted state
   execute: async (ctx: Context<SandboxContext>, { path }) => {
     // getSandbox creates or reuses the sandbox for this thread
     const sandbox = await getSandbox(ctx);
@@ -192,7 +212,7 @@ agent.stream(input, {
 
 Passing credentials through context keeps them out of the LLM's view entirely. The model never sees the token — it just calls `git_clone(url, path)` and the tool injects auth server-side. This prevents accidental leakage in responses or logs.
 
-### Parallel Toolkit (from marketplace)
+### Adding Web Search
 
 ```bash
 kernl add toolkit parallel
@@ -220,7 +240,7 @@ export const web = new MCPToolkit({
 });
 ```
 
-### Todo Toolkit (custom)
+### Adding Task Tracking
 
 Let's build a simple todo toolkit from scratch. This shows how to create tools with in-memory state:
 
