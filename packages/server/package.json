@@ -23,7 +23,7 @@
     "@kernl-sdk/openai": "workspace:*",
     "@kernl-sdk/xai": "workspace:*",
     "ai": "^5.0.93",
-    "hono": "^4.6.0",
+    "hono": "^4.11.4",
     "kernl": "workspace:*",
     "pino": "^9.6.0",
     "pino-pretty": "^13.0.0",
