@@ -14,7 +14,11 @@ export const clone = tool({
   description: "Clone a git repository into the sandbox",
   parameters: z.object({
     url: z.string().describe("Repository URL to clone"),
-    path: z.string().describe("Destination path for the clone"),
+    path: z
+      .string()
+      .describe(
+        "Destination path for the clone. Use a relative path like 'repo-name' — avoid absolute paths like '/home/user/...' which will fail with permission errors.",
+      ),
     branch: z.string().optional().describe("Specific branch to clone"),
   }),
   execute: async (ctx: Context<SandboxContext>, { url, path, branch }) => {
