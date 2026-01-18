@@ -72,10 +72,11 @@ import { fs, process, git, type SandboxContext } from "@/toolkits/daytona";
 import { web } from "@/toolkits/parallel";
 import { todo, type TodoContext } from "@/toolkits/todo";
 
+// Intersection of all toolkit contexts - ensures type safety across tools
 type ChargerContext = SandboxContext & TodoContext;
 
 export const charger = new Agent<ChargerContext>({
-  id: "charger",
+  id: "charger", // Used in API routes: /v1/agents/charger/stream
   name: "Charger",
   description: "A coding assistant with sandbox access",
   model: anthropic("claude-opus-4-5"),
@@ -114,16 +115,32 @@ import type { Context } from "kernl";
 
 export const daytona = new Daytona();
 
+// Git credentials for private repo operations (clone, push, pull)
+export interface GitCredentials {
+  username: string; // For GitHub: "x-access-token"
+  token: string; // For GitHub: personal access token or app token
+}
+
+// This interface extends the thread context - fields are persisted across requests
 export interface SandboxContext {
   sandboxId?: string;
+  git?: GitCredentials;
+}
+
+// Helper for git tools to get credentials from context
+export function getGitCredentials(ctx: Context<SandboxContext>) {
+  const { git } = ctx.context;
+  if (!git) return {};
+  return { username: git.username, password: git.token };
 }
 
 export async function getSandbox(
   ctx: Context<SandboxContext>,
 ): Promise<Sandbox> {
+  // ctx.context is the thread's persisted state
   const { context } = ctx;
 
-  // Reuse existing sandbox
+  // Reuse existing sandbox if we have one
   if (context.sandboxId) {
     const sandbox = await daytona.get(context.sandboxId);
     if (sandbox.state !== "started") {
@@ -132,16 +149,30 @@ export async function getSandbox(
     return sandbox;
   }
 
-  // Create new sandbox
+  // First tool call - create a new sandbox
   const sandbox = await daytona.create({
     language: "typescript",
-    autoStopInterval: 30,
+    autoStopInterval: 30, // Auto-stop after 30 min idle
   });
 
+  // Store ID in context - this gets persisted with the thread
   context.sandboxId = sandbox.id;
   return sandbox;
 }
 ```
+
+Git tools use `getGitCredentials(ctx)` to pass auth to Daytona. To enable private repo access, set credentials in context before the agent runs:
+
+```ts
+// Set git credentials for the thread
+await agent.threads.update(tid, {
+  context: {
+    git: { username: "x-access-token", token: "ghp_..." },
+  },
+});
+```
+
+Passing credentials through context keeps them out of the LLM's view entirely. The model never sees the token — it just calls `git_clone(url, path)` and the tool injects auth server-side. This prevents accidental leakage in responses or logs.
 
 Every tool calls `getSandbox(ctx)`. The first call creates the sandbox, subsequent calls reuse it. Because context is persisted with the thread, the sandbox survives across HTTP requests.
 
@@ -170,9 +201,11 @@ The Parallel toolkit uses kernl's `MCPToolkit` to connect to an external MCP ser
 // src/toolkits/parallel/index.ts
 import { MCPToolkit, MCPServerStreamableHttp } from "kernl";
 
+// MCPToolkit wraps any MCP server as a kernl toolkit
 export const web = new MCPToolkit({
   id: "web_search",
   description: "Real-time web search via Parallel AI",
+  // Streamable HTTP transport for MCP servers
   server: new MCPServerStreamableHttp({
     url: "https://search-mcp.parallel.ai/mcp",
     requestInit: {
@@ -323,15 +356,20 @@ agents.post("/:id/stream", zValidator("json", StreamBody), async (c) => {
   }
 
   const { tid, message } = c.req.valid("json");
+
+  // Decode the AI SDK UIMessage into kernl's internal format
   const input = await UIMessageCodec.decode(message as unknown as UIMessage);
 
+  // Auto-create thread on first message (frontend generates the UUID)
   const existing = await agent.threads.get(tid);
   if (!existing) {
     await agent.threads.create({ tid });
   }
 
+  // agent.stream() returns a kernl stream
   const stream = agent.stream(input, { threadId: tid });
 
+  // Convert to AI SDK's UIMessageStream format for the frontend
   return createUIMessageStreamResponse({
     stream: toUIMessageStream(stream),
   });
@@ -371,6 +409,7 @@ threads.get("/:tid", async (c) => {
   const kernl = c.get("kernl");
   const tid = c.req.param("tid");
 
+  // Fetch thread with message history (newest first from DB)
   const thread = await kernl.threads.get(tid, { history: { limit: 50 } });
   if (!thread) {
     return c.json({ error: "Thread not found" }, 404);
@@ -378,6 +417,7 @@ threads.get("/:tid", async (c) => {
 
   return c.json({
     ...thread,
+    // Convert kernl messages to AI SDK UIMessage format, oldest first for display
     history: historyToUIMessages((thread.history ?? []).reverse()),
   });
 });
