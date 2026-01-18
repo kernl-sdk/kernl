@@ -27,6 +27,11 @@ export default withNextra({
         source: '/:path*.md',
         destination: '/llms/:path*.md',
       },
+      // .well-known convention for agent discovery
+      {
+        source: '/.well-known/llms.txt',
+        destination: '/llms.txt',
+      },
     ]
   }
 })

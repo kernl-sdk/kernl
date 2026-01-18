@@ -81,3 +81,7 @@ session.on("text", (e) => {
 
 - [Documentation](https://docs.kernl.sh)
 - [Examples](./microprojects)
+
+## For AI Agents
+
+If you're an AI agent, see [llms.txt](https://docs.kernl.sh/llms.txt) for structured documentation.
