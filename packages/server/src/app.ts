@@ -28,7 +28,7 @@ export function hono(
   kernl: Kernl,
   options: HonoOptions = {},
 ): Hono<{ Variables: Variables }> {
-  const { prefix = "", cors: origins = ["*"] } = options;
+  const { prefix = "", cors: origins = ["http://localhost:3000"] } = options;
 
   const app = new Hono<{ Variables: Variables }>();
 

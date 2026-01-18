@@ -1,0 +1,1727 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "Kernl Server API",
+    "description": "HTTP API for @kernl-sdk/server"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "global.health",
+        "summary": "Get health",
+        "description": "Get health information about the kernl server.",
+        "responses": {
+          "200": {
+            "description": "Health information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "healthy": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "version": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["healthy", "version"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools": {
+      "get": {
+        "operationId": "tools.list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "agentId",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by agent ID"
+          }
+        ],
+        "summary": "List tools",
+        "description": "Get a list of available tools with their JSON schema parameters for a specific provider and model combination.",
+        "responses": {
+          "200": {
+            "description": "List of tools",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tools": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Tool"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/threads": {
+      "get": {
+        "operationId": "threads.list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "agentId",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by agent ID"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Max results"
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Pagination cursor"
+          }
+        ],
+        "summary": "List threads",
+        "description": "Get a list of all kernl threads, sorted by most recently updated.",
+        "responses": {
+          "200": {
+            "description": "Paginated threads",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedThreads"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "threads.create",
+        "parameters": [],
+        "summary": "Create thread",
+        "description": "Create a new kernl thread for interacting with AI assistants and managing conversations.",
+        "responses": {
+          "200": {
+            "description": "Created thread",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Thread"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ThreadCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/threads/{tid}": {
+      "get": {
+        "operationId": "threads.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tid",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "summary": "Get thread",
+        "description": "Retrieve thread metadata.",
+        "responses": {
+          "200": {
+            "description": "Thread",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Thread"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "threads.delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tid",
+            "schema": {
+              "type": "string",
+              "pattern": "^ses.*"
+            },
+            "required": true
+          }
+        ],
+        "summary": "Delete thread",
+        "description": "Delete a thread and permanently remove all associated data, including messages and history.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Success"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "threads.update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tid",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "summary": "Update thread",
+        "description": "Update properties of an existing thread, such as title or other metadata.",
+        "responses": {
+          "200": {
+            "description": "Updated thread",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Thread"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ThreadUpdate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/threads/{tid}/abort": {
+      "post": {
+        "operationId": "threads.abort",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tid",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "summary": "Abort thread",
+        "description": "Abort an active thread and stop any ongoing AI processing or command execution.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Success"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/threads/{tid}/messages": {
+      "get": {
+        "operationId": "threads.messages.list",
+        "x-note": "AI SDK adapter endpoint. Returns UIMessages. The future kernl-native equivalent will be GET /threads/{tid}/events.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tid",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "summary": "Get thread messages",
+        "description": "Retrieve messages for a thread as UIMessages.",
+        "responses": {
+          "200": {
+            "description": "Thread messages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AISDKMessageList"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/threads/{tid}/stream": {
+      "post": {
+        "operationId": "threads.stream",
+        "x-note": "AI SDK adapter endpoint. Accepts UIMessage, streams UIMessage responses. The future kernl-native equivalent will be POST /threads/{tid}/events.",
+        "summary": "Stream thread execution",
+        "description": "Send a message to a thread and stream the agent response. The thread must exist and determines which agent handles the request.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tid",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Thread ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AISDKStreamRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "SSE stream of UI messages",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string",
+                  "description": "Server-Sent Events stream"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Thread not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/providers": {
+      "get": {
+        "operationId": "providers.list",
+        "parameters": [],
+        "summary": "List providers",
+        "description": "Get a list of all available AI providers, including both available and connected ones.",
+        "responses": {
+          "200": {
+            "description": "List of providers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "providers": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Provider"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/providers/{providerID}/oauth/authorize": {
+      "post": {
+        "operationId": "providers.oauth.authorize",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "providerID",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Provider ID"
+          }
+        ],
+        "summary": "OAuth authorize",
+        "description": "Initiate OAuth authorization for a specific AI provider to get an authorization URL.",
+        "responses": {
+          "200": {
+            "description": "Authorization URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "format": "uri"
+                    }
+                  },
+                  "required": ["url"]
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OAuthAuthorize"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/providers/{providerID}/oauth/callback": {
+      "post": {
+        "operationId": "providers.oauth.callback",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "providerID",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Provider ID"
+          }
+        ],
+        "summary": "OAuth callback",
+        "description": "Handle the OAuth callback from a provider after user authorization.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Success"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OAuthCallback"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agents": {
+      "get": {
+        "operationId": "agents.list",
+        "parameters": [],
+        "summary": "List agents",
+        "description": "Get a list of all available AI agents in the kernl system.",
+        "responses": {
+          "200": {
+            "description": "List of agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "agents": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Agent"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mcps": {
+      "get": {
+        "operationId": "mcps.status",
+        "parameters": [],
+        "summary": "Get MCP status",
+        "description": "Get the status of all Model Context Protocol (MCP) servers.",
+        "responses": {
+          "200": {
+            "description": "List of MCP servers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "servers": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/McpServer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "mcps.add",
+        "parameters": [],
+        "summary": "Add MCP server",
+        "description": "Dynamically add a new Model Context Protocol (MCP) server to the system.",
+        "responses": {
+          "200": {
+            "description": "Created MCP server",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpServer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/McpServerCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mcps/{name}/auth": {
+      "post": {
+        "operationId": "mcps.auth.start",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "name",
+            "required": true
+          }
+        ],
+        "summary": "Start MCP OAuth",
+        "description": "Start OAuth authentication flow for a Model Context Protocol (MCP) server.",
+        "responses": {
+          "200": {
+            "description": "OAuth flow started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "authorizationUrl": {
+                      "description": "URL to open in browser for authorization",
+                      "type": "string"
+                    }
+                  },
+                  "required": ["authorizationUrl"]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "mcps.auth.remove",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "name",
+            "required": true
+          }
+        ],
+        "summary": "Remove MCP OAuth",
+        "description": "Remove OAuth credentials for an MCP server",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Success"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mcps/{name}/auth/callback": {
+      "post": {
+        "operationId": "mcps.auth.callback",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "name",
+            "required": true
+          }
+        ],
+        "summary": "Complete MCP OAuth",
+        "description": "Complete OAuth authentication for a Model Context Protocol (MCP) server using the authorization code.",
+        "responses": {
+          "200": {
+            "description": "OAuth authentication completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MCPStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "description": "Authorization code from OAuth callback",
+                    "type": "string"
+                  }
+                },
+                "required": ["code"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mcps/{name}/auth/authenticate": {
+      "post": {
+        "operationId": "mcps.auth.authenticate",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "name",
+            "required": true
+          }
+        ],
+        "summary": "Authenticate MCP OAuth",
+        "description": "Start OAuth flow and wait for callback (opens browser)",
+        "responses": {
+          "200": {
+            "description": "OAuth authentication completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MCPStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mcps/{name}/connect": {
+      "post": {
+        "operationId": "mcps.connect",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "description": "Connect an MCP server",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Success"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mcps/{name}/disconnect": {
+      "post": {
+        "operationId": "mcps.disconnect",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "description": "Disconnect an MCP server",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Success"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/{toolID}": {
+      "get": {
+        "operationId": "tools.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "toolID",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Tool ID"
+          }
+        ],
+        "summary": "Get tool",
+        "description": "Retrieve a specific tool by its ID, including its JSON schema parameters.",
+        "responses": {
+          "200": {
+            "description": "Tool",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tool"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/toolkits": {
+      "get": {
+        "operationId": "toolkits.list",
+        "summary": "List toolkits",
+        "description": "Get a list of all available toolkits (groups of tools).",
+        "responses": {
+          "200": {
+            "description": "List of toolkits",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "toolkits": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Toolkit"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/toolkits/{toolkitID}": {
+      "get": {
+        "operationId": "toolkits.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "toolkitID",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Toolkit ID"
+          }
+        ],
+        "summary": "Get toolkit",
+        "description": "Retrieve a specific toolkit with its tools.",
+        "responses": {
+          "200": {
+            "description": "Toolkit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Toolkit"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/realtime/credential": {
+      "post": {
+        "operationId": "realtime.credential",
+        "summary": "Get realtime credential",
+        "description": "Get ephemeral credentials for browser-side realtime connections.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "provider": {
+                    "type": "string",
+                    "enum": ["openai", "xai"]
+                  },
+                  "modelId": {
+                    "type": "string"
+                  },
+                  "agentId": {
+                    "type": "string"
+                  }
+                },
+                "required": ["provider", "modelId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Realtime credential",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "credential": {
+                      "$ref": "#/components/schemas/RealtimeCredential"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agents/{agentID}": {
+      "get": {
+        "operationId": "agents.get",
+        "summary": "Get agent",
+        "description": "Retrieve a specific agent by ID.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "agentID",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Agent ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Agent"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agent not found"
+          }
+        }
+      }
+    },
+    "/agents/{agentID}/stream": {
+      "post": {
+        "operationId": "agents.stream",
+        "summary": "Stream agent execution",
+        "description": "Send a message to an agent and stream the response. Creates the thread if it doesn't exist.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "agentID",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Agent ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StreamRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "SSE stream of UI messages",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string",
+                  "description": "Server-Sent Events stream"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agent not found"
+          }
+        }
+      }
+    },
+    "/mcps/{name}": {
+      "delete": {
+        "operationId": "mcps.remove",
+        "summary": "Remove MCP server",
+        "description": "Remove an MCP server registration.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Server name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Removed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/threads/{tid}/messages/{messageID}/parts/{partID}": {
+      "patch": {
+        "operationId": "messages.parts.update",
+        "summary": "Update message part",
+        "description": "Update a specific part of a message (e.g., add image, modify content).",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tid",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Thread ID"
+          },
+          {
+            "in": "path",
+            "name": "messageID",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Message ID"
+          },
+          {
+            "in": "path",
+            "name": "partID",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Part ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Success"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "messages.parts.delete",
+        "summary": "Delete message part",
+        "description": "Remove a part from a message.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tid",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Thread ID"
+          },
+          {
+            "in": "path",
+            "name": "messageID",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Message ID"
+          },
+          {
+            "in": "path",
+            "name": "partID",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Part ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Success"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Agent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique agent identifier"
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable agent name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Agent description"
+          },
+          "model": {
+            "$ref": "#/components/schemas/ModelInfo"
+          },
+          "memory": {
+            "type": "boolean",
+            "description": "Whether memory is enabled"
+          },
+          "toolkits": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of toolkit IDs"
+          }
+        },
+        "required": ["id", "name", "model"]
+      },
+      "Thread": {
+        "type": "object",
+        "properties": {
+          "tid": {
+            "type": "string",
+            "description": "Unique thread identifier"
+          },
+          "namespace": {
+            "type": "string",
+            "description": "Namespace for multi-tenancy"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true,
+            "description": "Thread title"
+          },
+          "agentId": {
+            "type": "string",
+            "description": "ID of the owning agent"
+          },
+          "model": {
+            "$ref": "#/components/schemas/ModelInfo"
+          },
+          "context": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "User-defined context"
+          },
+          "parentTaskId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Parent task ID if spawned"
+          },
+          "state": {
+            "$ref": "#/components/schemas/ThreadState"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "tid",
+          "namespace",
+          "agentId",
+          "model",
+          "state",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "ThreadState": {
+        "type": "string",
+        "enum": ["idle", "running", "stopped", "error"],
+        "description": "Thread lifecycle state"
+      },
+      "ThreadCreate": {
+        "type": "object",
+        "properties": {
+          "tid": {
+            "type": "string",
+            "description": "Optional thread ID (auto-generated if omitted)"
+          },
+          "agentId": {
+            "type": "string",
+            "description": "ID of the agent"
+          },
+          "title": {
+            "type": "string",
+            "description": "Optional title"
+          },
+          "context": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": ["agentId"]
+      },
+      "ThreadUpdate": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "context": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "AISDKMessageList": {
+        "type": "object",
+        "x-note": "AI SDK adapter type. Will be replaced by kernl-native event types in the future.",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UIMessage"
+            },
+            "description": "Messages as UIMessages"
+          }
+        },
+        "required": ["messages"]
+      },
+      "UIMessage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["user", "assistant"]
+          },
+          "parts": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "Message parts (text, tool calls, etc.)"
+          }
+        },
+        "required": ["id", "role", "parts"]
+      },
+      "Tool": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Tool ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Tool name"
+          },
+          "description": {
+            "type": "string"
+          },
+          "parameters": {
+            "type": "object",
+            "description": "JSON Schema for tool parameters"
+          }
+        },
+        "required": ["id", "name", "parameters"]
+      },
+      "Toolkit": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Toolkit ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Toolkit name"
+          },
+          "description": {
+            "type": "string"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tool IDs in this toolkit"
+          }
+        },
+        "required": ["id", "name", "tools"]
+      },
+      "Provider": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Provider ID (e.g., openai, anthropic)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name"
+          },
+          "models": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Available model IDs"
+          },
+          "auth": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["api_key", "oauth"]
+              },
+              "configured": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "required": ["id", "name"]
+      },
+      "McpServer": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Server name"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["connected", "disconnected", "error"]
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["name", "status"]
+      },
+      "McpServerCreate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "transport": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["stdio", "http"]
+              },
+              "command": {
+                "type": "string",
+                "description": "For stdio transport"
+              },
+              "url": {
+                "type": "string",
+                "description": "For http transport"
+              }
+            },
+            "required": ["type"]
+          }
+        },
+        "required": ["name", "transport"]
+      },
+      "RealtimeCredential": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["token", "url"]
+          },
+          "token": {
+            "type": "string",
+            "description": "If kind=token"
+          },
+          "url": {
+            "type": "string",
+            "description": "If kind=url"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["kind", "expiresAt"]
+      },
+      "ModelInfo": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "description": "Provider ID"
+          },
+          "modelId": {
+            "type": "string",
+            "description": "Model ID"
+          }
+        },
+        "required": ["provider", "modelId"]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": ["code", "message"]
+          }
+        }
+      },
+      "PaginatedThreads": {
+        "type": "object",
+        "properties": {
+          "threads": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Thread"
+            }
+          },
+          "next": {
+            "type": "string",
+            "nullable": true,
+            "description": "Cursor for next page"
+          }
+        },
+        "required": ["threads"]
+      },
+      "StreamRequest": {
+        "type": "object",
+        "properties": {
+          "tid": {
+            "type": "string",
+            "description": "Thread ID (created if doesn't exist)"
+          },
+          "message": {
+            "type": "object",
+            "description": "UIMessage to send"
+          },
+          "title": {
+            "type": "string",
+            "description": "Thread title (or '$auto' for auto-generation)"
+          },
+          "titlerAgentId": {
+            "type": "string",
+            "description": "Agent ID for auto title generation"
+          }
+        },
+        "required": ["tid", "message"]
+      },
+      "PartUpdate": {
+        "type": "object",
+        "description": "Update a message part",
+        "properties": {
+          "content": {
+            "description": "New content for the part"
+          }
+        }
+      },
+      "OAuthAuthorize": {
+        "type": "object",
+        "properties": {
+          "redirectUri": {
+            "type": "string",
+            "format": "uri",
+            "description": "OAuth redirect URI"
+          }
+        },
+        "required": ["redirectUri"]
+      },
+      "OAuthCallback": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Authorization code"
+          },
+          "state": {
+            "type": "string",
+            "description": "State parameter"
+          }
+        },
+        "required": ["code"]
+      },
+      "Success": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": ["success"]
+      },
+      "AISDKStreamRequest": {
+        "type": "object",
+        "x-note": "AI SDK adapter type. Will be replaced by kernl-native event types in the future.",
+        "description": "Request body for AI SDK streaming endpoints.",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/UIMessage",
+            "description": "UIMessage to send"
+          }
+        },
+        "required": ["message"]
+      }
+    }
+  }
+}
