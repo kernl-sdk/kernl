@@ -53,6 +53,23 @@ threads.post("/", zValidator("json", ThreadCreateBody), async (c) => {
 });
 
 /**
+ * GET /threads/:tid
+ *
+ * Get thread metadata.
+ */
+threads.get("/:tid", async (c) => {
+  const kernl = c.get("kernl") as Kernl;
+  const tid = c.req.param("tid");
+
+  const thread = await kernl.threads.get(tid);
+  if (!thread) {
+    throw new NotFoundError("Thread not found");
+  }
+
+  return c.json(thread);
+});
+
+/**
  * GET /threads/:tid/messages
  *
  * Get thread messages as UIMessages (AI SDK adapter).
@@ -103,23 +120,6 @@ threads.post(
     });
   },
 );
-
-/**
- * GET /threads/:tid
- *
- * Get thread metadata.
- */
-threads.get("/:tid", async (c) => {
-  const kernl = c.get("kernl") as Kernl;
-  const tid = c.req.param("tid");
-
-  const thread = await kernl.threads.get(tid);
-  if (!thread) {
-    throw new NotFoundError("Thread not found");
-  }
-
-  return c.json(thread);
-});
 
 /**
  * DELETE /threads/:tid

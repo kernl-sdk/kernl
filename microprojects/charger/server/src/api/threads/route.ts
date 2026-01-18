@@ -35,6 +35,21 @@ threads.get("/:tid", async (c) => {
   const kernl = c.get("kernl");
   const tid = c.req.param("tid");
 
+  const thread = await kernl.threads.get(tid);
+  if (!thread) {
+    throw new NotFoundError("Thread not found");
+  }
+
+  return c.json(thread);
+});
+
+/**
+ * GET /threads/:tid/messages
+ */
+threads.get("/:tid/messages", async (c) => {
+  const kernl = c.get("kernl");
+  const tid = c.req.param("tid");
+
   const thread = await kernl.threads.get(tid, { history: { limit: 50 } });
   if (!thread) {
     throw new NotFoundError("Thread not found");
@@ -43,8 +58,7 @@ threads.get("/:tid", async (c) => {
   const history = (thread.history ?? []).reverse();
 
   return c.json({
-    ...thread,
-    history: historyToUIMessages(history),
+    messages: historyToUIMessages(history),
   });
 });
 

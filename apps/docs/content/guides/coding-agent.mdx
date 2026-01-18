@@ -316,7 +316,8 @@ To connect the [agentic-chatbot](https://github.com/kernl-sdk/agentic-chatbot) U
 | `POST` | `/agents/{agentId}/stream` | Stream agent response (SSE) |
 | `GET` | `/agents` | List available agents |
 | `GET` | `/threads` | List threads (for history) |
-| `GET` | `/threads/{tid}` | Get thread with messages |
+| `GET` | `/threads/{tid}` | Get thread metadata |
+| `GET` | `/threads/{tid}/messages` | Get thread messages |
 
 > For the full API specification including request/response schemas, see the [OpenAPI spec](https://github.com/kernl-sdk/agentic-chatbot/blob/master/openapi.json) or the [Charger microproject](https://github.com/kernl-sdk/kernl/tree/master/microprojects/charger) for a complete implementation.
 
