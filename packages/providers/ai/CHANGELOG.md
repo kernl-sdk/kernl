@@ -1,5 +1,12 @@
 # @kernl/ai
 
+## 0.4.6
+
+### Patch Changes
+
+- Updated dependencies [296c377]
+  - kernl@0.12.4
+
 ## 0.4.5
 
 ### Patch Changes
