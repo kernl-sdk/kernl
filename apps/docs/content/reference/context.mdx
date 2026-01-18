@@ -7,4 +7,126 @@ description: Context class API reference.
 
 # Context
 
-*Coming soon.*
+Context carries runtime data through agent execution — user info, session state, feature flags, or any data your tools and instructions need.
+
+## Constructor
+
+```ts
+import { Context } from "kernl";
+
+const context = new Context<TContext>(namespace?, data?);
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `namespace` | `string` | `"kernl"` | Logical grouping for threads/memories |
+| `data` | `TContext` | `{}` | Your context data |
+
+## Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `namespace` | `string` | Namespace this context belongs to |
+| `context` | `TContext` | Your inner context data |
+| `agent` | `Agent` | Set during execution (read-only) |
+
+## Type Safety
+
+Define your context shape with TypeScript:
+
+```ts
+interface AppContext {
+  userId: string;
+  orgId: string;
+  permissions: string[];
+  featureFlags: Record<string, boolean>;
+}
+
+const agent = new Agent<AppContext>({
+  id: "assistant",
+  name: "Assistant",
+  model: anthropic("claude-sonnet-4-5"),
+  instructions: (ctx) => {
+    // ctx.context is typed as AppContext
+    const { userId, permissions } = ctx.context;
+    return `You are helping user ${userId}. They can: ${permissions.join(", ")}`;
+  },
+});
+
+await agent.run("Hello", {
+  context: {
+    userId: "user_123",
+    orgId: "org_456",
+    permissions: ["read", "write"],
+    featureFlags: { newUI: true },
+  },
+});
+```
+
+## Using Context in Tools
+
+Tools receive the typed context:
+
+```ts
+import { tool, Context } from "kernl";
+import { z } from "zod";
+
+interface AppContext {
+  userId: string;
+  apiToken: string;
+}
+
+const fetchData = tool({
+  id: "fetch_data",
+  description: "Fetch user data",
+  parameters: z.object({
+    dataType: z.string(),
+  }),
+  execute: async (ctx: Context<AppContext>, { dataType }) => {
+    // Access context data
+    const { userId, apiToken } = ctx.context;
+
+    const response = await fetch(`/api/${dataType}`, {
+      headers: { Authorization: `Bearer ${apiToken}` },
+    });
+
+    return response.json();
+  },
+});
+```
+
+## Context Persistence
+
+Context is persisted with the thread. When you resume a thread, the context from the previous execution is restored:
+
+```ts
+// First execution — sets context
+await agent.run("Remember my timezone", {
+  threadId: "thread_123",
+  context: { timezone: "America/New_York" },
+});
+
+// Later execution — context is restored from thread
+await agent.run("What time is it?", {
+  threadId: "thread_123",
+  // context.timezone is still "America/New_York"
+});
+```
+
+You can override context on subsequent calls:
+
+```ts
+await agent.run("Switch to London time", {
+  threadId: "thread_123",
+  context: { timezone: "Europe/London" },  // Override
+});
+```
+
+## Serialization
+
+```ts
+const ctx = new Context("myapp", { userId: "123" });
+
+ctx.toJSON();
+// { context: { userId: "123" } }
+```

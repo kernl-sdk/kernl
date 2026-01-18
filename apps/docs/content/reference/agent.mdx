@@ -7,4 +7,192 @@ description: Agent class API reference.
 
 # Agent
 
-*Coming soon.*
+The `Agent` class represents an LLM configured with instructions, tools, and memory.
+
+## Constructor
+
+```ts
+import { Agent } from "kernl";
+
+const agent = new Agent<TContext, TOutput>(config);
+```
+
+### Config
+
+| Option | Type | Required | Description |
+|--------|------|----------|-------------|
+| `id` | `string` | ✓ | Unique identifier |
+| `name` | `string` | ✓ | Display name |
+| `model` | `LanguageModel` | ✓ | LLM provider and model |
+| `instructions` | `string \| (ctx) => string` | ✓ | System prompt (static or dynamic) |
+| `description` | `string` | | Brief description |
+| `modelSettings` | `LanguageModelRequestSettings` | | Temperature, top_p, etc. |
+| `output` | `"text" \| ZodSchema` | | Output type (default: `"text"`) |
+| `toolkits` | `Toolkit[]` | | Tool collections |
+| `memory` | `{ enabled: boolean }` | | Enable memory tools |
+| `guardrails` | `AgentGuardrails` | | Input/output safety checks |
+
+### Example
+
+```ts
+import { Agent } from "kernl";
+import { anthropic } from "@kernl-sdk/ai/anthropic";
+import { github } from "@/toolkits/github";
+
+const agent = new Agent({
+  id: "jarvis",
+  name: "Jarvis",
+  model: anthropic("claude-sonnet-4-5"),
+  instructions: "You are a helpful assistant.",
+  toolkits: [github],
+  memory: { enabled: true },
+});
+```
+
+## Methods
+
+### run
+
+Blocking execution — waits for the full response.
+
+```ts
+const result = await agent.run(input, options?);
+```
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `input` | `string \| LanguageModelItem[]` | User message or message array |
+| `options` | `ThreadExecuteOptions` | Execution options (see below) |
+
+**Returns:** `Promise<ThreadExecuteResult>`
+
+```ts
+interface ThreadExecuteResult<TResponse> {
+  response: TResponse;  // string or structured output
+  state: any;           // Thread state at completion
+}
+```
+
+### stream
+
+Streaming execution — returns events as they happen.
+
+```ts
+const stream = agent.stream(input, options?);
+
+for await (const event of stream) {
+  if (event.kind === "text.delta") {
+    process.stdout.write(event.text);
+  }
+}
+```
+
+**Parameters:** Same as `run`.
+
+**Yields:** `ThreadStreamEvent` — includes `text.delta`, `tool.call`, `tool.result`, `finish`, etc.
+
+## Execute Options
+
+Options passed to `run` or `stream`:
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `threadId` | `string` | Resume an existing thread |
+| `context` | `TContext` | Runtime context data |
+| `namespace` | `string` | Logical grouping (default: `"kernl"`) |
+| `model` | `LanguageModel` | Override model for this execution |
+| `maxTicks` | `number` | Max iterations before stopping |
+| `abort` | `AbortSignal` | Cancellation signal |
+
+### Example with options
+
+```ts
+const result = await agent.run("What's on my calendar?", {
+  threadId: "thread_abc123",
+  context: {
+    userId: "user_456",
+    timezone: "America/New_York",
+  },
+});
+```
+
+## Dynamic Instructions
+
+Instructions can be a function that receives context:
+
+```ts
+interface UserContext {
+  user: { name: string; role: string };
+}
+
+const agent = new Agent<UserContext>({
+  id: "assistant",
+  name: "Assistant",
+  model: anthropic("claude-sonnet-4-5"),
+  instructions: (ctx) => `
+    You are helping ${ctx.context.user.name}.
+    Their role is ${ctx.context.user.role}.
+    Today is ${new Date().toDateString()}.
+  `,
+});
+
+await agent.run("Hello", {
+  context: { user: { name: "Alice", role: "admin" } },
+});
+```
+
+## Structured Output
+
+Use a Zod schema for typed responses:
+
+```ts
+import { z } from "zod";
+
+const agent = new Agent({
+  id: "extractor",
+  name: "Extractor",
+  model: anthropic("claude-sonnet-4-5"),
+  instructions: "Extract structured data from text.",
+  output: z.object({
+    name: z.string(),
+    email: z.string().email(),
+    confidence: z.number(),
+  }),
+});
+
+const result = await agent.run("Contact: Alice at alice@example.com");
+// result.response is typed as { name: string; email: string; confidence: number }
+```
+
+## Thread Management
+
+Agents have scoped thread methods:
+
+```ts
+// Get a thread
+const thread = await agent.threads.get("thread_123");
+
+// List threads for this agent
+const threads = await agent.threads.list({ limit: 10 });
+
+// Get thread history
+const history = await agent.threads.history("thread_123", {
+  limit: 50,
+  order: "desc",
+});
+
+// Delete a thread
+await agent.threads.delete("thread_123");
+```
+
+## Memory
+
+When `memory: { enabled: true }`, agents get memory tools automatically:
+
+- `memories.search` — semantic search over stored memories
+- `memories.create` — store new memories
+- `memories.list` — list memories with filters
+
+See [Memory API](/reference/memory) for programmatic access.

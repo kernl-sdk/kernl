@@ -113,7 +113,7 @@ console.log(result.response);
 const stream = jarvis.stream("Tell me a joke");
 
 for await (const event of stream) {
-  if (event.kind === "text-delta") {
+  if (event.kind === "text.delta") {
     process.stdout.write(event.text);
   }
 }

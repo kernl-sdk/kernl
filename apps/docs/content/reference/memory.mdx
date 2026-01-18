@@ -7,4 +7,190 @@ description: Memory class API reference.
 
 # Memory
 
-*Coming soon.*
+Memory enables agents to store, search, and recall knowledge across conversations.
+
+## Agent Memory
+
+When `memory: { enabled: true }`, agents get scoped memory methods:
+
+```ts
+const agent = new Agent({
+  id: "assistant",
+  memory: { enabled: true },
+  // ...
+});
+
+// Create
+await agent.memories.create({ ... });
+
+// Search
+await agent.memories.search({ ... });
+
+// List
+await agent.memories.list({ ... });
+
+// Update
+await agent.memories.update({ ... });
+```
+
+## Methods
+
+### create
+
+Store a new memory.
+
+```ts
+const memory = await agent.memories.create({
+  content: { text: "User prefers dark mode" },
+  collection: "preferences",
+});
+```
+
+**Parameters:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `content` | `MemoryByte` | ✓ | Memory content (see below) |
+| `collection` | `string` | | Category/group name |
+| `metadata` | `object` | | Custom fields |
+| `timestamp` | `number` | | When it occurred (default: now) |
+
+### search
+
+Semantic search over memories.
+
+```ts
+const results = await agent.memories.search({
+  query: "user preferences",
+  limit: 10,
+  filter: {
+    collections: ["preferences"],
+  },
+});
+```
+
+**Parameters:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `query` | `string` | ✓ | Search text (embedded for semantic search) |
+| `limit` | `number` | | Max results (default: 20) |
+| `filter` | `MemoryFilter` | | Narrow results (see below) |
+
+**Returns:** `SearchHit<MemoryRecord>[]` — ranked by relevance.
+
+### list
+
+List memories with filters.
+
+```ts
+const memories = await agent.memories.list({
+  collection: "preferences",
+  limit: 50,
+});
+```
+
+**Parameters:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `collection` | `string` | Filter by collection |
+| `limit` | `number` | Max results |
+
+### update
+
+Update an existing memory.
+
+```ts
+await agent.memories.update({
+  id: "mem_123",
+  content: { text: "User prefers light mode now" },
+  metadata: { updatedReason: "user changed preference" },
+});
+```
+
+**Parameters:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | `string` | ✓ | Memory ID to update |
+| `content` | `MemoryByte` | | New content |
+| `collection` | `string` | | New collection |
+| `metadata` | `object` | | Update metadata |
+
+## Memory Content
+
+Memory content (`MemoryByte`) supports text and structured data:
+
+```ts
+interface MemoryByte {
+  text?: string;      // Text content
+  object?: object;    // Structured JSON
+}
+```
+
+### Text
+
+```ts
+await agent.memories.create({
+  content: { text: "User's favorite color is blue" },
+});
+```
+
+### Structured
+
+```ts
+await agent.memories.create({
+  content: {
+    text: "User profile updated",
+    object: {
+      userId: "user_123",
+      preferences: { theme: "dark", language: "en" },
+    },
+  },
+});
+```
+
+## Memory Filter
+
+Narrow search/list results:
+
+```ts
+interface MemoryFilter {
+  scope?: {
+    namespace?: string;
+    entityId?: string;
+    agentId?: string;
+  };
+  collections?: string[];  // Filter by collection names
+  after?: number;          // Timestamp range (ms)
+  before?: number;
+  metadata?: object;       // Match metadata fields
+}
+```
+
+### Example
+
+```ts
+const results = await agent.memories.search({
+  query: "project deadlines",
+  filter: {
+    collections: ["work", "tasks"],
+    after: Date.now() - 7 * 24 * 60 * 60 * 1000,  // Last 7 days
+  },
+});
+```
+
+## Memory Scope
+
+Memories are scoped by namespace, entity, and agent:
+
+```ts
+interface MemoryScope {
+  namespace?: string;  // App-level grouping
+  entityId?: string;   // User, org, or other entity
+  agentId?: string;    // Which agent owns this
+}
+```
+
+Agent methods automatically scope to the current agent. For cross-agent access, use the Kernl memory API directly.

@@ -7,46 +7,4 @@ description: RealtimeAgent and RealtimeSession API reference.
 
 # Realtime
 
-Reference documentation for realtime voice sessions.
-
-## Session events
-
-| Event | Description |
-|-------|-------------|
-| `audio` | Audio chunk from assistant (for custom playback) |
-| `transcript` | Speech-to-text for user or assistant |
-| `text` | Text output from assistant |
-| `status` | Connection status changes |
-| `error` | Errors |
-
-```ts
-session.on("status", (status) => {
-  // "disconnected" | "connecting" | "connected" | "reconnecting" | "closed"
-});
-```
-
-## Session methods
-
-| Method | Description |
-|--------|-------------|
-| `connect()` | Establish WebSocket connection |
-| `close()` | Disconnect and cleanup |
-| `sendMessage(text)` | Send text message |
-| `sendAudio(base64)` | Send audio chunk (use channel instead) |
-| `commit()` | Signal end of speech (use channel instead) |
-| `interrupt()` | Cancel current response |
-| `mute()` / `unmute()` | Control audio input |
-
-## Providers
-
-Currently supported:
-
-| Provider | Models |
-|----------|--------|
-| OpenAI | `gpt-4o-realtime-preview`, `gpt-4o-realtime-preview-2024-12-17` |
-
-```ts
-import { openai } from "@kernl-sdk/openai";
-
-const model = openai.realtime("gpt-4o-realtime-preview");
-```
+*Coming soon.*

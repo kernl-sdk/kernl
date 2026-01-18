@@ -9,6 +9,7 @@ Use kernl when building agents that need:
 - **Thread management** — Automatic conversation persistence. Create, resume, and query threads without building custom infrastructure.
 - **Agent memory** — Agents can store, search, and recall knowledge across conversations. Working memory, short-term, and long-term memory with semantic search.
 - **Provider agnostic** — Swap models per-agent or per-request. No vendor lock-in.
+- **Realtime/voice** — The only framework with provider-agnostic realtime support. Build voice agents that work across OpenAI, Google, and others.
 - **Open source** — MIT licensed. Self-host or extend as needed.
 
 ## Why use this instead of the Vercel AI SDK?
