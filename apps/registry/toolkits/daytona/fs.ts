@@ -37,6 +37,40 @@ export const read = tool({
 });
 
 /**
+ * Edit a file by replacing a specific string.
+ */
+export const edit = tool({
+  id: "daytona_fs_edit",
+  description: "Edit a file by replacing a specific string with new content",
+  parameters: z.object({
+    path: z.string().describe("Path to the file to edit"),
+    old: z.string().describe("The exact string to find and replace"),
+    new: z.string().describe("The replacement string"),
+  }),
+  execute: async (ctx: Context<SandboxContext>, { path, old, new: newStr }) => {
+    const sandbox = await getSandbox(ctx);
+
+    const [result] = await sandbox.fs.replaceInFiles([path], old, newStr);
+
+    if (!result || result.replacements === 0) {
+      throw new Error(`Edit failed: string not found in ${path}`);
+    }
+
+    return {
+      success: true,
+      path,
+      diff: {
+        file: path,
+        before: old,
+        after: newStr,
+        additions: newStr.split("\n").length,
+        deletions: old.split("\n").length,
+      },
+    };
+  },
+});
+
+/**
  * Write content to a file.
  */
 export const write = tool({
@@ -141,44 +175,6 @@ export const grep = tool({
   execute: async (ctx: Context<SandboxContext>, { path, pattern }) => {
     const sandbox = await getSandbox(ctx);
     return await sandbox.fs.findFiles(path, pattern);
-  },
-});
-
-/**
- * Edit a file by replacing a specific string.
- */
-export const edit = tool({
-  id: "daytona_fs_edit",
-  description: "Edit a file by replacing a specific string with new content",
-  parameters: z.object({
-    path: z.string().describe("Path to the file to edit"),
-    old: z.string().describe("The exact string to find and replace"),
-    new: z.string().describe("The replacement string"),
-  }),
-  execute: async (ctx: Context<SandboxContext>, { path, old, new: newStr }) => {
-    const sandbox = await getSandbox(ctx);
-
-    const [result] = await sandbox.fs.replaceInFiles([path], old, newStr);
-
-    if (!result || result.replacements === 0) {
-      throw new Error(`Edit failed: string not found in ${path}`);
-    }
-
-    // Compute diff stats from the strings
-    const oldLines = old.split("\n").length;
-    const newLines = newStr.split("\n").length;
-
-    return {
-      success: true,
-      path,
-      diff: {
-        file: path,
-        before: old,
-        after: newStr,
-        additions: newLines,
-        deletions: oldLines,
-      },
-    };
   },
 });
 

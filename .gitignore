@@ -22,6 +22,8 @@ coverage
 # Vercel
 .vercel
 
+opencode.json
+
 # Build Outputs
 .next/
 out/

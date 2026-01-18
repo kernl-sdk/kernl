@@ -1060,6 +1060,286 @@ describe("Thread", () => {
     });
   });
 
+  describe("Event Sequencing", () => {
+    it("should assign incrementing seq values to all persisted events", async () => {
+      let callCount = 0;
+
+      const model = createMockModel(async (req: LanguageModelRequest) => {
+        callCount++;
+
+        if (callCount === 1) {
+          return {
+            content: [
+              {
+                kind: "message" as const,
+                id: "msg_1",
+                role: "assistant" as const,
+                content: [],
+              },
+              {
+                kind: "tool.call" as const,
+                toolId: "echo",
+                state: IN_PROGRESS,
+                callId: "call_1",
+                arguments: JSON.stringify({ text: "test" }),
+              },
+            ],
+            finishReason: "stop",
+            usage: { inputTokens: 2, outputTokens: 2, totalTokens: 4 },
+            warnings: [],
+          };
+        }
+
+        return {
+          content: [
+            {
+              kind: "message" as const,
+              id: "msg_2",
+              role: "assistant" as const,
+              content: [{ kind: "text" as const, text: "Done!" }],
+            },
+          ],
+          finishReason: "stop",
+          usage: { inputTokens: 4, outputTokens: 2, totalTokens: 6 },
+          warnings: [],
+        };
+      });
+
+      const echoTool = tool({
+        id: "echo",
+        description: "Echoes input",
+        parameters: z.object({ text: z.string() }),
+        execute: async (ctx, { text }) => `Echo: ${text}`,
+      });
+
+      const agent = new Agent({
+        id: "test",
+        name: "Test",
+        instructions: "Test agent",
+        model,
+        toolkits: [
+          new FunctionToolkit({ id: "test-tools", tools: [echoTool] }),
+        ],
+      });
+
+      const thread = new Thread({ agent, input: userMessage("test") });
+      await thread.execute();
+
+      const history = (thread as any).history as ThreadEvent[];
+
+      // Verify all events have seq values
+      for (const event of history) {
+        expect(event).toHaveProperty("seq");
+        expect(typeof event.seq).toBe("number");
+      }
+
+      // Verify seq values increment: 0, 1, 2, 3, 4
+      const seqValues = history.map((e) => e.seq);
+      expect(seqValues).toEqual([0, 1, 2, 3, 4]);
+    });
+
+    it("should assign consistent tid to all events in a thread", async () => {
+      const model = createMockModel(async (req: LanguageModelRequest) => {
+        return {
+          content: [
+            {
+              kind: "message" as const,
+              id: "msg_1",
+              role: "assistant" as const,
+              content: [{ kind: "text" as const, text: "Hello" }],
+            },
+          ],
+          finishReason: "stop",
+          usage: { inputTokens: 2, outputTokens: 2, totalTokens: 4 },
+          warnings: [],
+        };
+      });
+
+      const agent = new Agent({
+        id: "test",
+        name: "Test",
+        instructions: "Test agent",
+        model,
+      });
+
+      const thread = new Thread({ agent, input: userMessage("test") });
+      await thread.execute();
+
+      const history = (thread as any).history as ThreadEvent[];
+      const threadId = thread.tid;
+
+      // All events should have the same tid as the thread
+      for (const event of history) {
+        expect(event).toHaveProperty("tid");
+        expect(event.tid).toBe(threadId);
+      }
+    });
+
+    it("should assign timestamps to all events", async () => {
+      const model = createMockModel(async (req: LanguageModelRequest) => {
+        return {
+          content: [
+            {
+              kind: "message" as const,
+              id: "msg_1",
+              role: "assistant" as const,
+              content: [{ kind: "text" as const, text: "Hello" }],
+            },
+          ],
+          finishReason: "stop",
+          usage: { inputTokens: 2, outputTokens: 2, totalTokens: 4 },
+          warnings: [],
+        };
+      });
+
+      const agent = new Agent({
+        id: "test",
+        name: "Test",
+        instructions: "Test agent",
+        model,
+      });
+
+      const thread = new Thread({ agent, input: userMessage("test") });
+      await thread.execute();
+
+      const history = (thread as any).history as ThreadEvent[];
+
+      for (const event of history) {
+        expect(event).toHaveProperty("timestamp");
+        expect(event.timestamp).toBeInstanceOf(Date);
+      }
+    });
+
+    it("should generate event ids in expected format", async () => {
+      let callCount = 0;
+
+      const model = createMockModel(async (req: LanguageModelRequest) => {
+        callCount++;
+
+        if (callCount === 1) {
+          return {
+            content: [
+              {
+                kind: "message" as const,
+                id: "msg_1",
+                role: "assistant" as const,
+                content: [],
+              },
+              {
+                kind: "tool.call" as const,
+                toolId: "simple",
+                state: IN_PROGRESS,
+                callId: "call_1",
+                arguments: "{}",
+              },
+            ],
+            finishReason: "stop",
+            usage: { inputTokens: 2, outputTokens: 2, totalTokens: 4 },
+            warnings: [],
+          };
+        }
+
+        return {
+          content: [
+            {
+              kind: "message" as const,
+              id: "msg_2",
+              role: "assistant" as const,
+              content: [{ kind: "text" as const, text: "Done" }],
+            },
+          ],
+          finishReason: "stop",
+          usage: { inputTokens: 2, outputTokens: 2, totalTokens: 4 },
+          warnings: [],
+        };
+      });
+
+      const simpleTool = tool({
+        id: "simple",
+        description: "Simple tool",
+        parameters: undefined,
+        execute: async () => "result",
+      });
+
+      const agent = new Agent({
+        id: "test",
+        name: "Test",
+        instructions: "Test agent",
+        model,
+        toolkits: [
+          new FunctionToolkit({ id: "test-tools", tools: [simpleTool] }),
+        ],
+      });
+
+      const thread = new Thread({ agent, input: userMessage("test") });
+      await thread.execute();
+
+      const history = (thread as any).history as ThreadEvent[];
+
+      // Messages should have id format "message:{original_id}"
+      const messages = history.filter((e) => e.kind === "message");
+      for (const msg of messages) {
+        expect(msg.id).toMatch(/^message:/);
+      }
+
+      // Tool calls use callId (not id), so tevent falls back to randomID()
+      const toolCalls = history.filter((e) => e.kind === "tool.call");
+      for (const tc of toolCalls) {
+        expect(tc.id).toBeDefined();
+        expect(typeof tc.id).toBe("string");
+      }
+
+      // Tool results also use callId, so tevent falls back to randomID()
+      const toolResults = history.filter((e) => e.kind === "tool.result");
+      for (const tr of toolResults) {
+        expect(tr.id).toBeDefined();
+        expect(typeof tr.id).toBe("string");
+      }
+    });
+
+    it("should yield sequenced events during streaming", async () => {
+      const model = createMockModel(async (req: LanguageModelRequest) => {
+        return {
+          content: [
+            {
+              kind: "message" as const,
+              id: "msg_1",
+              role: "assistant" as const,
+              content: [{ kind: "text" as const, text: "Hello" }],
+            },
+          ],
+          finishReason: "stop",
+          usage: { inputTokens: 2, outputTokens: 2, totalTokens: 4 },
+          warnings: [],
+        };
+      });
+
+      const agent = new Agent({
+        id: "test",
+        name: "Test",
+        instructions: "Test agent",
+        model,
+      });
+
+      const thread = new Thread({ agent, input: userMessage("test") });
+
+      const events: any[] = [];
+      for await (const event of thread.stream()) {
+        events.push(event);
+      }
+
+      // Find the complete message event (not deltas)
+      const messageEvent = events.find(
+        (e) => e.kind === "message" && e.role === "assistant",
+      );
+
+      expect(messageEvent).toBeDefined();
+      expect(messageEvent).toHaveProperty("seq");
+      expect(messageEvent).toHaveProperty("tid");
+      expect(messageEvent).toHaveProperty("timestamp");
+    });
+  });
+
   describe("Final Output Parsing", () => {
     it("should return text output when output is 'text'", async () => {
       const model = createMockModel(async (req: LanguageModelRequest) => {

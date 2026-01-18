@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/popcorn/install",
+      "destination": "https://raw.githubusercontent.com/kernl-sdk/kernl/master/apps/popcorn/install.sh"
+    }
+  ]
+}
