@@ -1,5 +1,11 @@
 # @kernl/core
 
+## 0.12.4
+
+### Patch Changes
+
+- 296c377: Make tool execute method public for direct invocation
+
 ## 0.12.3
 
 ### Patch Changes
