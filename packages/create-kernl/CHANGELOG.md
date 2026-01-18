@@ -1,5 +1,11 @@
 # create-kernl
 
+## 0.2.7
+
+### Patch Changes
+
+- 7b2520b: Bump to pull latest @kernl-sdk/cli with template fixes
+
 ## 0.2.6
 
 ### Patch Changes
