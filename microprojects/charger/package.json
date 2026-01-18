@@ -1,0 +1,11 @@
+{
+  "name": "charger",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build"
+  },
+  "devDependencies": {
+    "turbo": "^2.6.1"
+  }
+}

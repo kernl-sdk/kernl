@@ -1,0 +1,31 @@
+{
+  "name": "charger-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file=.env.local src/index.ts",
+    "build": "tsc && tsc-alias --resolve-full-paths",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.0-beta.53",
+    "@daytonaio/sdk": "^0.128.1",
+    "@hono/node-server": "^1.19.6",
+    "@hono/zod-validator": "^0.7.5",
+    "@kernl-sdk/ai": "^0.4.5",
+    "@kernl-sdk/pg": "^0.1.35",
+    "ai": "^5.0.93",
+    "hono": "^4.10.6",
+    "kernl": "^0.12.3",
+    "pino": "^10.1.0",
+    "pino-pretty": "^13.1.2",
+    "zod": "^4.1.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsc-alias": "^1.8.16",
+    "tsx": "^4.20.6",
+    "typescript": "^5.6.0"
+  }
+}

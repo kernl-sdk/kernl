@@ -1,0 +1,646 @@
+<span className="section-label">Guides</span>
+
+# Building Charger - Coding Agent
+
+We're going to build a production-ready coding agent that can read, write, and execute code in a sandboxed environment using [Daytona](https://daytona.io), all in about 10 minutes.
+
+> For the complete working example, see [Charger](https://github.com/kernl-sdk/kernl/tree/master/microprojects/charger).
+
+## What We're Building
+
+By the end of this guide, you'll have a fully functional coding agent that can:
+
+- Execute shell commands in an isolated sandbox
+- Read and write files
+- Search codebases with grep and glob patterns
+- Search the web for documentation
+- Track tasks across multi-step workflows
+
+The stack:
+
+- **kernl** — Agent framework
+- **Daytona** — Secure sandboxed environments
+- **Hono** — API server
+- **Vercel AI SDK** — Streaming chat UI
+
+## Prerequisites
+
+- Node.js 20+
+- A [Daytona](https://app.daytona.io) API key
+- An [Anthropic](https://console.anthropic.com) API key
+- A [Parallel AI](https://parallel.ai) API key (for web search)
+- PostgreSQL database (for thread persistence)
+
+---
+
+## Part 1: Project Setup
+
+Start by scaffolding a new kernl project:
+
+```bash
+pnpm create kernl@latest charger
+cd charger
+```
+
+Install the kernl CLI globally:
+
+```bash
+npm install -g @kernl-sdk/cli
+```
+
+Install toolkits from the [marketplace](https://www.kernl.sh/marketplace):
+
+```bash
+kernl add toolkit daytona
+kernl add toolkit parallel
+```
+
+This gives us sandbox tools (file system, shell, git) and web search.
+
+---
+
+## Part 2: The Agent
+
+Here's what we're building — an agent with five toolkits:
+
+```ts
+// src/agents/charger.ts
+import { Agent } from "kernl";
+import { anthropic } from "@kernl-sdk/ai/anthropic";
+
+import { fs, process, git, type SandboxContext } from "@/toolkits/daytona";
+import { web } from "@/toolkits/parallel";
+import { todo, type TodoContext } from "@/toolkits/todo";
+
+type ChargerContext = SandboxContext & TodoContext;
+
+export const charger = new Agent<ChargerContext>({
+  id: "charger",
+  name: "Charger",
+  description: "A coding assistant with sandbox access",
+  model: anthropic("claude-opus-4-5"),
+  instructions: `You are Charger, a coding assistant with access to a sandbox.
+  
+Use the todo tools to track multi-step tasks. Search the web when you need 
+documentation or examples.`,
+  toolkits: [fs, process, git, web, todo],
+});
+```
+
+The toolkits give the agent these capabilities:
+
+| Toolkit     | Tools                                        | Source                    |
+| ----------- | -------------------------------------------- | ------------------------- |
+| **fs**      | read, write, list, mkdir, rm, mv, find, grep | Daytona (marketplace)     |
+| **process** | exec, kill                                   | Daytona (marketplace)     |
+| **git**     | clone, status, commit, push, pull            | Daytona (marketplace)     |
+| **web**     | search, extract                              | Parallel (marketplace)    |
+| **todo**    | read, write                                  | Custom (we'll build this) |
+
+The `ChargerContext` type is the intersection of all toolkit contexts — this ensures type safety when tools access shared state.
+
+---
+
+## Part 3: The Toolkits
+
+### Daytona Toolkit (from marketplace)
+
+The Daytona toolkit uses **lazy sandbox provisioning** — sandboxes are created on first tool use, not upfront. Here's the key pattern:
+
+```ts
+// src/toolkits/daytona/client.ts
+import { Daytona, Sandbox } from "@daytonaio/sdk";
+import type { Context } from "kernl";
+
+export const daytona = new Daytona();
+
+export interface SandboxContext {
+  sandboxId?: string;
+}
+
+export async function getSandbox(
+  ctx: Context<SandboxContext>,
+): Promise<Sandbox> {
+  const { context } = ctx;
+
+  // Reuse existing sandbox
+  if (context.sandboxId) {
+    const sandbox = await daytona.get(context.sandboxId);
+    if (sandbox.state !== "started") {
+      await sandbox.start();
+    }
+    return sandbox;
+  }
+
+  // Create new sandbox
+  const sandbox = await daytona.create({
+    language: "typescript",
+    autoStopInterval: 30,
+  });
+
+  context.sandboxId = sandbox.id;
+  return sandbox;
+}
+```
+
+Every tool calls `getSandbox(ctx)`. The first call creates the sandbox, subsequent calls reuse it. Because context is persisted with the thread, the sandbox survives across HTTP requests.
+
+Example tool using this pattern:
+
+```ts
+const read = tool({
+  id: "fs_read",
+  description: "Read the contents of a file",
+  parameters: z.object({
+    path: z.string().describe("Path to the file"),
+  }),
+  execute: async (ctx: Context<SandboxContext>, { path }) => {
+    const sandbox = await getSandbox(ctx);
+    const buffer = await sandbox.fs.downloadFile(path);
+    return buffer.toString("utf-8");
+  },
+});
+```
+
+### Parallel Toolkit (from marketplace)
+
+The Parallel toolkit uses kernl's `MCPToolkit` to connect to an external MCP server:
+
+```ts
+// src/toolkits/parallel/index.ts
+import { MCPToolkit, MCPServerStreamableHttp } from "kernl";
+
+export const web = new MCPToolkit({
+  id: "web_search",
+  description: "Real-time web search via Parallel AI",
+  server: new MCPServerStreamableHttp({
+    url: "https://search-mcp.parallel.ai/mcp",
+    requestInit: {
+      headers: {
+        Authorization: `Bearer ${process.env.PARALLEL_API_KEY}`,
+      },
+    },
+  }),
+});
+```
+
+### Todo Toolkit (custom)
+
+Let's build a simple todo toolkit from scratch. This shows how to create tools with in-memory state:
+
+```ts
+// src/toolkits/todo/index.ts
+import { z } from "zod";
+import { tool, Toolkit, type Context } from "kernl";
+
+const store = new Map<string, Todo[]>();
+
+interface Todo {
+  id: string;
+  content: string;
+  status: "pending" | "in_progress" | "completed";
+  priority: "high" | "medium" | "low";
+}
+
+export interface TodoContext {
+  threadId?: string;
+}
+
+const TodoSchema = z.object({
+  id: z.string().describe("Unique identifier"),
+  content: z.string().describe("Task description"),
+  status: z.enum(["pending", "in_progress", "completed"]),
+  priority: z.enum(["high", "medium", "low"]),
+});
+
+const read = tool({
+  id: "todo_read",
+  description: "Read the current todo list",
+  parameters: z.object({}),
+  execute: async (ctx: Context<TodoContext>) => {
+    const key = ctx.context.threadId ?? "default";
+    const todos = store.get(key) ?? [];
+    const pending = todos.filter((t) => t.status !== "completed").length;
+    return { message: `${pending} todos remaining`, todos };
+  },
+});
+
+const write = tool({
+  id: "todo_write",
+  description: "Update the todo list",
+  parameters: z.object({
+    todos: z.array(TodoSchema).describe("The complete updated todo list"),
+  }),
+  execute: async (ctx: Context<TodoContext>, { todos }) => {
+    const key = ctx.context.threadId ?? "default";
+    store.set(key, todos);
+    const pending = todos.filter((t) => t.status !== "completed").length;
+    return { message: `${pending} todos remaining`, todos };
+  },
+});
+
+export const todo = new Toolkit<TodoContext>({
+  id: "todo",
+  description: "Task management: create, update, and track todos",
+  tools: [read, write],
+});
+```
+
+---
+
+## Part 4: The API Server
+
+To connect a chat UI, we need an API server. Install the dependencies:
+
+```bash
+pnpm add hono @hono/node-server @hono/zod-validator @kernl-sdk/ai @kernl-sdk/pg ai pino pino-pretty
+```
+
+Create the following structure:
+
+```
+src/
+├── agents/
+│   └── charger.ts
+├── api/
+│   ├── agents.ts
+│   └── threads.ts
+├── lib/
+│   └── env.ts
+├── toolkits/
+│   ├── daytona/
+│   ├── parallel/
+│   └── todo/
+├── app.ts
+└── index.ts
+```
+
+### Environment Validation
+
+```ts
+// src/lib/env.ts
+import { z } from "zod";
+
+const schema = z.object({
+  PORT: z.string().optional().default("3001"),
+  WEB_ORIGIN: z.string().optional().default("http://localhost:3000"),
+  DATABASE_URL: z.string(),
+  ANTHROPIC_API_KEY: z.string(),
+  DAYTONA_API_KEY: z.string(),
+  PARALLEL_API_KEY: z.string(),
+});
+
+export const env = schema.parse(process.env);
+```
+
+### Streaming Endpoint
+
+```ts
+// src/api/agents.ts
+import { Hono } from "hono";
+import { Kernl } from "kernl";
+import { zValidator } from "@hono/zod-validator";
+import { createUIMessageStreamResponse, type UIMessage } from "ai";
+import { UIMessageCodec, toUIMessageStream } from "@kernl-sdk/ai";
+import { z } from "zod";
+
+const StreamBody = z.object({
+  tid: z.string().min(1),
+  message: z.record(z.string(), z.unknown()),
+});
+
+type Variables = { kernl: Kernl };
+
+export const agents = new Hono<{ Variables: Variables }>();
+
+agents.post("/:id/stream", zValidator("json", StreamBody), async (c) => {
+  const kernl = c.get("kernl");
+  const id = c.req.param("id");
+  const agent = kernl.agents.get(id);
+
+  if (!agent) {
+    return c.json({ error: "Agent not found" }, 404);
+  }
+
+  const { tid, message } = c.req.valid("json");
+  const input = await UIMessageCodec.decode(message as unknown as UIMessage);
+
+  const existing = await agent.threads.get(tid);
+  if (!existing) {
+    await agent.threads.create({ tid });
+  }
+
+  const stream = agent.stream(input, { threadId: tid });
+
+  return createUIMessageStreamResponse({
+    stream: toUIMessageStream(stream),
+  });
+});
+```
+
+### Threads Endpoint
+
+```ts
+// src/api/threads.ts
+import { Hono } from "hono";
+import { Kernl } from "kernl";
+import { zValidator } from "@hono/zod-validator";
+import { historyToUIMessages } from "@kernl-sdk/ai";
+import { z } from "zod";
+
+const ListQuery = z.object({
+  agent_id: z.string().optional(),
+  limit: z.coerce.number().int().positive().optional(),
+});
+
+type Variables = { kernl: Kernl };
+
+export const threads = new Hono<{ Variables: Variables }>();
+
+threads.get("/", zValidator("query", ListQuery), async (c) => {
+  const kernl = c.get("kernl");
+  const { agent_id, limit } = c.req.valid("query");
+
+  const page = await kernl.threads.list({ agentId: agent_id, limit });
+  const list = await page.collect();
+
+  return c.json({ threads: list, count: list.length });
+});
+
+threads.get("/:tid", async (c) => {
+  const kernl = c.get("kernl");
+  const tid = c.req.param("tid");
+
+  const thread = await kernl.threads.get(tid, { history: { limit: 50 } });
+  if (!thread) {
+    return c.json({ error: "Thread not found" }, 404);
+  }
+
+  return c.json({
+    ...thread,
+    history: historyToUIMessages((thread.history ?? []).reverse()),
+  });
+});
+
+threads.delete("/:tid", async (c) => {
+  const kernl = c.get("kernl");
+  await kernl.threads.delete(c.req.param("tid"));
+  return c.json({ success: true });
+});
+```
+
+### App Builder
+
+```ts
+// src/app.ts
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { Kernl } from "kernl";
+import { postgres } from "@kernl-sdk/pg";
+
+import { env } from "@/lib/env";
+import { charger } from "@/agents/charger";
+import { agents } from "@/api/agents";
+import { threads } from "@/api/threads";
+
+type Variables = { kernl: Kernl };
+
+export function build(): Hono<{ Variables: Variables }> {
+  const kernl = new Kernl({
+    storage: { db: postgres({ connstr: env.DATABASE_URL }) },
+  });
+
+  kernl.register(charger);
+
+  const app = new Hono<{ Variables: Variables }>();
+
+  app.use("/*", cors({ origin: [env.WEB_ORIGIN], credentials: true }));
+
+  app.use("/*", async (c, next) => {
+    c.set("kernl", kernl);
+    await next();
+  });
+
+  app.route("/v1/agents", agents);
+  app.route("/v1/threads", threads);
+
+  return app;
+}
+```
+
+### Entry Point
+
+```ts
+// src/index.ts
+import { serve } from "@hono/node-server";
+import { env } from "@/lib/env";
+import { build } from "./app";
+
+const app = build();
+
+console.log(`Server running at http://localhost:${env.PORT}`);
+
+serve({ fetch: app.fetch, port: parseInt(env.PORT) });
+```
+
+### Environment Variables
+
+Create `.env.local`:
+
+```bash
+ANTHROPIC_API_KEY=sk-ant-...
+DAYTONA_API_KEY=...
+PARALLEL_API_KEY=...
+DATABASE_URL=postgresql://user:pass@localhost:5432/charger
+```
+
+Start the server:
+
+```bash
+pnpm dev
+```
+
+---
+
+## Part 5: The Chatbot UI
+
+Restructure as a monorepo with Turbo:
+
+```
+charger/
+├── server/              # Move existing code here
+│   ├── src/
+│   ├── package.json
+│   └── ...
+├── web/                 # Frontend
+├── package.json         # Root package.json
+├── pnpm-workspace.yaml
+└── turbo.json
+```
+
+Create `pnpm-workspace.yaml`:
+
+```yaml
+packages:
+  - "server"
+  - "web"
+```
+
+Create `turbo.json`:
+
+```json
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**"]
+    }
+  }
+}
+```
+
+Create the root `package.json`:
+
+```json
+{
+  "name": "charger",
+  "private": true,
+  "packageManager": "pnpm@10.11.0",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build"
+  },
+  "devDependencies": {
+    "turbo": "^2.6.1"
+  }
+}
+```
+
+Clone the agentic-chatbot template:
+
+```bash
+git clone https://github.com/kernl-sdk/agentic-chatbot.git web
+rm -rf web/.git
+```
+
+Update the default agent ID from `jarvis` to `charger`:
+
+```bash
+find web/src -type f -name "*.tsx" -exec sed -i '' 's/jarvis/charger/g' {} +
+```
+
+Configure `web/.env.local`:
+
+```bash
+NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
+```
+
+Install and run:
+
+```bash
+pnpm install
+pnpm dev
+```
+
+This starts both the server (port 3001) and the frontend (port 3000) in parallel.
+
+---
+
+## Full Example
+
+See the [Charger microproject](https://github.com/kernl-sdk/kernl/tree/master/microprojects/charger) for the complete implementation.
+
+---
+
+## Appendix: API Specification
+
+[ GIVE THIS TO CLAUDE / CURSOR ]
+
+The server exposes the following REST endpoints. The frontend expects these exact routes and response shapes.
+
+```
+Base URL: http://localhost:3001
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ AGENTS                                                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ POST /v1/agents/:id/stream                                                   │
+│                                                                              │
+│ Stream agent responses using Server-Sent Events (SSE).                       │
+│ The frontend uses Vercel AI SDK's useChat with a custom transport.           │
+│                                                                              │
+│ Request:                                                                     │
+│   Content-Type: application/json                                             │
+│   Body: {                                                                    │
+│     "tid": "string",              // Thread ID (UUID)                        │
+│     "message": { ... }            // UIMessage object from AI SDK            │
+│   }                                                                          │
+│                                                                              │
+│ Response:                                                                    │
+│   Content-Type: text/event-stream                                            │
+│   Body: SSE stream (AI SDK UIMessageStream format)                           │
+│                                                                              │
+│ Errors:                                                                      │
+│   404: { "error": "Agent not found" }                                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ THREADS                                                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ GET /v1/threads/:tid                                                         │
+│                                                                              │
+│ Get a thread with its message history.                                       │
+│                                                                              │
+│ Response:                                                                    │
+│   {                                                                          │
+│     "tid": "string",                                                         │
+│     "agentId": "string",                                                     │
+│     "title": "string | null",                                                │
+│     "state": "string",                                                       │
+│     "createdAt": "ISO8601",                                                  │
+│     "updatedAt": "ISO8601",                                                  │
+│     "model": { "provider": "string", "modelId": "string" },                  │
+│     "context": { ... },                                                      │
+│     "history": [ UIMessage, ... ]    // Array of AI SDK UIMessage objects    │
+│   }                                                                          │
+│                                                                              │
+│ Errors:                                                                      │
+│   404: { "error": "Thread not found" }                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ GET /v1/threads                                                              │
+│                                                                              │
+│ List threads with optional filtering.                                        │
+│                                                                              │
+│ Query params:                                                                │
+│   agent_id?: string    // Filter by agent                                    │
+│   limit?: number       // Max results                                        │
+│                                                                              │
+│ Response:                                                                    │
+│   {                                                                          │
+│     "threads": [ { tid, agentId, title, state, createdAt, updatedAt }, ... ],│
+│     "count": number                                                          │
+│   }                                                                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ DELETE /v1/threads/:tid                                                      │
+│                                                                              │
+│ Delete a thread.                                                             │
+│                                                                              │
+│ Response:                                                                    │
+│   { "success": true }                                                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Key implementation notes:**
+
+1. **Thread auto-creation**: The `/v1/agents/:id/stream` endpoint creates the thread if it doesn't exist. The frontend generates a UUID for new conversations.
+
+2. **UIMessage format**: Messages use the [Vercel AI SDK UIMessage format](https://sdk.vercel.ai/docs/reference/ai-sdk-ui/use-chat#messages). The `historyToUIMessages` helper from `@kernl-sdk/ai` converts kernl's internal format.
+
+3. **SSE streaming**: Use `createUIMessageStreamResponse` and `toUIMessageStream` from the AI SDK to format the response correctly.
+
+4. **CORS**: The server must allow requests from the frontend origin (`http://localhost:3000` in development).
