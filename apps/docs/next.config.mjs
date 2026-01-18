@@ -19,5 +19,14 @@ const withNextra = nextra({
 export default withNextra({
   experimental: {
     viewTransition: true
+  },
+  async rewrites() {
+    return [
+      // Rewrite *.md requests to /llms/ folder
+      {
+        source: '/:path*.md',
+        destination: '/llms/:path*.md',
+      },
+    ]
   }
 })

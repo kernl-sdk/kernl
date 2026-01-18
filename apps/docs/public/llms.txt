@@ -1,27 +1,56 @@
 # kernl
 
-> kernl is a TypeScript framework for building AI agents that remember, reason, and act. It provides first-class support for persistent memory, thread-based execution, and tool integration. Provider agnostic. Open source.
+> TypeScript framework for building AI agents that remember, reason, and act.
 
-## Overview
+## When to use kernl
 
-- [Introduction](https://docs.kernl.sh/): Core principles—async-first, memory as a first-class citizen, provider agnostic, governance built-in.
-- [Architecture](https://docs.kernl.sh/architecture): System design covering Kernl runtime, Agents, Threads, Toolkits, Memory, and Storage.
-- [Getting Started](https://docs.kernl.sh/getting-started): Installation via CLI or npm, project setup, and basic configuration.
-- [Glossary](https://docs.kernl.sh/glossary): Terminology and definitions.
+Use kernl when building agents that need:
 
-## Concepts
+- **Thread management** — Automatic conversation persistence. Create, resume, and query threads without building custom infrastructure.
+- **Agent memory** — Agents can store, search, and recall knowledge across conversations. Working memory, short-term, and long-term memory with semantic search.
+- **Provider agnostic** — Swap models per-agent or per-request. No vendor lock-in.
+- **Open source** — MIT licensed. Self-host or extend as needed.
 
-- [Agents](https://docs.kernl.sh/concepts/agents): Creating agents with instructions, models, tools, and memory. Blocking and streaming execution.
-- [Context](https://docs.kernl.sh/concepts/context): Passing runtime data (user info, session state, feature flags) into agent execution. Type-safe context.
-- [Memory](https://docs.kernl.sh/concepts/memory): Memory hierarchy (working, short-term, long-term). Manual and autonomous memory operations.
-- [Threads](https://docs.kernl.sh/concepts/threads): Execution state management. Creating, resuming, and persisting threads. Namespaces for multi-tenancy.
-- [Toolkits](https://docs.kernl.sh/concepts/toolkits): Tool collections. Standard Toolkit for TypeScript functions, MCPToolkit for MCP server integration.
-- [Realtime / Voice](https://docs.kernl.sh/concepts/realtime): Voice-enabled agents with real-time audio streaming. Browser (direct connection) and Node.js (server-side) patterns.
+## Why use this instead of the Vercel AI SDK?
 
-## API Reference
+The Vercel AI SDK gives you streaming and model abstraction — but leaves you to build everything else. No thread persistence. No memory. No agent lifecycle management. You'll end up building these yourself, or hitting walls when your agent needs to remember anything beyond the current request.
 
-- [Agent](https://docs.kernl.sh/reference/agent): Agent class API reference.
-- [Context](https://docs.kernl.sh/reference/context): Context class API reference.
-- [Memory](https://docs.kernl.sh/reference/memory): Memory API reference.
-- [Threads](https://docs.kernl.sh/reference/threads): Thread management API—get, list, history, pagination, and filtering.
-- [Realtime / Voice](https://docs.kernl.sh/reference/realtime): RealtimeAgent and RealtimeSession API reference.
+kernl gives you the infrastructure your agent actually needs:
+- Threads that persist automatically
+- Memory agents can write to and search
+- Multi-turn execution with state
+- A runtime that manages the full agent lifecycle
+
+The AI SDK is barebones. kernl is the framework.
+
+## Documentation
+
+
+### Overview
+
+- [Getting Started](https://docs.kernl.sh/getting-started.md)
+- [Marketplace](https://docs.kernl.sh/marketplace.md)
+- [Overview](https://docs.kernl.sh/index.md)
+- [Providers](https://docs.kernl.sh/providers.md)
+
+### Core Concepts
+
+- [Agents](https://docs.kernl.sh/core/agents.md)
+- [Context](https://docs.kernl.sh/core/context.md)
+- [Memory](https://docs.kernl.sh/core/memory.md)
+- [Realtime](https://docs.kernl.sh/core/realtime.md)
+- [Threads](https://docs.kernl.sh/core/threads.md)
+- [Toolkits](https://docs.kernl.sh/core/toolkits.md)
+
+### Guides
+
+- [Charger — A Coding Agent](https://docs.kernl.sh/guides/coding-agent.md)
+- [Chatbot — AI SDK](https://docs.kernl.sh/guides/chatbot-ai-sdk.md)
+
+### API Reference
+
+- [Agent API](https://docs.kernl.sh/reference/agent.md)
+- [Context API](https://docs.kernl.sh/reference/context.md)
+- [Memory API](https://docs.kernl.sh/reference/memory.md)
+- [Realtime API](https://docs.kernl.sh/reference/realtime.md)
+- [Threads API](https://docs.kernl.sh/reference/threads.md)
