@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { z } from "zod";
 import { createUIMessageStreamResponse, UIMessage } from "ai";
 import { UIMessageCodec, toUIMessageStream } from "@kernl-sdk/ai";
 import { zValidator } from "@hono/zod-validator";
@@ -7,7 +8,20 @@ import { NotFoundError, ValidationError } from "@/lib/error";
 import { generateTitle } from "@/lib/utils";
 import type { Variables } from "@/types";
 
-import { StreamAgentBody } from "./schema";
+/**
+ * POST /agents/:id/stream
+ */
+const StreamAgentBody = z
+  .object({
+    tid: z.string().min(1, "tid is required"),
+    message: z.record(z.string(), z.unknown()),
+    title: z.union([z.string(), z.literal("$auto")]).optional(),
+    titlerAgentId: z.string().optional(),
+  })
+  .refine((data) => data.title !== "$auto" || data.titlerAgentId, {
+    message: "titlerAgentId required when title is $auto",
+    path: ["titlerAgentId"],
+  });
 
 export const agents = new Hono<{ Variables: Variables }>();
 

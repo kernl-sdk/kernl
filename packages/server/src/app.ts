@@ -7,10 +7,10 @@ import { errorHandler } from "./lib/error";
 import { logreq } from "./lib/logger";
 
 /* routes */
-import { agents } from "./api/agents/route";
-import { threads } from "./api/threads/route";
-import { realtime } from "./api/realtime/route";
-import { health } from "./api/health/route";
+import { agents } from "./api/agents";
+import { threads } from "./api/threads";
+import { realtime } from "./api/realtime";
+import { health } from "./api/health";
 
 /**
  * Create a Hono app wired to a Kernl instance.

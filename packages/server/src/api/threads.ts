@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { z } from "zod";
 import { Kernl } from "kernl";
 import { createUIMessageStreamResponse, UIMessage } from "ai";
 import {
@@ -11,7 +12,31 @@ import { zValidator } from "@hono/zod-validator";
 import { NotFoundError } from "@/lib/error";
 import type { Variables } from "@/types";
 
-import { ThreadsListQuery, ThreadCreateBody, StreamThreadBody } from "./schema";
+/**
+ * GET /threads query params
+ */
+const ThreadsListQuery = z.object({
+  agentId: z.string().optional(),
+  limit: z.coerce.number().int().positive().optional(),
+  cursor: z.string().optional(),
+});
+
+/**
+ * POST /threads
+ */
+const ThreadCreateBody = z.object({
+  tid: z.string().optional(),
+  agentId: z.string().min(1, "agentId is required"),
+  title: z.string().optional(),
+  context: z.record(z.string(), z.unknown()).optional(),
+});
+
+/**
+ * POST /threads/:tid/stream
+ */
+const StreamThreadBody = z.object({
+  message: z.record(z.string(), z.unknown()),
+});
 
 export const threads = new Hono<{ Variables: Variables }>();
 

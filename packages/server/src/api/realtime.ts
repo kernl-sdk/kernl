@@ -1,19 +1,19 @@
 import { Hono } from "hono";
-import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
+import { zValidator } from "@hono/zod-validator";
 import { openai } from "@kernl-sdk/openai";
 import { xai } from "@kernl-sdk/xai";
 
 import { ValidationError } from "@/lib/error";
 import type { Variables } from "@/types";
 
-export const realtime = new Hono<{ Variables: Variables }>();
-
 const CredentialBody = z.object({
   provider: z.string(),
   modelId: z.string(),
   agentId: z.string().optional(),
 });
+
+export const realtime = new Hono<{ Variables: Variables }>();
 
 /**
  * POST /realtime/credential
