@@ -8,6 +8,7 @@ export default {
   index: "Overview",
   "getting-started": "Getting Started",
   marketplace: "Marketplace",
+  providers: "Providers",
   core: "Core",
   guides: "Guides",
   reference: "Reference",
