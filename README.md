@@ -59,7 +59,7 @@ const agent = new RealtimeAgent({
   name: "Watson",
   instructions: "You are a helpful voice assistant. Be concise.",
   toolkits: [math],
-  memory: { enabled: true }
+  memory: { enabled: true },
 });
 
 const session = new RealtimeSession(agent, {
@@ -80,4 +80,4 @@ session.on("text", (e) => {
 ## Learn more
 
 - [Documentation](https://docs.kernl.sh)
-- [Examples](./microprojects/jarvis)
+- [Examples](./microprojects)
