@@ -5,10 +5,12 @@ export const dynamic = 'force-static';
 
 const BASE_URL = 'https://docs.kernl.sh';
 
-function formatPage(page: { data: { title: string; description?: string }; url: string }) {
+function formatPage(page: { data: { title?: string; description?: string }; url: string }) {
+  // Use frontmatter title or derive from URL
+  const title = page.data.title || page.url.split('/').pop() || 'Untitled';
   const desc = page.data.description ? `: ${page.data.description}` : '';
   const mdxUrl = page.url === '/' ? '/index.mdx' : `${page.url}.mdx`;
-  return `- [${page.data.title}](${BASE_URL}${mdxUrl})${desc}`;
+  return `- [${title}](${BASE_URL}${mdxUrl})${desc}`;
 }
 
 export async function GET() {
@@ -82,7 +84,7 @@ export async function GET() {
 
   return new Response(lines.join('\n'), {
     headers: {
-      'Content-Type': 'text/plain',
+      'Content-Type': 'text/plain; charset=utf-8',
     },
   });
 }

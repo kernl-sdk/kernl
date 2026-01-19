@@ -1,9 +1,11 @@
 import { defineConfig, defineDocs, frontmatterSchema, metaSchema } from 'fumadocs-mdx/config';
 import { z } from 'zod';
 import jotaiTheme from './themes/jotai.json';
+import { remarkStripMdLinks } from './lib/remark-strip-md-links';
 
-// Extend frontmatter with optional image field for per-page OG images
+// Extend frontmatter - title optional for auto-generated API reference
 const extendedSchema = frontmatterSchema.extend({
+  title: z.string().optional(),
   image: z.string().optional(),
 });
 
@@ -24,6 +26,7 @@ export const docs = defineDocs({
 
 export default defineConfig({
   mdxOptions: {
+    remarkPlugins: [remarkStripMdLinks],
     rehypeCodeOptions: {
       themes: {
         light: 'min-light',

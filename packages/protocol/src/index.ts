@@ -1,6 +1,5 @@
 /**
- * kernl - Protocol
- *
+ * @packageDocumentation
  * Standard interfaces and types for AI model providers.
  */
 

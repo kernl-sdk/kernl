@@ -6,6 +6,15 @@ import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import { PageActions } from '@/components/page-actions';
 
+// Extract title from TOC's first heading if not in frontmatter
+function getTitle(page: { data: { title?: string; toc: { title: string }[] }; url: string }) {
+  if (page.data.title) return page.data.title;
+  // Try first TOC entry (usually the h1)
+  if (page.data.toc?.[0]?.title) return page.data.toc[0].title;
+  // Fallback to URL segment
+  return page.url.split('/').pop() || 'Untitled';
+}
+
 export default async function Page(props: PageProps<'/[[...slug]]'>) {
   const params = await props.params;
   const page = source.getPage(params.slug);
@@ -13,22 +22,29 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
 
   const MDX = page.data.body;
   const isOverview = !params.slug || params.slug.length === 0;
+  const isReference = params.slug?.[0] === 'reference';
+  const title = getTitle(page as Parameters<typeof getTitle>[0]);
 
   return (
     <DocsPage
       toc={page.data.toc}
       full={page.data.full}
     >
-      {!isOverview && (
+      {!isOverview && !isReference && (
         <div className="flex items-start justify-between gap-4">
           <div>
-            <DocsTitle>{page.data.title}</DocsTitle>
+            <DocsTitle>{title}</DocsTitle>
             <DocsDescription>{page.data.description}</DocsDescription>
           </div>
           <PageActions markdownUrl={`/llms.mdx${page.url}`} />
         </div>
       )}
-      <DocsBody>
+      <DocsBody className={isReference ? 'relative' : undefined}>
+        {isReference && (
+          <div className="absolute right-0 top-0 z-10">
+            <PageActions markdownUrl={`/llms.mdx${page.url}`} />
+          </div>
+        )}
         <MDX
           components={getMDXComponents({
             // this allows you to link to other pages with relative file paths
@@ -51,11 +67,11 @@ export async function generateMetadata(props: PageProps<'/[[...slug]]'>): Promis
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
-  // Use per-page image if specified, otherwise default
+  const title = getTitle(page as Parameters<typeof getTitle>[0]);
   const ogImage = page.data.image || DEFAULT_OG_IMAGE;
 
   return {
-    title: page.data.title,
+    title,
     description: page.data.description,
     openGraph: {
       images: ogImage,

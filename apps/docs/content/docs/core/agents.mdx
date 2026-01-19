@@ -3,7 +3,7 @@ title: Agents
 description: Create agents with instructions, models, tools, and memory. Blocking and streaming execution.
 ---
 
-> *Reference:* [Agents](/reference/agent)
+> *Reference:* [Agent](/reference/kernl/classes/Agent)
 
 An agent is a language model (LLM) which is configured with:
 
@@ -11,73 +11,119 @@ An agent is a language model (LLM) which is configured with:
 - **Model** — which LLM to call, plus any optional model tuning parameters.
 - **Tools** — a list of functions or APIs the LLM can invoke to accomplish a task.
 
-## Creating an agent
+## Basic Usage
 
 ```ts
 import { Agent } from "kernl";
 import { anthropic } from "@kernl-sdk/ai/anthropic";
+import { github } from "@/toolkits/github";
 
 const agent = new Agent({
   id: "jarvis",
   name: "Jarvis",
   model: anthropic("claude-sonnet-4-5"),
   instructions: "You are a helpful assistant.",
+  toolkits: [github],
+  memory: { enabled: true },
 });
 ```
 
-Register it with kernl before use:
+## Constructor
 
 ```ts
-import { Kernl } from "kernl";
+import { Agent } from "kernl";
 
-const kernl = new Kernl();
-kernl.register(agent);
+const agent = new Agent<TContext, TOutput>(config);
 ```
 
-## Basic configuration
+### Config
 
 <TypeTable
   type={{
-    id: {
-      type: "string",
-      description: "Unique identifier (required)",
-    },
-    name: {
-      type: "string",
-      description: "Display name",
-    },
-    model: {
-      type: "LanguageModel",
-      description: "LLM to use",
-    },
-    instructions: {
-      type: "string | (ctx) => string",
-      description: "System prompt — can be a string or function",
-    },
-    toolkits: {
-      type: "Toolkit[]",
-      description: "Array of toolkits",
-    },
-    memory: {
-      type: "{ enabled: boolean }",
-      description: "Memory settings",
-    },
-  }}
+  id: {
+    type: "string",
+    description: "Unique identifier",
+  },
+  name: {
+    type: "string",
+    description: "Display name",
+  },
+  model: {
+    type: "LanguageModel",
+    description: "LLM provider and model",
+  },
+  instructions: {
+    type: "string | (ctx) => string",
+    description: "System prompt (static or dynamic)",
+  },
+  description: {
+    type: "string",
+    description: "Brief description",
+  },
+  modelSettings: {
+    type: "LanguageModelRequestSettings",
+    description: "Temperature, top_p, etc.",
+  },
+  output: {
+    type: '"text" | ZodSchema',
+    description: "Output type",
+    default: '"text"',
+  },
+  toolkits: {
+    type: "Toolkit[]",
+    description: "Tool collections",
+  },
+  memory: {
+    type: "{ enabled: boolean }",
+    description: "Enable memory tools",
+  },
+  guardrails: {
+    type: "AgentGuardrails",
+    description: "Input/output safety checks",
+  },
+}}
 />
 
-## Running
+## Methods
 
-**Blocking** — wait for the full response:
+### run()
+
+Blocking execution — waits for the full response.
 
 ```ts
-const result = await agent.run("What's 2 + 2?");
-console.log(result.response);
+const result = await agent.run(input, options?);
 ```
 
-**Streaming** — receive events as they happen:
+**Parameters:**
+
+<TypeTable
+  type={{
+  input: {
+    type: "string | LanguageModelItem[]",
+    description: "User message or message array",
+  },
+  options: {
+    type: "ThreadExecuteOptions",
+    description: "Execution options (see below)",
+  },
+}}
+/>
+
+**Returns:** `Promise<ThreadExecuteResult>`
 
 ```ts
-const stream = agent.stream("Tell me a story");
+interface ThreadExecuteResult<TResponse> {
+  response: TResponse;  // string or structured output
+  state: any;           // Thread state at completion
+}
+```
+
+### stream()
+
+Streaming execution — returns events as they happen.
+
+```ts
+const stream = agent.stream(input, options?);
 
 for await (const event of stream) {
   if (event.kind === "text.delta") {
@@ -86,13 +132,64 @@ for await (const event of stream) {
 }
 ```
 
-## Dynamic instructions
+**Parameters:** Same as `run`.
+
+**Yields:** `ThreadStreamEvent` — includes `text.delta`, `tool.call`, `tool.result`, `finish`, etc.
+
+## Execute Options
+
+Options passed to `run` or `stream`:
+
+<TypeTable
+  type={{
+  threadId: {
+    type: "string",
+    description: "Resume an existing thread",
+  },
+  context: {
+    type: "TContext",
+    description: "Runtime context data",
+  },
+  namespace: {
+    type: "string",
+    description: "Logical grouping",
+    default: '"kernl"',
+  },
+  model: {
+    type: "LanguageModel",
+    description: "Override model for this execution",
+  },
+  maxTicks: {
+    type: "number",
+    description: "Max iterations before stopping",
+  },
+  abort: {
+    type: "AbortSignal",
+    description: "Cancellation signal",
+  },
+}}
+/>
+
+### Example with options
+
+```ts
+const result = await agent.run("What's on my calendar?", {
+  threadId: "thread_abc123",
+  context: {
+    userId: "user_456",
+    timezone: "America/New_York",
+  },
+});
+```
+
+## Dynamic Instructions
 
 Instructions can be a function that receives context:
 
 ```ts
-import { Agent } from "kernl";
-import { anthropic } from "@kernl-sdk/ai/anthropic";
+interface UserContext {
+  user: { name: string; role: string };
+}
 
 const agent = new Agent<UserContext>({
   id: "assistant",
@@ -100,47 +197,66 @@ const agent = new Agent<UserContext>({
   model: anthropic("claude-sonnet-4-5"),
   instructions: (ctx) => `
     You are helping ${ctx.context.user.name}.
+    Their role is ${ctx.context.user.role}.
     Today is ${new Date().toDateString()}.
   `,
 });
 
 await agent.run("Hello", {
-  context: {
-    username: "Tony"
-  }
+  context: { user: { name: "Alice", role: "admin" } },
 });
 ```
 
-## Adding tools
+## Structured Output
+
+Use a Zod schema for typed responses:
 
 ```ts
-import { Agent } from "kernl";
-import { anthropic } from "@kernl-sdk/ai/anthropic";
-import { math } from "@/toolkits/math";
-import { github } from "@/toolkits/github";
+import { z } from "zod";
 
-const jarvis = new Agent({
-  id: "jarvis",
-  name: "Jarvis",
+const agent = new Agent({
+  id: "extractor",
+  name: "Extractor",
   model: anthropic("claude-sonnet-4-5"),
-  instructions: "You are a helpful assistant with access to tools.",
-  toolkits: [math, github],
+  instructions: "Extract structured data from text.",
+  output: z.object({
+    name: z.string(),
+    email: z.string().email(),
+    confidence: z.number(),
+  }),
 });
+
+const result = await agent.run("Contact: Alice at alice@example.com");
+// result.response is typed as { name: string; email: string; confidence: number }
 ```
 
-## Enabling memory
+## Thread Management
+
+Agents have scoped thread methods:
 
 ```ts
-import { Agent } from "kernl";
-import { anthropic } from "@kernl-sdk/ai/anthropic";
+// Get a thread
+const thread = await agent.threads.get("thread_123");
 
-const jarvis = new Agent({
-  id: "jarvis",
-  name: "Jarvis",
-  model: anthropic("claude-sonnet-4-5"),
-  instructions: "You are a helpful assistant. Remember user preferences.",
-  memory: { enabled: true },
+// List threads for this agent
+const threads = await agent.threads.list({ limit: 10 });
+
+// Get thread history
+const history = await agent.threads.history("thread_123", {
+  limit: 50,
+  order: "desc",
 });
+
+// Delete a thread
+await agent.threads.delete("thread_123");
 ```
+
+## Memory
+
+When `memory: { enabled: true }`, agents get memory tools automatically:
+
+* `memories.search` — semantic search over stored memories
+* `memories.create` — store new memories
+* `memories.list` — list memories with filters
 
 See [Memory](/core/memory) for details.

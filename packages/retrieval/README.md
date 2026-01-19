@@ -1,5 +1,7 @@
 # @kernl-sdk/retrieval
 
+> **For AI agents**: These reference docs help coding agents understand the kernl SDK. If your agent gets stuck, share this page with it.
+
 Generic search and retrieval abstractions for kernl.
 
 ## Search

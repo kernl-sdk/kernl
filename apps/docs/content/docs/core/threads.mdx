@@ -3,11 +3,9 @@ title: Threads
 description: Execution state management. Creating, resuming, and persisting threads. Namespaces for multi-tenancy.
 ---
 
-> *Reference:* [Threads](/reference/threads)
+> *Reference:* [Thread](/reference/kernl/interfaces/Thread)
 
-A Thread is a single execution of an agent. It holds the message history, tool calls, state, and everything that happens during a run.
-
-Agents are stateless. Threads hold state.
+A Thread is a sequence of events that represent a single execution of an agent. It holds the message history, tool calls, state, and everything that happens during a run.
 
 ## Creating a thread
 
@@ -46,6 +44,15 @@ Everything that happens in a thread is recorded as an event:
 - Tool results
 - Errors
 
+Retrieve history with:
+
+```ts
+const history = await agent.threads.history("thread_123", {
+  limit: 50,
+  order: "desc",
+});
+```
+
 ## Persistence
 
 When storage is configured, threads are automatically persisted:
@@ -68,7 +75,7 @@ Threads checkpoint at key moments:
 
 This means you can resume a thread even after a crash or restart.
 
-## Listing threads
+## Managing threads
 
 Access an agent's threads:
 
@@ -81,6 +88,9 @@ const thread = await agent.threads.get("thread_abc123");
 
 // get thread with history
 const thread = await agent.threads.get("thread_abc123", { history: true });
+
+// update thread title
+await agent.threads.update("thread_abc123", { title: "Support conversation" });
 
 // delete a thread
 await agent.threads.delete("thread_abc123");
@@ -96,3 +106,56 @@ await agent.run("Hello", {
   namespace: "tenant-abc",
 });
 ```
+
+Namespaces let you partition threads by tenant, environment, or product. All thread operations are scoped to the namespace.
+
+## Thread Properties
+
+<TypeTable
+  type={{
+  tid: {
+    type: "string",
+    description: "Globally-unique thread identifier",
+  },
+  agentId: {
+    type: "string",
+    description: "ID of the agent that owns this thread",
+  },
+  namespace: {
+    type: "string",
+    description: "Logical namespace for multi-tenancy",
+  },
+  title: {
+    type: "string | null",
+    description: "Optional human-readable title",
+  },
+  state: {
+    type: "ThreadState",
+    description: "Current lifecycle state",
+  },
+  context: {
+    type: "Record<string, unknown>",
+    description: "User-defined context attached to this thread",
+  },
+  model: {
+    type: "MThreadModelInfo",
+    description: "Language model used for this thread",
+  },
+  parentTaskId: {
+    type: "string | null",
+    description: "Parent task ID if spawned from another thread",
+  },
+  createdAt: {
+    type: "Date",
+    description: "When the thread was created",
+  },
+  updatedAt: {
+    type: "Date",
+    description: "When the thread was last updated",
+  },
+  history: {
+    type: "ThreadEvent[]",
+    description: "Event history (when requested)",
+  },
+}}
+/>

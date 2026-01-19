@@ -1,0 +1,40 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPointStrategy": "packages",
+  "entryPoints": [
+    "packages/kernl",
+    "packages/react",
+    "packages/retrieval",
+    "packages/protocol"
+  ],
+  "out": "apps/docs/content/docs/reference",
+  "plugin": ["typedoc-plugin-markdown", "typedoc-plugin-frontmatter"],
+  "name": "Reference",
+  "readme": "none",
+  "gitRevision": "master",
+
+  "outputFileStrategy": "members",
+  "fileExtension": ".md",
+  "entryFileName": "index",
+  "flattenOutputFiles": false,
+  "excludeScopesInPaths": true,
+
+  "indexFormat": "table",
+  "parametersFormat": "table",
+  "interfacePropertiesFormat": "table",
+  "classPropertiesFormat": "table",
+  "enumMembersFormat": "table",
+  "typeDeclarationFormat": "table",
+  "propertyMembersFormat": "table",
+
+  "expandObjects": true,
+  "expandParameters": true,
+  "useCodeBlocks": true,
+  "hideBreadcrumbs": true,
+  "hidePageHeader": true,
+  "hidePageTitle": false,
+
+  "frontmatterGlobals": {
+    "layout": "docs"
+  }
+}

@@ -378,3 +378,18 @@ aside,
   border-color: #1b1f28 !important;
 }
 
+/* Sidebar nested border indicators for deeper levels */
+/* Level 2: Items inside a folder (e.g., Classes inside @kernl-sdk/protocol) */
+.dark aside#nd-sidebar [data-tree-folder] > [data-collapsed] + div {
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  margin-left: 0.75rem;
+  padding-left: 0.75rem;
+}
+
+/* Level 3: Items inside nested folders (e.g., Agent inside Classes) */
+.dark aside#nd-sidebar [data-tree-folder] [data-tree-folder] > [data-collapsed] + div {
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  margin-left: 0.75rem;
+  padding-left: 0.75rem;
+}
+

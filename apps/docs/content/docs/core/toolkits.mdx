@@ -3,7 +3,7 @@ title: Toolkits
 description: Tool collections. Standard Toolkit for TypeScript functions, MCPToolkit for MCP server integration.
 ---
 
-> *Reference:* [Toolkits](/reference/toolkit)
+> *Reference:* [Toolkit](/reference/kernl/classes/Toolkit)
 
 A toolkit is a collection of related tools that can be used by an agent. kernl supports two flavors:
 
@@ -103,12 +103,3 @@ const github = new MCPToolkit({
   },
 });
 ```
-
-## When to use which
-
-| Scenario | Choice |
-|----------|--------|
-| Custom business logic | `Toolkit` |
-| Quick start with common services | Marketplace |
-| Integration with external service via MCP | `MCPToolkit` |
-| Leverage existing MCP ecosystem | `MCPToolkit` |

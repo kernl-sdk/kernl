@@ -1,0 +1,3 @@
+{
+  "buildCommand": "cd ../.. && pnpm docs:api && cd apps/docs && pnpm build"
+}

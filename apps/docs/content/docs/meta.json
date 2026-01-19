@@ -3,8 +3,8 @@
   "pages": [
     "index",
     "getting-started",
-    "providers",
     "marketplace",
+    "providers",
     "core",
     "guides",
     "reference"
