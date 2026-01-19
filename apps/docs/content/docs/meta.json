@@ -1,0 +1,12 @@
+{
+  "title": "Docs",
+  "pages": [
+    "index",
+    "getting-started",
+    "providers",
+    "marketplace",
+    "core",
+    "guides",
+    "reference"
+  ]
+}

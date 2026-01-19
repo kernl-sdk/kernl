@@ -1,0 +1,380 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+:root {
+  --color-brand: oklch(0.752 0.029 208);
+  --color-brand-neon: oklch(0.869 0.059 177);
+  --color-steel: oklch(0.864 0.063 251);
+  --color-success: #74E381;
+  --font-sans: 'SF Pro', 'SF Pro Text', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+@media (max-width: 1400px) {
+  :root {
+    --fd-layout-width: 90%;
+  }
+}
+
+body,
+html {
+  font-family: var(--font-sans) !important;
+}
+
+/* Dark gradient background from landing page */
+.dark body {
+  background: linear-gradient(to bottom, oklch(0.18 0 0) 0%, oklch(0.08 0 0) 100%);
+  background-attachment: fixed;
+}
+
+/* Prose / content font size */
+.prose,
+article,
+[data-fd-content] {
+  font-size: 15.4px !important;
+}
+
+/* Logo text */
+.logo-text {
+  font-family: 'SF Mono', Menlo, monospace;
+  font-weight: 400;
+  font-size: 14px;
+  color: var(--color-brand);
+}
+
+/* Logo container in nav */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 4px;
+}
+
+.logo-icon {
+  color: var(--color-steel);
+}
+
+/* Bullet point styling */
+.prose ul {
+  list-style: none !important;
+  padding-left: 1.35rem !important;
+}
+
+.prose ul > li {
+  position: relative !important;
+  padding-left: 1.5rem !important;
+}
+
+.prose ul > li::before {
+  content: "•" !important;
+  position: absolute !important;
+  left: 0 !important;
+  color: var(--color-brand) !important;
+  font-size: 1.2em !important;
+  line-height: 1.4 !important;
+}
+
+/* Page title styling */
+.dark h1,
+.dark [data-fd-heading] h1,
+.dark .prose h1:first-of-type {
+  font-family: var(--font-sans);
+  font-size: 1.6rem !important;
+  font-weight: 500 !important;
+  color: #ffffff !important;
+  border: none !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* Overview hero title */
+.overview-hero h1,
+.dark .overview-hero h1,
+.dark .prose .overview-hero h1,
+.dark article .overview-hero h1 {
+  font-family: 'SF Mono', Menlo, monospace !important;
+  font-weight: 300 !important;
+  font-size: 1.25rem !important;
+  color: var(--color-brand-neon) !important;
+}
+
+/* Section headers */
+.dark .prose h2,
+.dark .prose h2 a,
+.dark [data-fd-content] h2,
+.dark [data-fd-content] h2 a {
+  color: var(--color-brand) !important;
+  font-weight: 400 !important;
+  font-size: 1.25rem !important;
+  border: none !important;
+}
+
+.dark .prose h3,
+.dark .prose h3 a,
+.dark [data-fd-content] h3,
+.dark [data-fd-content] h3 a,
+.dark .prose h4,
+.dark .prose h4 a,
+.dark [data-fd-content] h4,
+.dark [data-fd-content] h4 a {
+  color: var(--color-steel) !important;
+  border: none !important;
+}
+
+/* Description text beneath title */
+.dark [data-fd-description],
+.dark .fd-description,
+.dark p[class*="description"] {
+  font-size: 0.75rem !important;
+  color: #7a7a7a !important;
+}
+
+/* Reduce gap after page header */
+.dark [data-fd-heading],
+.dark article > header,
+.dark .prose > header {
+  margin-bottom: 1rem !important;
+  padding-bottom: 0 !important;
+}
+
+.dark article > :first-child,
+.dark .prose > :first-child {
+  margin-top: 0 !important;
+}
+
+/* Sidebar styling overrides */
+.dark aside#nd-sidebar {
+  --color-fd-muted-foreground: rgba(255, 255, 255, 0.7);
+  --color-fd-primary: var(--color-steel);
+  --color-fd-accent: transparent;
+  --color-fd-accent-foreground: #fff;
+}
+
+/* Sidebar folder/section labels (Core, Guides, Reference, etc.) */
+.dark aside#nd-sidebar button[data-state] .truncate {
+  font-family: 'SF Mono', Menlo, monospace !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+  letter-spacing: -0.01em !important;
+  color: #fff !important;
+}
+
+/* Remove active background but keep indicator line */
+.dark aside#nd-sidebar a[data-active="true"] {
+  background: transparent !important;
+}
+
+/* Style the active indicator line */
+.dark aside#nd-sidebar a[data-active="true"]::before {
+  background: var(--color-steel) !important;
+  inset-block: 0.375rem !important;
+}
+
+/* Add more padding to nested subsection items (ones inside folders) */
+.dark aside#nd-sidebar a[href][style*="calc(5"] {
+  padding-inline-start: calc(var(--spacing) * 7) !important;
+}
+
+/* Breadcrumb / section label above title */
+.dark .prose > nav:first-child,
+.dark [class*="breadcrumb"],
+.dark [class*="Breadcrumb"],
+.dark nav[aria-label="breadcrumb"],
+.dark [data-fd-breadcrumb],
+.dark [data-fd-heading] > nav,
+.dark article > header nav,
+.dark header nav:has(a) {
+  font-family: 'SF Mono', Menlo, monospace !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+  letter-spacing: -0.01em !important;
+  color: var(--color-brand) !important;
+}
+
+.dark .prose > nav:first-child *,
+.dark [class*="breadcrumb"] *,
+.dark [class*="Breadcrumb"] *,
+.dark nav[aria-label="breadcrumb"] *,
+.dark [data-fd-breadcrumb] *,
+.dark [data-fd-heading] > nav *,
+.dark article > header nav *,
+.dark header nav:has(a) * {
+  font-family: 'SF Mono', Menlo, monospace !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+  letter-spacing: -0.01em !important;
+  color: var(--color-brand) !important;
+}
+
+/* Sidebar - remove bg and border */
+aside,
+[data-fd-sidebar],
+[class*="sidebar"] {
+  background: transparent !important;
+  border: none !important;
+  border-right: none !important;
+}
+
+.dark aside,
+.dark [data-fd-sidebar],
+.dark [class*="sidebar"] {
+  background: transparent !important;
+  border: none !important;
+  border-right: none !important;
+}
+
+/* Page action buttons */
+.page-header-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.page-action-btn {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  border: 1px solid #333 !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  padding: 0 !important;
+}
+
+.page-action-btn:hover {
+  border-color: var(--color-brand) !important;
+}
+
+.page-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-action-icon-brand {
+  color: var(--color-brand) !important;
+}
+
+.page-action-icon-steel {
+  color: var(--color-steel) !important;
+}
+
+/* TOC styling - target the right sidebar TOC */
+.\[grid-area\:toc\] a,
+.\[grid-area\:toc\] li,
+.dark .\[grid-area\:toc\] a,
+.dark .\[grid-area\:toc\] li {
+  font-size: 13px !important;
+}
+
+/* Content links */
+.dark .prose a,
+.dark [data-fd-content] a {
+  color: var(--color-steel) !important;
+  text-decoration: none !important;
+  font-weight: 400 !important;
+}
+
+/* External link arrow */
+.dark .prose a[href^="http"]::after,
+.dark [data-fd-content] a[href^="http"]::after {
+  content: " ↗";
+  font-size: 0.85em;
+  opacity: 0.8;
+}
+
+/* Blockquotes */
+.dark blockquote,
+.dark .prose blockquote,
+.dark article blockquote,
+.dark [data-fd-content] blockquote {
+  all: unset !important;
+  display: block !important;
+  font-size: 0.9em !important;
+  font-style: normal !important;
+  color: #7a7a7a !important;
+  border-left: 2px solid var(--color-brand) !important;
+  padding-left: 1rem !important;
+  margin: 1rem 0 !important;
+  background: transparent !important;
+}
+
+.dark blockquote::before,
+.dark blockquote::after,
+.dark .prose blockquote::before,
+.dark .prose blockquote::after,
+.dark blockquote p::before,
+.dark blockquote p::after,
+.dark .prose blockquote p::before,
+.dark .prose blockquote p::after {
+  content: "" !important;
+  content: none !important;
+  display: none !important;
+  quotes: none !important;
+}
+
+.dark blockquote,
+.dark .prose blockquote {
+  quotes: "" "" !important;
+}
+
+.dark blockquote p,
+.dark .prose blockquote p,
+.dark article blockquote p {
+  font-style: normal !important;
+  font-weight: 400 !important;
+  color: #7a7a7a !important;
+  margin: 0 !important;
+}
+
+/* TypeTable styling - prop names use text-fd-primary */
+.dark div:has(> div > code.text-fd-primary) code.text-fd-primary,
+.dark .text-fd-primary.font-medium {
+  color: var(--color-steel) !important;
+}
+
+/* Hide native scrollbar (optional - custom scrollbar is shown instead) */
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+  * {
+    scrollbar-width: none;
+  }
+}
+
+/* Search/dialog overlay - match code block background */
+.dark {
+  --color-fd-popover: #0A0A0A;
+  --color-fd-card: #0A0A0A;
+  --color-fd-secondary: #0A0A0A;
+}
+
+/* Sidebar search input */
+.dark button[data-search-full] {
+  background: #0A0A0A !important;
+  border-color: #1b1f28 !important;
+}
+
+/* Table styling - match code block background */
+.dark table,
+.dark .prose table,
+.dark [data-fd-content] table,
+.dark [data-type-table] {
+  background: #0A0A0A !important;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.dark table th,
+.dark table td,
+.dark .prose table th,
+.dark .prose table td {
+  background: #0A0A0A !important;
+  border-color: #1b1f28 !important;
+}
+

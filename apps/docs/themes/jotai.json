@@ -2,7 +2,7 @@
   "name": "Jotai",
   "type": "dark",
   "colors": {
-    "editor.background": "#13161c",
+    "editor.background": "#0A0A0A",
     "editor.foreground": "#e4f0fb",
     "editor.lineHighlightBackground": "#11141a",
     "editorLineNumber.foreground": "#545b68",

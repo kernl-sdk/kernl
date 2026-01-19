@@ -1,37 +1,18 @@
-import nextra from 'nextra'
-import { createRequire } from 'module'
+import { createMDX } from 'fumadocs-mdx/next';
 
-const require = createRequire(import.meta.url)
-const jotai = require('./themes/jotai.json')
+const withMDX = createMDX();
 
-const withNextra = nextra({
-  defaultShowCopyCode: true,
-  mdxOptions: {
-    rehypePrettyCodeOptions: {
-      theme: {
-        dark: jotai,
-        light: 'min-light'
-      }
-    }
-  }
-})
-
-export default withNextra({
-  experimental: {
-    viewTransition: true
-  },
+/** @type {import('next').NextConfig} */
+const config = {
+  reactStrictMode: true,
   async rewrites() {
     return [
-      // Rewrite *.md requests to /llms/ folder
       {
-        source: '/:path*.md',
-        destination: '/llms/:path*.md',
+        source: '/:path*.mdx',
+        destination: '/llms.mdx/:path*',
       },
-      // .well-known convention for agent discovery
-      {
-        source: '/.well-known/llms.txt',
-        destination: '/llms.txt',
-      },
-    ]
-  }
-})
+    ];
+  },
+};
+
+export default withMDX(config);

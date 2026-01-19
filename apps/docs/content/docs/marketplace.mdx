@@ -1,0 +1,41 @@
+---
+title: Marketplace
+description: Pre-built toolkits for common integrations — GitHub, Linear, Slack, Daytona, and more.
+---
+
+Pre-built toolkits for common integrations — GitHub, Linear, Slack, and more. Browse available toolkits at [kernl.sh/marketplace](https://www.kernl.sh/marketplace).
+
+When you add a toolkit, the source code is copied directly into your project — just like [shadcn](https://ui.shadcn.com), so you have a familiar experience that we all love. You can read, modify, and extend the code however you like. No package dependency, just files in your `toolkits/` directory that you fully control.
+
+## Adding toolkits
+
+```bash
+kernl add toolkit github
+```
+
+This will:
+
+- Download the toolkit source to your `toolkits/` directory
+- Install any required dependencies
+- Show environment variables you need to configure
+
+Add multiple at once:
+
+```bash
+kernl add toolkit github linear
+```
+
+## Using toolkits
+
+After adding, import and use like any other toolkit:
+
+```ts
+import { github } from "@/toolkits/github";
+import { linear } from "@/toolkits/linear";
+
+const agent = new Agent({
+  id: "assistant",
+  model: anthropic("claude-sonnet-4-5"),
+  toolkits: [github, linear],
+});
+```

@@ -1,0 +1,171 @@
+---
+title: Threads
+description: Thread management API — get, list, history, pagination, and filtering.
+---
+
+You interact with threads through the `kernl.threads` resource, which returns simple models:
+
+- `Thread` – a snapshot of a thread's metadata and state.
+- `ThreadEvent` – an item in a thread's event history (messages, tool calls/results, reasoning, etc.).
+
+> Note: examples below assume you've imported the public SDK types and created a `Kernl` instance.
+
+```ts
+import { Kernl, type Thread, type ThreadEvent } from "kernl";
+
+const kernl = new Kernl();
+```
+
+---
+
+### Getting a single thread
+
+```ts
+const thread = await kernl.threads.get("tid_123");
+
+if (!thread) {
+  throw new Error("thread not found");
+}
+
+console.log(thread.tid, thread.state, thread.namespace);
+```
+
+`get(id)` returns a `Thread | null` with:
+
+- `tid` – thread id.
+- `namespace` – logical partition (e.g. `"prod"`, `"staging"`, `"acme"`).
+- `agentId` – owning agent.
+- `model` – `{ provider, modelId }`.
+- `context` – your JSON-serializable context object.
+- `parentTaskId` – parent task id, if any.
+- `state` – current thread state.
+- `createdAt`, `updatedAt` – timestamps.
+
+You can also eagerly include history:
+
+```ts
+const thread = await kernl.threads.get("tid_123", {
+  history: true,
+});
+
+// history is only present when requested
+thread?.history?.forEach((event) => {
+  console.log(event.seq, event.kind);
+});
+```
+
+For finer control over history:
+
+```ts
+const thread = await kernl.threads.get("tid_123", {
+  history: {
+    // only keep the last 50 events, newest first
+    limit: 50,
+    order: "desc",
+    // only message + tool-result events
+    kinds: ["message", "tool-result"],
+  },
+});
+```
+
+---
+
+### Listing threads
+
+`kernl.threads.list()` returns a cursor–style page you can iterate directly:
+
+```ts
+// Most recent threads in a namespace, newest first.
+const threads = await kernl.threads.list({
+  namespace: "my-app",
+  limit: 20,
+});
+
+for await (const thread of threads) {
+  console.log(thread.tid, thread.state);
+}
+```
+
+List parameters:
+
+- `namespace?: string` – restrict to a namespace.
+- `agentId?: string` – restrict to an agent's threads.
+- `state?: ThreadState | ThreadState[]` – filter by state.
+- `parentTaskId?: string` – filter by parent task.
+- `after?: Date` – only include threads created after this timestamp.
+- `before?: Date` – only include threads created before this timestamp.
+- `order?: { createdAt?: "asc" | "desc"; updatedAt?: "asc" | "desc" }` – control ordering.
+- `limit?: number` – page size.
+
+The returned page supports:
+
+- `items: Thread[]` – threads in the current page.
+- `last: boolean` – `true` if there are no more pages.
+- `next(): Promise<Page | null>` – fetch the next page.
+- Async iteration (`for await (const thread of page)`) – walks all pages.
+- `collect(): Promise<Thread[]>` – materialize all threads across pages.
+
+Example: pagination + filters:
+
+```ts
+// Only RUNNING threads for a given agent, newest first
+const page = await kernl.threads.list({
+  agentId: "support-bot",
+  state: "running",
+  limit: 10,
+});
+
+const runningNow = await page.collect();
+```
+
+Example: created–at window:
+
+```ts
+const from = new Date("2025-01-01T00:00:00Z");
+const to = new Date("2025-02-01T00:00:00Z");
+
+const page = await kernl.threads.list({
+  namespace: "prod",
+  after: from,
+  before: to,
+  order: { createdAt: "asc" },
+});
+
+const threadsInWindow = await page.collect();
+```
+
+---
+
+### Reading thread history
+
+You can fetch history directly from the `threads` resource:
+
+```ts
+const events: ThreadEvent[] = await kernl.threads.history("tid_123");
+
+for (const event of events) {
+  console.log(event.seq, event.kind);
+}
+```
+
+By default, history is:
+
+- Sorted by `seq` descending (latest event first).
+- Filtered to only "public" events (messages, reasoning, tool calls/results).
+  Internal `system` events are not returned.
+
+You can tailor the history query:
+
+```ts
+// Incremental fetch: events after seq 42, ascending order, text messages only.
+const events = await kernl.threads.history("tid_123", {
+  after: 42,
+  order: "asc",
+  kinds: ["message"],
+});
+
+// Limit to the last N events:
+const last50 = await kernl.threads.history("tid_123", { limit: 50 });
+```
+
+Use `after` for "since last seen" polling, `kinds` for event–type filtering, and `limit` to bound payload size.

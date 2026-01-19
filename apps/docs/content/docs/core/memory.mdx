@@ -1,0 +1,137 @@
+---
+title: Memory
+description: Persistent agent memory with semantic search. Manual and autonomous memory operations.
+---
+
+> *Reference:* [Memory](/reference/memory)
+
+## Hierarchy
+
+kernl distinguishes between a few layers in the memory hierarchy:
+
+- L1 :: Working memory — Active manipulation of information during thread execution.
+- L2 :: Short-term memory — Temporally bounded storage of small amounts of information.
+- L3 :: Long-term memory — Explicit + implicit memory: episodic, semantic, procedural (skills), archival.
+
+
+```
+           /\
+          /  \     L1 :: Working memory
+         /____\
+        /      \     L2 :: Short-term memory
+       /________\
+      /          \     L3 :: Long-term memory
+     /____________\
+```
+
+## Usage modes
+
+There are two primary modes of interacting with memory in kernl:
+
+- Manual — you call `agent.memories.*` yourself with explicit control.
+- Agent systools — the agent calls memory system tools during its run.
+
+### a) Manual
+
+```ts
+import { Agent } from "kernl";
+import { anthropic } from "@kernl-sdk/ai/anthropic";
+
+const jarvis = new Agent({
+  id: "jarvis",
+  name: "Jarvis",
+  model: anthropic("claude-sonnet-4-5"),
+  instructions: "Assist Tony Stark in saving the world from destruction.",
+  memory: { enabled: true },
+});
+
+// create a memory
+const mem = await jarvis.memories.create({
+  collection: "preferences",
+  content: {
+    text: "Tony prefers his coffee extra strong, two shots of espresso, no sugar.",
+  },
+});
+
+// list memories
+const prefs = await jarvis.memories.list({
+  collection: "preferences",
+  limit: 10,
+});
+
+// update a memory
+await jarvis.memories.update({
+  id: mem.id,
+  content: {
+    text: "Tony now prefers one shot of espresso with oat milk.",
+  },
+});
+```
+
+### b) Agent systools
+
+The agent determines how + when it wants to make changes to its own memory. Prompting is useful here for modulating its behavior.
+
+The memory system tools:
+- `list_memories`
+- `create_memory`
+- `update_memory`
+- `search_memories`
+
+```ts
+await jarvis.run(
+  "JARVIS, from now on I want my coffee extra strong, two shots of espresso, no sugar.",
+);
+
+/*
+Jarvis would then call `create_memory`:
+
+{
+  tool: "create_memory",
+  arguments: {
+    content: "Tony prefers his coffee extra strong, two shots of espresso, no sugar.",
+    collection: "preferences",
+  }
+}
+*/
+
+const res = await jarvis.run("Remind me how I like my coffee, JARVIS.");
+
+/*
+Jarvis might call `search_memories`:
+
+{
+  tool: "search_memories",
+  arguments: {
+    query: "Tony's coffee preference",
+    limit: 5
+  }
+}
+
+// tool result:
+[
+  { id: "mem_abc123", text: "Tony prefers his coffee extra strong...", score: 0.97 }
+]
+
+...and then JARVIS uses that to answer the question.
+*/
+```
+
+## Storage
+
+kernl uses a primary DB store as the source of truth for memory records. You can optionally configure a search index as a projection of that primary store.
+
+```ts
+import { Kernl } from "kernl";
+import { postgres } from "@kernl-sdk/pg";
+import { turbopuffer } from "@kernl-sdk/turbopuffer";
+
+const kernl = new Kernl({
+  storage: {
+    db: postgres({ connstr: process.env.DATABASE_URL }),
+    vector: turbopuffer({ apiKey: process.env.TURBOPUFFER_API_KEY }),
+  },
+});
+```
+
+Only `db` storage is strictly required. The `vector` store enables semantic search over memories.
