@@ -1,4 +1,4 @@
-import { getPageImage, source } from '@/lib/source';
+import { source } from '@/lib/source';
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
@@ -44,16 +44,21 @@ export async function generateStaticParams() {
   return source.generateParams();
 }
 
+const DEFAULT_OG_IMAGE = '/og/kernl.png';
+
 export async function generateMetadata(props: PageProps<'/[[...slug]]'>): Promise<Metadata> {
   const params = await props.params;
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
+  // Use per-page image if specified, otherwise default
+  const ogImage = page.data.image || DEFAULT_OG_IMAGE;
+
   return {
     title: page.data.title,
     description: page.data.description,
     openGraph: {
-      images: getPageImage(page).url,
+      images: ogImage,
     },
   };
 }

@@ -37,16 +37,16 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "kernl": "workspace:*",
     "@kernl-sdk/protocol": "workspace:*",
-    "@kernl-sdk/shared": "workspace:*"
+    "@kernl-sdk/shared": "workspace:*",
+    "kernl": "workspace:*"
   },
   "peerDependencies": {
     "react": "^18 || ^19"
   },
   "devDependencies": {
     "@types/node": "^24.10.0",
-    "@types/react": "^19.1.8",
+    "@types/react": "^19.2.8",
     "react": "^19.1.0",
     "tsc-alias": "^1.8.10",
     "typescript": "5.9.2"

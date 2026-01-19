@@ -1,10 +1,12 @@
 import { cn } from "@/lib/utils";
 
+type IconProps = React.SVGProps<SVGSVGElement> & { size?: number };
+
 export function IconKernl({
   className,
   size = 16,
   ...props
-}: React.ComponentProps<"svg"> & { size?: number }) {
+}: IconProps) {
   return (
     <svg
       width={size * 0.764}
