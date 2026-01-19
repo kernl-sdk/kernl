@@ -1,0 +1,174 @@
+---
+title: Kernl
+description: Configure storage, memory, and manage agents with the Kernl runtime.
+---
+
+> *Reference:* [Kernl](/reference/kernl/classes/Kernl)
+
+The `Kernl` class is the central runtime that manages agents, threads, and the memory system. It handles storage configuration, agent registration, and orchestrates execution.
+
+## Basic Usage
+
+```ts
+import { Kernl, Agent } from "kernl";
+import { anthropic } from "@kernl-sdk/ai/anthropic";
+
+const kernl = new Kernl();
+
+const agent = new Agent({
+  id: "assistant",
+  name: "Assistant",
+  model: anthropic("claude-sonnet-4-5"),
+  instructions: "You are a helpful assistant.",
+});
+
+kernl.register(agent);
+```
+
+## Constructor
+
+```ts
+import { Kernl } from "kernl";
+
+const kernl = new Kernl(options?);
+```
+
+### Options
+
+<TypeTable
+  type={{
+  storage: {
+    type: "StorageOptions",
+    description: "Database and vector storage configuration",
+  },
+  memory: {
+    type: "MemoryOptions",
+    description: "Memory system configuration",
+  },
+}}
+/>
+
+## Storage Options
+
+Configure where threads, tasks, and traces are persisted.
+
+<TypeTable
+  type={{
+  db: {
+    type: "KernlStorage",
+    description: "Relational database adapter",
+  },
+  vector: {
+    type: "SearchIndex",
+    description: "Vector search index for semantic memory",
+  },
+}}
+/>
+
+### Example with Postgres + Turbopuffer
+
+```ts
+import { Kernl } from "kernl";
+import { postgres } from "@kernl-sdk/pg";
+import { turbopuffer } from "@kernl-sdk/turbopuffer";
+import { openai } from "@kernl-sdk/ai/openai";
+
+const kernl = new Kernl({
+  storage: {
+    db: postgres({ connstr: process.env.DATABASE_URL }),
+    vector: turbopuffer({
+      apiKey: process.env.TURBOPUFFER_API_KEY,
+      region: "us-east-1",
+    }),
+  },
+  memory: {
+    embedding: openai.embedding("text-embedding-3-small"),
+  },
+});
+```
+
+### Example with Postgres + pgvector
+
+You can also pass the pool directly to share connections:
+
+```ts
+import { Kernl } from "kernl";
+import { postgres, pgvector } from "@kernl-sdk/pg";
+import { openai } from "@kernl-sdk/ai/openai";
+import { Pool } from "pg";
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+
+const kernl = new Kernl({
+  storage: {
+    db: postgres({ pool }),
+    vector: pgvector({ pool }),
+  },
+  memory: {
+    embedding: openai.embedding("text-embedding-3-small"),
+  },
+});
+```
+
+## Memory Options
+
+Configure how agent memories are stored and searched.
+
+<TypeTable
+  type={{
+  embedding: {
+    type: 'string | EmbeddingModel',
+    description: 'Embedding model for encoding memories',
+  },
+  indexId: {
+    type: "string",
+    description: "Logical index ID for the search backend",
+    default: '"kernl_memories_index"',
+  },
+  indexProviderOptions: {
+    type: "Record<string, unknown>",
+    description: "Backend-specific options (e.g., { schema: 'kernl' } for pgvector)",
+  },
+  dimensions: {
+    type: "number",
+    description: "Vector dimensions for embeddings",
+    default: "1536",
+  },
+  similarity: {
+    type: '"cosine" | "euclidean" | "dot_product"',
+    description: "Similarity metric for vector search",
+    default: '"cosine"',
+  },
+}}
+/>
+
+## Full Example
+
+```ts
+import { Kernl, Agent } from "kernl";
+import { postgres, pgvector } from "@kernl-sdk/pg";
+import { anthropic } from "@kernl-sdk/ai/anthropic";
+import { openai } from "@kernl-sdk/ai/openai";
+
+const kernl = new Kernl({
+  storage: {
+    db: postgres({ connstr: process.env.DATABASE_URL }),
+    vector: pgvector({ connstr: process.env.DATABASE_URL }),
+  },
+  memory: {
+    embedding: openai.embedding("text-embedding-3-small"),
+  },
+});
+
+const assistant = new Agent({
+  id: "assistant",
+  name: "Assistant",
+  model: anthropic("claude-sonnet-4-5"),
+  instructions: "You are a helpful assistant with memory.",
+  memory: { enabled: true },
+});
+
+kernl.register(assistant);
+
+const result = await assistant.run("Remember that my favorite color is blue.");
+```

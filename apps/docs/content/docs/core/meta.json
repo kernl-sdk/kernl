@@ -1,4 +1,4 @@
 {
   "title": "Core",
-  "pages": ["agents", "threads", "toolkits", "context", "memory", "realtime"]
+  "pages": ["kernl", "agents", "threads", "toolkits", "context", "memory", "realtime"]
 }
