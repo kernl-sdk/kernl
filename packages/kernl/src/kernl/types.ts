@@ -3,6 +3,7 @@ import { SearchIndex } from "@kernl-sdk/retrieval";
 
 import { BaseAgent } from "@/agent/base";
 import { KernlStorage } from "@/storage";
+import type { Subscriber } from "@/tracing";
 
 /**
  * Storage configuration for Kernl.
@@ -82,6 +83,12 @@ export interface KernlOptions {
    * Memory system configuration.
    */
   memory?: MemoryOptions;
+
+  /**
+   * Tracer for observability. Receives span and event data.
+   * Use CompositeTracer to fan out to multiple backends.
+   */
+  tracer?: Subscriber;
 }
 
 /**

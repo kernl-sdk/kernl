@@ -12,6 +12,7 @@ import {
   MemoryIndexHandle,
   buildMemoryIndexSchema,
 } from "@/memory";
+import { setSubscriber, clearSubscriber, type Subscriber } from "@/tracing";
 
 import { logger } from "@/lib/logger";
 import { RThreads } from "@/api/resources/threads";
@@ -33,6 +34,7 @@ export class Kernl extends KernlHooks {
   private readonly _models: ModelRegistry;
   private readonly _memopts: MemoryOptions | undefined;
   private readonly _storopts: StorageOptions | undefined;
+  private readonly _subscriber: Subscriber | null = null;
 
   readonly storage: KernlStorage;
   athreads: Map<string, Thread<any, any>> = new Map(); /* active threads */
@@ -60,6 +62,12 @@ export class Kernl extends KernlHooks {
     this.threads = new RThreads(this.storage.threads);
     this.agents = new RAgents(this._agents);
     this.memories = this.initmem();
+
+    // wire tracing
+    if (options.tracer) {
+      this._subscriber = options.tracer;
+      setSubscriber(this._subscriber);
+    }
   }
 
   /**
@@ -195,5 +203,18 @@ export class Kernl extends KernlHooks {
         : undefined,
       encoder,
     });
+  }
+
+  /**
+   * Gracefully shutdown the Kernl instance.
+   * Flushes and shuts down tracing subscribers, closes storage connections.
+   */
+  async shutdown(timeout?: number): Promise<void> {
+    if (this._subscriber) {
+      await this._subscriber.flush();
+      await this._subscriber.shutdown(timeout);
+      clearSubscriber();
+    }
+    // TODO: close storage connections when storage supports it
   }
 }

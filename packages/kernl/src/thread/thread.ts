@@ -7,6 +7,14 @@ import { Context } from "@/context";
 import type { Task } from "@/task";
 import type { ResolvedAgentResponse } from "@/guardrail";
 import type { ThreadStore } from "@/storage";
+import {
+  span,
+  event,
+  run,
+  type Span,
+  type ModelCallSpan,
+  type ToolCallSpan,
+} from "@/tracing";
 
 import { logger } from "@/lib/logger";
 
@@ -113,6 +121,7 @@ export class Thread<
 
   private abort?: AbortController;
   private storage?: ThreadStore;
+  private _span?: Span; /* tracing span for current execution */
 
   constructor(options: ThreadOptions<TContext, TOutput>) {
     this.tid = options.tid ?? `tid_${randomID()}`;
@@ -178,14 +187,33 @@ export class Thread<
 
     await this.checkpoint(); /* c1: persist RUNNING state + initial input */
 
-    this.emit("thread.start");
+    // create thread span (root span for this execution)
+    this._span = span(
+      {
+        kind: "thread",
+        threadId: this.tid,
+        agentId: this.agent.id,
+        namespace: this.namespace,
+        context: this.context.context,
+      },
+      null,
+    );
+    this._span.enter();
 
+    this.emit("thread.start");
     yield { kind: "stream.start" }; // always yield start immediately
 
     try {
       yield* this._execute();
+      this._span.record({ state: "stopped", result: this.tickres });
       this.emit("thread.stop", { state: STOPPED, result: this.tickres });
     } catch (err) {
+      this._span.error(err instanceof Error ? err : new Error(String(err)));
+      event({
+        kind: "thread.error",
+        message: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+      });
       this.emit("thread.stop", {
         state: STOPPED,
         error: err instanceof Error ? err.message : String(err),
@@ -194,6 +222,9 @@ export class Thread<
     } finally {
       this.state = STOPPED;
       this.abort = undefined;
+      this._span.close();
+      // (TODO): questionable whether this should be undefined. perhaps a single thread should exit + resume..
+      this._span = undefined;
       await this.checkpoint(); /* c4: final checkpoint - persist STOPPED state */
     }
   }
@@ -286,37 +317,66 @@ export class Thread<
 
     const req = await this.prepareModelRequest(this.history);
 
+    const s = span<ModelCallSpan>(
+      {
+        kind: "model.call",
+        provider: this.model.provider,
+        modelId: this.model.modelId,
+        request: {
+          input: req.input,
+          settings: req.settings,
+          responseType: req.responseType,
+          tools: req.tools,
+        },
+      },
+      this._span!.id,
+    );
+    s.enter();
+
     this.emit("model.call.start", { settings: req.settings ?? {} });
 
     let usage: LanguageModelUsage | undefined;
-    let finishReason: LanguageModelFinishReason = { unified: "other", raw: undefined };
+    let finishReason: LanguageModelFinishReason = {
+      unified: "other",
+      raw: undefined,
+    };
 
     try {
       if (this.model.stream) {
-        for await (const event of this.model.stream(req)) {
-          if (event.kind === "finish") {
-            usage = event.usage;
-            finishReason = event.finishReason;
+        for await (const e of this.model.stream(req)) {
+          if (e.kind === "finish") {
+            usage = e.usage;
+            finishReason = e.finishReason;
           }
-          yield event;
+          yield e;
         }
       } else {
         // fallback: blocking generate, yield events as batch
         const res = await this.model.generate(req);
         usage = res.usage;
         finishReason = res.finishReason;
-        for (const event of res.content) {
-          yield event;
+        for (const e of res.content) {
+          yield e;
         }
       }
 
+      s.record({
+        response: {
+          content: [], // TODO: collect content if needed
+          finishReason,
+          usage,
+        },
+      });
       this.emit("model.call.end", { finishReason, usage });
     } catch (error) {
+      s.error(error instanceof Error ? error : new Error(String(error)));
       this.emit("model.call.end", { finishReason: "error" });
       yield {
         kind: "error",
         error: error instanceof Error ? error : new Error(String(error)),
       };
+    } finally {
+      s.close();
     }
   }
 
@@ -390,7 +450,7 @@ export class Thread<
   }
 
   /**
-   * Cancel the running thread
+   * Abort the running thread
    *
    * TODO: Emit thread.stop when cancelled (neither result nor error set)
    */
@@ -478,6 +538,18 @@ export class Thread<
       calls.map(async (call: ToolCall) => {
         const parsedArgs = JSON.parse(call.arguments || "{}");
 
+        // create tool.call span
+        const s = span<ToolCallSpan>(
+          {
+            kind: "tool.call",
+            toolId: call.toolId,
+            callId: call.callId,
+            args: parsedArgs,
+          },
+          this._span!.id,
+        );
+        s.enter();
+
         this.emit("tool.call.start", {
           toolId: call.toolId,
           callId: call.callId,
@@ -501,16 +573,20 @@ export class Thread<
           const ctx = new Context(this.namespace, this.context.context);
           ctx.agent = this.agent;
           ctx.approve(call.callId); // mark this call as approved
+
           const res = await tool.invoke(ctx, call.arguments, call.callId);
+
+          s.record({
+            state: res.state,
+            result: res.result,
+            error: res.error,
+          });
 
           this.emit("tool.call.end", {
             toolId: call.toolId,
             callId: call.callId,
             state: res.state,
-            result:
-              typeof res.result === "string"
-                ? res.result
-                : JSON.stringify(res.result),
+            result: res.result,
             error: res.error,
           });
 
@@ -523,11 +599,15 @@ export class Thread<
             error: res.error,
           };
         } catch (error) {
+          const errMsg = error instanceof Error ? error.message : String(error);
+          s.error(error instanceof Error ? error : new Error(errMsg));
+          s.record({ state: "failed", error: errMsg });
+
           this.emit("tool.call.end", {
             toolId: call.toolId,
             callId: call.callId,
             state: FAILED,
-            error: error instanceof Error ? error.message : String(error),
+            error: errMsg,
           });
 
           return {
@@ -536,8 +616,10 @@ export class Thread<
             toolId: call.toolId,
             state: FAILED,
             result: undefined as any,
-            error: error instanceof Error ? error.message : String(error),
+            error: errMsg,
           };
+        } finally {
+          s.close();
         }
       }),
     );
