@@ -5,6 +5,12 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  build: {
+    rollupOptions: {
+      // TODO: Remove once kernl/realtime is moved to separate browser-safe package (#50)
+      external: [/^node:/],
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
