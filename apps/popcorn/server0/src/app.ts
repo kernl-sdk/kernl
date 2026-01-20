@@ -1,11 +1,13 @@
 import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
 import { Kernl } from "kernl";
+import { LaminarTracer } from "@kernl-sdk/laminar";
+
+import * as eventBus from "@/state/events";
 
 import { codex } from "@/agents/codex";
 import { titler } from "@/agents/titler";
 import { claudmin } from "@/agents/claudmin";
-import * as eventBus from "@/state/events";
 
 import { global } from "@/api/global";
 import { events } from "@/api/events";
@@ -35,7 +37,13 @@ type Variables = {
  * This server translates OpenCode contract endpoints → kernl primitives.
  */
 export function build(): Hono<{ Variables: Variables }> {
-  const kernl = new Kernl();
+  const tracer = new LaminarTracer({
+    apiKey: process.env.LMNR_PROJECT_API_KEY,
+  });
+
+  const kernl = new Kernl({
+    tracer,
+  });
 
   // --- register agents ---
   kernl.register(codex);
@@ -95,7 +103,10 @@ export function build(): Hono<{ Variables: Variables }> {
   return app;
 }
 
-function handleError(err: Error, cx: Context<{ Variables: Variables }>): Response {
+function handleError(
+  err: Error,
+  cx: Context<{ Variables: Variables }>,
+): Response {
   console.error("[error]", err.message);
 
   const directory = cx.get("directory") ?? "";
