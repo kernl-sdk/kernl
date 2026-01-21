@@ -1,5 +1,5 @@
 {
-  "name": "@kernl-sdk/laminar",
+  "name": "@kernl-sdk/lmnr",
   "version": "0.1.0",
   "description": "Laminar observability integration for kernl",
   "keywords": [
@@ -39,6 +39,7 @@
     "test:run": "vitest run"
   },
   "dependencies": {
+    "@kernl-sdk/shared": "workspace:*",
     "kernl": "workspace:*"
   },
   "peerDependencies": {

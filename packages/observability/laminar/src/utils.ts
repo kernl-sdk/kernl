@@ -1,49 +1,5 @@
-import type { SpanData, EventData } from "kernl/tracing";
-
-export type SpanType = "DEFAULT" | "LLM" | "TOOL";
-
-export function spanName(data: SpanData): string {
-  switch (data.kind) {
-    case "thread":
-      return `kernl.thread.${data.agentId}`;
-    case "model.call":
-      return `kernl.model.${data.provider}.${data.modelId}`;
-    case "tool.call":
-      return `kernl.tool.${data.toolId}`;
-    default:
-      return `kernl.unknown`;
-  }
-}
-
-export function spanType(kind: SpanData["kind"]): SpanType {
-  switch (kind) {
-    case "thread":
-      return "DEFAULT";
-    case "model.call":
-      return "LLM";
-    case "tool.call":
-      return "TOOL";
-    default:
-      return "DEFAULT";
-  }
-}
-
-export function formatInput(data: SpanData): Record<string, unknown> {
-  const { kind, ...rest } = data;
-  return rest;
-}
-
-export function flattenEventData(data: EventData): Record<string, string | number | boolean> {
-  const result: Record<string, string | number | boolean> = {};
-  for (const [key, value] of Object.entries(data)) {
-    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-      result[key] = value;
-    } else if (value !== undefined) {
-      result[key] = JSON.stringify(value);
-    }
-  }
-  return result;
-}
+import type { Span } from "@lmnr-ai/lmnr";
+import type { SpanData } from "kernl/tracing";
 
 export function extractSessionId(data: SpanData): string | undefined {
   if (data.kind === "thread" && data.context) {
@@ -59,4 +15,43 @@ export function extractUserId(data: SpanData): string | undefined {
     if (typeof ctx.userId === "string") return ctx.userId;
   }
   return undefined;
+}
+
+export function setPromptAttributes(
+  span: Span,
+  items: Array<{
+    kind: string;
+    role?: string;
+    content?: Array<{ kind: string; text?: string }>;
+  }>,
+): void {
+  let idx = 0;
+  for (const item of items) {
+    if (item.kind === "message" && item.role && item.content) {
+      span.setAttribute(`gen_ai.prompt.${idx}.role`, item.role);
+      const content = item.content
+        .filter((p): p is { kind: "text"; text: string } => p.kind === "text")
+        .map((p) => p.text)
+        .join("");
+      span.setAttribute(`gen_ai.prompt.${idx}.content`, content);
+      idx++;
+    }
+  }
+}
+
+export function setCompletionAttributes(
+  span: Span,
+  items: Array<{ kind: string; role?: string; text?: string }>,
+): void {
+  let idx = 0;
+  for (const item of items) {
+    if (item.kind === "message" && item.role) {
+      span.setAttribute(`gen_ai.completion.${idx}.role`, item.role);
+      idx++;
+    }
+    if ((item.kind === "text" || item.kind === "reasoning") && item.text) {
+      span.setAttribute(`gen_ai.completion.${idx}.content`, item.text);
+      idx++;
+    }
+  }
 }

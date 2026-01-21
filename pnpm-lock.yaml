@@ -1018,6 +1018,9 @@ importers:
 
   packages/observability/laminar:
     dependencies:
+      '@kernl-sdk/shared':
+        specifier: workspace:*
+        version: link:../../shared
       kernl:
         specifier: workspace:*
         version: link:../../kernl
