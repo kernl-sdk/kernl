@@ -30,6 +30,7 @@ import {
   LanguageModelStreamEvent,
   type LanguageModelUsage,
   type LanguageModelFinishReason,
+  type LanguageModelResponseItem,
 } from "@kernl-sdk/protocol";
 import { randomID, filter } from "@kernl-sdk/shared/lib";
 
@@ -335,6 +336,8 @@ export class Thread<
 
     this.emit("model.call.start", { settings: req.settings ?? {} });
 
+    // tracing / observability
+    const content: LanguageModelResponseItem[] = [];
     let usage: LanguageModelUsage | undefined;
     let finishReason: LanguageModelFinishReason = {
       unified: "other",
@@ -348,6 +351,7 @@ export class Thread<
             usage = e.usage;
             finishReason = e.finishReason;
           }
+          if (notDelta(e)) content.push(e as LanguageModelResponseItem);
           yield e;
         }
       } else {
@@ -356,13 +360,14 @@ export class Thread<
         usage = res.usage;
         finishReason = res.finishReason;
         for (const e of res.content) {
+          content.push(e);
           yield e;
         }
       }
 
       s.record({
         response: {
-          content: [], // TODO: collect content if needed
+          content,
           finishReason,
           usage,
         },
