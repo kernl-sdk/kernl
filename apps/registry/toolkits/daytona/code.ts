@@ -7,7 +7,7 @@ import { getSandbox, type SandboxContext } from "./client";
  * Run Python code in the sandbox.
  */
 export const interpreter = tool({
-  id: "daytona_code_interpreter",
+  id: "code_interpreter",
   description:
     "Run Python code in a stateful interpreter. Variables and imports persist across calls.",
   parameters: z.object({
@@ -26,7 +26,7 @@ export const interpreter = tool({
 });
 
 export const code = new Toolkit<SandboxContext>({
-  id: "daytona_code_interpreter",
+  id: "code_interpreter",
   description: "Stateful Python code interpreter",
   tools: [interpreter],
 });

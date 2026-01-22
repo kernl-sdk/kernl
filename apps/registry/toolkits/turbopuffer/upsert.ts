@@ -20,7 +20,7 @@ const DocumentSchema = z.object({
  * Inserts or updates a document in the search index.
  */
 export const upsert = tool({
-  id: "turbopuffer_upsert",
+  id: "upsert",
   description: "Insert or update a document in the search index",
   parameters: z.object({
     document: DocumentSchema.describe("Document to upsert"),

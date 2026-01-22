@@ -9,7 +9,7 @@ import { am, INBOX_ID } from "./client";
  * Sends a new email message, creating a new thread.
  */
 export const sendMessage = tool({
-  id: "agentmail_messages_send",
+  id: "messages_send",
   description: "Send a new email message, creating a new thread",
   parameters: z.object({
     to: z.string().describe("Recipient email address"),
@@ -44,7 +44,7 @@ export const sendMessage = tool({
  * Lists all messages in the inbox.
  */
 export const listMessages = tool({
-  id: "agentmail_messages_list",
+  id: "messages_list",
   description: "List all messages in the inbox",
   parameters: z.object({}),
   execute: async () => {
@@ -70,7 +70,7 @@ export const listMessages = tool({
  * Gets the details of a specific message.
  */
 export const getMessage = tool({
-  id: "agentmail_messages_get",
+  id: "messages_get",
   description: "Get the details of a specific message",
   parameters: z.object({
     message_id: z.string().describe("The message ID to retrieve"),
@@ -100,7 +100,7 @@ export const getMessage = tool({
  * Replies to an existing message in a thread.
  */
 export const replyToMessage = tool({
-  id: "agentmail_messages_reply",
+  id: "messages_reply",
   description: "Reply to an existing message in a thread",
   parameters: z.object({
     message_id: z.string().describe("The message ID to reply to"),
@@ -126,7 +126,7 @@ export const replyToMessage = tool({
  * Updates a message's labels for organizing and tracking.
  */
 export const updateMessage = tool({
-  id: "agentmail_messages_update",
+  id: "messages_update",
   description: "Update a message's labels for organizing and tracking workflows",
   parameters: z.object({
     message_id: z.string().describe("The message ID to update"),

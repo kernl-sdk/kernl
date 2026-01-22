@@ -8,7 +8,7 @@ import { octokit } from "./client";
  * Searches for GitHub users using GitHub search syntax.
  */
 export const searchUsers = tool({
-  id: "github_users_search",
+  id: "users_search",
   description: "Search for GitHub users",
   parameters: z.object({
     query: z.string().describe("Search query using GitHub search syntax"),
@@ -42,7 +42,7 @@ export const searchUsers = tool({
 });
 
 export const users = new Toolkit({
-  id: "github_users",
+  id: "users",
   description: "GitHub Users",
   tools: [searchUsers],
 });

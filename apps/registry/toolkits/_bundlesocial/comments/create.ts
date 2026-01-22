@@ -18,7 +18,7 @@ const commentPlatforms = [
 ] as const;
 
 export const createComment = tool({
-  id: "bundlesocial_comments_create",
+  id: "comments_create",
   description: "Create a comment/reply on a post",
   parameters: z.object({
     title: z.string().describe("Internal title for the comment"),

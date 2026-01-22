@@ -4,7 +4,7 @@ import { tool } from "kernl";
 import { client } from "../client";
 
 export const deleteComment = tool({
-  id: "bundlesocial_comments_delete",
+  id: "comments_delete",
   description: "Delete a comment",
   parameters: z.object({
     id: z.string().describe("Comment ID to delete"),

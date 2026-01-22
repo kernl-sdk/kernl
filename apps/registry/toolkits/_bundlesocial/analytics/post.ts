@@ -18,7 +18,7 @@ const analyticsPlatforms = [
 ] as const;
 
 export const getPostAnalytics = tool({
-  id: "bundlesocial_analytics_post",
+  id: "analytics_post",
   description: "Get performance analytics for a specific post",
   parameters: z.object({
     post_id: z.string().describe("Post ID to get analytics for"),

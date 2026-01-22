@@ -31,7 +31,7 @@ const FilterSchema = z
  * Searches documents by semantic similarity or full-text match.
  */
 export const search = tool({
-  id: "turbopuffer_search",
+  id: "search",
   description: "Search documents by semantic similarity or text",
   parameters: z.object({
     query: QuerySchema.describe("Search query by field"),

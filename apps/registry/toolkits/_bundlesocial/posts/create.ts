@@ -120,7 +120,7 @@ const platformDataSchema = z.object({
 });
 
 export const createPost = tool({
-  id: "bundlesocial_posts_create",
+  id: "posts_create",
   description:
     "Create and schedule a post across multiple social media platforms",
   parameters: z.object({

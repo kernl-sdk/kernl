@@ -5,7 +5,7 @@ import { client, TEAM_ID } from "../client";
 import { PLATFORMS } from "../constants";
 
 export const listPosts = tool({
-  id: "bundlesocial_posts_list",
+  id: "posts_list",
   description: "List posts for a team with optional filtering",
   parameters: z.object({
     status: z.enum(["DRAFT", "SCHEDULED", "POSTED", "ERROR", "DELETED", "PROCESSING", "REVIEW", "RETRYING"]).optional().describe("Filter by post status"),

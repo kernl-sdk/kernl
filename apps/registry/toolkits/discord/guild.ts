@@ -8,7 +8,7 @@ import { discord, getGuildId, type DiscordContext } from "./client";
  * Get guild information.
  */
 export const info = tool({
-  id: "discord_guild_info",
+  id: "guild_info",
   description: "Get information about the Discord server",
   parameters: z.object({}),
   async execute(ctx: Context<DiscordContext>) {
@@ -22,7 +22,7 @@ export const info = tool({
  * Edit guild settings.
  */
 export const edit = tool({
-  id: "discord_guild_edit",
+  id: "guild_edit",
   description: "Edit the Discord server's settings",
   parameters: z.object({
     name: z.string().optional().describe("New server name"),
@@ -57,7 +57,7 @@ export const edit = tool({
  * List bans in the guild.
  */
 export const bans = tool({
-  id: "discord_guild_bans",
+  id: "guild_bans",
   description: "List all banned users in the Discord server",
   parameters: z.object({
     limit: z.number().min(1).max(1000).default(100).describe("Max bans to return"),
@@ -76,7 +76,7 @@ export const bans = tool({
 });
 
 export const guild = new Toolkit<DiscordContext>({
-  id: "discord_guild",
+  id: "guild",
   description: "Discord server/guild management",
   tools: [info, edit, bans],
 });

@@ -8,7 +8,7 @@ import { octokit, getRepo, type GitHubContext } from "./client";
  * Gets file or directory contents from the repository.
  */
 export const getFileContents = tool({
-  id: "github_repos_get_file_contents",
+  id: "repos_get_file_contents",
   description: "Get file or directory contents from the repository",
   parameters: z.object({
     path: z.string().optional().describe("Path to file/directory"),
@@ -53,7 +53,7 @@ export const getFileContents = tool({
  * Creates a new branch from an existing branch or commit.
  */
 export const createBranch = tool({
-  id: "github_repos_create_branch",
+  id: "repos_create_branch",
   description: "Create a new branch in the repository",
   parameters: z.object({
     branch: z.string().describe("Name for the new branch"),
@@ -90,7 +90,7 @@ export const createBranch = tool({
  * Lists all branches in the repository.
  */
 export const listBranches = tool({
-  id: "github_repos_list_branches",
+  id: "repos_list_branches",
   description: "List branches in the repository",
   parameters: z.object({
     page: z.number().optional().describe("Page number (default: 1)"),
@@ -114,7 +114,7 @@ export const listBranches = tool({
  * Searches for code across repositories using GitHub search syntax.
  */
 export const searchCode = tool({
-  id: "github_repos_search_code",
+  id: "repos_search_code",
   description: "Search for code across repositories",
   parameters: z.object({
     query: z.string().describe("Search query using GitHub code search syntax"),
@@ -146,7 +146,7 @@ export const searchCode = tool({
  * Searches for repositories using GitHub search syntax.
  */
 export const searchRepositories = tool({
-  id: "github_repos_search_repositories",
+  id: "repos_search_repositories",
   description: "Search for repositories",
   parameters: z.object({
     query: z.string().describe("Search query using GitHub search syntax"),
@@ -187,7 +187,7 @@ export const searchRepositories = tool({
  * Lists commits in the repository with optional filters.
  */
 export const listCommits = tool({
-  id: "github_repos_list_commits",
+  id: "repos_list_commits",
   description: "List commits in the repository",
   parameters: z.object({
     sha: z.string().optional().describe("Branch name or commit SHA to start from"),
@@ -227,7 +227,7 @@ export const listCommits = tool({
  * Gets detailed information about a specific commit.
  */
 export const getCommit = tool({
-  id: "github_repos_get_commit",
+  id: "repos_get_commit",
   description: "Get details of a specific commit",
   parameters: z.object({
     ref: z.string().describe("Commit SHA, branch name, or tag"),
@@ -257,7 +257,7 @@ export const getCommit = tool({
 });
 
 export const repos = new Toolkit<GitHubContext>({
-  id: "github_repos",
+  id: "repos",
   description: "GitHub Repository operations",
   tools: [
     // getFileContents, - uncomment if agents need to read file contents

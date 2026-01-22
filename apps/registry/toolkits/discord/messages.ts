@@ -8,7 +8,7 @@ import { discord, type DiscordContext } from "./client";
  * Send a message to a channel.
  */
 export const send = tool({
-  id: "discord_messages_send",
+  id: "messages_send",
   description: "Send a message to a Discord channel",
   parameters: z.object({
     channelId: z.string().describe("The channel ID"),
@@ -59,7 +59,7 @@ export const send = tool({
  * Get messages from a channel.
  */
 export const list = tool({
-  id: "discord_messages_list",
+  id: "messages_list",
   description: "Get messages from a Discord channel",
   parameters: z.object({
     channelId: z.string().describe("The channel ID"),
@@ -93,7 +93,7 @@ export const list = tool({
  * Get a specific message.
  */
 export const get = tool({
-  id: "discord_messages_get",
+  id: "messages_get",
   description: "Get a specific message by ID",
   parameters: z.object({
     channelId: z.string().describe("The channel ID"),
@@ -111,7 +111,7 @@ export const get = tool({
  * Delete a message.
  */
 export const remove = tool({
-  id: "discord_messages_delete",
+  id: "messages_delete",
   description: "Delete a message",
   parameters: z.object({
     channelId: z.string().describe("The channel ID"),
@@ -127,7 +127,7 @@ export const remove = tool({
  * Bulk delete messages (for moderation).
  */
 export const bulkDelete = tool({
-  id: "discord_messages_bulk_delete",
+  id: "messages_bulk_delete",
   description:
     "Bulk delete messages (2-100 messages, must be less than 14 days old)",
   parameters: z.object({
@@ -151,7 +151,7 @@ export const bulkDelete = tool({
  * Pin a message.
  */
 export const pin = tool({
-  id: "discord_messages_pin",
+  id: "messages_pin",
   description: "Pin a message to a channel",
   parameters: z.object({
     channelId: z.string().describe("The channel ID"),
@@ -167,7 +167,7 @@ export const pin = tool({
  * Unpin a message.
  */
 export const unpin = tool({
-  id: "discord_messages_unpin",
+  id: "messages_unpin",
   description: "Unpin a message from a channel",
   parameters: z.object({
     channelId: z.string().describe("The channel ID"),
@@ -180,7 +180,7 @@ export const unpin = tool({
 });
 
 export const messages = new Toolkit<DiscordContext>({
-  id: "discord_messages",
+  id: "messages",
   description: "Discord message operations",
   tools: [send, list, get, remove, bulkDelete, pin, unpin],
 });

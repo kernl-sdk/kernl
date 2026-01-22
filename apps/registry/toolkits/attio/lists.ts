@@ -14,7 +14,7 @@ type AttioValues = { [key: string]: unknown[] };
  * List all lists in the workspace.
  */
 export const list = tool({
-  id: "attio_lists_list",
+  id: "lists_list",
   description: "List all lists (pipelines, boards) in the workspace",
   parameters: z.object({}),
   async execute(ctx: Context<AttioContext>) {
@@ -27,7 +27,7 @@ export const list = tool({
  * Get a specific list by ID or slug.
  */
 export const get = tool({
-  id: "attio_lists_get",
+  id: "lists_get",
   description: "Get details about a specific list",
   parameters: z.object({
     list: z.string().describe("List ID or slug"),
@@ -42,7 +42,7 @@ export const get = tool({
  * Create a new list.
  */
 export const create = tool({
-  id: "attio_lists_create",
+  id: "lists_create",
   description: "Create a new list in the workspace",
   parameters: z.object({
     name: z.string().describe("List name"),
@@ -76,7 +76,7 @@ export const create = tool({
  * Update a list.
  */
 export const update = tool({
-  id: "attio_lists_update",
+  id: "lists_update",
   description: "Update a list's name or access settings",
   parameters: z.object({
     list: z.string().describe("List ID or slug"),
@@ -100,7 +100,7 @@ export const update = tool({
  * List entries in a list.
  */
 export const listEntries = tool({
-  id: "attio_lists_entries_list",
+  id: "lists_entries_list",
   description: "List entries in a list (pipeline items)",
   parameters: z.object({
     list: z.string().describe("List ID or slug"),
@@ -125,7 +125,7 @@ export const listEntries = tool({
  * Get a specific entry.
  */
 export const getEntry = tool({
-  id: "attio_lists_entries_get",
+  id: "lists_entries_get",
   description: "Get a specific entry from a list",
   parameters: z.object({
     list: z.string().describe("List ID or slug"),
@@ -141,7 +141,7 @@ export const getEntry = tool({
  * Create a new entry in a list.
  */
 export const createEntry = tool({
-  id: "attio_lists_entries_create",
+  id: "lists_entries_create",
   description: "Add a record to a list as a new entry",
   parameters: z.object({
     list: z.string().describe("List ID or slug"),
@@ -173,7 +173,7 @@ export const createEntry = tool({
  * Update an entry.
  */
 export const updateEntry = tool({
-  id: "attio_lists_entries_update",
+  id: "lists_entries_update",
   description: "Update an entry's attribute values",
   parameters: z.object({
     list: z.string().describe("List ID or slug"),
@@ -200,7 +200,7 @@ export const updateEntry = tool({
  * Delete an entry from a list.
  */
 export const removeEntry = tool({
-  id: "attio_lists_entries_delete",
+  id: "lists_entries_delete",
   description: "Remove an entry from a list",
   parameters: z.object({
     list: z.string().describe("List ID or slug"),
@@ -213,7 +213,7 @@ export const removeEntry = tool({
 });
 
 export const lists = new Toolkit<AttioContext>({
-  id: "attio_lists",
+  id: "lists",
   description: "Attio CRM list and entry operations (pipelines, boards)",
   tools: [
     list,

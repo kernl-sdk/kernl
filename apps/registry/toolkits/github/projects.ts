@@ -8,7 +8,7 @@ import { octokit, getRepo, type GitHubContext } from "./client";
  * Lists projects (v2) for the repository or organization.
  */
 export const listProjects = tool({
-  id: "github_projects_list",
+  id: "projects_list",
   description: "List GitHub Projects (v2) for the repository",
   parameters: z.object({
     first: z.number().optional().describe("Number of projects to return (max 100)"),
@@ -71,7 +71,7 @@ export const listProjects = tool({
  * Gets a specific project by number.
  */
 export const getProject = tool({
-  id: "github_projects_get",
+  id: "projects_get",
   description: "Get a GitHub Project (v2) by number",
   parameters: z.object({
     number: z.number().describe("Project number"),
@@ -160,7 +160,7 @@ export const getProject = tool({
  * Lists items in a project.
  */
 export const listProjectItems = tool({
-  id: "github_projects_list_items",
+  id: "projects_list_items",
   description: "List items in a GitHub Project (v2)",
   parameters: z.object({
     number: z.number().describe("Project number"),
@@ -242,7 +242,7 @@ export const listProjectItems = tool({
  * Gets the fields/columns available in a project.
  */
 export const listProjectFields = tool({
-  id: "github_projects_list_fields",
+  id: "projects_list_fields",
   description: "List fields in a GitHub Project (v2)",
   parameters: z.object({
     number: z.number().describe("Project number"),
@@ -307,7 +307,7 @@ export const listProjectFields = tool({
  * - listProjectFields: Get available fields and their options
  */
 export const projects = new Toolkit<GitHubContext>({
-  id: "github_projects",
+  id: "projects",
   description: "GitHub Projects (v2)",
   tools: [listProjects, getProject, listProjectItems, listProjectFields],
 });

@@ -14,7 +14,7 @@ const PERMISSION_FLAGS = Object.keys(PERMISSION_BITS) as [string, ...string[]];
  * Set permission overwrites for a role or user on a channel.
  */
 export const set = tool({
-  id: "discord_permissions_set",
+  id: "permissions_set",
   description:
     "Set permission overwrites for a role or user on a specific channel",
   parameters: z.object({
@@ -52,7 +52,7 @@ export const set = tool({
  * Remove permission overwrites for a role or user on a channel.
  */
 export const remove = tool({
-  id: "discord_permissions_remove",
+  id: "permissions_remove",
   description: "Remove permission overwrites for a role or user on a channel",
   parameters: z.object({
     channelId: z.string().describe("The channel ID"),
@@ -67,7 +67,7 @@ export const remove = tool({
 });
 
 export const permissions = new Toolkit<DiscordContext>({
-  id: "discord_permissions",
+  id: "permissions",
   description: "Discord channel permission management",
   tools: [set, remove],
 });

@@ -7,7 +7,7 @@ import { ensureDesktop, type SandboxContext } from "./client";
  * Take a screenshot of the desktop.
  */
 export const screenshot = tool({
-  id: "daytona_computer_screenshot",
+  id: "computer_screenshot",
   description: "Take a screenshot of the desktop",
   parameters: z.object({
     region: z
@@ -35,7 +35,7 @@ export const screenshot = tool({
  * Click the mouse at coordinates.
  */
 export const click = tool({
-  id: "daytona_computer_click",
+  id: "computer_click",
   description: "Click the mouse at specified coordinates",
   parameters: z.object({
     x: z.number().describe("X coordinate"),
@@ -63,7 +63,7 @@ export const click = tool({
  * Move the mouse to coordinates.
  */
 export const move = tool({
-  id: "daytona_computer_move",
+  id: "computer_move",
   description: "Move the mouse cursor to specified coordinates",
   parameters: z.object({
     x: z.number().describe("X coordinate"),
@@ -81,7 +81,7 @@ export const move = tool({
  * Drag the mouse from one point to another.
  */
 export const drag = tool({
-  id: "daytona_computer_drag",
+  id: "computer_drag",
   description: "Drag the mouse from start to end coordinates",
   parameters: z.object({
     start_x: z.number().describe("Starting X coordinate"),
@@ -104,7 +104,7 @@ export const drag = tool({
  * Scroll the mouse wheel.
  */
 export const scroll = tool({
-  id: "daytona_computer_scroll",
+  id: "computer_scroll",
   description: "Scroll the mouse wheel at specified coordinates",
   parameters: z.object({
     x: z.number().describe("X coordinate"),
@@ -127,7 +127,7 @@ export const scroll = tool({
  * Type text on the keyboard.
  */
 export const type = tool({
-  id: "daytona_computer_type",
+  id: "computer_type",
   description: "Type text on the keyboard",
   parameters: z.object({
     text: z.string().describe("Text to type"),
@@ -145,7 +145,7 @@ export const type = tool({
  * Press a key with optional modifiers.
  */
 export const press = tool({
-  id: "daytona_computer_press",
+  id: "computer_press",
   description: "Press a key with optional modifiers",
   parameters: z.object({
     key: z.string().describe("Key to press (e.g., 'Return', 'Escape', 'a')"),
@@ -166,7 +166,7 @@ export const press = tool({
  * Press a hotkey combination.
  */
 export const hotkey = tool({
-  id: "daytona_computer_hotkey",
+  id: "computer_hotkey",
   description: "Press a hotkey combination (e.g., 'ctrl+c', 'alt+tab')",
   parameters: z.object({
     keys: z
@@ -185,7 +185,7 @@ export const hotkey = tool({
  * Get display information.
  */
 export const display = tool({
-  id: "daytona_computer_display",
+  id: "computer_display",
   description: "Get display information (resolution, etc.)",
   parameters: z.object({}),
   execute: async (ctx: Context<SandboxContext>) => {
@@ -198,7 +198,7 @@ export const display = tool({
  * List open windows.
  */
 export const windows = tool({
-  id: "daytona_computer_windows",
+  id: "computer_windows",
   description: "List open windows",
   parameters: z.object({}),
   execute: async (ctx: Context<SandboxContext>) => {
@@ -208,7 +208,7 @@ export const windows = tool({
 });
 
 export const computer = new Toolkit<SandboxContext>({
-  id: "daytona_computer",
+  id: "computer",
   description:
     "Desktop automation for Daytona sandboxes (mouse, keyboard, screenshots)",
   tools: [

@@ -9,7 +9,7 @@ import { octokit } from "./client";
  * Creates a new gist with one or more files.
  */
 export const createGist = tool({
-  id: "github_gists_create",
+  id: "gists_create",
   description: "Create a new gist",
   parameters: z.object({
     description: z.string().optional().describe("Gist description"),
@@ -40,7 +40,7 @@ export const createGist = tool({
  * Retrieves a gist by its ID including file contents.
  */
 export const getGist = tool({
-  id: "github_gists_get",
+  id: "gists_get",
   description: "Get a gist by ID",
   parameters: z.object({
     gist_id: z.string().describe("Gist ID"),
@@ -71,7 +71,7 @@ export const getGist = tool({
  * Lists gists for the authenticated user.
  */
 export const listGists = tool({
-  id: "github_gists_list",
+  id: "gists_list",
   description: "List gists for the authenticated user",
   parameters: z.object({
     since: z.string().optional().describe("Filter by date (ISO 8601)"),
@@ -98,7 +98,7 @@ export const listGists = tool({
  * Updates an existing gist's description or files.
  */
 export const updateGist = tool({
-  id: "github_gists_update",
+  id: "gists_update",
   description: "Update an existing gist",
   parameters: z.object({
     gist_id: z.string().describe("Gist ID"),
@@ -120,7 +120,7 @@ export const updateGist = tool({
 });
 
 export const gists = new Toolkit({
-  id: "github_gists",
+  id: "gists",
   description: "GitHub Gists",
   tools: [createGist, getGist, listGists, updateGist],
 });

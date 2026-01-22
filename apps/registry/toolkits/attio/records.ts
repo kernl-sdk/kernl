@@ -10,7 +10,7 @@ type AttioValues = { [key: string]: unknown[] };
  * List records for an object with optional filtering.
  */
 export const list = tool({
-  id: "attio_records_list",
+  id: "records_list",
   description: "List records for an object (e.g. list all people or companies)",
   parameters: z.object({
     object: z
@@ -37,7 +37,7 @@ export const list = tool({
  * Get a specific record by ID.
  */
 export const get = tool({
-  id: "attio_records_get",
+  id: "records_get",
   description: "Get a specific record by its ID",
   parameters: z.object({
     object: z.string().describe("Object slug or ID"),
@@ -53,7 +53,7 @@ export const get = tool({
  * Create a new record.
  */
 export const create = tool({
-  id: "attio_records_create",
+  id: "records_create",
   description: "Create a new record for an object",
   parameters: z.object({
     object: z.string().describe("Object slug or ID"),
@@ -75,7 +75,7 @@ export const create = tool({
  * Update a record (append mode - adds to multi-value attributes).
  */
 export const update = tool({
-  id: "attio_records_update",
+  id: "records_update",
   description:
     "Update a record's attributes (appends to multi-value attributes)",
   parameters: z.object({
@@ -98,7 +98,7 @@ export const update = tool({
  * Delete a record.
  */
 export const remove = tool({
-  id: "attio_records_delete",
+  id: "records_delete",
   description: "Delete a record",
   parameters: z.object({
     object: z.string().describe("Object slug or ID"),
@@ -114,7 +114,7 @@ export const remove = tool({
  * Search for records across objects.
  */
 export const search = tool({
-  id: "attio_records_search",
+  id: "records_search",
   description: "Search for records across specified objects by name or text",
   parameters: z.object({
     query: z.string().describe("Search query text"),
@@ -143,7 +143,7 @@ export const search = tool({
  * Upsert a record - find by matching values or create if not found.
  */
 export const upsert = tool({
-  id: "attio_records_upsert",
+  id: "records_upsert",
   description: "Find a record by matching attribute or create it if not found",
   parameters: z.object({
     object: z.string().describe("Object slug or ID"),
@@ -171,7 +171,7 @@ export const upsert = tool({
 });
 
 export const records = new Toolkit<AttioContext>({
-  id: "attio_records",
+  id: "records",
   description:
     "Attio CRM record operations (people, companies, custom objects)",
   tools: [list, get, create, update, remove, search, upsert],

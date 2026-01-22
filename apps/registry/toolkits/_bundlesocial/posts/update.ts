@@ -8,7 +8,7 @@ import { PLATFORMS } from "../constants";
 type UpdatePlatformData = NonNullable<PostUpdateData["requestBody"]>["data"];
 
 export const updatePost = tool({
-  id: "bundlesocial_posts_update",
+  id: "posts_update",
   description: "Update a draft or scheduled post (cannot update posted content)",
   parameters: z.object({
     id: z.string().describe("Post ID to update"),

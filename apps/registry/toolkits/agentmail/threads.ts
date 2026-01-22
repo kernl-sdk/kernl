@@ -9,7 +9,7 @@ import { am, INBOX_ID } from "./client";
  * Lists threads in the inbox.
  */
 export const listThreads = tool({
-  id: "agentmail_threads_list",
+  id: "threads_list",
   description: "List threads in the inbox",
   parameters: z.object({}),
   execute: async () => {
@@ -33,7 +33,7 @@ export const listThreads = tool({
  * Gets a thread with all its messages.
  */
 export const getThread = tool({
-  id: "agentmail_threads_get",
+  id: "threads_get",
   description: "Get a thread with all its messages",
   parameters: z.object({
     thread_id: z.string().describe("The thread ID to retrieve"),

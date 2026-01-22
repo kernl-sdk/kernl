@@ -4,7 +4,7 @@ import { tool } from "kernl";
 import { client } from "../client";
 
 export const retryPost = tool({
-  id: "bundlesocial_posts_retry",
+  id: "posts_retry",
   description: "Retry a failed post",
   parameters: z.object({
     id: z.string().describe("Post ID to retry"),

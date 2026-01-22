@@ -8,7 +8,7 @@ import { octokit, getRepo, type GitHubContext } from "./client";
  * Lists repositories starred by the authenticated user.
  */
 export const list = tool({
-  id: "github_stargazers_list_starred",
+  id: "stargazers_list_starred",
   description: "List repositories starred by the authenticated user",
   parameters: z.object({
     sort: z.enum(["created", "updated"]).optional().describe("Sort field"),
@@ -42,7 +42,7 @@ export const list = tool({
  * Stars the current repository for the authenticated user.
  */
 export const star = tool({
-  id: "github_stargazers_star",
+  id: "stargazers_star",
   description: "Star a repository",
   parameters: z.object({}),
   execute: async (ctx: Context<GitHubContext>) => {
@@ -58,7 +58,7 @@ export const star = tool({
  * Removes the star from the current repository for the authenticated user.
  */
 export const unstar = tool({
-  id: "github_stargazers_unstar",
+  id: "stargazers_unstar",
   description: "Unstar a repository",
   parameters: z.object({}),
   execute: async (ctx: Context<GitHubContext>) => {
@@ -69,7 +69,7 @@ export const unstar = tool({
 });
 
 export const stargazers = new Toolkit<GitHubContext>({
-  id: "github_stargazers",
+  id: "stargazers",
   description: "Repository stars",
   tools: [list, star, unstar],
 });

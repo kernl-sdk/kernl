@@ -7,7 +7,7 @@ import { attio, type AttioContext } from "./client";
  * List notes, optionally filtered by parent record.
  */
 export const list = tool({
-  id: "attio_notes_list",
+  id: "notes_list",
   description: "List notes, optionally filtered by a parent record",
   parameters: z.object({
     parentObject: z
@@ -47,7 +47,7 @@ export const list = tool({
  * Get a specific note by ID.
  */
 export const get = tool({
-  id: "attio_notes_get",
+  id: "notes_get",
   description: "Get a specific note by its ID",
   parameters: z.object({
     noteId: z.string().describe("The note ID to retrieve"),
@@ -62,7 +62,7 @@ export const get = tool({
  * Create a new note attached to a record.
  */
 export const create = tool({
-  id: "attio_notes_create",
+  id: "notes_create",
   description: "Create a new note attached to a record",
   parameters: z.object({
     parentObject: z
@@ -99,7 +99,7 @@ export const create = tool({
  * Delete a note.
  */
 export const remove = tool({
-  id: "attio_notes_delete",
+  id: "notes_delete",
   description: "Delete a note",
   parameters: z.object({
     noteId: z.string().describe("The note ID to delete"),
@@ -111,7 +111,7 @@ export const remove = tool({
 });
 
 export const notes = new Toolkit<AttioContext>({
-  id: "attio_notes",
+  id: "notes",
   description: "Attio CRM note operations",
   tools: [list, get, create, remove],
 });

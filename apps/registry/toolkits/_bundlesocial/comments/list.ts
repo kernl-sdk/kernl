@@ -18,7 +18,7 @@ const commentPlatforms = [
 ] as const;
 
 export const listComments = tool({
-  id: "bundlesocial_comments_list",
+  id: "comments_list",
   description: "List comments for a team",
   parameters: z.object({
     post_id: z.string().optional().describe("Filter by post ID"),

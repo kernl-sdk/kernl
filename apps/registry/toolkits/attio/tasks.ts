@@ -11,7 +11,7 @@ import { attio, type AttioContext } from "./client";
  * List tasks, optionally filtered by status or assignee.
  */
 export const list = tool({
-  id: "attio_tasks_list",
+  id: "tasks_list",
   description: "List tasks, optionally filtered by status or linked record",
   parameters: z.object({
     linkedObject: z
@@ -53,7 +53,7 @@ export const list = tool({
  * Get a specific task by ID.
  */
 export const get = tool({
-  id: "attio_tasks_get",
+  id: "tasks_get",
   description: "Get a specific task by its ID",
   parameters: z.object({
     taskId: z.string().describe("The task ID to retrieve"),
@@ -68,7 +68,7 @@ export const get = tool({
  * Create a new task.
  */
 export const create = tool({
-  id: "attio_tasks_create",
+  id: "tasks_create",
   description: "Create a new task, optionally linked to a record",
   parameters: z.object({
     content: z.string().describe("Task description/content (max 2000 chars)"),
@@ -141,7 +141,7 @@ export const create = tool({
  * Update a task.
  */
 export const update = tool({
-  id: "attio_tasks_update",
+  id: "tasks_update",
   description: "Update a task's deadline or completion status",
   parameters: z.object({
     taskId: z.string().describe("The task ID to update"),
@@ -169,7 +169,7 @@ export const update = tool({
  * Delete a task.
  */
 export const remove = tool({
-  id: "attio_tasks_delete",
+  id: "tasks_delete",
   description: "Delete a task",
   parameters: z.object({
     taskId: z.string().describe("The task ID to delete"),
@@ -181,7 +181,7 @@ export const remove = tool({
 });
 
 export const tasks = new Toolkit<AttioContext>({
-  id: "attio_tasks",
+  id: "tasks",
   description: "Attio CRM task management",
   tools: [list, get, create, update, remove],
 });

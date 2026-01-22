@@ -9,7 +9,7 @@ import { am, INBOX_ID } from "./client";
  * Creates a draft email for review before sending.
  */
 export const createDraft = tool({
-  id: "agentmail_drafts_create",
+  id: "drafts_create",
   description: "Create a draft email for review before sending",
   parameters: z.object({
     to: z.array(z.string()).describe("Recipient email addresses"),
@@ -43,7 +43,7 @@ export const createDraft = tool({
  * Gets the details of a specific draft.
  */
 export const getDraft = tool({
-  id: "agentmail_drafts_get",
+  id: "drafts_get",
   description: "Get the details of a specific draft",
   parameters: z.object({
     draft_id: z.string().describe("The draft ID to retrieve"),
@@ -69,7 +69,7 @@ export const getDraft = tool({
  * Lists all drafts across the organization.
  */
 export const listDrafts = tool({
-  id: "agentmail_drafts_list",
+  id: "drafts_list",
   description: "List all drafts across the organization",
   parameters: z.object({}),
   execute: async () => {
@@ -94,7 +94,7 @@ export const listDrafts = tool({
  * Sends a draft email, converting it to a sent message.
  */
 export const sendDraft = tool({
-  id: "agentmail_drafts_send",
+  id: "drafts_send",
   description: "Send a draft email, converting it to a sent message",
   parameters: z.object({
     draft_id: z.string().describe("The draft ID to send"),
@@ -115,7 +115,7 @@ export const sendDraft = tool({
  * Updates a draft email before sending.
  */
 export const updateDraft = tool({
-  id: "agentmail_drafts_update",
+  id: "drafts_update",
   description: "Update a draft email before sending",
   parameters: z.object({
     draft_id: z.string().describe("The draft ID to update"),
@@ -150,7 +150,7 @@ export const updateDraft = tool({
  * Deletes a draft email.
  */
 export const deleteDraft = tool({
-  id: "agentmail_drafts_delete",
+  id: "drafts_delete",
   description: "Delete a draft email",
   parameters: z.object({
     draft_id: z.string().describe("The draft ID to delete"),

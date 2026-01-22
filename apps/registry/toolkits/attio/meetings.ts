@@ -7,7 +7,7 @@ import { attio, type AttioContext } from "./client";
  * List meetings with cursor-based pagination.
  */
 export const list = tool({
-  id: "attio_meetings_list",
+  id: "meetings_list",
   description: "List meetings with optional date filters",
   parameters: z.object({
     cursor: z.string().optional().describe("Pagination cursor for next page"),
@@ -37,7 +37,7 @@ export const list = tool({
  * Get a specific meeting by ID.
  */
 export const get = tool({
-  id: "attio_meetings_get",
+  id: "meetings_get",
   description: "Get a specific meeting by its ID",
   parameters: z.object({
     meetingId: z.string().describe("The meeting ID to retrieve"),
@@ -49,7 +49,7 @@ export const get = tool({
 });
 
 export const meetings = new Toolkit<AttioContext>({
-  id: "attio_meetings",
+  id: "meetings",
   description: "Attio CRM meeting operations",
   tools: [list, get],
 });

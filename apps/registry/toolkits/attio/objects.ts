@@ -7,7 +7,7 @@ import { attio, type AttioContext } from "./client";
  * List all objects in the workspace.
  */
 export const list = tool({
-  id: "attio_objects_list",
+  id: "objects_list",
   description:
     "List all objects (e.g. People, Companies, custom objects) in the Attio workspace",
   parameters: z.object({}),
@@ -21,7 +21,7 @@ export const list = tool({
  * Get a specific object by slug or ID.
  */
 export const get = tool({
-  id: "attio_objects_get",
+  id: "objects_get",
   description: "Get details about a specific object including its attributes",
   parameters: z.object({
     object: z
@@ -38,7 +38,7 @@ export const get = tool({
  * Create a new custom object.
  */
 export const create = tool({
-  id: "attio_objects_create",
+  id: "objects_create",
   description: "Create a new custom object in the workspace",
   parameters: z.object({
     name: z.string().describe("Display name for the object (e.g. 'Project')"),
@@ -63,7 +63,7 @@ export const create = tool({
  * Update an object's configuration.
  */
 export const update = tool({
-  id: "attio_objects_update",
+  id: "objects_update",
   description: "Update an object's display name or other settings",
   parameters: z.object({
     object: z.string().describe("Object slug or ID to update"),
@@ -81,7 +81,7 @@ export const update = tool({
 });
 
 export const objects = new Toolkit<AttioContext>({
-  id: "attio_objects",
+  id: "objects",
   description: "Attio CRM object schema management",
   tools: [list, get, create, update],
 });

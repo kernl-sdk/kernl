@@ -7,7 +7,7 @@ import { attio, type AttioContext } from "./client";
  * Get a specific comment by ID.
  */
 export const get = tool({
-  id: "attio_comments_get",
+  id: "comments_get",
   description: "Get a specific comment by its ID",
   parameters: z.object({
     commentId: z.string().describe("The comment ID to retrieve"),
@@ -22,7 +22,7 @@ export const get = tool({
  * Create a new comment on an existing thread.
  */
 export const createOnThread = tool({
-  id: "attio_comments_create_on_thread",
+  id: "comments_create_on_thread",
   description: "Create a new comment on an existing thread",
   parameters: z.object({
     threadId: z.string().describe("The thread ID to comment on"),
@@ -46,7 +46,7 @@ export const createOnThread = tool({
  * Create a new comment on a record.
  */
 export const createOnRecord = tool({
-  id: "attio_comments_create_on_record",
+  id: "comments_create_on_record",
   description: "Create a new top-level comment on a record",
   parameters: z.object({
     object: z.string().describe("Object slug or ID the record belongs to"),
@@ -74,7 +74,7 @@ export const createOnRecord = tool({
  * Delete a comment.
  */
 export const remove = tool({
-  id: "attio_comments_delete",
+  id: "comments_delete",
   description:
     "Delete a comment (deletes entire thread if it's the first comment)",
   parameters: z.object({
@@ -87,7 +87,7 @@ export const remove = tool({
 });
 
 export const comments = new Toolkit<AttioContext>({
-  id: "attio_comments",
+  id: "comments",
   description: "Attio CRM comment operations",
   tools: [get, createOnThread, createOnRecord, remove],
 });

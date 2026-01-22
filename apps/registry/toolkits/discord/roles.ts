@@ -9,7 +9,7 @@ import { transformRole } from "./util/permissions";
  * List all roles in the guild.
  */
 export const list = tool({
-  id: "discord_roles_list",
+  id: "roles_list",
   description: "List all roles in the Discord server",
   parameters: z.object({}),
   async execute(ctx: Context<DiscordContext>) {
@@ -23,7 +23,7 @@ export const list = tool({
  * Create a new role.
  */
 export const create = tool({
-  id: "discord_roles_create",
+  id: "roles_create",
   description: "Create a new role in the Discord server",
   parameters: z.object({
     name: z.string().describe("Role name"),
@@ -64,7 +64,7 @@ export const create = tool({
  * Edit a role.
  */
 export const edit = tool({
-  id: "discord_roles_edit",
+  id: "roles_edit",
   description: "Edit a role's settings",
   parameters: z.object({
     roleId: z.string().describe("The role ID"),
@@ -100,7 +100,7 @@ export const edit = tool({
  * Delete a role.
  */
 export const remove = tool({
-  id: "discord_roles_delete",
+  id: "roles_delete",
   description: "Delete a role from the Discord server",
   parameters: z.object({
     roleId: z.string().describe("The role ID to delete"),
@@ -113,7 +113,7 @@ export const remove = tool({
 });
 
 export const roles = new Toolkit<DiscordContext>({
-  id: "discord_roles",
+  id: "roles",
   description: "Discord role management",
   tools: [list, create, edit, remove],
 });

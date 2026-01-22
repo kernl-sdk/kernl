@@ -7,7 +7,7 @@ import { getSandbox, type SandboxContext } from "./client";
  * List contents of a directory.
  */
 export const list = tool({
-  id: "daytona_fs_list",
+  id: "fs_list",
   description: "List files and directories in a path",
   parameters: z.object({
     path: z
@@ -24,7 +24,7 @@ export const list = tool({
  * Read a file's contents.
  */
 export const read = tool({
-  id: "daytona_fs_read",
+  id: "fs_read",
   description: "Read the contents of a file",
   parameters: z.object({
     path: z.string().describe("Path to the file to read"),
@@ -40,7 +40,7 @@ export const read = tool({
  * Edit a file by replacing a specific string.
  */
 export const edit = tool({
-  id: "daytona_fs_edit",
+  id: "fs_edit",
   description: "Edit a file by replacing a specific string with new content",
   parameters: z.object({
     path: z.string().describe("Path to the file to edit"),
@@ -76,7 +76,7 @@ export const edit = tool({
  * Write content to a file.
  */
 export const write = tool({
-  id: "daytona_fs_write",
+  id: "fs_write",
   description: "Write content to a file (creates or overwrites)",
   parameters: z.object({
     path: z.string().describe("Path to the file to write"),
@@ -93,7 +93,7 @@ export const write = tool({
  * Create a directory.
  */
 export const mkdir = tool({
-  id: "daytona_fs_mkdir",
+  id: "fs_mkdir",
   description: "Create a new directory",
   parameters: z.object({
     path: z.string().describe("Path of the directory to create"),
@@ -113,7 +113,7 @@ export const mkdir = tool({
  * Delete a file or directory.
  */
 export const rm = tool({
-  id: "daytona_fs_rm",
+  id: "fs_rm",
   description: "Delete a file or directory",
   parameters: z.object({
     path: z.string().describe("Path to delete"),
@@ -133,7 +133,7 @@ export const rm = tool({
  * Move or rename a file or directory.
  */
 export const mv = tool({
-  id: "daytona_fs_mv",
+  id: "fs_mv",
   description: "Move or rename a file or directory",
   parameters: z.object({
     source: z.string().describe("Source path"),
@@ -150,7 +150,7 @@ export const mv = tool({
  * Search for files by name pattern.
  */
 export const find = tool({
-  id: "daytona_fs_find",
+  id: "fs_find",
   description: "Search for files by name pattern (supports globs like *.ts)",
   parameters: z.object({
     path: z.string().describe("Directory to search in"),
@@ -168,7 +168,7 @@ export const find = tool({
  * Search for text patterns within files.
  */
 export const grep = tool({
-  id: "daytona_fs_grep",
+  id: "fs_grep",
   description: "Search for text patterns within files",
   parameters: z.object({
     path: z.string().describe("Directory to search in"),
@@ -184,7 +184,7 @@ export const grep = tool({
  * Get detailed information about a file.
  */
 export const stat = tool({
-  id: "daytona_fs_stat",
+  id: "fs_stat",
   description: "Get detailed information about a file or directory",
   parameters: z.object({
     path: z.string().describe("Path to the file or directory"),
@@ -196,7 +196,7 @@ export const stat = tool({
 });
 
 export const fs = new Toolkit<SandboxContext>({
-  id: "daytona_fs",
+  id: "fs",
   description: "File system operations for Daytona sandboxes",
   tools: [list, read, write, edit, mkdir, rm, mv, find, grep, stat],
 });

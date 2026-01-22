@@ -4,7 +4,7 @@ import { tool } from "kernl";
 import { client } from "../client";
 
 export const deletePost = tool({
-  id: "bundlesocial_posts_delete",
+  id: "posts_delete",
   description: "Delete a post",
   parameters: z.object({
     id: z.string().describe("Post ID to delete"),

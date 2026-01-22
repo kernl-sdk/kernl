@@ -8,7 +8,7 @@ import { octokit, getRepo, type GitHubContext } from "./client";
  * Adds a comment to an issue or pull request.
  */
 export const addComment = tool({
-  id: "github_issues_add_comment",
+  id: "issues_add_comment",
   description: "Add a comment to an issue or pull request",
   parameters: z.object({
     issue_number: z.number().describe("Issue or PR number"),
@@ -32,7 +32,7 @@ export const addComment = tool({
  * Retrieves details for a specific issue including labels and assignees.
  */
 export const getIssue = tool({
-  id: "github_issues_get",
+  id: "issues_get",
   description: "Get issue details",
   parameters: z.object({
     issue_number: z.number().describe("Issue number"),
@@ -67,7 +67,7 @@ export const getIssue = tool({
  * Creates a new issue with optional labels, assignees, and milestone.
  */
 export const createIssue = tool({
-  id: "github_issues_create",
+  id: "issues_create",
   description: "Create a new issue",
   parameters: z.object({
     title: z.string().describe("Issue title"),
@@ -97,7 +97,7 @@ export const createIssue = tool({
  * Updates an existing issue's title, body, state, labels, or assignees.
  */
 export const updateIssue = tool({
-  id: "github_issues_update",
+  id: "issues_update",
   description: "Update an existing issue",
   parameters: z.object({
     issue_number: z.number().describe("Issue number"),
@@ -136,7 +136,7 @@ export const updateIssue = tool({
  * Lists issues in the repository with optional state and label filters.
  */
 export const listIssues = tool({
-  id: "github_issues_list",
+  id: "issues_list",
   description: "List issues in the repository",
   parameters: z.object({
     state: z
@@ -186,7 +186,7 @@ export const listIssues = tool({
  * Lists all comments on a specific issue.
  */
 export const listIssueComments = tool({
-  id: "github_issues_list_comments",
+  id: "issues_list_comments",
   description: "List comments on an issue",
   parameters: z.object({
     issue_number: z.number().describe("Issue number"),
@@ -220,7 +220,7 @@ export const listIssueComments = tool({
  * Searches issues and pull requests using GitHub search syntax.
  */
 export const searchIssues = tool({
-  id: "github_issues_search",
+  id: "issues_search",
   description: "Search issues and pull requests",
   parameters: z.object({
     query: z.string().describe("Search query using GitHub search syntax"),
@@ -275,7 +275,7 @@ export const searchIssues = tool({
 // - sub_issue_write
 
 export const issues = new Toolkit<GitHubContext>({
-  id: "github_issues",
+  id: "issues",
   description: "GitHub Issues operations",
   tools: [
     addComment,

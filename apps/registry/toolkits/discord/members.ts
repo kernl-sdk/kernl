@@ -8,7 +8,7 @@ import { discord, getGuildId, type DiscordContext } from "./client";
  * List members in the guild.
  */
 export const list = tool({
-  id: "discord_members_list",
+  id: "members_list",
   description: "List members in the Discord server",
   parameters: z.object({
     limit: z
@@ -35,7 +35,7 @@ export const list = tool({
  * Get a specific member.
  */
 export const get = tool({
-  id: "discord_members_get",
+  id: "members_get",
   description: "Get information about a specific server member",
   parameters: z.object({
     userId: z.string().describe("The user ID"),
@@ -50,7 +50,7 @@ export const get = tool({
  * Edit a member (nickname, roles, etc.).
  */
 export const edit = tool({
-  id: "discord_members_edit",
+  id: "members_edit",
   description: "Edit a member's server profile",
   parameters: z.object({
     userId: z.string().describe("The user ID"),
@@ -79,7 +79,7 @@ export const edit = tool({
  * Add a role to a member.
  */
 export const addRole = tool({
-  id: "discord_members_add_role",
+  id: "members_add_role",
   description: "Add a role to a member",
   parameters: z.object({
     userId: z.string().describe("The user ID"),
@@ -96,7 +96,7 @@ export const addRole = tool({
  * Remove a role from a member.
  */
 export const removeRole = tool({
-  id: "discord_members_remove_role",
+  id: "members_remove_role",
   description: "Remove a role from a member",
   parameters: z.object({
     userId: z.string().describe("The user ID"),
@@ -113,7 +113,7 @@ export const removeRole = tool({
  * Kick a member from the server.
  */
 export const kick = tool({
-  id: "discord_members_kick",
+  id: "members_kick",
   description: "Kick a member from the server",
   parameters: z.object({
     userId: z.string().describe("The user ID to kick"),
@@ -129,7 +129,7 @@ export const kick = tool({
  * Ban a member from the server.
  */
 export const ban = tool({
-  id: "discord_members_ban",
+  id: "members_ban",
   description: "Ban a user from the server",
   parameters: z.object({
     userId: z.string().describe("The user ID to ban"),
@@ -157,7 +157,7 @@ export const ban = tool({
  * Unban a user.
  */
 export const unban = tool({
-  id: "discord_members_unban",
+  id: "members_unban",
   description: "Unban a user from the server",
   parameters: z.object({
     userId: z.string().describe("The user ID to unban"),
@@ -173,7 +173,7 @@ export const unban = tool({
  * Timeout a member (temporarily mute).
  */
 export const timeout = tool({
-  id: "discord_members_timeout",
+  id: "members_timeout",
   description:
     "Timeout a member (prevent them from sending messages temporarily)",
   parameters: z.object({
@@ -200,7 +200,7 @@ export const timeout = tool({
 });
 
 export const members = new Toolkit<DiscordContext>({
-  id: "discord_members",
+  id: "members",
   description: "Discord member management",
   tools: [list, get, edit, addRole, removeRole, kick, ban, unban, timeout],
 });

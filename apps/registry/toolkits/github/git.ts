@@ -8,7 +8,7 @@ import { octokit, getRepo, type GitHubContext } from "./client";
  * Gets a tree (directory listing) from the repository by SHA or ref.
  */
 export const getTree = tool({
-  id: "github_git_get_tree",
+  id: "git_get_tree",
   description: "Get a tree from the repository (directory listing)",
   parameters: z.object({
     tree_sha: z
@@ -42,7 +42,7 @@ export const getTree = tool({
 });
 
 export const git = new Toolkit<GitHubContext>({
-  id: "github_git",
+  id: "git",
   description: "Low-level Git API operations",
   tools: [getTree],
 });

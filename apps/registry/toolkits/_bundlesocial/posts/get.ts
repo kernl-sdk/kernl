@@ -4,7 +4,7 @@ import { tool } from "kernl";
 import { client } from "../client";
 
 export const getPost = tool({
-  id: "bundlesocial_posts_get",
+  id: "posts_get",
   description: "Get details of a specific post",
   parameters: z.object({
     id: z.string().describe("Post ID"),

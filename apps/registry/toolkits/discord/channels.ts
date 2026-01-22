@@ -8,7 +8,7 @@ import { discord, getGuildId, type DiscordContext } from "./client";
  * List all channels in a guild.
  */
 export const list = tool({
-  id: "discord_channels_list",
+  id: "channels_list",
   description: "List all channels in the Discord server",
   parameters: z.object({}),
   async execute(ctx: Context<DiscordContext>) {
@@ -22,7 +22,7 @@ export const list = tool({
  * Get a channel by ID.
  */
 export const get = tool({
-  id: "discord_channels_get",
+  id: "channels_get",
   description: "Get information about a specific channel",
   parameters: z.object({
     channelId: z.string().describe("The channel ID"),
@@ -37,7 +37,7 @@ export const get = tool({
  * Create a new channel.
  */
 export const create = tool({
-  id: "discord_channels_create",
+  id: "channels_create",
   description: "Create a new channel in the Discord server",
   parameters: z.object({
     name: z.string().describe("Channel name"),
@@ -80,7 +80,7 @@ export const create = tool({
  * Edit a channel.
  */
 export const edit = tool({
-  id: "discord_channels_edit",
+  id: "channels_edit",
   description: "Edit a channel's settings",
   parameters: z.object({
     channelId: z.string().describe("The channel ID"),
@@ -115,7 +115,7 @@ export const edit = tool({
  * Delete a channel.
  */
 export const remove = tool({
-  id: "discord_channels_delete",
+  id: "channels_delete",
   description: "Delete a channel",
   parameters: z.object({
     channelId: z.string().describe("The channel ID to delete"),
@@ -127,7 +127,7 @@ export const remove = tool({
 });
 
 export const channels = new Toolkit<DiscordContext>({
-  id: "discord_channels",
+  id: "channels",
   description: "Discord channel management",
   tools: [list, get, create, edit, remove],
 });

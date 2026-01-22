@@ -18,7 +18,7 @@ const analyticsPlatforms = [
 ] as const;
 
 export const getAccountAnalytics = tool({
-  id: "bundlesocial_analytics_account",
+  id: "analytics_account",
   description: "Get analytics for a connected social account",
   parameters: z.object({
     platform: z.enum(analyticsPlatforms).describe("Platform to get analytics from"),

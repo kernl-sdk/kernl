@@ -8,7 +8,7 @@ import { octokit, getRepo, type GitHubContext } from "./client";
  * Lists discussion categories in the repository.
  */
 export const listDiscussionCategories = tool({
-  id: "github_discussions_list_categories",
+  id: "discussions_list_categories",
   description: "List discussion categories in the repository",
   parameters: z.object({}),
   execute: async (ctx: Context<GitHubContext>) => {
@@ -51,7 +51,7 @@ export const listDiscussionCategories = tool({
  * Lists discussions in the repository with optional category filter.
  */
 export const listDiscussions = tool({
-  id: "github_discussions_list",
+  id: "discussions_list",
   description: "List discussions in the repository",
   parameters: z.object({
     category_id: z.string().optional().describe("Filter by category ID"),
@@ -121,7 +121,7 @@ export const listDiscussions = tool({
  * Gets a specific discussion by number.
  */
 export const getDiscussion = tool({
-  id: "github_discussions_get",
+  id: "discussions_get",
   description: "Get a discussion by number",
   parameters: z.object({
     number: z.number().describe("Discussion number"),
@@ -196,7 +196,7 @@ export const getDiscussion = tool({
  * Gets comments on a discussion.
  */
 export const getDiscussionComments = tool({
-  id: "github_discussions_get_comments",
+  id: "discussions_get_comments",
   description: "Get comments on a discussion",
   parameters: z.object({
     number: z.number().describe("Discussion number"),
@@ -272,7 +272,7 @@ export const getDiscussionComments = tool({
  * - getDiscussionComments: Read comments and answers on a discussion
  */
 export const discussions = new Toolkit<GitHubContext>({
-  id: "github_discussions",
+  id: "discussions",
   description: "GitHub Discussions",
   tools: [
     listDiscussionCategories,

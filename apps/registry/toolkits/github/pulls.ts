@@ -9,7 +9,7 @@ import { octokit, getRepo, type GitHubContext } from "./client";
  * Creates a new pull request from a head branch to a base branch.
  */
 export const createPullRequest = tool({
-  id: "github_pulls_create",
+  id: "pulls_create",
   description: "Create a new pull request",
   parameters: z.object({
     title: z.string().describe("PR title"),
@@ -44,7 +44,7 @@ export const createPullRequest = tool({
  * Retrieves detailed information about a specific pull request.
  */
 export const getPullRequest = tool({
-  id: "github_pulls_get",
+  id: "pulls_get",
   description: "Get pull request details",
   parameters: z.object({
     pull_number: z.number().describe("Pull request number"),
@@ -82,7 +82,7 @@ export const getPullRequest = tool({
  * Fetches the unified diff for a pull request.
  */
 export const getPullRequestDiff = tool({
-  id: "github_pulls_get_diff",
+  id: "pulls_get_diff",
   description: "Get the diff for a pull request",
   parameters: z.object({
     pull_number: z.number().describe("Pull request number"),
@@ -105,7 +105,7 @@ export const getPullRequestDiff = tool({
  * Lists files changed in a pull request with additions/deletions stats.
  */
 export const getPullRequestFiles = tool({
-  id: "github_pulls_get_files",
+  id: "pulls_get_files",
   description: "Get the list of files changed in a pull request",
   parameters: z.object({
     pull_number: z.number().describe("Pull request number"),
@@ -137,7 +137,7 @@ export const getPullRequestFiles = tool({
  * Lists pull requests in the repository with optional filters.
  */
 export const listPullRequests = tool({
-  id: "github_pulls_list",
+  id: "pulls_list",
   description: "List pull requests in the repository",
   parameters: z.object({
     state: z
@@ -189,7 +189,7 @@ export const listPullRequests = tool({
  * Updates a pull request's title, body, state, or base branch.
  */
 export const updatePullRequest = tool({
-  id: "github_pulls_update",
+  id: "pulls_update",
   description: "Update a pull request",
   parameters: z.object({
     pull_number: z.number().describe("Pull request number"),
@@ -224,7 +224,7 @@ export const updatePullRequest = tool({
  * Merges a pull request using merge, squash, or rebase strategy.
  */
 export const mergePullRequest = tool({
-  id: "github_pulls_merge",
+  id: "pulls_merge",
   description: "Merge a pull request",
   parameters: z.object({
     pull_number: z.number().describe("Pull request number"),
@@ -258,7 +258,7 @@ export const mergePullRequest = tool({
  * Searches for pull requests across repositories using GitHub search syntax.
  */
 export const searchPullRequests = tool({
-  id: "github_pulls_search",
+  id: "pulls_search",
   description: "Search for pull requests",
   parameters: z.object({
     query: z.string().describe("Search query using GitHub search syntax (e.g. 'is:open author:user')"),
@@ -296,7 +296,7 @@ export const searchPullRequests = tool({
 });
 
 export const pulls = new Toolkit<GitHubContext>({
-  id: "github_pulls",
+  id: "pulls",
   description: "GitHub Pull Request operations",
   tools: [
     createPullRequest,
