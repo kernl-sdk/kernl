@@ -437,10 +437,23 @@ async function processMessage(
       },
     ];
 
+    // Build context - add git/github credentials for sandbox agents
+    const context: Record<string, unknown> = { sessionID: sessionId, directory };
+    if (agentId === "sandex") {
+      if (process.env.GITHUB_TOKEN) {
+        context.git = {
+          username: "x-access-token",
+          token: process.env.GITHUB_TOKEN,
+        };
+      }
+      context.owner = "kernl-sdk";
+      context.repo = "kernl";
+    }
+
     for await (const event of agent.stream(input, {
       model,
       threadId: sessionId,
-      context: { sessionID: sessionId, directory },
+      context,
     })) {
       switch (event.kind) {
         case "text.start":

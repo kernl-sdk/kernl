@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import { Kernl } from "kernl";
 
 import { codex } from "@/agents/codex";
+import { sandex } from "@/agents/sandex";
 import { titler } from "@/agents/titler";
 import { claudmin } from "@/agents/claudmin";
 import * as eventBus from "@/state/events";
@@ -37,8 +38,9 @@ type Variables = {
 export function build(): Hono<{ Variables: Variables }> {
   const kernl = new Kernl();
 
-  // --- register agents ---
+  // --- agents ---
   kernl.register(codex);
+  kernl.register(sandex);
   kernl.register(titler);
   kernl.register(claudmin);
 
@@ -95,7 +97,10 @@ export function build(): Hono<{ Variables: Variables }> {
   return app;
 }
 
-function handleError(err: Error, cx: Context<{ Variables: Variables }>): Response {
+function handleError(
+  err: Error,
+  cx: Context<{ Variables: Variables }>,
+): Response {
   console.error("[error]", err.message);
 
   const directory = cx.get("directory") ?? "";

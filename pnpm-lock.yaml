@@ -308,6 +308,9 @@ importers:
 
   apps/popcorn/server0:
     dependencies:
+      '@daytonaio/sdk':
+        specifier: ^0.128.1
+        version: 0.128.1(ws@8.18.3)
       '@discordjs/rest':
         specifier: ^2.4.0
         version: 2.6.0
@@ -323,6 +326,9 @@ importers:
       '@kernl-sdk/shared':
         specifier: workspace:*
         version: link:../../../packages/shared
+      '@octokit/rest':
+        specifier: ^22.0.1
+        version: 22.0.1
       '@popcorn/shared':
         specifier: workspace:*
         version: link:../shared

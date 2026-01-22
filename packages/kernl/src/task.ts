@@ -8,7 +8,6 @@ import type { Thread } from "@/thread";
  */
 export class Task<TContext = UnknownContext, TResult = unknown> {
   id: string /* unique identifier for this task (pid) */;
-  // tgid: string | null; /* task groupid */
   // prio: TaskPriority;
   instructions:
     | string

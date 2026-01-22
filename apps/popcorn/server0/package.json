@@ -13,11 +13,13 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "@daytonaio/sdk": "^0.128.1",
     "@discordjs/rest": "^2.4.0",
     "@hono/node-server": "^1.19.8",
     "@kernl-sdk/ai": "workspace:*",
     "@kernl-sdk/protocol": "workspace:*",
     "@kernl-sdk/shared": "workspace:*",
+    "@octokit/rest": "^22.0.1",
     "@popcorn/shared": "workspace:*",
     "ai": "^5.0.93",
     "attio-crm": "^0.0.1",
