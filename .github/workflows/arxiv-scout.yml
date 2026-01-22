@@ -26,14 +26,12 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
+        working-directory: microprojects/arxiv-scout
         run: pnpm install
 
-      - name: Build workspace
-        run: pnpm build
-
-      - name: Run scout
+      - name: Build and run scout
         working-directory: microprojects/arxiv-scout
-        run: pnpm scout
+        run: pnpm build && node dist/index.js
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 

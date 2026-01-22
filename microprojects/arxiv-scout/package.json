@@ -11,9 +11,9 @@
   "dependencies": {
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.0",
-    "@kernl-sdk/ai": "workspace:*",
+    "@kernl-sdk/ai": "^0.4.6",
     "fast-xml-parser": "^4.5.0",
-    "kernl": "workspace:*",
+    "kernl": "^0.12.4",
     "zod": "^4.1.12"
   },
   "devDependencies": {

@@ -716,14 +716,14 @@ importers:
         specifier: ^6.0.0
         version: 6.0.1
       '@kernl-sdk/ai':
-        specifier: workspace:*
-        version: link:../../packages/providers/ai
+        specifier: ^0.4.6
+        version: 0.4.6(@ai-sdk/provider@3.0.3)(zod@4.1.13)
       fast-xml-parser:
         specifier: ^4.5.0
         version: 4.5.3
       kernl:
-        specifier: workspace:*
-        version: link:../../packages/kernl
+        specifier: ^0.12.4
+        version: 0.12.4(zod@4.1.13)
       zod:
         specifier: ^4.1.12
         version: 4.1.13
@@ -2940,6 +2940,32 @@ packages:
 
   '@jsdevtools/ono@7.1.3':
     resolution: {integrity: sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==}
+
+  '@kernl-sdk/ai@0.4.6':
+    resolution: {integrity: sha512-UmESpqMFAqTtcsJRw/E1mR6HEmLR00xB6qhkFeR/ZCzPllWbv4SQKN9qK8f7A7+7J0foFC3mawS8jcrGZqOAYg==}
+    peerDependencies:
+      '@ai-sdk/anthropic': '*'
+      '@ai-sdk/google': '*'
+      '@ai-sdk/openai': '*'
+      '@ai-sdk/provider': ^3.0.3
+    peerDependenciesMeta:
+      '@ai-sdk/anthropic':
+        optional: true
+      '@ai-sdk/google':
+        optional: true
+      '@ai-sdk/openai':
+        optional: true
+
+  '@kernl-sdk/protocol@0.5.1':
+    resolution: {integrity: sha512-Pm0nrVjSt8k1FaODQ7QzrK6ZjXynqlO4RBoVfwAB1b6OKNHERa00WmLp1BM0IAckfsHriedlaBM68QM9AFAo9A==}
+
+  '@kernl-sdk/retrieval@0.1.10':
+    resolution: {integrity: sha512-91ndAAt5gmG5SZCvqqx67P9kUV/germx7QGaBooldZ+OrlfJrxJdxKgQ5mpAbLxxPqXgTIsqUeVC8JLHi4B1FA==}
+
+  '@kernl-sdk/shared@0.4.0':
+    resolution: {integrity: sha512-zLqHeCoB0EaR757XcgRKY43qav+p1xhjJFsgukMaL+15DFXbryJ57ZAC38LR9KRIojk8OrMNKcL4xZE8MthT6Q==}
+    peerDependencies:
+      zod: ^4.1.8
 
   '@kobalte/core@0.13.11':
     resolution: {integrity: sha512-hK7TYpdib/XDb/r/4XDBFaO9O+3ZHz4ZWryV4/3BfES+tSQVgg2IJupDnztKXB0BqbSRy/aWlHKw1SPtNPYCFQ==}
@@ -6953,6 +6979,11 @@ packages:
   katex@0.16.27:
     resolution: {integrity: sha512-aeQoDkuRWSqQN6nSvVCEFvfXdqo1OQiCmmW1kc9xSdjutPv7BGO7pqY9sQRJpMOGrEdfDgF2TfRXe5eUAD2Waw==}
     hasBin: true
+
+  kernl@0.12.4:
+    resolution: {integrity: sha512-8ByZXvSihtVYT5Ut8xUVC3+gN+lQYiOIMh6FTDI+0ZSrWJPpp2EDisTGERtcm+Z3/cU1ETTgEYfVyT6YzLWuRA==}
+    peerDependencies:
+      zod: ^4.1.8
 
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
@@ -11305,6 +11336,36 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.5
 
   '@jsdevtools/ono@7.1.3': {}
+
+  '@kernl-sdk/ai@0.4.6(@ai-sdk/provider@3.0.3)(zod@4.1.13)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.3
+      '@kernl-sdk/protocol': 0.5.1(zod@4.1.13)
+      '@kernl-sdk/retrieval': 0.1.10(zod@4.1.13)
+      '@kernl-sdk/shared': 0.4.0(zod@4.1.13)
+      kernl: 0.12.4(zod@4.1.13)
+    transitivePeerDependencies:
+      - '@cfworker/json-schema'
+      - hono
+      - supports-color
+      - zod
+
+  '@kernl-sdk/protocol@0.5.1(zod@4.1.13)':
+    dependencies:
+      '@kernl-sdk/shared': 0.4.0(zod@4.1.13)
+    transitivePeerDependencies:
+      - zod
+
+  '@kernl-sdk/retrieval@0.1.10(zod@4.1.13)':
+    dependencies:
+      '@kernl-sdk/protocol': 0.5.1(zod@4.1.13)
+      '@kernl-sdk/shared': 0.4.0(zod@4.1.13)
+    transitivePeerDependencies:
+      - zod
+
+  '@kernl-sdk/shared@0.4.0(zod@4.1.13)':
+    dependencies:
+      zod: 4.1.13
 
   '@kobalte/core@0.13.11(solid-js@1.9.10)':
     dependencies:
@@ -16418,6 +16479,19 @@ snapshots:
   katex@0.16.27:
     dependencies:
       commander: 8.3.0
+
+  kernl@0.12.4(zod@4.1.13):
+    dependencies:
+      '@kernl-sdk/protocol': 0.5.1(zod@4.1.13)
+      '@kernl-sdk/retrieval': 0.1.10(zod@4.1.13)
+      '@kernl-sdk/shared': 0.4.0(zod@4.1.13)
+      '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.4)(zod@4.1.13)
+      yaml: 2.8.2
+      zod: 4.1.13
+    transitivePeerDependencies:
+      - '@cfworker/json-schema'
+      - hono
+      - supports-color
 
   keyv@4.5.4:
     dependencies:
