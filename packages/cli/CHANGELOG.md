@@ -1,5 +1,11 @@
 # @kernl/cli
 
+## 0.6.2
+
+### Patch Changes
+
+- b816c95: fix: add --env-file=.env to scaffold scripts for automatic env loading
+
 ## 0.6.1
 
 ### Patch Changes
