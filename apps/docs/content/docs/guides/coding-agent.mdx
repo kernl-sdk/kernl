@@ -119,8 +119,6 @@ The `ChargerContext` type is the intersection of all toolkit contexts — this e
 
 ### Daytona Toolkit
 
-> **Important:** The marketplace toolkits use prefixed IDs like `daytona_fs_read` for namespacing. When copying toolkits into your project, rename these to `fs_read`, `fs_edit`, `git_clone`, etc. The [agentic-chatbot](https://github.com/kernl-sdk/agentic-chatbot) template expects these shorter IDs for specialized UI components like the diff viewer.
-
 The Daytona toolkit uses **lazy sandbox provisioning** — sandboxes are created on first tool use, not upfront. Here's what a tool looks like:
 
 ```ts
@@ -453,7 +451,6 @@ import { cors } from "hono/cors";
 import { Kernl } from "kernl";
 import { postgres } from "@kernl-sdk/pg";
 
-import { env } from "@/lib/env";
 import { charger } from "@/agents/charger";
 import { agents } from "@/api/agents";
 import { threads } from "@/api/threads";
@@ -462,14 +459,14 @@ type Variables = { kernl: Kernl };
 
 export function build(): Hono<{ Variables: Variables }> {
   const kernl = new Kernl({
-    storage: { db: postgres({ connstr: env.DATABASE_URL }) },
+    storage: { db: postgres({ connstr: process.env.DATABASE_URL! }) },
   });
 
   kernl.register(charger);
 
   const app = new Hono<{ Variables: Variables }>();
 
-  app.use("/*", cors({ origin: [env.WEB_ORIGIN], credentials: true }));
+  app.use("/*", cors({ origin: ["http://localhost:3000"], credentials: true }));
 
   app.use("/*", async (c, next) => {
     c.set("kernl", kernl);
@@ -488,19 +485,19 @@ export function build(): Hono<{ Variables: Variables }> {
 ```ts
 // src/index.ts
 import { serve } from "@hono/node-server";
-import { env } from "@/lib/env";
 import { build } from "./app";
 
+const PORT = process.env.PORT ?? "3001";
 const app = build();
 
-console.log(`Server running at http://localhost:${env.PORT}`);
+console.log(`Server running at http://localhost:${PORT}`);
 
-serve({ fetch: app.fetch, port: parseInt(env.PORT) });
+serve({ fetch: app.fetch, port: parseInt(PORT) });
 ```
 
 ### Environment Variables
 
-Create `.env.local`:
+Create `.env`:
 
 ```bash
 ANTHROPIC_API_KEY=sk-ant-...

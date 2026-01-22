@@ -1,10 +1,11 @@
 import { Agent } from "kernl";
 import { anthropic } from "@kernl-sdk/ai/anthropic";
 
-import { fs, process, git, SandboxContext } from "@/toolkits/daytona";
+import { fs, process, git, type SandboxContext } from "@/toolkits/daytona";
 import { web } from "@/toolkits/parallel";
+import { todo, type TodoContext } from "@/toolkits/todo";
 
-type ChargerContext = SandboxContext;
+type ChargerContext = SandboxContext & TodoContext;
 
 export const charger = new Agent<ChargerContext>({
   id: "charger",
@@ -30,6 +31,9 @@ The sandbox starts empty. If you need to work on a project, you can:
 - Create files from scratch
 - Install dependencies with npm/pip/etc.
 
-Always verify your changes work before considering a task complete.`,
-  toolkits: [fs, process, git, web],
+Always verify your changes work before considering a task complete.
+
+Use the todo tools to track multi-step tasks. Search the web when you need
+documentation or examples.`,
+  toolkits: [fs, process, git, web, todo],
 });

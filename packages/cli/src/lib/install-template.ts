@@ -139,8 +139,8 @@ export const jarvis = new Agent({
     private: true,
     type: "module",
     scripts: {
-      dev: "tsx watch src/index.ts",
-      start: "tsx src/index.ts",
+      dev: "tsx watch --env-file=.env src/index.ts",
+      start: "tsx --env-file=.env src/index.ts",
     },
     dependencies: {
       kernl: `^${kernlVersion}`,
