@@ -4,7 +4,7 @@ import { kernl } from "@/lib/kernl/server";
 import { KernlApiError } from "@/lib/kernl";
 import { Chat } from "@/components/chat/chat";
 
-const DEFAULT_AGENT = "jarvis";
+const DEFAULT_AGENT = "charger";
 
 interface ChatPageProps {
   params: Promise<{ id: string }>;

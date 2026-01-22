@@ -147,7 +147,7 @@ The magic is in `getSandbox(ctx)` — it lazily provisions sandboxes and stores 
 
 ```ts
 // src/toolkits/daytona/client.ts
-import { Daytona, Sandbox } from "@daytonaio/sdk";
+import { Daytona, Sandbox, SandboxState } from "@daytonaio/sdk";
 import type { Context } from "kernl";
 
 export const daytona = new Daytona();
@@ -162,13 +162,13 @@ export interface GitCredentials {
 export interface SandboxContext {
   sandboxId?: string;
   git?: GitCredentials;
+  env?: Record<string, string>;
 }
 
 // Helper for git tools to get credentials from context
 export function getGitCredentials(ctx: Context<SandboxContext>) {
   const { git } = ctx.context;
-  if (!git) return {};
-  return { username: git.username, password: git.token };
+  return git ? { username: git.username, password: git.token } : {};
 }
 
 export async function getSandbox(
@@ -179,7 +179,7 @@ export async function getSandbox(
   // Reuse existing sandbox if we have one
   if (context.sandboxId) {
     const sandbox = await daytona.get(context.sandboxId);
-    if (sandbox.state !== "started") {
+    if (sandbox.state !== SandboxState.STARTED) {
       await sandbox.start();
     }
     return sandbox;
@@ -563,13 +563,21 @@ Create the root `package.json`:
 {
   "name": "charger",
   "private": true,
-  "packageManager": "pnpm@10.11.0",
+  "packageManager": "pnpm@10.19.0",
   "scripts": {
+    "build": "turbo run build",
     "dev": "turbo run dev",
-    "build": "turbo run build"
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check-types": "turbo run check-types"
   },
   "devDependencies": {
-    "turbo": "^2.6.1"
+    "prettier": "^3.7.4",
+    "turbo": "^2.7.5",
+    "typescript": "5.9.2"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
 ```

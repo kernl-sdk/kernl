@@ -10,7 +10,7 @@ import { getSandbox, getGitCredentials, type SandboxContext } from "./client";
  * `ctx.context.git = { username: "x-access-token", token: "ghp_..." }`
  */
 export const clone = tool({
-  id: "daytona_git_clone",
+  id: "git_clone",
   description: "Clone a git repository into the sandbox",
   parameters: z.object({
     url: z.string().describe("Repository URL to clone"),
@@ -31,7 +31,7 @@ export const clone = tool({
  * Get repository status.
  */
 export const status = tool({
-  id: "daytona_git_status",
+  id: "git_status",
   description: "Get the status of a git repository",
   parameters: z.object({
     path: z.string().describe("Path to the git repository"),
@@ -46,7 +46,7 @@ export const status = tool({
  * Stage files for commit.
  */
 export const add = tool({
-  id: "daytona_git_add",
+  id: "git_add",
   description: "Stage files for the next commit",
   parameters: z.object({
     path: z.string().describe("Path to the git repository"),
@@ -64,7 +64,7 @@ export const add = tool({
  * Commit staged changes.
  */
 export const commit = tool({
-  id: "daytona_git_commit",
+  id: "git_commit",
   description: "Commit staged changes",
   parameters: z.object({
     path: z.string().describe("Path to the git repository"),
@@ -87,7 +87,7 @@ export const commit = tool({
  * List branches.
  */
 export const branches = tool({
-  id: "daytona_git_branches",
+  id: "git_branches",
   description: "List branches in a repository",
   parameters: z.object({
     path: z.string().describe("Path to the git repository"),
@@ -104,7 +104,7 @@ export const branches = tool({
  * Checkout a branch.
  */
 export const checkout = tool({
-  id: "daytona_git_checkout",
+  id: "git_checkout",
   description: "Checkout a branch",
   parameters: z.object({
     path: z.string().describe("Path to the git repository"),
@@ -122,7 +122,7 @@ export const checkout = tool({
  * Create a new branch.
  */
 export const branch = tool({
-  id: "daytona_git_branch",
+  id: "git_branch",
   description: "Create a new branch",
   parameters: z.object({
     path: z.string().describe("Path to the git repository"),
@@ -143,7 +143,7 @@ export const branch = tool({
  * `ctx.context.git = { username: "x-access-token", token: "ghp_..." }`
  */
 export const pull = tool({
-  id: "daytona_git_pull",
+  id: "git_pull",
   description: "Pull changes from the remote repository",
   parameters: z.object({
     path: z.string().describe("Path to the git repository"),
@@ -165,7 +165,7 @@ export const pull = tool({
  * `ctx.context.git = { username: "x-access-token", token: "ghp_..." }`
  */
 export const push = tool({
-  id: "daytona_git_push",
+  id: "git_push",
   description: "Push changes to the remote repository",
   parameters: z.object({
     path: z.string().describe("Path to the git repository"),
@@ -181,7 +181,7 @@ export const push = tool({
 });
 
 export const git = new Toolkit<SandboxContext>({
-  id: "daytona_git",
+  id: "git",
   description: "Git operations for Daytona sandboxes",
   tools: [clone, status, add, commit, branches, checkout, branch, pull, push],
 });

@@ -48,7 +48,7 @@ interface ChatProps {
   initialAgent?: string;
 }
 
-const DEFAULT_AGENT = "watson";
+const DEFAULT_AGENT = "charger";
 
 /**
  * Chat component implementing a pure state machine for thread management.

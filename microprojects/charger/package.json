@@ -1,11 +1,20 @@
 {
   "name": "charger",
   "private": true,
+  "packageManager": "pnpm@10.19.0",
   "scripts": {
+    "build": "turbo run build",
     "dev": "turbo run dev",
-    "build": "turbo run build"
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check-types": "turbo run check-types"
   },
   "devDependencies": {
-    "turbo": "^2.6.1"
+    "prettier": "^3.7.4",
+    "turbo": "^2.7.5",
+    "typescript": "5.9.2"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

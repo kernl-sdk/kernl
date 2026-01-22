@@ -45,7 +45,7 @@ export class KernlClient {
      * Create a new thread
      *
      * @example
-     * const thread = await kernl.threads.create({ agentId: "jarvis" });
+     * const thread = await kernl.threads.create({ agentId: "charger" });
      */
     create: async (params: ThreadCreateParams): Promise<ThreadResource> => {
       return this.fetch<ThreadResource>("/threads", {
@@ -78,7 +78,7 @@ export class KernlClient {
      * List threads with optional filtering and pagination
      *
      * @example
-     * const threads = await kernl.threads.list({ agentId: "jarvis", limit: 20 });
+     * const threads = await kernl.threads.list({ agentId: "charger", limit: 20 });
      */
     list: async (params?: ListThreadsParams): Promise<ThreadResource[]> => {
       const searchParams = new URLSearchParams();
@@ -120,7 +120,7 @@ export class KernlClient {
      * Get a single agent by ID
      *
      * @example
-     * const agent = await kernl.agents.get("jarvis");
+     * const agent = await kernl.agents.get("charger");
      */
     get: async (agentId: string): Promise<AgentResource> => {
       return this.fetch<AgentResource>(`/agents/${agentId}`);

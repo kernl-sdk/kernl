@@ -30,6 +30,10 @@ agents.get("/", async (c) => {
       id: a.id,
       name: a.name,
       description: a.description,
+      model: {
+        provider: a.model.provider,
+        modelId: a.model.modelId,
+      },
     })),
   });
 });

@@ -7,7 +7,7 @@ import { getSandbox, type SandboxContext } from "./client";
  * Execute a shell command.
  */
 export const exec = tool({
-  id: "daytona_process_exec",
+  id: "process_exec",
   description: "Execute a shell command in the sandbox",
   parameters: z.object({
     command: z.string().describe("Shell command to execute"),
@@ -29,7 +29,7 @@ export const exec = tool({
 });
 
 export const process = new Toolkit<SandboxContext>({
-  id: "daytona_process",
+  id: "process",
   description: "Shell command execution for Daytona sandboxes",
   tools: [exec],
 });
