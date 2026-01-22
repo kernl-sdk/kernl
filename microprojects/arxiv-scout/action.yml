@@ -1,0 +1,20 @@
+name: "arXiv Scout"
+description: "Daily arXiv paper scanner for agent runtime research"
+author: "kernl-sdk"
+
+branding:
+  icon: "search"
+  color: "blue"
+
+inputs:
+  anthropic_api_key:
+    description: "Anthropic API key for Claude"
+    required: true
+  github_token:
+    description: "GitHub token for committing results"
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: "node20"
+  main: "dist/index.js"

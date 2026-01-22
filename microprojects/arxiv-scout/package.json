@@ -1,0 +1,24 @@
+{
+  "name": "@arxiv-scout/action",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file=.env.local src/index.ts",
+    "build": "ncc build src/index.ts -o dist",
+    "start": "tsx --env-file=.env.local src/index.ts"
+  },
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.0",
+    "@kernl-sdk/ai": "workspace:*",
+    "fast-xml-parser": "^4.5.0",
+    "kernl": "workspace:*",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@vercel/ncc": "^0.38.3",
+    "tsx": "^4.19.0",
+    "typescript": "5.9.2"
+  }
+}

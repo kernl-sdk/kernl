@@ -4,6 +4,7 @@ packages:
   - packages/storage/*
   - microprojects/playground/*
   - microprojects/docster
+  - microprojects/arxiv-scout
   - apps/*
   - apps/popcorn/*
 
