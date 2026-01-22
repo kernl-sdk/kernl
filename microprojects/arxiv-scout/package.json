@@ -6,7 +6,7 @@
     "dev": "tsx watch --env-file=.env.local src/index.ts",
     "build": "ncc build src/index.ts -o dist",
     "start": "tsx --env-file=.env.local src/index.ts",
-    "ci": "tsx src/index.ts"
+    "scout": "tsx src/index.ts"
   },
   "dependencies": {
     "@actions/core": "^1.11.1",
