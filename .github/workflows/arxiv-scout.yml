@@ -30,7 +30,7 @@ jobs:
 
       - name: Run scout
         working-directory: microprojects/arxiv-scout
-        run: pnpm start
+        run: pnpm ci
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
