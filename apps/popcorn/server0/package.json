@@ -27,6 +27,7 @@
     "discord-api-types": "^0.37.119",
     "fuzzysort": "catalog:",
     "hono": "^4.11.3",
+    "@kernl-sdk/laminar": "workspace:*",
     "kernl": "workspace:*",
     "zod": "^4.1.8"
   },

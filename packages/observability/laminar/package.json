@@ -1,65 +1,55 @@
 {
-  "name": "kernl",
-  "version": "0.12.4",
-  "description": "A modern AI agent framework",
+  "name": "@kernl-sdk/lmnr",
+  "version": "0.1.0",
+  "description": "Laminar observability integration for kernl",
   "keywords": [
     "kernl",
-    "ai",
-    "agent",
-    "framework",
-    "mcp"
+    "laminar",
+    "tracing",
+    "observability",
+    "llm"
   ],
   "author": "dremnik",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/kernl-sdk/kernl.git",
-    "directory": "packages/kernl"
+    "directory": "packages/observability/laminar"
   },
   "homepage": "https://github.com/kernl-sdk/kernl#readme",
   "bugs": {
     "url": "https://github.com/kernl-sdk/kernl/issues"
   },
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    },
-    "./internal": {
-      "types": "./dist/internal.d.ts",
-      "import": "./dist/internal.js"
-    },
-    "./tracing": {
-      "types": "./dist/tracing/index.d.ts",
-      "import": "./dist/tracing/index.js"
     }
   },
   "scripts": {
-    "clean": "rm -rf dist",
     "build": "tsc && tsc-alias --resolve-full-paths",
     "dev": "tsc --watch",
-    "lint": "eslint src/",
     "check-types": "tsc --noEmit",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@kernl-sdk/protocol": "workspace:*",
-    "@kernl-sdk/retrieval": "workspace:*",
-    "@kernl-sdk/shared": "workspace:^",
-    "@modelcontextprotocol/sdk": "^1.25.2",
-    "yaml": "^2.8.2"
+    "@kernl-sdk/shared": "workspace:*",
+    "kernl": "workspace:*"
   },
   "peerDependencies": {
-    "zod": "^4.1.8"
+    "@lmnr-ai/lmnr": ">=0.8.0"
   },
   "devDependencies": {
+    "@lmnr-ai/lmnr": "^0.8.6",
     "@types/node": "^24.10.0",
     "tsc-alias": "^1.8.10",
     "typescript": "5.9.2",
-    "vitest": "^4.0.8",
-    "zod": "^4.1.8"
+    "vitest": "^4.0.8"
   }
 }

@@ -2,6 +2,7 @@ packages:
   - packages/*
   - packages/providers/*
   - packages/storage/*
+  - packages/observability/*
   - microprojects/playground/*
   - microprojects/docster
   - microprojects/arxiv-scout
