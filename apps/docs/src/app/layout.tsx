@@ -1,4 +1,5 @@
 import { RootProvider } from 'fumadocs-ui/provider/next';
+import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
 import { Scrollbar } from '@/components/scrollbar';
 import './global.css';
@@ -18,6 +19,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
       <body className="flex flex-col min-h-screen">
         <RootProvider theme={{ forcedTheme: 'dark' }}>{children}</RootProvider>
         <Scrollbar />
+        <Analytics />
       </body>
     </html>
   );

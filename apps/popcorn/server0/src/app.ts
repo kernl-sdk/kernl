@@ -1,7 +1,6 @@
 import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
 import { Kernl } from "kernl";
-import { LaminarTracer } from "@kernl-sdk/laminar";
 
 import * as eventBus from "@/state/events";
 
@@ -38,13 +37,7 @@ type Variables = {
  * This server translates OpenCode contract endpoints → kernl primitives.
  */
 export function build(): Hono<{ Variables: Variables }> {
-  const tracer = new LaminarTracer({
-    apiKey: process.env.LMNR_PROJECT_API_KEY,
-  });
-
-  const kernl = new Kernl({
-    tracer,
-  });
+  const kernl = new Kernl();
 
   // --- agents ---
   kernl.register(codex);
