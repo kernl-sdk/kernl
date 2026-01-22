@@ -22,7 +22,7 @@ export const exec = tool({
     return await sandbox.process.executeCommand(
       command,
       cwd,
-      undefined,
+      ctx.context.env, // (NOTE): add env param for LLM + merge if needed
       timeout,
     );
   },

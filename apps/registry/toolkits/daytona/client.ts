@@ -1,4 +1,4 @@
-import { Daytona, Sandbox } from "@daytonaio/sdk";
+import { Daytona, Sandbox, SandboxState } from "@daytonaio/sdk";
 import type { Context } from "kernl";
 
 export const daytona = new Daytona();
@@ -19,17 +19,18 @@ export interface SandboxContext {
   sandboxId?: string;
   desktopStarted?: boolean;
   git?: GitCredentials;
+  env?: Record<string, string>;
 }
 
 /**
  * Gets git credentials from context if available.
  */
-export function getGitCredentials(
-  ctx: Context<SandboxContext>,
-): { username?: string; password?: string } {
+export function getGitCredentials(ctx: Context<SandboxContext>): {
+  username?: string;
+  password?: string;
+} {
   const { git } = ctx.context;
-  if (!git) return {};
-  return { username: git.username, password: git.token };
+  return git ? { username: git.username, password: git.token } : {};
 }
 
 /**
@@ -37,8 +38,6 @@ export function getGitCredentials(
  *
  * Sandboxes are auto-provisioned on first use and cached in context.
  * This allows tools to operate without explicit sandbox lifecycle management.
- * For custom sandbox configuration, set `ctx.context.sandboxId` before
- * invoking tools, or create a sandbox programmatically and assign its ID.
  */
 export async function getSandbox(
   ctx: Context<SandboxContext>,
@@ -48,7 +47,7 @@ export async function getSandbox(
   if (context.sandboxId) {
     const sandbox = await daytona.get(context.sandboxId);
 
-    if (sandbox.state !== "started") {
+    if (sandbox.state !== SandboxState.STARTED) {
       await sandbox.start();
     }
 

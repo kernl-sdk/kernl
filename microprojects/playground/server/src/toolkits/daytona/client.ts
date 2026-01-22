@@ -1,4 +1,4 @@
-import { Daytona, Sandbox } from "@daytonaio/sdk";
+import { Daytona, Sandbox, SandboxState } from "@daytonaio/sdk";
 import type { Context } from "kernl";
 
 export const daytona = new Daytona();
@@ -19,6 +19,7 @@ export interface SandboxContext {
   sandboxId?: string;
   desktopStarted?: boolean;
   git?: GitCredentials;
+  env?: Record<string, string>;
 }
 
 /**
@@ -48,7 +49,7 @@ export async function getSandbox(
   if (context.sandboxId) {
     const sandbox = await daytona.get(context.sandboxId);
 
-    if (sandbox.state !== "started") {
+    if (sandbox.state !== SandboxState.STARTED) {
       await sandbox.start();
     }
 
