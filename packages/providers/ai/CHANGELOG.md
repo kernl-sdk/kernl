@@ -1,5 +1,11 @@
 # @kernl/ai
 
+## 0.4.7
+
+### Patch Changes
+
+- 4e6f569: Add Mistral AI provider support with language models and embeddings
+
 ## 0.4.6
 
 ### Patch Changes
