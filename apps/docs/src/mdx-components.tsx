@@ -20,6 +20,10 @@ function KernlIcon({ size = 48 }: { size?: number }) {
   );
 }
 
+function Invisible() {
+  return null;
+}
+
 function OverviewHero({ description }: { description?: string }) {
   return (
     <div className="overview-hero flex flex-col items-center text-center mb-8">
@@ -48,6 +52,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     TypeTable,
     KernlIcon,
     OverviewHero,
+    Invisible,
     pre: (props: ComponentPropsWithoutRef<'pre'>) => (
       <CodeBlock keepBackground {...props}>
         <Pre>{props.children}</Pre>

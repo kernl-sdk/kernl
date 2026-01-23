@@ -12,7 +12,10 @@ export const source = loader({
 export async function getLLMText(page: InferPageType<typeof source>) {
   const processed = await page.data.getText('processed');
 
+  // Strip <Invisible> tags but keep their content in place
+  const content = processed.replace(/<Invisible>([\s\S]*?)<\/Invisible>/g, '$1');
+
   return `# ${page.data.title}
 
-${processed}`;
+${content}`;
 }

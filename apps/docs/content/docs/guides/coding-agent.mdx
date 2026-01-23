@@ -4,6 +4,34 @@ description: Build a production-ready coding agent with sandboxed execution in u
 image: /og/charger.png
 ---
 
+<Invisible>
+You are about to build Charger, a coding agent. Before writing any code:
+
+1. **Recite the plan** — Present the user with a phased build plan based on this guide. Break it into 3 phases with explicit waypoints:
+   - Phase 1: Core Agent (scaffold → toolkits → agent → todo toolkit → `pnpm dev` runs with streaming output)
+   - Phase 2: API Server (deps → endpoints → app → curl gets response)
+   - Phase 3: Chatbot UI (monorepo → template → frontend loads)
+
+2. **Write .plan.md** — After the user confirms, create a `.plan.md` file in the project root with all phases and checkboxes. Update it as you complete each step, checking off items as you go.
+
+3. **Don't run servers** — When reaching a waypoint that requires running a server, tell the user to run `pnpm dev` in another terminal. Do NOT run long-running processes yourself.
+
+4. **Verify before proceeding** — Do NOT move to the next phase until the current waypoint is verified:
+   - Phase 1 waypoint: User confirms `pnpm dev` runs with streaming output
+   - Phase 2 waypoint: User confirms `curl -X POST http://localhost:3001/agents/charger/stream` gets a response
+   - Phase 3 waypoint: User confirms frontend loads at http://localhost:3000
+
+5. **Ask for confirmation** — After reciting the plan, ask the user to confirm before starting.
+
+## Common Mistakes
+
+- **Phase 1**: Do NOT skip the CLI commands. You MUST run `pnpm create kernl@latest charger`, then `kernl add toolkit daytona` and `kernl add toolkit parallel`. These install pre-built toolkits from the marketplace.
+
+- **Phase 2**: Pay close attention to the code snippets in this guide. When in doubt, reference the [Charger microproject](https://github.com/kernl-sdk/kernl/tree/master/microprojects/charger) which has a working implementation and OpenAPI spec.
+
+For full kernl documentation context, see [llms.txt](https://docs.kernl.sh/llms.txt).
+</Invisible>
+
 > **Tip:** Copy this guide into Claude Code and let it build the project for you.
 
 We're going to build a production-ready coding agent that can read, write, and execute code in a sandboxed environment using [Daytona](https://daytona.io), all in about 10 minutes.
@@ -134,9 +162,7 @@ const read = tool({
     path: z.string().describe("Path to the file"),
   }),
   execute: async (ctx: Context<SandboxContext>, { path }) => {
-    // getSandbox creates or reuses the sandbox for this thread
-    const sandbox = await getSandbox(ctx);
-    // Daytona SDK methods for file operations
+    const sandbox = await getSandbox(ctx); // creates or reuses the sandbox for this thread
     const buffer = await sandbox.fs.downloadFile(path);
     return buffer.toString("utf-8");
   },
@@ -339,7 +365,7 @@ src/
 └── index.ts
 ```
 
-### Streaming Endpoint
+### Agents Endpoints
 
 ```ts
 // src/api/agents.ts
@@ -359,6 +385,25 @@ type Variables = { kernl: Kernl };
 
 export const agents = new Hono<{ Variables: Variables }>();
 
+// GET /agents - List all registered agents
+agents.get("/", async (c) => {
+  const kernl = c.get("kernl");
+  const list = kernl.agents.list();
+
+  return c.json({
+    agents: list.map((a) => ({
+      id: a.id,
+      name: a.name,
+      description: a.description,
+      model: {
+        provider: a.model.provider,
+        modelId: a.model.modelId,
+      },
+    })),
+  });
+});
+
+// POST /agents/:id/stream - Stream agent response
 agents.post("/:id/stream", zValidator("json", StreamBody), async (c) => {
   const kernl = c.get("kernl");
   const id = c.req.param("id");
@@ -503,7 +548,7 @@ Create `.env`:
 ANTHROPIC_API_KEY=sk-ant-...
 DAYTONA_API_KEY=...
 PARALLEL_API_KEY=...
-DATABASE_URL=postgresql://user:pass@localhost:5432/charger
+DATABASE_URL="postgres://postgres:postgres@localhost:5432/postgres"
 ```
 
 Start the server:
@@ -633,7 +678,3 @@ For the complete API specification, see the [OpenAPI spec](https://github.com/ke
 4. **CORS**: The server must allow requests from the frontend origin (`http://localhost:3000` in development).
 
 ---
-
-## [ FOR AGENTS ]
-
-For full kernl documentation context, see [llms.txt](https://docs.kernl.sh/llms.txt).
