@@ -40,6 +40,10 @@
     "./google": {
       "types": "./dist/providers/google.d.ts",
       "import": "./dist/providers/google.js"
+    },
+    "./mistral": {
+      "types": "./dist/providers/mistral.d.ts",
+      "import": "./dist/providers/mistral.js"
     }
   },
   "scripts": {
@@ -63,11 +67,15 @@
     },
     "@ai-sdk/google": {
       "optional": true
+    },
+    "@ai-sdk/mistral": {
+      "optional": true
     }
   },
   "devDependencies": {
     "@ai-sdk/anthropic": "^3.0.14",
     "@ai-sdk/google": "^3.0.9",
+    "@ai-sdk/mistral": "^3.0.7",
     "@ai-sdk/openai": "^3.0.11",
     "@ai-sdk/provider": "^3.0.3",
     "@types/node": "^24.10.0",

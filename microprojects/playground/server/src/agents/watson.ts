@@ -1,6 +1,5 @@
 import { Agent } from "kernl";
-import { anthropic } from "@kernl-sdk/ai/anthropic";
-import { openai } from "@kernl-sdk/ai/openai";
+import { mistral } from "@kernl-sdk/ai/mistral";
 
 import { fs, process, code, computer, git } from "@/toolkits/daytona";
 
@@ -15,6 +14,6 @@ You have access to a Daytona sandbox environment where you can:
 - Read/write files and manage the filesystem
 - Use git for version control
 - Control the desktop for computer use tasks`,
-  model: anthropic("claude-opus-4-5"),
+  model: mistral("mistral-large-latest"),
   toolkits: [fs, process, git],
 });
