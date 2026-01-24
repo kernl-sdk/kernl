@@ -60,7 +60,7 @@ async function scout(track: Track, logger: Logger): Promise<string | null> {
 
   const papers = await arxiv.papers.list({
     categories: [...trackInfo.categories],
-    daysBack: 1,
+    daysBack: 2, // arXiv releases in batches, so we need a wider window
     maxResults: 200,
     sortBy: "submittedDate",
     sortOrder: "descending",

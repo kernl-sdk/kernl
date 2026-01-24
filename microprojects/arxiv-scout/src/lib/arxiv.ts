@@ -159,7 +159,8 @@ class Papers {
       const now = new Date();
       const from = new Date(now);
       from.setDate(from.getDate() - daysBack);
-      const fmt = (d: Date) => d.toISOString().slice(0, 10).replace(/-/g, "");
+      // arXiv expects YYYYMMDDHHMM format
+      const fmt = (d: Date) => d.toISOString().slice(0, 16).replace(/[-:T]/g, "");
       parts.push(`submittedDate:[${fmt(from)} TO ${fmt(now)}]`);
     }
 
