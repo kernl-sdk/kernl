@@ -159,9 +159,9 @@ class Papers {
       const now = new Date();
       const from = new Date(now);
       from.setDate(from.getDate() - daysBack);
-      // arXiv expects YYYYMMDDHHMM format
-      const fmt = (d: Date) => d.toISOString().slice(0, 16).replace(/[-:T]/g, "");
-      parts.push(`submittedDate:[${fmt(from)} TO ${fmt(now)}]`);
+      // arXiv expects YYYYMMDDHHMM format with full day ranges
+      const fmtDate = (d: Date) => d.toISOString().slice(0, 10).replace(/-/g, "");
+      parts.push(`submittedDate:[${fmtDate(from)}0000 TO ${fmtDate(now)}2359]`);
     }
 
     const searchQuery = parts.join(" AND ") || "all:*";
