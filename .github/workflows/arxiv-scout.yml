@@ -29,11 +29,14 @@ jobs:
         working-directory: microprojects/arxiv-scout
         run: pnpm install
 
-      - name: Build and run scout
+      - name: Build action
         working-directory: microprojects/arxiv-scout
-        run: pnpm build && node dist/index.js
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: pnpm build
+
+      - name: Run arXiv Scout
+        uses: ./microprojects/arxiv-scout
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
 
       - name: Commit results
         run: |
