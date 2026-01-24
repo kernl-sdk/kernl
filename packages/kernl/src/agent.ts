@@ -115,6 +115,7 @@ export class Agent<
         tid: options?.threadId,
         namespace: options?.namespace,
         storage: this.kernl.storage?.threads,
+        abort: options?.abort,
       });
       return this.kernl.spawn(thread);
     }
@@ -186,6 +187,7 @@ export class Agent<
         tid: options?.threadId,
         namespace: options?.namespace,
         storage: this.kernl.storage?.threads,
+        abort: options?.abort,
       });
       yield* this.kernl.spawnStream(thread);
       return;

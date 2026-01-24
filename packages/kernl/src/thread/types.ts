@@ -219,6 +219,11 @@ export interface ThreadOptions<
    * hydrating from a store. Callers creating new threads should omit it.
    */
   persisted?: boolean;
+  /**
+   * Abort signal for cancelling thread execution.
+   * When aborted, the thread will stop at the next safe point.
+   */
+  abort?: AbortSignal;
 }
 
 /**

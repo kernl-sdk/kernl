@@ -120,7 +120,7 @@ export class Thread<
   private history: ThreadEvent[] /* history representing the event log for the thread */;
   private tickres?: ResolvedAgentResponse<TOutput>; /* final result from terminal tick */
 
-  private abort?: AbortController;
+  private _abort?: AbortSignal;
   private storage?: ThreadStore;
   private _span?: Span; /* tracing span for current execution */
 
@@ -144,6 +144,7 @@ export class Thread<
     this.cpbuf = [];
     this.persisted = options.persisted ?? false;
     this.history = options.history ?? [];
+    this._abort = options.abort;
 
     // seek to latest seq (not persisted)
     if (this.history.length > 0) {
@@ -178,12 +179,11 @@ export class Thread<
    *   - Exactly one thread.stop (with result on success, error on failure)
    */
   async *stream(): AsyncIterable<ThreadStreamEvent> {
-    if (this.state === RUNNING && this.abort) {
+    if (this.state === RUNNING) {
       throw new Error("thread already running");
     }
 
     this.state = RUNNING;
-    this.abort = new AbortController();
     this.tickres = undefined; // reset for this run
 
     await this.checkpoint(); /* c1: persist RUNNING state + initial input */
@@ -222,7 +222,6 @@ export class Thread<
       throw err;
     } finally {
       this.state = STOPPED;
-      this.abort = undefined;
       this._span.close();
       // (TODO): questionable whether this should be undefined. perhaps a single thread should exit + resume..
       this._span = undefined;
@@ -240,7 +239,7 @@ export class Thread<
     for (;;) {
       let err: Error | undefined = undefined;
 
-      if (this.abort?.signal.aborted) {
+      if (this._abort?.aborted) {
         return;
       }
 
@@ -455,12 +454,12 @@ export class Thread<
   }
 
   /**
-   * Abort the running thread
+   * Abort the running thread.
    *
-   * TODO: Emit thread.stop when cancelled (neither result nor error set)
+   * @throws {Error} Not implemented - use AbortSignal via options instead
    */
-  cancel() {
-    this.abort?.abort();
+  abort() {
+    throw new Error("Not implemented: use AbortSignal via ThreadExecuteOptions");
   }
 
   /**
@@ -685,6 +684,7 @@ export class Thread<
       settings,
       tools,
       responseType,
+      abort: this._abort,
     };
   }
 }
