@@ -17,6 +17,7 @@
     "@discordjs/rest": "^2.4.0",
     "@hono/node-server": "^1.19.8",
     "@kernl-sdk/ai": "workspace:*",
+    "@kernl-sdk/pg": "workspace:*",
     "@kernl-sdk/protocol": "workspace:*",
     "@kernl-sdk/shared": "workspace:*",
     "@octokit/rest": "^22.0.1",

@@ -1,6 +1,7 @@
 import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
 import { Kernl } from "kernl";
+import { postgres } from "@kernl-sdk/pg";
 
 import * as eventBus from "@/state/events";
 
@@ -37,7 +38,11 @@ type Variables = {
  * This server translates OpenCode contract endpoints → kernl primitives.
  */
 export function build(): Hono<{ Variables: Variables }> {
-  const kernl = new Kernl();
+  const kernl = new Kernl({
+    storage: {
+      db: postgres({ connstr: process.env.DATABASE_URL! }),
+    },
+  });
 
   // --- agents ---
   kernl.register(codex);

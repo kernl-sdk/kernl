@@ -77,6 +77,7 @@ export type UserMessage = {
   time: {
     created: number
   }
+  seq?: number
   summary?: {
     title?: string
     body?: string
@@ -147,6 +148,7 @@ export type AssistantMessage = {
     created: number
     completed?: number
   }
+  seq?: number
   error?: ProviderAuthError | UnknownError | MessageOutputLengthError | MessageAbortedError | ApiError
   parentID: string
   modelID: string

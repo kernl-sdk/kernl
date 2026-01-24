@@ -16,8 +16,8 @@
     "@opentui/solid": "0.1.73",
     "@popcorn/sdk": "workspace:*",
     "@popcorn/tui": "workspace:*",
-    "server0": "workspace:*",
-    "commander": "^14.0.2"
+    "commander": "^14.0.2",
+    "server0": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
