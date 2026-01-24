@@ -17,6 +17,7 @@
     "@kernl-sdk/turbopuffer": "workspace:*",
     "@octokit/rest": "^22.0.1",
     "kernl": "workspace:*",
+    "modal": "^0.6.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {

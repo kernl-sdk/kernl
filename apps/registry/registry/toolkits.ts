@@ -135,4 +135,20 @@ export const toolkits: RegistryItem[] = [
       { path: "toolkits/discord/util/permissions.ts" },
     ],
   },
+  {
+    name: "modal",
+    type: "registry:toolkit",
+    title: "Modal",
+    description: "Cloud sandboxes for secure code execution with filesystem snapshots",
+    icon: "https://registry.kernl.sh/icons/modal.svg",
+    category: "developer-tools",
+    dependencies: ["modal"],
+    env: ["MODAL_TOKEN_ID", "MODAL_TOKEN_SECRET"],
+    files: [
+      { path: "toolkits/modal/index.ts" },
+      { path: "toolkits/modal/client.ts" },
+      { path: "toolkits/modal/process.ts" },
+      { path: "toolkits/modal/fs.ts" },
+    ],
+  },
 ];
