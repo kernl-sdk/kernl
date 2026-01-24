@@ -1,5 +1,11 @@
 # @kernl/core
 
+## 0.12.6
+
+### Patch Changes
+
+- adc9cf2: Wire up abort signal for thread cancellation. Users can now pass an AbortSignal via ThreadExecuteOptions to cancel running threads.
+
 ## 0.12.5
 
 ### Patch Changes

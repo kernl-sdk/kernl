@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/lmnr",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Laminar observability integration for kernl",
   "keywords": [
     "kernl",
