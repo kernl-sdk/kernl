@@ -120,7 +120,7 @@ export class Thread<
   private history: ThreadEvent[] /* history representing the event log for the thread */;
   private tickres?: ResolvedAgentResponse<TOutput>; /* final result from terminal tick */
 
-  private _abort?: AbortSignal;
+  _abort?: AbortSignal;
   private storage?: ThreadStore;
   private _span?: Span; /* tracing span for current execution */
 
@@ -205,7 +205,7 @@ export class Thread<
     yield { kind: "stream.start" }; // always yield start immediately
 
     try {
-      yield* this._execute();
+      yield* this.loop();
       this._span.record({ state: "stopped", result: this.tickres });
       this.emit("thread.stop", { state: STOPPED, result: this.tickres });
     } catch (err) {
@@ -235,16 +235,16 @@ export class Thread<
    * NOTE: Streaming structured output deferred for now. Prioritizing correctness + simplicity,
    * and unclear what use cases there would actually be for streaming a structured output (other than maybe gen UI).
    */
-  private async *_execute(): AsyncGenerator<ThreadStreamEvent, void> {
+  private async *loop(): AsyncGenerator<ThreadStreamEvent, void> {
     for (;;) {
       let err: Error | undefined = undefined;
 
-      if (this._abort?.aborted) {
-        return;
-      }
-
       const events = [];
       for await (const e of this.tick()) {
+        if (this._abort?.aborted) {
+          return;
+        }
+
         if (e.kind === "error") {
           err = e.error;
           logger.error(err.message); // (TODO): onError callback in options
@@ -459,7 +459,9 @@ export class Thread<
    * @throws {Error} Not implemented - use AbortSignal via options instead
    */
   abort() {
-    throw new Error("Not implemented: use AbortSignal via ThreadExecuteOptions");
+    throw new Error(
+      "Not implemented: use AbortSignal via ThreadExecuteOptions",
+    );
   }
 
   /**

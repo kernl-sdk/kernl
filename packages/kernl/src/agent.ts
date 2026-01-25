@@ -127,6 +127,7 @@ export class Agent<
     if (options?.model) {
       thread.model = options.model;
     }
+    thread._abort = options?.abort;
     thread.append(...items);
     return this.kernl.schedule(thread);
   }
@@ -200,6 +201,7 @@ export class Agent<
     if (options?.model) {
       thread.model = options.model;
     }
+    thread._abort = options?.abort;
     thread.append(...items);
     yield* this.kernl.scheduleStream(thread);
   }
