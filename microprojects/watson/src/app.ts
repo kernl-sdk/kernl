@@ -22,7 +22,7 @@ type Variables = {
 export function build(): Hono<{ Variables: Variables }> {
   const kernl = new Kernl({
     storage: {
-      db: postgres({ connstr: env.DATABASE_URL }),
+      db: postgres({ url: env.DATABASE_URL }),
       vector: turbopuffer({
         apiKey: env.TURBOPUFFER_API_KEY,
         region: "api",

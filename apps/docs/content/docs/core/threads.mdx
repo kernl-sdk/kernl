@@ -63,7 +63,7 @@ import { postgres } from "@kernl-sdk/pg";
 
 const kernl = new Kernl({
   storage: {
-    db: postgres({ connstr: process.env.DATABASE_URL }),
+    db: postgres({ url: process.env.DATABASE_URL }),
   },
 });
 ```

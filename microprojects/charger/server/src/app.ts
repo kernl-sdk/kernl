@@ -18,7 +18,7 @@ type Variables = {
 
 export function build(): Hono<{ Variables: Variables }> {
   const kernl = new Kernl({
-    storage: { db: postgres({ connstr: env.DATABASE_URL }) },
+    storage: { db: postgres({ url: env.DATABASE_URL }) },
   });
 
   kernl.register(charger);

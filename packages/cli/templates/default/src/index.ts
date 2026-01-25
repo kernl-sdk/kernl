@@ -6,7 +6,7 @@ import { jarvis } from "@/agents/jarvis";
 const kernl = new Kernl({
   storage: {
     db: undefined,
-    // db: postgres({ connstr: process.env.DATABASE_URL }), // if you want thread persistence + memories
+    // db: postgres({ url: process.env.DATABASE_URL }), // if you want thread persistence + memories
   },
 });
 

@@ -83,7 +83,7 @@ import { openai } from "@kernl-sdk/ai/openai";
 
 const kernl = new Kernl({
   storage: {
-    db: postgres({ connstr: process.env.DATABASE_URL }),
+    db: postgres({ url: process.env.DATABASE_URL }),
     vector: turbopuffer({
       apiKey: process.env.TURBOPUFFER_API_KEY,
       region: "us-east-1",
@@ -160,8 +160,8 @@ import { openai } from "@kernl-sdk/ai/openai";
 
 const kernl = new Kernl({
   storage: {
-    db: postgres({ connstr: process.env.DATABASE_URL }),
-    vector: pgvector({ connstr: process.env.DATABASE_URL }),
+    db: postgres({ url: process.env.DATABASE_URL }),
+    vector: pgvector({ url: process.env.DATABASE_URL }),
   },
   memory: {
     embedding: openai.embedding("text-embedding-3-small"),

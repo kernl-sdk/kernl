@@ -25,7 +25,7 @@ export function pgvector(config: ConnectionConfig) {
  */
 export type ConnectionConfig =
   | { pool: Pool }
-  | { connstr: string }
+  | { url: string }
   | {
       host: string;
       port: number;
@@ -47,8 +47,8 @@ export type PostgresConfig = ConnectionConfig & {
 function pool(config: ConnectionConfig): Pool {
   if ("pool" in config) {
     return config.pool;
-  } else if ("connstr" in config) {
-    return new Pool({ connectionString: config.connstr });
+  } else if ("url" in config) {
+    return new Pool({ connectionString: config.url });
   } else {
     return new Pool({
       host: config.host,

@@ -128,7 +128,7 @@ import { turbopuffer } from "@kernl-sdk/turbopuffer";
 
 const kernl = new Kernl({
   storage: {
-    db: postgres({ connstr: process.env.DATABASE_URL }),
+    db: postgres({ url: process.env.DATABASE_URL }),
     vector: turbopuffer({ apiKey: process.env.TURBOPUFFER_API_KEY }),
   },
 });

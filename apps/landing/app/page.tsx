@@ -23,7 +23,7 @@ export const jarvis = new Agent({
 
 const appCode = `const kernl = new Kernl({
   storage: {
-    db: postgres({ connstr: process.env.DATABASE_URL }),
+    db: postgres({ url: process.env.DATABASE_URL }),
   },
 });
 
