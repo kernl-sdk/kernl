@@ -722,14 +722,14 @@ importers:
         specifier: ^6.0.0
         version: 6.0.1
       '@kernl-sdk/ai':
-        specifier: ^0.4.7
-        version: 0.4.7(@ai-sdk/provider@3.0.5)(zod@4.1.13)
+        specifier: ^0.4.9
+        version: 0.4.9(@ai-sdk/provider@3.0.5)(zod@4.1.13)
       fast-xml-parser:
         specifier: ^4.5.0
         version: 4.5.3
       kernl:
-        specifier: ^0.12.4
-        version: 0.12.4(zod@4.1.13)
+        specifier: ^0.12.6
+        version: 0.12.6(zod@4.1.13)
       zod:
         specifier: ^4.1.12
         version: 4.1.13
@@ -3066,8 +3066,8 @@ packages:
   '@jsdevtools/ono@7.1.3':
     resolution: {integrity: sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==}
 
-  '@kernl-sdk/ai@0.4.7':
-    resolution: {integrity: sha512-TfmP96jMvzUgt1IMsoLXxesSFbgwrBqyFUKEfdGohiFlbma5iwE8iCCECwe3INFiw2Vl/r9uGO3QLwO8NBMDpQ==}
+  '@kernl-sdk/ai@0.4.9':
+    resolution: {integrity: sha512-LjOxFI9Qf4WSz0j2YA3n7paZUCyL1rl01QfEDo7I2IXYvpiJ9hz5jUZajpifhPID0c6Of18NZN/+i3n7FgsDEA==}
     peerDependencies:
       '@ai-sdk/anthropic': '*'
       '@ai-sdk/google': '*'
@@ -7632,8 +7632,8 @@ packages:
     resolution: {integrity: sha512-aeQoDkuRWSqQN6nSvVCEFvfXdqo1OQiCmmW1kc9xSdjutPv7BGO7pqY9sQRJpMOGrEdfDgF2TfRXe5eUAD2Waw==}
     hasBin: true
 
-  kernl@0.12.4:
-    resolution: {integrity: sha512-8ByZXvSihtVYT5Ut8xUVC3+gN+lQYiOIMh6FTDI+0ZSrWJPpp2EDisTGERtcm+Z3/cU1ETTgEYfVyT6YzLWuRA==}
+  kernl@0.12.6:
+    resolution: {integrity: sha512-mHwzp6WH2pfY3JIrjG/5kPeFCNOjpnC6p2cFUszZCq/yR12kwIwQNFl935Z0gXQIQLrOPNB/Hv9xBFvTUEoZGQ==}
     peerDependencies:
       zod: ^4.1.8
 
@@ -12169,13 +12169,13 @@ snapshots:
 
   '@jsdevtools/ono@7.1.3': {}
 
-  '@kernl-sdk/ai@0.4.7(@ai-sdk/provider@3.0.5)(zod@4.1.13)':
+  '@kernl-sdk/ai@0.4.9(@ai-sdk/provider@3.0.5)(zod@4.1.13)':
     dependencies:
       '@ai-sdk/provider': 3.0.5
       '@kernl-sdk/protocol': 0.5.1(zod@4.1.13)
       '@kernl-sdk/retrieval': 0.1.10(zod@4.1.13)
       '@kernl-sdk/shared': 0.4.0(zod@4.1.13)
-      kernl: 0.12.4(zod@4.1.13)
+      kernl: 0.12.6(zod@4.1.13)
     transitivePeerDependencies:
       - '@cfworker/json-schema'
       - hono
@@ -18051,7 +18051,7 @@ snapshots:
     dependencies:
       commander: 8.3.0
 
-  kernl@0.12.4(zod@4.1.13):
+  kernl@0.12.6(zod@4.1.13):
     dependencies:
       '@kernl-sdk/protocol': 0.5.1(zod@4.1.13)
       '@kernl-sdk/retrieval': 0.1.10(zod@4.1.13)
