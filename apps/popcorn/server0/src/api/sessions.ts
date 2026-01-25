@@ -12,8 +12,11 @@ import { createModel } from "@/lib/models";
 import { read as readTool } from "@/toolkits/fs/read";
 import { SessionCodec, type Session } from "@/lib/codecs/session";
 import { MessageCodec } from "@/lib/codecs/message";
+import { initSandbox } from "@/toolkits/daytona";
 
 type Variables = { kernl: Kernl };
+
+const aborts = new Map<string, AbortController>();
 
 export const sessions = new Hono<{ Variables: Variables }>();
 
@@ -313,6 +316,10 @@ sessions.post("/:id/message", async (cx) => {
   // Use deterministic suffix so history conversion produces matching IDs
   const assistantMessageId = `${clientMessageId}~response`;
 
+  // Create abort controller for this session
+  const controller = new AbortController();
+  aborts.set(sessionId, controller);
+
   // Process in background, emit events to bus
   processMessage(
     kernl,
@@ -324,6 +331,7 @@ sessions.post("/:id/message", async (cx) => {
     filePartsWithIds,
     agentId,
     model,
+    controller.signal,
   );
 
   // Return immediately with the user message
@@ -351,6 +359,7 @@ async function processMessage(
   }>,
   agentId: string,
   overrideModel?: LanguageModel,
+  signal?: AbortSignal,
 ) {
   const agent = kernl.agents.get(agentId) ?? kernl.agents.get("codex")!;
 
@@ -458,7 +467,10 @@ async function processMessage(
       },
     ];
 
+    // Start with existing thread context (if any) to preserve sandboxId etc.
+    const existingThread = await kernl.threads.get(sessionId);
     const context: Record<string, unknown> = {
+      ...(existingThread?.context ?? {}),
       sessionID: sessionId,
       directory,
     };
@@ -471,12 +483,19 @@ async function processMessage(
       }
       context.owner = "kernl-sdk";
       context.repo = "kernl";
+
+      // Set up sandbox with kernl repo on new session
+      if (!context.sandboxId) {
+        const sandboxId = await initSandbox();
+        context.sandboxId = sandboxId;
+      }
     }
 
     for await (const event of agent.stream(input, {
       model,
       threadId: sessionId,
       context,
+      abort: signal,
     })) {
       switch (event.kind) {
         case "text.start":
@@ -609,8 +628,9 @@ async function processMessage(
         }
 
         case "message":
-          if (event.role === "user") {
+          if (event.role === "user" && event.id === parentId) {
             // Emit user message seq now that kernl has assigned it
+            // Only for current user message, not historical ones
             emit("message.updated", {
               info: {
                 id: parentId,
@@ -631,7 +651,8 @@ async function processMessage(
                 },
               },
             });
-          } else if (event.role === "assistant") {
+          } else if (event.role === "assistant" && event.id === messageId) {
+            // Only for current assistant message, not historical ones
             if (currentTextPartId) {
               emit("message.part.updated", {
                 part: {
@@ -753,9 +774,10 @@ async function processMessage(
             data: { message },
           },
     });
+  } finally {
+    aborts.delete(sessionId);
+    emit("session.status", { sessionID: sessionId, status: { type: "idle" } });
   }
-
-  emit("session.status", { sessionID: sessionId, status: { type: "idle" } });
 }
 
 /**
@@ -763,6 +785,10 @@ async function processMessage(
  */
 sessions.post("/:id/abort", async (cx) => {
   const sessionId = cx.req.param("id");
+  const controller = aborts.get(sessionId);
+  if (controller) {
+    controller.abort();
+  }
   return cx.json({ aborted: true, sessionId });
 });
 

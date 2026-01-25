@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { tool, Toolkit, Context } from "kernl";
+import { createTwoFilesPatch } from "diff";
 
 import { getSandbox, type SandboxContext } from "./client";
 
@@ -20,6 +21,10 @@ export const list = tool({
   },
 });
 
+const DEFAULT_READ_LIMIT = 2000;
+const MAX_LINE_LENGTH = 2000;
+const MAX_BYTES = 50 * 1024;
+
 /**
  * Read a file's contents.
  */
@@ -28,11 +33,57 @@ export const read = tool({
   description: "Read the contents of a file",
   parameters: z.object({
     path: z.string().describe("Path to the file to read"),
+    offset: z.number().optional().describe("Line number to start reading from (0-based)"),
+    limit: z.number().optional().describe("Number of lines to read (default: 2000)"),
   }),
-  execute: async (ctx: Context<SandboxContext>, { path }) => {
+  execute: async (ctx: Context<SandboxContext>, { path, offset: offsetParam, limit: limitParam }) => {
     const sandbox = await getSandbox(ctx);
     const buf = await sandbox.fs.downloadFile(path);
-    return buf.toString("utf-8");
+    const content = buf.toString("utf-8");
+    const allLines = content.split("\n");
+
+    const limit = limitParam ?? DEFAULT_READ_LIMIT;
+    const offset = offsetParam ?? 0;
+
+    const raw: string[] = [];
+    let bytes = 0;
+    let truncatedByBytes = false;
+
+    for (let i = offset; i < Math.min(allLines.length, offset + limit); i++) {
+      const line =
+        allLines[i].length > MAX_LINE_LENGTH
+          ? allLines[i].substring(0, MAX_LINE_LENGTH) + "..."
+          : allLines[i];
+      const size = Buffer.byteLength(line, "utf-8") + (raw.length > 0 ? 1 : 0);
+      if (bytes + size > MAX_BYTES) {
+        truncatedByBytes = true;
+        break;
+      }
+      raw.push(line);
+      bytes += size;
+    }
+
+    const formatted = raw.map((line, index) => {
+      return `${(index + offset + 1).toString().padStart(5, " ")}\t${line}`;
+    });
+
+    let output = "<file>\n";
+    output += formatted.join("\n");
+
+    const totalLines = allLines.length;
+    const lastReadLine = offset + raw.length;
+    const hasMoreLines = totalLines > lastReadLine;
+
+    if (truncatedByBytes) {
+      output += `\n\n(Output truncated at ${MAX_BYTES} bytes. Use 'offset' parameter to read beyond line ${lastReadLine})`;
+    } else if (hasMoreLines) {
+      output += `\n\n(File has more lines. Use 'offset' parameter to read beyond line ${lastReadLine})`;
+    } else {
+      output += `\n\n(End of file - total ${totalLines} lines)`;
+    }
+    output += "\n</file>";
+
+    return output;
   },
 });
 
@@ -50,6 +101,10 @@ export const edit = tool({
   execute: async (ctx: Context<SandboxContext>, { path, old, new: newStr }) => {
     const sandbox = await getSandbox(ctx);
 
+    // Read original content before edit
+    const originalBuf = await sandbox.fs.downloadFile(path);
+    const original = originalBuf.toString("utf-8");
+
     const [result] = await sandbox.fs.replaceInFiles([path], old, newStr);
 
     if (!result?.success) {
@@ -58,10 +113,18 @@ export const edit = tool({
       );
     }
 
+    // Read updated content after edit
+    const updatedBuf = await sandbox.fs.downloadFile(path);
+    const updated = updatedBuf.toString("utf-8");
+
+    // Generate unified diff
+    const diff = createTwoFilesPatch(path, path, original, updated);
+    const text = `Edited ${path}: replaced 1 occurrence`;
+
     return {
-      success: true,
-      path,
-      diff: {
+      text,
+      diff,
+      changes: {
         file: path,
         before: old,
         after: newStr,
@@ -84,8 +147,28 @@ export const write = tool({
   }),
   execute: async (ctx: Context<SandboxContext>, { path, content }) => {
     const sandbox = await getSandbox(ctx);
+
+    // Capture original content (empty if new file)
+    let original = "";
+    let exists = false;
+    try {
+      const buf = await sandbox.fs.downloadFile(path);
+      original = buf.toString("utf-8");
+      exists = true;
+    } catch {
+      // File doesn't exist, will be created
+    }
+
     await sandbox.fs.uploadFile(Buffer.from(content, "utf-8"), path);
-    return { success: true, path };
+
+    // Generate unified diff
+    const diff = createTwoFilesPatch(path, path, original, content);
+
+    const lines = content.split("\n").length;
+    const action = exists ? "Updated" : "Created";
+    const text = `${action} ${path} (${lines} lines)`;
+
+    return { text, diff };
   },
 });
 

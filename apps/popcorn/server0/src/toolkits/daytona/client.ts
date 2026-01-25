@@ -1,7 +1,9 @@
 import type { Context } from "kernl";
-import { Daytona, Sandbox } from "@daytonaio/sdk";
+import { Daytona, Sandbox, Image } from "@daytonaio/sdk";
 
 export const daytona = new Daytona();
+
+const SANDBOX_IMAGE = Image.base("node:20-slim");
 
 /**
  * Git credentials for authenticated operations.
@@ -29,8 +31,7 @@ export function getGitCredentials(ctx: Context<SandboxContext>): {
   password?: string;
 } {
   const { git } = ctx.context;
-  if (!git) return {};
-  return { username: git.username, password: git.token };
+  return git ? { username: git.username, password: git.token } : {};
 }
 
 /**
@@ -56,15 +57,54 @@ export async function getSandbox(
     return sandbox;
   }
 
-  // auto-provision a new sandbox with sensible defaults
+  // auto-provision a new sandbox
   const sandbox = await daytona.create({
-    language: "python", // <- adjust to whatever language you want your sandbox to be
-    autoStopInterval: 30, // 30 min idle timeout
+    image: SANDBOX_IMAGE,
+    autoStopInterval: 15,
+    resources: { disk: 10 },
   });
 
   context.sandboxId = sandbox.id;
 
   return sandbox;
+}
+
+/**
+ * Creates and sets up a new sandbox with kernl repo for sandex sessions.
+ * Call this when a new sandex chat starts.
+ * Creates sandbox immediately, fires and forgets clone/install.
+ */
+export async function initSandbox(): Promise<string> {
+  console.log("[sandbox] creating...");
+  const sandbox = await daytona.create({
+    image: SANDBOX_IMAGE,
+    autoStopInterval: 30,
+    resources: { disk: 10 },
+  });
+
+  // Fire and forget setup
+  (async () => {
+    const log = (msg: string) => sandbox.process.executeCommand(`echo "${msg}" >> /tmp/setup.log`);
+    const run = async (cmd: string, cwd?: string) => {
+      await log(`[${new Date().toISOString()}] running: ${cmd}`);
+      try {
+        const result = await sandbox.process.executeCommand(cmd, cwd);
+        await log(`[${new Date().toISOString()}] success: ${JSON.stringify(result).slice(0, 500)}`);
+        return result;
+      } catch (err) {
+        await log(`[${new Date().toISOString()}] error: ${err}`);
+        throw err;
+      }
+    };
+
+    await run("apt-get update && apt-get install -y git");
+    await run("git clone https://github.com/kernl-sdk/kernl.git");
+    await run("npm install -g pnpm && pnpm install", "kernl");
+
+    await log("[sandbox] ready");
+  })().catch((err) => console.error("[sandbox] setup error:", err));
+
+  return sandbox.id;
 }
 
 /**
