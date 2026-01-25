@@ -38,6 +38,8 @@ export class Agent<
   extends BaseAgent<TContext, TOutput>
   implements AgentConfig<TContext, TOutput>
 {
+  /** Convenience flag for debugging/logging. */
+  readonly isAgent = true;
   readonly kind = "llm";
   readonly model: LanguageModel;
   readonly modelSettings: LanguageModelRequestSettings;
@@ -48,6 +50,11 @@ export class Agent<
   };
   readonly output: TOutput = "text" as TOutput;
   readonly resetToolChoice: boolean;
+
+  /** Returns true if this agent is currently executing the given thread id. */
+  isThreadRunning(tid: string): boolean {
+    return Boolean(this.kernl?.athreads.has(tid));
+  }
 
   constructor(config: AgentConfig<TContext, TOutput>) {
     super(config);
