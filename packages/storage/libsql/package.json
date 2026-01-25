@@ -38,12 +38,16 @@
     "test:run": "vitest run"
   },
   "devDependencies": {
+    "@kernl-sdk/protocol": "workspace:*",
     "@types/node": "^24.10.0",
     "tsc-alias": "^1.8.10",
     "typescript": "5.9.2",
     "vitest": "^4.0.8"
   },
   "dependencies": {
-    "@kernl-sdk/storage": "workspace:*"
+    "@kernl-sdk/shared": "workspace:*",
+    "@kernl-sdk/storage": "workspace:*",
+    "@libsql/client": "^0.14.0",
+    "kernl": "workspace:*"
   }
 }
