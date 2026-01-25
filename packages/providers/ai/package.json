@@ -44,6 +44,10 @@
     "./mistral": {
       "types": "./dist/providers/mistral.d.ts",
       "import": "./dist/providers/mistral.js"
+    },
+    "./xai": {
+      "types": "./dist/providers/xai.d.ts",
+      "import": "./dist/providers/xai.js"
     }
   },
   "scripts": {
@@ -70,6 +74,9 @@
     },
     "@ai-sdk/mistral": {
       "optional": true
+    },
+    "@ai-sdk/xai": {
+      "optional": true
     }
   },
   "devDependencies": {
@@ -77,6 +84,7 @@
     "@ai-sdk/google": "^3.0.9",
     "@ai-sdk/mistral": "^3.0.7",
     "@ai-sdk/openai": "^3.0.11",
+    "@ai-sdk/xai": "^3.0.34",
     "@ai-sdk/provider": "^3.0.3",
     "@types/node": "^24.10.0",
     "ai": "^5.0.93",
