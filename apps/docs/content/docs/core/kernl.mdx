@@ -65,6 +65,14 @@ Configure where threads, tasks, and traces are persisted.
 }}
 />
 
+### Available Adapters
+
+| Package | Type | Description |
+|---------|------|-------------|
+| `@kernl-sdk/pg` | db, vector | PostgreSQL with pgvector support |
+| `@kernl-sdk/libsql` | db | LibSQL/SQLite adapter (local or Turso) |
+| `@kernl-sdk/turbopuffer` | vector | Turbopuffer vector search |
+
 ### Example with Postgres + Turbopuffer
 
 ```ts
