@@ -1,6 +1,6 @@
 {
   "name": "@kernl-sdk/react",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "React bindings for kernl",
   "keywords": [
     "kernl",

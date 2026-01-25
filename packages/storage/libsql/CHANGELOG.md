@@ -1,5 +1,13 @@
 # @kernl/libsql
 
+## 0.1.39
+
+### Patch Changes
+
+- Updated dependencies [772acad]
+  - kernl@0.12.7
+  - @kernl-sdk/storage@0.2.7
+
 ## 0.1.38
 
 ### Patch Changes

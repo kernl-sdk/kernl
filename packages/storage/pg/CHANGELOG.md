@@ -1,5 +1,18 @@
 # @kernl/pg
 
+## 0.2.0
+
+### Minor Changes
+
+- 813834f: refactor: rename `connstr` option to `url` for consistency with libsql adapter
+
+### Patch Changes
+
+- 772acad: fix: parse BIGINT timestamps correctly when resuming threads from storage
+- Updated dependencies [772acad]
+  - kernl@0.12.7
+  - @kernl-sdk/storage@0.2.7
+
 ## 0.1.38
 
 ### Patch Changes
