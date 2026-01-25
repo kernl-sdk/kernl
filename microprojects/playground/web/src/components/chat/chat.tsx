@@ -2,7 +2,7 @@ import useSWR from "swr";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, isToolUIPart, type UIMessage } from "ai";
+import { DefaultChatTransport, isToolUIPart, type UIMessage, type FileUIPart } from "ai";
 import { nanoid } from "nanoid";
 import { toast } from "sonner";
 import { ArrowDown } from "lucide-react";
@@ -23,6 +23,7 @@ import {
   ToolOutput,
 } from "@/components/ai-elements/tool";
 import type { PromptInputMessage } from "@/components/ai-elements/prompt-input";
+import { AttachmentPill } from "@/components/ai-elements/prompt-input";
 import { AgentDrawer } from "@/components/sidebar/agent-drawer";
 import { HistorySidebar } from "@/components/sidebar/history-sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -120,7 +121,9 @@ export function Chat({
 
   const handleSubmit = useCallback(
     (message: PromptInputMessage) => {
-      if (!message.text?.trim()) return;
+      const hasText = Boolean(message.text?.trim());
+      const hasFiles = Boolean(message.files?.length);
+      if (!hasText && !hasFiles) return;
 
       // STATE A → STATE B: First message in new chat
       if (isNewChat && tidRef.current === null) {
@@ -131,7 +134,10 @@ export function Chat({
         window.history.replaceState(null, "", `/agents/${agentId}/c/${newTid}`);
       }
 
-      sendMessage({ text: message.text });
+      sendMessage({
+        text: message.text || "",
+        files: message.files,
+      });
       setInput("");
     },
     [agentId, isNewChat, sendMessage],
@@ -222,6 +228,15 @@ export function Chat({
                           <MessageResponse key={`${m.id}-${i}`}>
                             {part.text}
                           </MessageResponse>
+                        );
+                      }
+
+                      if (part.type === "file") {
+                        return (
+                          <AttachmentPill
+                            key={`${m.id}-${i}`}
+                            data={part as FileUIPart}
+                          />
                         );
                       }
 

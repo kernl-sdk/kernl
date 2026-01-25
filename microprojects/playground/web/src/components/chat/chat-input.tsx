@@ -3,10 +3,13 @@ import type { ChatStatus } from "ai";
 
 import {
   PromptInput,
+  PromptInputProvider,
   PromptInputTextarea,
   PromptInputSubmit,
   PromptInputTools,
   PromptInputButton,
+  PromptInputAttachment,
+  useProviderAttachments,
   type PromptInputMessage,
 } from "@/components/ai-elements/prompt-input";
 
@@ -26,39 +29,82 @@ export function ChatInput({
   placeholder = "What's on the agenda?",
 }: ChatInputProps) {
   const handleSubmit = (message: PromptInputMessage) => {
-    if (!message.text?.trim()) return;
+    const hasText = Boolean(message.text?.trim());
+    const hasAttachments = Boolean(message.files?.length);
+    if (!(hasText || hasAttachments)) return;
     onSubmit(message);
   };
 
   return (
-    <PromptInput onSubmit={handleSubmit} className="chat-input relative rounded-full border bg-surface py-[5px]">
-      {/* left toolbar */}
-      <PromptInputTools className="pl-4">
-        <PromptInputButton className="cursor-pointer rounded-full">
-          <Plus className="size-5" />
-        </PromptInputButton>
-      </PromptInputTools>
+    <PromptInputProvider>
+      <div className="flex flex-col gap-2">
+        {/* Attachments outside the pill */}
+        <Attachments />
 
-      {/* textarea */}
-      <PromptInputTextarea
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.currentTarget.value)}
-        className="min-h-0 pl-4 pr-24 !text-[15px]"
-      />
+        {/* Input pill */}
+        <PromptInput
+          onSubmit={handleSubmit}
+          multiple
+          globalDrop
+          accept="image/*"
+          className="chat-input relative rounded-full border bg-surface py-[5px]"
+        >
+          {/* left toolbar */}
+          <PromptInputTools className="pl-4">
+            <AttachButton />
+          </PromptInputTools>
 
-      {/* right toolbar */}
-      <PromptInputTools className="absolute right-4 flex items-center gap-2">
-        <PromptInputButton className="cursor-pointer rounded-full">
-          <Mic className="size-4" />
-        </PromptInputButton>
-        <PromptInputSubmit
-          variant="ghost"
-          status={status}
-          disabled={!value.trim()}
-          className="cursor-pointer rounded-full"
-        />
-      </PromptInputTools>
-    </PromptInput>
+          {/* textarea */}
+          <PromptInputTextarea
+            value={value}
+            placeholder={placeholder}
+            onChange={(e) => onChange(e.currentTarget.value)}
+            className="min-h-0 pl-4 pr-24 !text-[15px]"
+          />
+
+          {/* right toolbar */}
+          <PromptInputTools className="absolute right-4 flex items-center gap-2">
+            <PromptInputButton className="cursor-pointer rounded-full">
+              <Mic className="size-4" />
+            </PromptInputButton>
+            <PromptInputSubmit
+              variant="ghost"
+              status={status}
+              disabled={!value.trim()}
+              className="cursor-pointer rounded-full"
+            />
+          </PromptInputTools>
+        </PromptInput>
+      </div>
+    </PromptInputProvider>
+  );
+}
+
+function Attachments() {
+  const attachments = useProviderAttachments();
+
+  if (!attachments.files.length) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 px-2">
+      {attachments.files.map((file) => (
+        <PromptInputAttachment key={file.id} data={file} />
+      ))}
+    </div>
+  );
+}
+
+function AttachButton() {
+  const attachments = useProviderAttachments();
+
+  return (
+    <PromptInputButton
+      className="cursor-pointer rounded-full"
+      onClick={() => attachments.openFileDialog()}
+    >
+      <Plus className="size-5" />
+    </PromptInputButton>
   );
 }
