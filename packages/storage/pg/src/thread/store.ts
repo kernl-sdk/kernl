@@ -390,8 +390,8 @@ export class PGThreadStore implements ThreadStore {
       tick: record.tick,
       state: record.state,
       metadata: record.metadata,
-      createdAt: new Date(record.created_at),
-      updatedAt: new Date(record.updated_at),
+      createdAt: new Date(Number(record.created_at)), // pg returns BIGINT as string
+      updatedAt: new Date(Number(record.updated_at)), // pg returns BIGINT as string
       storage: this, // pass storage reference so resumed thread can persist
       persisted: true,
     });
