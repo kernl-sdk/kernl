@@ -3,6 +3,34 @@
  */
 import * as path from "node:path";
 import * as fs from "node:fs/promises";
+import { existsSync, mkdirSync } from "node:fs";
+import { homedir } from "node:os";
+
+/**
+ * Get XDG data directory for popcorn.
+ * - Linux: ~/.local/share/popcorn
+ * - macOS: ~/Library/Application Support/popcorn
+ */
+export function getDataDir(): string {
+  const base = process.env.XDG_DATA_HOME
+    ? process.env.XDG_DATA_HOME
+    : process.platform === "darwin"
+      ? path.join(homedir(), "Library", "Application Support")
+      : path.join(homedir(), ".local", "share");
+  return path.join(base, "popcorn");
+}
+
+/**
+ * Ensure the data directory exists, creating it if necessary.
+ * Returns the data directory path.
+ */
+export function dataDir(): string {
+  const dir = getDataDir();
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true });
+  }
+  return dir;
+}
 
 /**
  * Check if a path is contained within a base directory.

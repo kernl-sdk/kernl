@@ -1,15 +1,20 @@
+import { join } from "node:path";
+
 import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
 import { Kernl } from "kernl";
-import { postgres } from "@kernl-sdk/pg";
+import { libsql } from "@kernl-sdk/libsql";
 
-import * as eventBus from "@/state/events";
+import * as ebus from "@/state/events";
+import { dataDir } from "@/util/path";
 
+// -- agents ---
 import { codex } from "@/agents/codex";
 import { sandex } from "@/agents/sandex";
 import { titler } from "@/agents/titler";
 import { claudmin } from "@/agents/claudmin";
 
+// --- routes ---
 import { global } from "@/api/global";
 import { events } from "@/api/events";
 import { sessions } from "@/api/sessions";
@@ -38,9 +43,11 @@ type Variables = {
  * This server translates OpenCode contract endpoints → kernl primitives.
  */
 export function build(): Hono<{ Variables: Variables }> {
+  const dir = dataDir();
+
   const kernl = new Kernl({
     storage: {
-      db: postgres({ connstr: process.env.DATABASE_URL! }),
+      db: libsql({ url: `file:${join(dir, "popcorn.db")}` }),
     },
   });
 
@@ -52,7 +59,7 @@ export function build(): Hono<{ Variables: Variables }> {
 
   const app = new Hono<{ Variables: Variables }>();
 
-  // --- CORS ---
+  // --- * CORS * ---
   app.use(
     "/*",
     cors({
@@ -61,13 +68,13 @@ export function build(): Hono<{ Variables: Variables }> {
     }),
   );
 
-  // --- inject kernl into context ---
+  // --- * inject kernl into context * ---
   app.use("/*", async (cx, next) => {
     cx.set("kernl", kernl);
     await next();
   });
 
-  // --- inject directory into context ---
+  // --- * inject directory into context * ---
   app.use("/*", async (cx, next) => {
     // Priority: query param > header > process.cwd()
     const directory =
@@ -78,10 +85,10 @@ export function build(): Hono<{ Variables: Variables }> {
     await next();
   });
 
-  // --- error handler ---
+  // --- * error handler * ---
   app.onError(handleError);
 
-  // --- routes ---
+  // --- * routes * ---
   app.route("/global", global);
   app.route("/event", events);
   app.route("/session", sessions);
@@ -112,8 +119,8 @@ function handleError(
   const directory = cx.get("directory") ?? "";
   const message = err.message || "An unexpected error occurred";
 
-  // Emit error event for TUI toast
-  eventBus.emit(directory, {
+  // emit error event for TUI toast
+  ebus.emit(directory, {
     type: "app.error",
     properties: {
       error: {
