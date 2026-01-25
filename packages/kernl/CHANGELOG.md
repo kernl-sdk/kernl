@@ -1,5 +1,11 @@
 # @kernl/core
 
+## 0.12.7
+
+### Patch Changes
+
+- 772acad: fix: wire abort signal when resuming threads from storage
+
 ## 0.12.6
 
 ### Patch Changes

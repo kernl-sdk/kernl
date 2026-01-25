@@ -1,5 +1,16 @@
 # @kernl/ai
 
+## 0.5.0
+
+### Minor Changes
+
+- 8c855d4: feat: add xAI/Grok provider support
+
+### Patch Changes
+
+- Updated dependencies [772acad]
+  - kernl@0.12.7
+
 ## 0.4.9
 
 ### Patch Changes

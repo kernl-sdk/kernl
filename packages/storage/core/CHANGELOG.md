@@ -1,5 +1,12 @@
 # @kernl/storage
 
+## 0.2.7
+
+### Patch Changes
+
+- Updated dependencies [772acad]
+  - kernl@0.12.7
+
 ## 0.2.6
 
 ### Patch Changes
