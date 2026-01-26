@@ -40,7 +40,6 @@ type Variables = {
 
 /**
  * Hono app builder for OpenCode-compatible adapter server.
- * This server translates OpenCode contract endpoints → kernl primitives.
  */
 export function build(): Hono<{ Variables: Variables }> {
   const dir = dataDir();
@@ -51,7 +50,7 @@ export function build(): Hono<{ Variables: Variables }> {
     },
   });
 
-  // --- agents ---
+  // --- * agents * ---
   kernl.register(codex);
   kernl.register(sandex);
   kernl.register(titler);
@@ -119,7 +118,6 @@ function handleError(
   const directory = cx.get("directory") ?? "";
   const message = err.message || "An unexpected error occurred";
 
-  // emit error event for TUI toast
   ebus.emit(directory, {
     type: "app.error",
     properties: {

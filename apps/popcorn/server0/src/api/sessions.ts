@@ -108,6 +108,7 @@ sessions.patch("/:id", async (cx) => {
 sessions.delete("/:id", async (cx) => {
   const kernl = cx.get("kernl");
   const id = cx.req.param("id");
+  const directory = cx.req.header("x-opencode-directory") ?? process.cwd();
 
   const thread = await kernl.threads.get(id);
   if (!thread) {
@@ -115,6 +116,12 @@ sessions.delete("/:id", async (cx) => {
   }
 
   await kernl.threads.delete(id);
+
+  events.emit(directory, {
+    type: "session.deleted",
+    properties: { info: SessionCodec.encode(thread) },
+  });
+
   return cx.json({ deleted: true, id });
 });
 
@@ -816,18 +823,22 @@ async function title(
   sessionId: string,
   directory: string,
 ): Promise<void> {
+  let generatedTitle = "New Session";
+
   try {
     const res = await titler.run(`User message: ${message}`);
-    const thread = await kernl.threads.update(sessionId, {
-      title: res.response.trim(),
-    });
-    if (thread) {
-      events.emit(directory, {
-        type: "session.updated",
-        properties: { info: SessionCodec.encode(thread) },
-      });
-    }
+    generatedTitle = res.response.trim() || generatedTitle;
   } catch (err) {
     console.error("[sessions] titler error:", err);
+  }
+
+  const thread = await kernl.threads.update(sessionId, {
+    title: generatedTitle,
+  });
+  if (thread) {
+    events.emit(directory, {
+      type: "session.updated",
+      properties: { info: SessionCodec.encode(thread) },
+    });
   }
 }

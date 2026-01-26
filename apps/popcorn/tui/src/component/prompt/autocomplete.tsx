@@ -414,7 +414,7 @@ export function Autocomplete(props: {
         onSelect: () => command.trigger("agent.list"),
       },
       {
-        display: "/session",
+        display: "/sessions",
         aliases: ["/resume", "/continue"],
         description: "list sessions",
         onSelect: () => command.trigger("session.list"),

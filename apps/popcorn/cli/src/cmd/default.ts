@@ -6,12 +6,11 @@
  */
 import path from "path";
 import { Command } from "commander";
-import { Rpc } from "../rpc";
-import type { rpc as workerRpc } from "../worker";
 import type { Event } from "@popcorn/sdk/v2";
 import { tui } from "@popcorn/tui/app";
 
-declare const POPCORN_WORKER_PATH: string | undefined;
+import { Rpc } from "../rpc";
+import type { rpc as workerRpc } from "../worker";
 
 type RpcClient = ReturnType<typeof Rpc.client<typeof workerRpc>>;
 
@@ -83,11 +82,10 @@ export const popcorn = new Command("start")
       process.exit(1);
     }
 
-    // Spawn the worker - use define'd path in compiled binary, relative in dev
-    const workerPath =
-      typeof POPCORN_WORKER_PATH !== "undefined"
-        ? POPCORN_WORKER_PATH
-        : new URL("../worker.ts", import.meta.url).href;
+    // Spawn the worker from the bundled module
+    const workerPath = import.meta.url.includes("/$bunfs/")
+      ? new URL("./worker.js", import.meta.url).pathname
+      : new URL("../worker.ts", import.meta.url).href;
     const worker = new Worker(workerPath, {
       env: Object.fromEntries(
         Object.entries(process.env).filter(
@@ -100,10 +98,9 @@ export const popcorn = new Command("start")
       console.error("[worker error]", e);
     };
 
-    // Create RPC client
     const client = Rpc.client<typeof workerRpc>(worker);
 
-    // Handle process signals
+    // handle process signals
     process.on("uncaughtException", (e) => {
       console.error("[uncaught exception]", e);
     });
@@ -111,7 +108,7 @@ export const popcorn = new Command("start")
       console.error("[unhandled rejection]", e);
     });
 
-    // Read piped input if any
+    // read piped input if any
     const piped = !process.stdin.isTTY ? await Bun.stdin.text() : undefined;
     const prompt = options.prompt
       ? piped
@@ -119,15 +116,15 @@ export const popcorn = new Command("start")
         : options.prompt
       : piped;
 
-    // Subscribe to events
+    // subscribe to events
     await client.call("subscribe", { directory: cwd });
 
-    // Use RPC mode (no HTTP server)
+    // use RPC mode (no HTTP server)
     const url = "http://popcorn.internal";
     const customFetch = createWorkerFetch(client);
     const events = createEventSource(client, cwd);
 
-    // Start the TUI
+    // start the TUI
     await tui({
       url,
       fetch: customFetch,

@@ -1,7 +1,7 @@
-import { RGBA } from "@opentui/core"
+import { RGBA } from "@opentui/core";
 
 export namespace Terminal {
-  export type Colors = Awaited<ReturnType<typeof colors>>
+  export type Colors = Awaited<ReturnType<typeof colors>>;
   /**
    * Query terminal colors including background, foreground, and palette (0-15).
    * Uses OSC escape sequences to retrieve actual terminal color values.
@@ -13,102 +13,170 @@ export namespace Terminal {
    * Any query that fails will be null/empty.
    */
   export async function colors(): Promise<{
-    background: RGBA | null
-    foreground: RGBA | null
-    colors: RGBA[]
+    background: RGBA | null;
+    foreground: RGBA | null;
+    colors: RGBA[];
   }> {
-    if (!process.stdin.isTTY) return { background: null, foreground: null, colors: [] }
+    if (!process.stdin.isTTY)
+      return { background: null, foreground: null, colors: [] };
 
     return new Promise((resolve) => {
-      let background: RGBA | null = null
-      let foreground: RGBA | null = null
-      const paletteColors: RGBA[] = []
-      let timeout: NodeJS.Timeout
+      let background: RGBA | null = null;
+      let foreground: RGBA | null = null;
+      const paletteColors: RGBA[] = [];
+      let timeout: NodeJS.Timeout;
 
       const cleanup = () => {
-        process.stdin.setRawMode(false)
-        process.stdin.removeListener("data", handler)
-        clearTimeout(timeout)
-      }
+        process.stdin.setRawMode(false);
+        process.stdin.removeListener("data", handler);
+        clearTimeout(timeout);
+      };
 
       const parseColor = (colorStr: string): RGBA | null => {
         if (colorStr.startsWith("rgb:")) {
-          const parts = colorStr.substring(4).split("/")
+          const parts = colorStr.substring(4).split("/");
           return RGBA.fromInts(
             parseInt(parts[0], 16) >> 8, // Convert 16-bit to 8-bit
             parseInt(parts[1], 16) >> 8,
             parseInt(parts[2], 16) >> 8,
             255,
-          )
+          );
         }
         if (colorStr.startsWith("#")) {
-          return RGBA.fromHex(colorStr)
+          return RGBA.fromHex(colorStr);
         }
         if (colorStr.startsWith("rgb(")) {
-          const parts = colorStr.substring(4, colorStr.length - 1).split(",")
-          return RGBA.fromInts(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]), 255)
+          const parts = colorStr.substring(4, colorStr.length - 1).split(",");
+          return RGBA.fromInts(
+            parseInt(parts[0]),
+            parseInt(parts[1]),
+            parseInt(parts[2]),
+            255,
+          );
         }
-        return null
-      }
+        return null;
+      };
 
       const handler = (data: Buffer) => {
-        const str = data.toString()
+        const str = data.toString();
 
         // Match OSC 11 (background color)
-        const bgMatch = str.match(/\x1b]11;([^\x07\x1b]+)/)
+        const bgMatch = str.match(/\x1b]11;([^\x07\x1b]+)/);
         if (bgMatch) {
-          background = parseColor(bgMatch[1])
+          background = parseColor(bgMatch[1]);
         }
 
         // Match OSC 10 (foreground color)
-        const fgMatch = str.match(/\x1b]10;([^\x07\x1b]+)/)
+        const fgMatch = str.match(/\x1b]10;([^\x07\x1b]+)/);
         if (fgMatch) {
-          foreground = parseColor(fgMatch[1])
+          foreground = parseColor(fgMatch[1]);
         }
 
         // Match OSC 4 (palette colors)
-        const paletteMatches = str.matchAll(/\x1b]4;(\d+);([^\x07\x1b]+)/g)
+        const paletteMatches = str.matchAll(/\x1b]4;(\d+);([^\x07\x1b]+)/g);
         for (const match of paletteMatches) {
-          const index = parseInt(match[1])
-          const color = parseColor(match[2])
-          if (color) paletteColors[index] = color
+          const index = parseInt(match[1]);
+          const color = parseColor(match[2]);
+          if (color) paletteColors[index] = color;
         }
 
         // Return immediately if we have all 16 palette colors
         if (paletteColors.filter((c) => c !== undefined).length === 16) {
-          cleanup()
-          resolve({ background, foreground, colors: paletteColors })
+          cleanup();
+          resolve({ background, foreground, colors: paletteColors });
         }
-      }
+      };
 
-      process.stdin.setRawMode(true)
-      process.stdin.on("data", handler)
+      process.stdin.setRawMode(true);
+      process.stdin.on("data", handler);
 
       // Query background (OSC 11)
-      process.stdout.write("\x1b]11;?\x07")
+      process.stdout.write("\x1b]11;?\x07");
       // Query foreground (OSC 10)
-      process.stdout.write("\x1b]10;?\x07")
+      process.stdout.write("\x1b]10;?\x07");
       // Query palette colors 0-15 (OSC 4)
       for (let i = 0; i < 16; i++) {
-        process.stdout.write(`\x1b]4;${i};?\x07`)
+        process.stdout.write(`\x1b]4;${i};?\x07`);
       }
 
       timeout = setTimeout(() => {
-        cleanup()
-        resolve({ background, foreground, colors: paletteColors })
-      }, 1000)
-    })
+        cleanup();
+        resolve({ background, foreground, colors: paletteColors });
+      }, 1000);
+    });
   }
 
-  export async function getTerminalBackgroundColor(): Promise<"dark" | "light"> {
-    const result = await colors()
-    if (!result.background) return "dark"
+  export async function getTerminalBackgroundColor(): Promise<
+    "dark" | "light"
+  > {
+    const result = await colors();
+    if (!result.background) return "dark";
 
-    const { r, g, b } = result.background
+    const { r, g, b } = result.background;
     // Calculate luminance using relative luminance formula
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 
     // Determine if dark or light based on luminance threshold
-    return luminance > 0.5 ? "light" : "dark"
+    return luminance > 0.5 ? "light" : "dark";
   }
+}
+
+export async function getTerminalBackgroundColor(): Promise<"dark" | "light"> {
+  // can't set raw mode if not a TTY
+  if (!process.stdin.isTTY) return "dark";
+
+  return new Promise((resolve) => {
+    let timeout: NodeJS.Timeout;
+
+    const cleanup = () => {
+      process.stdin.setRawMode(false);
+      process.stdin.removeListener("data", handler);
+      clearTimeout(timeout);
+    };
+
+    const handler = (data: Buffer) => {
+      const str = data.toString();
+      const match = str.match(/\x1b]11;([^\x07\x1b]+)/);
+      if (match) {
+        cleanup();
+        const color = match[1];
+        // Parse RGB values from color string
+        // Formats: rgb:RR/GG/BB or #RRGGBB or rgb(R,G,B)
+        let r = 0,
+          g = 0,
+          b = 0;
+
+        if (color.startsWith("rgb:")) {
+          const parts = color.substring(4).split("/");
+          r = parseInt(parts[0], 16) >> 8; // Convert 16-bit to 8-bit
+          g = parseInt(parts[1], 16) >> 8; // Convert 16-bit to 8-bit
+          b = parseInt(parts[2], 16) >> 8; // Convert 16-bit to 8-bit
+        } else if (color.startsWith("#")) {
+          r = parseInt(color.substring(1, 3), 16);
+          g = parseInt(color.substring(3, 5), 16);
+          b = parseInt(color.substring(5, 7), 16);
+        } else if (color.startsWith("rgb(")) {
+          const parts = color.substring(4, color.length - 1).split(",");
+          r = parseInt(parts[0]);
+          g = parseInt(parts[1]);
+          b = parseInt(parts[2]);
+        }
+
+        // Calculate luminance using relative luminance formula
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+        // Determine if dark or light based on luminance threshold
+        resolve(luminance > 0.5 ? "light" : "dark");
+      }
+    };
+
+    process.stdin.setRawMode(true);
+    process.stdin.on("data", handler);
+    process.stdout.write("\x1b]11;?\x07");
+
+    timeout = setTimeout(() => {
+      cleanup();
+      resolve("dark");
+    }, 1000);
+  });
 }

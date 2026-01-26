@@ -9,9 +9,9 @@
  */
 
 import solidPlugin from "@opentui/solid/bun-plugin";
-import { realpathSync } from "fs";
-import { resolve, relative } from "path";
 import pkg from "./package.json";
+
+const workerPath = "./src/worker.ts";
 
 // Parse --target argument
 const targetArg = process.argv.find((arg) => arg.startsWith("--target="));
@@ -21,12 +21,8 @@ const target =
   (targetFlag !== -1 ? process.argv[targetFlag + 1] : null) ??
   `${process.platform}-${process.arch}`;
 
-const dir = import.meta.dirname;
-const workerAbsolute = realpathSync(resolve(dir, "./src/worker.ts"));
-const workerRelative = relative(dir, workerAbsolute).replaceAll("\\", "/");
-const bunfsRoot = "/$bunfs/root/";
-
 const result = await Bun.build({
+  root: ".",
   conditions: ["browser"],
   tsconfig: "./tsconfig.json",
   plugins: [solidPlugin],
@@ -40,10 +36,9 @@ const result = await Bun.build({
     target: `bun-${target}` as "bun",
     outfile: "dist/popcorn",
   },
-  entrypoints: ["./src/index.ts", workerAbsolute],
+  entrypoints: ["./src/index.ts", workerPath],
   define: {
     POPCORN_VERSION: `'${pkg.version}'`,
-    POPCORN_WORKER_PATH: `'${bunfsRoot}${workerRelative}'`,
   },
 });
 
