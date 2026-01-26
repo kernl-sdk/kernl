@@ -151,4 +151,19 @@ export const toolkits: RegistryItem[] = [
       { path: "toolkits/modal/fs.ts" },
     ],
   },
+  {
+    name: "supermemory",
+    type: "registry:toolkit",
+    title: "Supermemory",
+    description: "Document storage and semantic search for long-term memory",
+    icon: "https://registry.kernl.sh/icons/supermemory.svg",
+    category: "search",
+    dependencies: ["supermemory@^4.0.0"],
+    env: ["SUPERMEMORY_API_KEY"],
+    files: [
+      { path: "toolkits/supermemory/index.ts" },
+      { path: "toolkits/supermemory/client.ts" },
+      { path: "toolkits/supermemory/documents.ts" },
+    ],
+  },
 ];
