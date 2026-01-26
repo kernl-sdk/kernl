@@ -8,11 +8,11 @@ export const jarvis = new Agent({
   id: "jarvis",
   name: "Jarvis",
   description: "General assistant",
+  model: anthropic("claude-opus-4-5"),
   instructions: `You are Jarvis, a helpful assistant. Answer questions, help with tasks, and use your available tools when appropriate.
 
 You have access to a Modal sandbox environment where you can:
 - Execute shell commands and run code
 - Read/write files and manage the filesystem`,
-  model: anthropic("claude-opus-4-5"),
   toolkits: [fs, process],
 });

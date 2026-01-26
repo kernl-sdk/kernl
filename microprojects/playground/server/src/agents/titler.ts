@@ -9,11 +9,11 @@ import { anthropic } from "@kernl-sdk/ai/anthropic";
 export const titler = new Agent({
   id: "titler",
   name: "Titler",
+  model: anthropic("claude-haiku-4-5"),
   instructions: `You generate concise, human-readable titles for chat threads.
 
 Given a user message, respond with a short title (max 8 words) that summarizes
 the topic in a way that's useful in a conversation list.
 
 Return only the title text, with no quotes or other decoration.`,
-  model: anthropic("claude-haiku-4-5"),
 });

@@ -1,24 +1,36 @@
-import { useState, useCallback, useMemo } from "react";
-import { useParams } from "react-router-dom";
-import { LiveWaveform, useRealtime, useBrowserAudio } from "@kernl-sdk/react";
-import { Lightbulb } from "lucide-react";
+// TODO: Re-enable when kernl/realtime is browser-safe (#50)
+// import { useState, useCallback, useMemo } from "react";
+// import { useParams } from "react-router-dom";
+// import { LiveWaveform, useRealtime, useBrowserAudio } from "@kernl-sdk/react";
+// import { Lightbulb } from "lucide-react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { kernl } from "@/lib/kernl";
-import { watson } from "@/agents/watson";
-import type { LightContext } from "@/toolkits/light";
+// import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+// import { Button } from "@/components/ui/button";
+// import { kernl } from "@/lib/kernl";
+// import { watson } from "@/agents/watson";
+// import type { LightContext } from "@/toolkits/light";
 
-const realtimeAgents = { watson };
+// const realtimeAgents = { watson };
 
 export default function VoicePage() {
+  return (
+    <div className="flex h-full items-center justify-center">
+      <p className="text-muted-foreground">
+        Voice disabled - waiting for kernl/realtime browser support (#50)
+      </p>
+    </div>
+  );
+}
+
+/*
+function VoicePageImpl() {
   const { agentId } = useParams<{ agentId: string }>();
   const agent = realtimeAgents[agentId as keyof typeof realtimeAgents];
 
   const [error, setError] = useState<string | null>(null);
   const [lightOn, setLightOn] = useState(false);
 
-  /** Browser audio channel for mic capture and playback. */
+  // Browser audio channel for mic capture and playback.
   const { channel } = useBrowserAudio();
 
   // context for tools - memoize to prevent reconnection on every render
@@ -30,9 +42,7 @@ export default function VoicePage() {
     ctx,
   });
 
-  /**
-   * Request mic permissions, init audio, and connect to the session
-   */
+  // Request mic permissions, init audio, and connect to the session
   const start = useCallback(async () => {
     if (!agent || !channel) return;
     setError(null);
@@ -51,9 +61,7 @@ export default function VoicePage() {
     }
   }, [agent, channel, connect]);
 
-  /**
-   * Disconnect from the model and release audio resources.
-   */
+  // Disconnect from the model and release audio resources.
   const stop = useCallback(() => {
     disconnect();
     channel?.close();
@@ -72,7 +80,6 @@ export default function VoicePage() {
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-8">
-      {/* Agent info */}
       <div className="flex flex-col items-center gap-3">
         <Avatar className="size-13 mb-2 bg-surface border-2 border-steel">
           <AvatarFallback className="bg-transparent text-base">
@@ -82,7 +89,6 @@ export default function VoicePage() {
         <span className="text-lg font-semibold">{agent.name}</span>
       </div>
 
-      {/* Light demo */}
       <div
         className={`flex items-center justify-center size-20 rounded-full transition-all duration-300 ${
           lightOn
@@ -97,7 +103,6 @@ export default function VoicePage() {
         />
       </div>
 
-      {/* Waveform */}
       <div className="w-full max-w-xs px-8">
         <LiveWaveform
           audio={channel}
@@ -108,7 +113,6 @@ export default function VoicePage() {
         />
       </div>
 
-      {/* Controls */}
       <div className="flex flex-col items-center gap-4">
         {error && <p className="text-sm text-red-500">{error}</p>}
 
@@ -135,3 +139,4 @@ export default function VoicePage() {
     </div>
   );
 }
+*/

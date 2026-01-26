@@ -5,9 +5,11 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IconAgents } from "@/components/ui/icons";
 import { kernl } from "@/lib/kernl";
-import { watson } from "@/agents/watson";
+// TODO: Re-enable when kernl/realtime is browser-safe (#50)
+// import { watson } from "@/agents/watson";
 
-const realtimeAgents = [watson];
+// const realtimeAgents = [watson];
+const realtimeAgents: { id: string; name: string; description: string }[] = [];
 
 export default function AgentsPage() {
   const { data, isLoading } = useSWR("agents", () => kernl.agents.list());
