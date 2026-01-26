@@ -36,8 +36,8 @@ importers:
         specifier: ^0.4.5
         version: 0.4.6(@ai-sdk/anthropic@3.0.23(zod@4.3.6))(@ai-sdk/provider@3.0.5)(hono@4.11.5)(zod@4.3.6)
       '@kernl-sdk/pg':
-        specifier: ^0.1.35
-        version: 0.1.36(hono@4.11.5)(zod@4.3.6)
+        specifier: ^0.2.0
+        version: 0.2.0(hono@4.11.5)(zod@4.3.6)
       ai:
         specifier: ^5.0.93
         version: 5.0.123(zod@4.3.6)
@@ -45,8 +45,8 @@ importers:
         specifier: ^4.10.6
         version: 4.11.5
       kernl:
-        specifier: ^0.12.3
-        version: 0.12.4(hono@4.11.5)(zod@4.3.6)
+        specifier: ^0.12.7
+        version: 0.12.7(hono@4.11.5)(zod@4.3.6)
       pino:
         specifier: ^10.1.0
         version: 10.2.1
@@ -1012,8 +1012,8 @@ packages:
       '@ai-sdk/openai':
         optional: true
 
-  '@kernl-sdk/pg@0.1.36':
-    resolution: {integrity: sha512-AlfQI26yKD+UgYE/HCer+PZI4VnfqOTtOPd9s+qA+LTNiIf0w1dmpSObAGenxnOYsdWGBe1+29R0YLcWHcvTig==}
+  '@kernl-sdk/pg@0.2.0':
+    resolution: {integrity: sha512-Y8EtbrDIlLDIJZGLDCYDUA4zHCtxpXkciSFZltK9uv8qzzRoggjAUvXVRflyZ6JPeI09KOLZSrsqYx/ftVcIDQ==}
 
   '@kernl-sdk/protocol@0.5.1':
     resolution: {integrity: sha512-Pm0nrVjSt8k1FaODQ7QzrK6ZjXynqlO4RBoVfwAB1b6OKNHERa00WmLp1BM0IAckfsHriedlaBM68QM9AFAo9A==}
@@ -1026,8 +1026,8 @@ packages:
     peerDependencies:
       zod: ^4.1.8
 
-  '@kernl-sdk/storage@0.2.4':
-    resolution: {integrity: sha512-xEazunPiO2/zH1xpNiraihygWTpFaNJDtAd2MH11PwPU7x+P/WebB+Fw0qNgZ9LJko2aTrhqTkb4dOLSpS7m8Q==}
+  '@kernl-sdk/storage@0.2.7':
+    resolution: {integrity: sha512-zFRztXjFMK+cR8s5UxLfusRAbP6irbIy373r9wpEHHw3JeJ8fLdqeGRVMB/6LO8jMhesnJtkshC3bVC9RDk6jA==}
     peerDependencies:
       zod: ^4.1.8
 
@@ -3625,6 +3625,11 @@ packages:
 
   kernl@0.12.4:
     resolution: {integrity: sha512-8ByZXvSihtVYT5Ut8xUVC3+gN+lQYiOIMh6FTDI+0ZSrWJPpp2EDisTGERtcm+Z3/cU1ETTgEYfVyT6YzLWuRA==}
+    peerDependencies:
+      zod: ^4.1.8
+
+  kernl@0.12.7:
+    resolution: {integrity: sha512-lSuEQEJNWGLMTRN3D+QYcODIvZSiQGStsim/bLjatgdpX4VgLKIR2ye2AXz7EfWAFmB7dzYZYuFfRzO6AVgOVA==}
     peerDependencies:
       zod: ^4.1.8
 
@@ -6258,12 +6263,12 @@ snapshots:
       - supports-color
       - zod
 
-  '@kernl-sdk/pg@0.1.36(hono@4.11.5)(zod@4.3.6)':
+  '@kernl-sdk/pg@0.2.0(hono@4.11.5)(zod@4.3.6)':
     dependencies:
       '@kernl-sdk/retrieval': 0.1.10(zod@4.3.6)
       '@kernl-sdk/shared': 0.4.0(zod@4.3.6)
-      '@kernl-sdk/storage': 0.2.4(hono@4.11.5)(zod@4.3.6)
-      kernl: 0.12.4(hono@4.11.5)(zod@4.3.6)
+      '@kernl-sdk/storage': 0.2.7(hono@4.11.5)(zod@4.3.6)
+      kernl: 0.12.7(hono@4.11.5)(zod@4.3.6)
       pg: 8.17.2
     transitivePeerDependencies:
       - '@cfworker/json-schema'
@@ -6289,11 +6294,11 @@ snapshots:
     dependencies:
       zod: 4.3.6
 
-  '@kernl-sdk/storage@0.2.4(hono@4.11.5)(zod@4.3.6)':
+  '@kernl-sdk/storage@0.2.7(hono@4.11.5)(zod@4.3.6)':
     dependencies:
       '@kernl-sdk/protocol': 0.5.1(zod@4.3.6)
       '@kernl-sdk/shared': 0.4.0(zod@4.3.6)
-      kernl: 0.12.4(hono@4.11.5)(zod@4.3.6)
+      kernl: 0.12.7(hono@4.11.5)(zod@4.3.6)
       zod: 4.3.6
     transitivePeerDependencies:
       - '@cfworker/json-schema'
@@ -9310,6 +9315,19 @@ snapshots:
       commander: 8.3.0
 
   kernl@0.12.4(hono@4.11.5)(zod@4.3.6):
+    dependencies:
+      '@kernl-sdk/protocol': 0.5.1(zod@4.3.6)
+      '@kernl-sdk/retrieval': 0.1.10(zod@4.3.6)
+      '@kernl-sdk/shared': 0.4.0(zod@4.3.6)
+      '@modelcontextprotocol/sdk': 1.25.3(hono@4.11.5)(zod@4.3.6)
+      yaml: 2.8.2
+      zod: 4.3.6
+    transitivePeerDependencies:
+      - '@cfworker/json-schema'
+      - hono
+      - supports-color
+
+  kernl@0.12.7(hono@4.11.5)(zod@4.3.6):
     dependencies:
       '@kernl-sdk/protocol': 0.5.1(zod@4.3.6)
       '@kernl-sdk/retrieval': 0.1.10(zod@4.3.6)

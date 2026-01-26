@@ -3,12 +3,15 @@ import { cors } from "hono/cors";
 import { Kernl } from "kernl";
 import { postgres } from "@kernl-sdk/pg";
 
+// --- lib ---
 import { APIError } from "@/lib/error";
 import { logger, logreq } from "@/lib/logger";
 import { env } from "@/lib/env";
 
+// --- agents ---
 import { charger } from "@/agents/charger";
 
+// --- routes ---
 import agents from "@/api/agents";
 import threads from "@/api/threads";
 
@@ -18,7 +21,9 @@ type Variables = {
 
 export function build(): Hono<{ Variables: Variables }> {
   const kernl = new Kernl({
-    storage: { db: postgres({ url: env.DATABASE_URL }) },
+    storage: {
+      db: postgres({ url: env.DATABASE_URL }),
+    },
   });
 
   kernl.register(charger);
