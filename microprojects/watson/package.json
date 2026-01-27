@@ -18,7 +18,7 @@
     "@kernl-sdk/pg": "^0.1.19",
     "@kernl-sdk/turbopuffer": "^0.1.4",
     "@workflow/world-postgres": "^4.1.0-beta.17",
-    "hono": "^4.10.6",
+    "hono": "^4.11.7",
     "kernl": "^0.8.2",
     "pino": "^10.1.0",
     "pino-pretty": "^13.1.2",
