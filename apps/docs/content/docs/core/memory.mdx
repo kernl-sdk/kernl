@@ -42,7 +42,6 @@ const jarvis = new Agent({
   name: "Jarvis",
   model: anthropic("claude-sonnet-4-5"),
   instructions: "Assist Tony Stark in saving the world from destruction.",
-  memory: { enabled: true },
 });
 
 // create a memory
@@ -69,6 +68,22 @@ await jarvis.memories.update({
 ```
 
 ### b) Agent systools
+
+Import the memory toolkit to give the agent autonomous control over its memory:
+
+```ts
+import { Agent } from "kernl";
+import { anthropic } from "@kernl-sdk/ai/anthropic";
+import { memory } from "kernl/systools";
+
+const jarvis = new Agent({
+  id: "jarvis",
+  name: "Jarvis",
+  model: anthropic("claude-sonnet-4-5"),
+  instructions: "Assist Tony Stark in saving the world from destruction.",
+  toolkits: [memory],
+});
+```
 
 The agent determines how + when it wants to make changes to its own memory. Prompting is useful here for modulating its behavior.
 

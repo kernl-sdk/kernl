@@ -24,7 +24,6 @@ const agent = new Agent({
   model: anthropic("claude-sonnet-4-5"),
   instructions: "You are a helpful assistant.",
   toolkits: [github],
-  memory: { enabled: true },
 });
 ```
 
@@ -72,14 +71,6 @@ const agent = new Agent<TContext, TOutput>(config);
   toolkits: {
     type: "Toolkit[]",
     description: "Tool collections",
-  },
-  memory: {
-    type: "{ enabled: boolean }",
-    description: "Enable memory tools",
-  },
-  guardrails: {
-    type: "AgentGuardrails",
-    description: "Input/output safety checks",
   },
 }}
 />
@@ -253,10 +244,27 @@ await agent.threads.delete("thread_123");
 
 ## Memory
 
-When `memory: { enabled: true }`, agents get memory tools automatically:
+Add memory capabilities by importing the built-in memory toolkit:
 
-* `memories.search` — semantic search over stored memories
-* `memories.create` — store new memories
-* `memories.list` — list memories with filters
+```ts
+import { Agent } from "kernl";
+import { anthropic } from "@kernl-sdk/ai/anthropic";
+import { memory } from "kernl/systools";
+
+const agent = new Agent({
+  id: "jarvis",
+  name: "Jarvis",
+  model: anthropic("claude-sonnet-4-5"),
+  instructions: "You are a helpful assistant with long-term memory.",
+  toolkits: [memory],
+});
+```
+
+This gives the agent tools for autonomous memory management:
+
+- `search_memories` — semantic search over stored memories
+- `create_memory` — store new memories
+- `update_memory` — modify existing memories
+- `list_memories` — list memories with filters
 
 See [Memory](/core/memory) for details.
