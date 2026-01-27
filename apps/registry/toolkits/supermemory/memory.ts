@@ -1,11 +1,7 @@
 import { z } from "zod";
 import { tool, Toolkit, type Context } from "kernl";
 
-import {
-  supermemory,
-  getContainerTag,
-  type SupermemoryContext,
-} from "./client";
+import { supermemory, getUserId, type SupermemoryContext } from "./client";
 
 /**
  * @tool
@@ -29,10 +25,10 @@ export const add = tool({
       message: "Provide either content or url, not both",
     }),
   async execute(ctx: Context<SupermemoryContext>, { content, url }) {
-    const tag = getContainerTag(ctx.context);
+    const uid = getUserId(ctx.context);
     const response = await supermemory.memories.add({
       content: content ?? url!,
-      containerTags: tag ? [tag] : undefined,
+      containerTags: [uid],
     });
     return { id: response.id, stored: true };
   },
@@ -82,9 +78,9 @@ export const list = tool({
     order: z.enum(["asc", "desc"]).optional().describe("Sort order"),
   }),
   async execute(ctx: Context<SupermemoryContext>, { limit, sort, order }) {
-    const tag = getContainerTag(ctx.context);
+    const uid = getUserId(ctx.context);
     const response = await supermemory.memories.list({
-      containerTags: tag ? [tag] : undefined,
+      containerTags: [uid],
       limit,
       sort,
       order,
@@ -161,9 +157,9 @@ export const forget = tool({
       message: "Provide either id or content to identify the memory",
     }),
   async execute(ctx: Context<SupermemoryContext>, { id, content, reason }) {
-    const tag = getContainerTag(ctx.context);
+    const uid = getUserId(ctx.context);
     return await supermemory.memories.forget({
-      containerTag: tag,
+      containerTag: uid,
       id,
       content,
       reason,
@@ -191,10 +187,10 @@ export const search = tool({
       .describe("Max results (default: 10)"),
   }),
   async execute(ctx: Context<SupermemoryContext>, { q, limit }) {
-    const tag = getContainerTag(ctx.context);
+    const uid = getUserId(ctx.context);
     const response = await supermemory.search.memories({
       q,
-      containerTag: tag,
+      containerTag: uid,
       limit,
     });
     return response.results.map((r) => ({

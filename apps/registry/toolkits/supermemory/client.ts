@@ -22,14 +22,11 @@ export interface SupermemoryContext {
   userId?: string;
 }
 
+const DEFAULT_USER_ID = "default";
+
 /**
- * Builds a container tag from context fields.
- * Customize this to match your partitioning strategy.
- * Defaults to "default" if no context is provided.
+ * Gets the user ID from context, falling back to a default.
  */
-export function getContainerTag(ctx: SupermemoryContext): string {
-  const parts: string[] = [];
-  if (ctx.namespace) parts.push(ctx.namespace);
-  if (ctx.userId) parts.push(ctx.userId);
-  return parts.length > 0 ? parts.join("_") : "default";
+export function getUserId(ctx: SupermemoryContext): string {
+  return ctx.userId ?? DEFAULT_USER_ID;
 }

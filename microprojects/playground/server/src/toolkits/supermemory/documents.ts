@@ -1,11 +1,7 @@
 import { z } from "zod";
 import { tool, Toolkit, type Context } from "kernl";
 
-import {
-  supermemory,
-  getContainerTag,
-  type SupermemoryContext,
-} from "./client";
+import { supermemory, getUserId, type SupermemoryContext } from "./client";
 
 const MetadataSchema = z
   .record(
@@ -41,9 +37,10 @@ export const add = tool({
       message: "Provide either content or url, not both",
     }),
   async execute(ctx: Context<SupermemoryContext>, { content, url, metadata }) {
+    const uid = getUserId(ctx.context);
     return await supermemory.documents.add({
       content: content ?? url!,
-      containerTag: getContainerTag(ctx.context),
+      containerTag: uid,
       metadata,
     });
   },
@@ -100,11 +97,11 @@ export const list = tool({
     ctx: Context<SupermemoryContext>,
     { limit, cursor, sort, order },
   ) {
-    const tag = getContainerTag(ctx.context);
+    const uid = getUserId(ctx.context);
     return await supermemory.documents.list({
       limit,
       page: cursor,
-      containerTags: tag ? [tag] : undefined,
+      containerTags: [uid],
       sort,
       order,
     });
@@ -140,9 +137,10 @@ export const update = tool({
     ctx: Context<SupermemoryContext>,
     { id, content, url, metadata },
   ) {
+    const uid = getUserId(ctx.context);
     return await supermemory.documents.update(id, {
       content: content ?? url,
-      containerTag: getContainerTag(ctx.context),
+      containerTag: uid,
       metadata,
     });
   },
@@ -198,11 +196,11 @@ export const search = tool({
     ctx: Context<SupermemoryContext>,
     { q, limit, doc_id, include_summary, rerank },
   ) {
-    const tag = getContainerTag(ctx.context);
+    const uid = getUserId(ctx.context);
     return await supermemory.search.documents({
       q,
       limit,
-      containerTags: tag ? [tag] : undefined,
+      containerTags: [uid],
       docId: doc_id,
       includeSummary: include_summary,
       rerank,
@@ -211,7 +209,7 @@ export const search = tool({
 });
 
 export const documents = new Toolkit<SupermemoryContext>({
-  id: "supermemory.documents",
+  id: "supermemory_documents",
   description: "Document storage and search for Supermemory",
   tools: [add, get, list, update, rm, search],
 });
