@@ -23,6 +23,25 @@ Create a new kernl app:
 kernl init my-project
 ```
 
+### Claude Code
+
+Make Claude an expert at kernl:
+
+```shell
+/plugin marketplace add kernl-sdk/skills
+/plugin install kernl@skills
+```
+
+### Cursor
+
+Add the skill to your project:
+
+```bash
+git clone https://github.com/kernl-sdk/skills.git /tmp/kernl-skills
+mkdir -p .cursor/skills
+cp -r /tmp/kernl-skills/plugins/kernl/skills/kernl .cursor/skills/kernl-docs
+```
+
 ## Usage
 
 ### Agent
