@@ -71,7 +71,7 @@ export interface AgentConfig<
    * that can be static (Toolkit) or dynamic (MCPToolkit).
    *
    * @example
-   * ```typescript
+   * ```ts
    * const myTools = new Toolkit({
    *   id: "custom",
    *   tools: [tool1, tool2]
@@ -90,14 +90,6 @@ export interface AgentConfig<
    * ```
    */
   toolkits?: BaseToolkit<TContext>[];
-
-  /**
-   * Memory configuration for this agent.
-   * Enables memory system tools (memories.search, memories.create, memories.list).
-   *
-   * Requires kernl to be configured with memory storage.
-   */
-  memory?: AgentMemoryConfig;
 
   /**
    * A list of checks that run in parallel to the agent's execution on the input + output for the agent,
@@ -153,16 +145,6 @@ export interface AgentGuardrails<TOutput extends AgentOutputType = TextOutput> {
  * 'text' is a special type that indicates the output will be a string.
  */
 export type AgentOutputType = TextOutput | ZodType;
-
-/**
- * Memory configuration for an agent.
- */
-export interface AgentMemoryConfig {
-  /**
-   * Enable memory system tools for this agent.
-   */
-  enabled: boolean;
-}
 
 /**
  * Agent kind discriminator.

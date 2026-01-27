@@ -10,12 +10,10 @@ import {
   Memory,
   MemoryByteEncoder,
   MemoryIndexHandle,
-  MemoryStore,
   buildMemoryIndexSchema,
 } from "@/memory";
 import { setSubscriber, clearSubscriber, type Subscriber } from "@/tracing";
 
-import { logger } from "@/lib/logger";
 import { RThreads } from "@/api/resources/threads";
 import { RAgents } from "@/api/resources/agents";
 import type { ThreadExecuteResult, ThreadStreamEvent } from "@/thread/types";
@@ -40,21 +38,14 @@ export class Kernl extends KernlHooks {
   readonly storage: KernlStorage;
   athreads: Map<string, Thread<any, any>> = new Map(); /* active threads */
 
-  private warnings = {
-    embedding: false, // "Embeddings are not configured. If you want memories to auto-embed text content..."
-    vector: false, // "No vector storage configured. The memories.search() function will not be..."
-  }; /* tracks warnings that have been logged */
 
   // --- public API ---
   readonly threads: RThreads;
   readonly agents: RAgents;
-  readonly memories: MemoryStore;
+  readonly memories: Memory;
 
   constructor(options: KernlOptions = {}) {
     super();
-
-    this._memopts = options.memory;
-    this._storopts = options.storage;
 
     this._agents = new AgentRegistry();
     this._models = new ModelRegistry();
@@ -63,8 +54,9 @@ export class Kernl extends KernlHooks {
     this.threads = new RThreads(this.storage.threads);
     this.agents = new RAgents(this._agents);
     this.memories = this.initmem();
+    this._memopts = options.memory;
+    this._storopts = options.storage;
 
-    // wire tracing
     if (options.tracer) {
       this._subscriber = options.tracer;
       setSubscriber(this._subscriber);
@@ -77,25 +69,6 @@ export class Kernl extends KernlHooks {
   register(agent: BaseAgent<any>): void {
     this._agents.register(agent);
     agent.bind(this);
-
-    // memory config warnings (log once)
-    if (agent.memory.enabled) {
-      if (!this._memopts?.embedding && !this.warnings.embedding) {
-        logger.warn(
-          "Embeddings are not configured. If you want memories to auto-embed text content, " +
-            "pass an embedding model into the memory config in new Kernl()",
-        );
-        this.warnings.embedding = true;
-      }
-
-      if (!this._storopts?.vector && !this.warnings.vector) {
-        logger.warn(
-          "No vector storage configured. The memories.search() function will not be " +
-            "available. To enable memory search, pass storage.vector in new Kernl()",
-        );
-        this.warnings.vector = true;
-      }
-    }
 
     // auto-populate model registry for storage hydration (llm agents only - for now)
     if (agent.kind === "llm") {

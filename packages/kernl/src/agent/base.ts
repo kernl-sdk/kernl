@@ -2,7 +2,6 @@ import { randomID } from "@kernl-sdk/shared/lib";
 
 import type { Context, UnknownContext } from "@/context";
 import type { Tool, BaseToolkit } from "@/tool";
-import { memory } from "@/tool";
 import { MisconfiguredError } from "@/lib/error";
 import { AgentHooks, type AgentHookEvents } from "@/lifecycle";
 import type { Kernl } from "@/kernl";
@@ -13,7 +12,7 @@ import type {
   MemorySearchQuery,
 } from "@/memory";
 
-import type { AgentKind, AgentMemoryConfig, AgentOutputType } from "./types";
+import type { AgentKind, AgentOutputType } from "./types";
 import type { TextOutput } from "@/thread/types";
 
 /**
@@ -27,7 +26,6 @@ export interface BaseAgentConfig<TContext = UnknownContext> {
     | string
     | ((context: Context<TContext>) => Promise<string> | string);
   toolkits?: BaseToolkit<TContext>[];
-  memory?: AgentMemoryConfig;
 }
 
 /**
@@ -61,7 +59,6 @@ export abstract class BaseAgent<
   ) => Promise<string> | string;
   readonly toolkits: BaseToolkit<TContext>[];
   readonly systools: BaseToolkit<TContext>[];
-  readonly memory: AgentMemoryConfig;
 
   constructor(config: BaseAgentConfig<TContext>) {
     super();
@@ -79,7 +76,6 @@ export abstract class BaseAgent<
         : () => config.instructions as string;
     this.toolkits = config.toolkits ?? [];
     this.systools = [];
-    this.memory = config.memory ?? { enabled: false };
 
     for (const toolkit of this.toolkits) {
       toolkit.bind(this);
@@ -91,14 +87,6 @@ export abstract class BaseAgent<
    */
   bind(kernl: Kernl): void {
     this.kernl = kernl;
-
-    // initialize system toolkits
-    if (this.memory.enabled) {
-      // safety: system tools only rely on ctx.agent, not ctx.context
-      const toolkit = memory as unknown as BaseToolkit<TContext>;
-      this.systools.push(toolkit);
-      toolkit.bind(this);
-    }
   }
 
   /**

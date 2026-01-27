@@ -2,12 +2,24 @@
  * Memory system toolkit.
  *
  * Provides tools for agents to store and retrieve memories.
- * Enabled via `memory: true` in agent config.
+ *
+ * @example
+ * ```ts
+ * import { Agent } from "kernl";
+ * import { memory } from "kernl/systools";
+ *
+ * const agent = new Agent({
+ *   toolkits: [memory],
+ * });
+ * ```
+ *
+ * Requires the agent to be registered with Kernl via `kernl.register(agent)`.
  */
 
 import assert from "assert";
 import { z } from "zod";
 
+import type { MemorySearchResult } from "@/memory";
 import { tool } from "../tool";
 import { Toolkit } from "../toolkit";
 
@@ -36,7 +48,7 @@ const search = tool({
       limit: limit ?? 10,
     });
 
-    return mems.map((h) => ({
+    return mems.map((h: MemorySearchResult) => ({
       id: h.record.id,
       collection: h.record.collection,
       text: h.record.content.text,
