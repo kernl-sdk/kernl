@@ -14,7 +14,7 @@ import type {
   IndexMemoryRecord,
   IndexMemoryRecordPatch,
   MemoryByteCodec,
-} from "../../types";
+} from "../types";
 
 /**
  * Codec for converting MemoryFilter to retrieval Filter.

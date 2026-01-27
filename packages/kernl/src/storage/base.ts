@@ -4,7 +4,7 @@
 
 import type { IAgentRegistry, IModelRegistry } from "@/kernl/types";
 import type { ThreadStore } from "./thread";
-import type { MemoryStore } from "@/memory/store";
+import type { MemoryStore } from "@/memory/interface";
 
 /**
  * The main storage interface for Kernl.

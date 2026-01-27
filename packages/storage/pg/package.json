@@ -48,10 +48,10 @@
     "vitest": "^4.0.8"
   },
   "dependencies": {
-    "kernl": "workspace:^",
     "@kernl-sdk/retrieval": "workspace:^",
     "@kernl-sdk/shared": "workspace:^",
     "@kernl-sdk/storage": "workspace:*",
+    "kernl": "workspace:^",
     "pg": "^8.16.3"
   }
 }

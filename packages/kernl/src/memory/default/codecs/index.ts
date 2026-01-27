@@ -14,7 +14,7 @@ import type {
   UnknownDocument,
 } from "@kernl-sdk/retrieval";
 
-import type { IndexMemoryRecord } from "../../types";
+import type { IndexMemoryRecord } from "../types";
 import { IDENTITY_DOC, IDENTITY_SCHEMA, IDENTITY_QUERY } from "./identity";
 import { TPUF_DOC, TPUF_SCHEMA, TPUF_QUERY } from "./tpuf";
 

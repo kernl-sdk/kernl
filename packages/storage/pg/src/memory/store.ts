@@ -10,8 +10,6 @@ import type {
   NewMemory,
   MemoryRecordUpdate,
   MemoryListOptions,
-  MemorySearchQuery,
-  MemorySearchResult,
 } from "kernl";
 import {
   KERNL_SCHEMA_NAME,
@@ -166,15 +164,4 @@ export class PGMemoryStore implements MemoryStore {
     );
   }
 
-  /**
-   * Search memories.
-   *
-   * This store does not support vector search. Configure storage.vector
-   * and memory.embedding for semantic search capabilities.
-   */
-  async search(_query: MemorySearchQuery): Promise<MemorySearchResult[]> {
-    throw new Error(
-      "search() requires vector storage. Configure storage.vector and memory.embedding in Kernl options.",
-    );
-  }
 }

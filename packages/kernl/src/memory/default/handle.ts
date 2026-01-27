@@ -18,7 +18,7 @@ import {
 } from "@kernl-sdk/retrieval";
 
 import { getAdapterCodecs, type AdapterCodecs } from "./codecs";
-import type { IndexMemoryRecord } from "../types";
+import type { IndexMemoryRecord } from "./types";
 
 /**
  * Configuration for MemoryIndexHandle.

@@ -33,8 +33,6 @@ import type {
   MemoryRecordUpdate,
   MemoryListOptions,
   MemoryFilter,
-  MemorySearchQuery,
-  MemorySearchResult,
 } from "@/memory";
 
 /**
@@ -467,12 +465,6 @@ export class InMemoryMemoryStore implements MemoryStore {
     for (const id of ids) {
       this.memories.delete(id);
     }
-  }
-
-  async search(_query: MemorySearchQuery): Promise<MemorySearchResult[]> {
-    throw new Error(
-      "search() requires vector storage. Configure storage.vector and memory.embedding in Kernl options.",
-    );
   }
 
   /**

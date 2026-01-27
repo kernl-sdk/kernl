@@ -3,13 +3,16 @@
  */
 
 // Default composite implementation
-export { Memory } from "./default/memory";
+export {
+  Memory,
+  DefaultMemorySnapshot as DefaultMemoryContext,
+} from "./default/memory";
 export { MemoryByteEncoder, ObjectTextCodec } from "./default/encoder";
 export { buildMemoryIndexSchema } from "./default/schema";
 export { MemoryIndexHandle } from "./default/handle";
 export type { MemoryIndexHandleConfig } from "./default/handle";
 
-// Shared types
+// Core types
 export type {
   // Byte types
   TextByte,
@@ -17,30 +20,38 @@ export type {
   AudioByte,
   VideoByte,
   MemoryByte,
-  IndexableByte,
-  MemoryByteCodec,
   // Core types
   MemoryScope,
   MemoryKind,
   NewMemory,
-  AgentMemoryCreate,
-  AgentMemoryUpdate,
-  MemoryConfig,
-  MemoryReindexParams,
   MemoryRecord,
   MemoryRecordUpdate,
   MemoryFilter,
   MemoryListOptions,
   MemorySearchQuery,
   MemorySearchResult,
+  // kernl-specific types
+  IndexableByte,
+  MemoryByteCodec,
+  AgentMemoryCreate,
+  AgentMemoryUpdate,
+  MemoryConfig,
+  MemoryReindexParams,
   IndexMemoryRecord,
   IndexMemoryRecordPatch,
   WorkingMemorySnapshot,
   ShortTermMemorySnapshot,
-} from "./types";
+} from "./default/types";
 
-// Interface
-export type { MemoryStore } from "./store";
+// Interfaces
+export type {
+  MemoryStore,
+  MemoryProvider,
+  Renderable,
+  RenderFormat,
+  MemorySnapshot,
+} from "./interface";
+export { BaseMemorySnapshot } from "./interface";
 
 // Index interfaces (part of default implementation)
 export type {
