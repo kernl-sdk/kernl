@@ -2,12 +2,14 @@
  * Memory module.
  */
 
-export { Memory } from "./memory";
-export { MemoryByteEncoder, ObjectTextCodec } from "./encoder";
-export { buildMemoryIndexSchema } from "./schema";
-export { MemoryIndexHandle } from "./handle";
-export type { MemoryIndexHandleConfig } from "./handle";
+// Default composite implementation
+export { Memory } from "./default/memory";
+export { MemoryByteEncoder, ObjectTextCodec } from "./default/encoder";
+export { buildMemoryIndexSchema } from "./default/schema";
+export { MemoryIndexHandle } from "./default/handle";
+export type { MemoryIndexHandleConfig } from "./default/handle";
 
+// Shared types
 export type {
   // Byte types
   TextByte,
@@ -30,14 +32,17 @@ export type {
   MemoryFilter,
   MemoryListOptions,
   MemorySearchQuery,
+  MemorySearchResult,
   IndexMemoryRecord,
   IndexMemoryRecordPatch,
   WorkingMemorySnapshot,
   ShortTermMemorySnapshot,
 } from "./types";
 
+// Interface
 export type { MemoryStore } from "./store";
 
+// Index interfaces (part of default implementation)
 export type {
   MemoryIndexBase,
   MemorySearchIndex,
@@ -47,4 +52,4 @@ export type {
   GraphTraversalResult,
   ArchiveQuery,
   ArchiveResult,
-} from "./indexes";
+} from "./default/indexes";

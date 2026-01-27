@@ -5,7 +5,7 @@
 import type { EmbeddingModel, JSONObject } from "@kernl-sdk/protocol";
 import { stringify as yamlStringify } from "yaml";
 
-import type { MemoryByte, IndexableByte, MemoryByteCodec } from "./types";
+import type { MemoryByte, IndexableByte, MemoryByteCodec } from "../types";
 
 // ---------------------
 // ObjectTextCodec

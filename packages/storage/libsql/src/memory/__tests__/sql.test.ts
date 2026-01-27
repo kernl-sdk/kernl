@@ -130,20 +130,20 @@ describe("LibSQL memory SQL codecs", () => {
   describe("SQL_UPDATE", () => {
     it("encodes content update with JSON stringify", () => {
       const content = { text: "Updated content" };
-      const result = SQL_UPDATE.encode({ patch: { id: "m1", content } });
+      const result = SQL_UPDATE.encode({ patch: {content } });
       expect(result.sql).toContain("content = ?");
       expect(result.params).toContain(JSON.stringify(content));
     });
 
     it("encodes wmem flag update", () => {
-      const result = SQL_UPDATE.encode({ patch: { id: "m1", wmem: true } });
+      const result = SQL_UPDATE.encode({ patch: {wmem: true } });
       expect(result.sql).toContain("wmem = ?");
       expect(result.params).toContain(1); // SQLite boolean
     });
 
     it("encodes smem expiration update", () => {
       const result = SQL_UPDATE.encode({
-        patch: { id: "m1", smem: { expiresAt: 1700100000000 } },
+        patch: {smem: { expiresAt: 1700100000000 } },
       });
       expect(result.sql).toContain("smem_expires_at = ?");
       expect(result.params).toContain(1700100000000);
@@ -151,14 +151,14 @@ describe("LibSQL memory SQL codecs", () => {
 
     it("encodes metadata update", () => {
       const metadata = { confidence: 0.95 };
-      const result = SQL_UPDATE.encode({ patch: { id: "m1", metadata } });
+      const result = SQL_UPDATE.encode({ patch: {metadata } });
       expect(result.sql).toContain("metadata = ?");
       expect(result.params).toContain(JSON.stringify(metadata));
     });
 
     it("always includes updated_at", () => {
       const before = Date.now();
-      const result = SQL_UPDATE.encode({ patch: { id: "m1", wmem: false } });
+      const result = SQL_UPDATE.encode({ patch: {wmem: false } });
       const after = Date.now();
 
       expect(result.sql).toContain("updated_at = ?");
@@ -171,7 +171,6 @@ describe("LibSQL memory SQL codecs", () => {
     it("combines multiple updates", () => {
       const result = SQL_UPDATE.encode({
         patch: {
-          id: "m1",
           content: { text: "New" },
           wmem: true,
           metadata: { edited: true },

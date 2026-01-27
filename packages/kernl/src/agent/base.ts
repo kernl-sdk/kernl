@@ -198,8 +198,7 @@ export abstract class BaseAgent<
         }),
 
       update: (params: AgentMemoryUpdate) =>
-        kmem.update({
-          id: params.id,
+        kmem.update(params.id, {
           content: params.content,
           collection: params.collection,
           wmem: params.wmem,

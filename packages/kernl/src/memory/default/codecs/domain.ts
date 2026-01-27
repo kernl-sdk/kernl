@@ -14,7 +14,7 @@ import type {
   IndexMemoryRecord,
   IndexMemoryRecordPatch,
   MemoryByteCodec,
-} from "../types";
+} from "../../types";
 
 /**
  * Codec for converting MemoryFilter to retrieval Filter.
@@ -99,7 +99,7 @@ export function recordCodec(
  */
 export const PATCH_CODEC: Codec<MemoryRecordUpdate, IndexMemoryRecordPatch> = {
   encode(update: MemoryRecordUpdate): IndexMemoryRecordPatch {
-    const patch: IndexMemoryRecordPatch = { id: update.id };
+    const patch: IndexMemoryRecordPatch = {};
 
     if (update.scope?.namespace !== undefined)
       patch.namespace = update.scope.namespace;

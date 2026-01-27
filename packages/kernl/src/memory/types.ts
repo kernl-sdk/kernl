@@ -46,7 +46,7 @@ export interface VideoByte {
  * Memory content - the smallest coherent unit of memory.
  *
  * May contain multiple modalities (e.g., captioned image, video with transcript).
- * At most one of each modality type.
+ * At most one of each modality type (for now).
  */
 export interface MemoryByte {
   text?: TextByte;
@@ -115,6 +115,8 @@ export interface ShortTermMemorySnapshot {
 
 /**
  * Memory scope - identifies who/what this memory belongs to.
+ *
+ * (TODO): this is not generic enough
  */
 export interface MemoryScope {
   namespace?: string;
@@ -217,7 +219,6 @@ export type MemoryRecord = EpisodicMemoryRecord | SemanticMemoryRecord;
  * Update payload for a memory record.
  */
 export interface MemoryRecordUpdate {
-  id: string;
   scope?: MemoryScope;
   collection?: string;
   content?: MemoryByte;
@@ -261,6 +262,14 @@ export interface MemorySearchQuery {
 }
 
 /**
+ * Result from semantic memory search.
+ */
+export interface MemorySearchResult {
+  record: MemoryRecord;
+  score: number;
+}
+
+/**
  * Params for triggering reindexing of a memory record.
  */
 export interface MemoryReindexParams {
@@ -292,7 +301,6 @@ export interface IndexMemoryRecord extends IndexableByte {
  * Content changes require full re-index, not a patch.
  */
 export interface IndexMemoryRecordPatch {
-  id: string;
   namespace?: string | null;
   entityId?: string | null;
   agentId?: string | null;

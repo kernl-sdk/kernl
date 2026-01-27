@@ -1,7 +1,7 @@
-import type { IndexHandle, SearchHit } from "@kernl-sdk/retrieval";
+import type { IndexHandle } from "@kernl-sdk/retrieval";
 import type { AsyncCodec } from "@kernl-sdk/shared/lib";
 
-import type { MemoryStore } from "./store";
+import type { MemoryStore } from "../store";
 import type {
   NewMemory,
   MemoryRecord,
@@ -9,28 +9,31 @@ import type {
   MemoryScope,
   MemoryConfig,
   MemorySearchQuery,
+  MemorySearchResult,
   MemoryListOptions,
   MemoryByteCodec,
   IndexMemoryRecord,
   WorkingMemorySnapshot,
   ShortTermMemorySnapshot,
   MemoryReindexParams,
-} from "./types";
+} from "../types";
 import { MEMORY_FILTER, PATCH_CODEC, recordCodec } from "./codecs";
 
 /**
- * Memory is the primary memory abstraction for agents.
+ * Memory is the default composite MemoryStore implementation.
  *
- * Sits above storage/index layers + owns cognitive policy, eviction/TTL, consolidation.
+ * Composes a raw storage backend with optional vector search index and
+ * embedding encoder. This is the implementation you get when configuring
+ * Kernl with storage.db + storage.vector + memory.embedding.
  *
+ * For external providers (e.g., Supermemory), implement MemoryStore directly.
+ *
+ * Memory layers:
  *  - L1 / wmem: active working set exposed to the model
  *  - L2 / smem: bounded recent context with a TTL
  *  - L3 / lmem: durable, structured long-term store
- *
- * Delegates persistence to storage adapters and optional indexes as
- * _projections_ of the primary memory store.
  */
-export class Memory {
+export class Memory implements MemoryStore {
   private readonly store: MemoryStore;
   private readonly _search: IndexHandle<IndexMemoryRecord> | null;
 
@@ -44,6 +47,13 @@ export class Memory {
     // TODO: default encoder using text-embedding-3-small
     this.encoder = config.encoder;
     this.rcodec = recordCodec(config.encoder);
+  }
+
+  /**
+   * Get a memory by ID.
+   */
+  async get(id: string): Promise<MemoryRecord | null> {
+    return this.store.get(id);
   }
 
   /**
@@ -66,16 +76,15 @@ export class Memory {
    * Update an existing memory record.
    * Updates primary store, then re-indexes or patches search index.
    */
-  async update(update: MemoryRecordUpdate): Promise<MemoryRecord> {
-    const record = await this.store.update(update.id, update);
+  async update(id: string, patch: MemoryRecordUpdate): Promise<MemoryRecord> {
+    const record = await this.store.update(id, patch);
     if (!this._search) return record;
 
-    if (update.content) {
+    if (patch.content) {
       const indexed = await this.rcodec.encode(record); // content changed → full re-index with new embeddings
       await this._search.upsert(indexed);
     } else {
-      const patch = PATCH_CODEC.encode(update); // metadata only → cheap patch
-      await this._search.patch(patch);
+      await this._search.patch({ id, ...PATCH_CODEC.encode(patch) }); // metadata only → cheap patch
     }
 
     return record;
@@ -87,18 +96,35 @@ export class Memory {
    * Sends rich query with both text and vector - the index handle
    * adapts based on backend capabilities (e.g. drops text for pgvector).
    */
-  async search(q: MemorySearchQuery): Promise<SearchHit<IndexMemoryRecord>[]> {
+  async search(q: MemorySearchQuery): Promise<MemorySearchResult[]> {
     if (!this._search) {
       throw new Error("search index not configured");
     }
 
     const tvec = await this.encoder.embed(q.query);
 
-    return this._search.query({
+    const hits = await this._search.query({
       query: [{ text: q.query, tvec: tvec ?? undefined }],
       filter: q.filter ? MEMORY_FILTER.encode(q.filter) : undefined,
       limit: q.limit ?? 20,
     });
+
+    // (TODO): Avoid hydration by storing full record fields in the index.
+    // Hydrate full records from store
+    const results = await Promise.all(
+      hits.map(async (hit) => {
+        const id = hit.document?.id;
+        if (!id) {
+          throw new Error("search hit missing document id");
+        }
+        const record = await this.store.get(id);
+        if (!record) {
+          throw new Error(`memory not found in store: ${id}`);
+        }
+        return { record, score: hit.score };
+      }),
+    );
+    return results;
   }
 
   /**
@@ -106,6 +132,26 @@ export class Memory {
    */
   async list(options?: MemoryListOptions): Promise<MemoryRecord[]> {
     return this.store.list(options);
+  }
+
+  /**
+   * Delete a memory by ID.
+   */
+  async delete(id: string): Promise<void> {
+    await this.store.delete(id);
+    if (this._search) {
+      await this._search.delete(id);
+    }
+  }
+
+  /**
+   * Delete multiple memories by ID.
+   */
+  async mdelete(ids: string[]): Promise<void> {
+    await this.store.mdelete(ids);
+    if (this._search) {
+      await Promise.all(ids.map((id) => this._search!.delete(id)));
+    }
   }
 
   /**

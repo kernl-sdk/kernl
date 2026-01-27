@@ -10,6 +10,7 @@ import {
   Memory,
   MemoryByteEncoder,
   MemoryIndexHandle,
+  MemoryStore,
   buildMemoryIndexSchema,
 } from "@/memory";
 import { setSubscriber, clearSubscriber, type Subscriber } from "@/tracing";
@@ -47,7 +48,7 @@ export class Kernl extends KernlHooks {
   // --- public API ---
   readonly threads: RThreads;
   readonly agents: RAgents;
-  readonly memories: Memory;
+  readonly memories: MemoryStore;
 
   constructor(options: KernlOptions = {}) {
     super();

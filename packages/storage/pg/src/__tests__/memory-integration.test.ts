@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import { Pool } from "pg";
 import { Kernl, Agent } from "kernl";
+import type { MemorySearchResult } from "kernl";
 import type { LanguageModel } from "@kernl-sdk/protocol";
-import type { SearchHit } from "@kernl-sdk/retrieval";
 import "@kernl-sdk/ai/openai"; // Register OpenAI embedding provider
 
 import { postgres, pgvector } from "../index";
@@ -150,7 +150,7 @@ describe.sequential(
       expect(results.length).toBeGreaterThan(0);
 
       // Should find TypeScript-related memories with higher scores
-      const ids = results.map((r: SearchHit) => r.document?.id);
+      const ids = results.map((r: MemorySearchResult) => r.record.id);
       expect(ids).toContain("m1"); // Direct match
       expect(ids).toContain("m3"); // Related to TypeScript
     });
@@ -199,7 +199,7 @@ describe.sequential(
       });
 
       expect(results.length).toBe(1);
-      expect(results[0].document?.id).toBe("m1");
+      expect(results[0].record.id).toBe("m1");
     });
 
     it("respects limit", async () => {
@@ -268,7 +268,7 @@ describe.sequential(
       });
 
       expect(results.length).toBeGreaterThan(0);
-      expect(results[0].document?.id).toBe("m1");
+      expect(results[0].record.id).toBe("m1");
     });
 
     it("updates memory content and re-indexes", async () => {
@@ -281,8 +281,7 @@ describe.sequential(
       });
 
       // Update content
-      await kernl.memories.update({
-        id: "m1",
+      await kernl.memories.update("m1", {
         content: { text: "Updated content about cats" },
       });
 
@@ -293,9 +292,9 @@ describe.sequential(
       });
 
       expect(results.length).toBeGreaterThan(0);
-      const match = results.find((r: SearchHit) => r.document?.id === "m1");
+      const match = results.find((r: MemorySearchResult) => r.record.id === "m1");
       expect(match).toBeDefined();
-      expect(match?.document?.text).toBe("Updated content about cats");
+      expect(match?.record.content.text).toBe("Updated content about cats");
     });
 
     it("patches memory metadata without re-indexing", async () => {
@@ -309,8 +308,7 @@ describe.sequential(
       });
 
       // Update only metadata (should patch, not full re-index)
-      await kernl.memories.update({
-        id: "m1",
+      await kernl.memories.update("m1", {
         metadata: { version: 2, updated: true },
       });
 
@@ -377,10 +375,10 @@ describe.sequential(
       });
 
       expect(results1).toHaveLength(1);
-      expect(results1[0].document?.agentId).toBe("test-agent-1");
+      expect(results1[0].record.scope.agentId).toBe("test-agent-1");
 
       expect(results2).toHaveLength(1);
-      expect(results2[0].document?.agentId).toBe("test-agent-2");
+      expect(results2[0].record.scope.agentId).toBe("test-agent-2");
     });
 
     it("creates memories with multimodal content", async () => {
@@ -406,7 +404,7 @@ describe.sequential(
       });
 
       expect(results.length).toBeGreaterThan(0);
-      const match = results.find((r: SearchHit) => r.document?.id === "m1");
+      const match = results.find((r: MemorySearchResult) => r.record.id === "m1");
       expect(match).toBeDefined();
     });
   },

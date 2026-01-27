@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import type { EmbeddingModel } from "@kernl-sdk/protocol";
 
 import { MemoryByteEncoder, ObjectTextCodec } from "../encoder";
-import type { MemoryByte } from "../types";
+import type { MemoryByte } from "../../types";
 
 // Mock embedder that returns predictable vectors
 function createMockEmbedder(): EmbeddingModel<string> {

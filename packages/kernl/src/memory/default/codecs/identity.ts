@@ -7,7 +7,7 @@
 import type { Codec } from "@kernl-sdk/shared/lib";
 import type { FieldSchema, SearchQuery, UnknownDocument } from "@kernl-sdk/retrieval";
 
-import type { IndexMemoryRecord } from "../types";
+import type { IndexMemoryRecord } from "../../types";
 
 export const IDENTITY_DOC: Codec<IndexMemoryRecord, UnknownDocument> = {
   encode: (doc) => doc as unknown as UnknownDocument,

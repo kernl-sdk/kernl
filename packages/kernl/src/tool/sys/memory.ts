@@ -37,10 +37,10 @@ const search = tool({
     });
 
     return mems.map((h) => ({
-      id: h.document?.id,
-      collection: h.document?.collection,
-      text: h.document?.text,
-      object: h.document?.objtext,
+      id: h.record.id,
+      collection: h.record.collection,
+      text: h.record.content.text,
+      object: h.record.content.object,
       score: h.score,
     }));
   },

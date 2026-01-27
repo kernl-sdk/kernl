@@ -20,7 +20,7 @@ import type {
   UnknownDocument,
 } from "@kernl-sdk/retrieval";
 
-import type { IndexMemoryRecord } from "../types";
+import type { IndexMemoryRecord } from "../../types";
 
 /**
  * Turbopuffer document codec.

@@ -12,7 +12,7 @@ import type {
   MemoryRecordUpdate,
   MemorySearchQuery,
   IndexMemoryRecord,
-} from "./types";
+} from "../types";
 
 /**
  * Base interface for memory indexes.

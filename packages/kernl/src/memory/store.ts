@@ -7,12 +7,12 @@ import type {
   NewMemory,
   MemoryRecordUpdate,
   MemoryListOptions,
+  MemorySearchQuery,
+  MemorySearchResult,
 } from "./types";
 
 /**
  * Memory persistence store.
- *
- * Follows the same pattern as ThreadStore - simple CRUD operations.
  */
 export interface MemoryStore {
   /**
@@ -44,4 +44,9 @@ export interface MemoryStore {
    * Delete multiple memories.
    */
   mdelete(ids: string[]): Promise<void>;
+
+  /**
+   * Semantic search across memories.
+   */
+  search(query: MemorySearchQuery): Promise<MemorySearchResult[]>;
 }

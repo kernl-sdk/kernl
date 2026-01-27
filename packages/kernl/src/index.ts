@@ -89,6 +89,7 @@ export type {
   MemoryFilter,
   MemoryListOptions,
   MemorySearchQuery,
+  MemorySearchResult,
   WorkingMemorySnapshot,
   ShortTermMemorySnapshot,
   MemoryIndexBase,
