@@ -38,7 +38,6 @@ describe("LibSQLMemoryStore update", () => {
     await new Promise((r) => setTimeout(r, 10));
 
     const updated = await storage.memories.update(memId, {
-      id: memId,
       content: { text: "Updated content" },
     });
 
@@ -52,7 +51,6 @@ describe("LibSQLMemoryStore update", () => {
 
   it("updates wmem flag", async () => {
     const updated = await storage.memories.update(memId, {
-      id: memId,
       wmem: true,
     });
 
@@ -66,7 +64,6 @@ describe("LibSQLMemoryStore update", () => {
     const expiresAt = Date.now() + 7200000;
 
     const updated = await storage.memories.update(memId, {
-      id: memId,
       smem: { expiresAt },
     });
 
@@ -79,13 +76,11 @@ describe("LibSQLMemoryStore update", () => {
   it("clears smem expiration", async () => {
     // First set an expiration
     await storage.memories.update(memId, {
-      id: memId,
       smem: { expiresAt: Date.now() + 3600000 },
     });
 
     // Then clear it
     const updated = await storage.memories.update(memId, {
-      id: memId,
       smem: { expiresAt: null },
     });
 
@@ -96,7 +91,6 @@ describe("LibSQLMemoryStore update", () => {
     const newMetadata = { version: 2, source: "api", edited: true };
 
     const updated = await storage.memories.update(memId, {
-      id: memId,
       metadata: newMetadata,
     });
 
@@ -108,7 +102,6 @@ describe("LibSQLMemoryStore update", () => {
 
   it("updates multiple fields at once", async () => {
     const updated = await storage.memories.update(memId, {
-      id: memId,
       content: { text: "New content" },
       wmem: true,
       metadata: { version: 3 },
@@ -122,7 +115,6 @@ describe("LibSQLMemoryStore update", () => {
   it("throws when memory does not exist", async () => {
     await expect(
       storage.memories.update("nonexistent", {
-        id: "nonexistent",
         content: { text: "test" },
       }),
     ).rejects.toThrow(/not found/i);
@@ -132,7 +124,6 @@ describe("LibSQLMemoryStore update", () => {
     const before = await storage.memories.get(memId);
 
     await storage.memories.update(memId, {
-      id: memId,
       wmem: true,
     });
 

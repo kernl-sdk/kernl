@@ -57,7 +57,6 @@ export interface Agent {
   name: string;
   description?: string;
   model: { provider: string; modelId: string };
-  memory: { enabled: boolean };
   toolkits: string[];
 }
 

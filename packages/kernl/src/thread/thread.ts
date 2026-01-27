@@ -279,8 +279,7 @@ export class Thread<
       }
 
       // perform intended actions
-      const { actions, pendingApprovals } =
-        await this.performActions(intentions);
+      const { actions, pendingApprovals } = await this.act(intentions);
 
       // append + yield action events (sequenced)
       for (const a of actions) {
@@ -311,9 +310,17 @@ export class Thread<
   private async *tick(): AsyncGenerator<LanguageModelStreamEvent> {
     this._tick++;
 
-    // (TODO): check limits (if this._tick > this.limits.maxTicks)
-    // (TODO): run input guardrails on first tick (if this._tick === 1)
-    // (TODO): compaction if necessary
+    // (TODO): 1. check limits (if this._tick > this.limits.maxTicks)
+    // (TODO): 2. microcompact if necessary (+ [maybe] compact?)
+    // (TODO): 3. Codec: ThreadEvent[] -> LanguageModelItem[]
+    // (TODO): 4. run transformers on LanguageModelItem[] (input guardrails, etc.) as order list (deterministic processing)
+    //
+    // (TODO): 5. const system = await this.agent.instructions(this.context);
+    // (TODO): 6. serialize action repertoire (tools, systools, etc.)
+    // (TODO): 7. agent.memory.load(contextId); // ensure stable prefix for caching
+    //            (wmem + smem)
+    //            - tasks
+    //            - active artifacts
 
     const req = await this.prepareModelRequest(this.history);
 
@@ -454,17 +461,6 @@ export class Thread<
   }
 
   /**
-   * Abort the running thread.
-   *
-   * @throws {Error} Not implemented - use AbortSignal via options instead
-   */
-  abort() {
-    throw new Error(
-      "Not implemented: use AbortSignal via ThreadExecuteOptions",
-    );
-  }
-
-  /**
    * Emit an agent event with common fields auto-filled.
    */
   private emit(kind: string, payload?: Record<string, unknown>): void {
@@ -493,9 +489,7 @@ export class Thread<
   /**
    * Perform the actions returned by the model
    */
-  private async performActions(
-    intentions: ActionSet,
-  ): Promise<PerformActionsResult> {
+  private async act(intentions: ActionSet): Promise<PerformActionsResult> {
     // // priority 1: syscalls first - these override all other actions
     // if (actions.syscalls.length > 0) {
     //   switch (actions.syscalls.kind) { // is it possible to have more than one?
@@ -509,7 +503,6 @@ export class Thread<
 
     // (TODO): refactor into a general actions system - probably shouldn't be handled by Thread
     const toolEvents = await this.executeTools(intentions.toolCalls);
-    // const mcpEvents = await this.executeMCPRequests(actions.mcpRequests);
 
     const actions: ThreadEventInner[] = [];
     const pendingApprovals: ToolCall[] = [];
@@ -688,5 +681,18 @@ export class Thread<
       responseType,
       abort: this._abort,
     };
+  }
+
+  // (MAYBE)
+
+  /**
+   * Abort the running thread.
+   *
+   * @throws {Error} Not implemented - use AbortSignal via options instead
+   */
+  abort() {
+    throw new Error(
+      "Not implemented: use AbortSignal via ThreadExecuteOptions",
+    );
   }
 }

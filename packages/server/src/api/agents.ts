@@ -42,7 +42,6 @@ agents.get("/", (c) => {
       provider: agent.model.provider,
       modelId: agent.model.modelId,
     },
-    memory: agent.memory,
     toolkits: agent.toolkits.map((t) => t.id),
   }));
 

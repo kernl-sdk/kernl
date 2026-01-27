@@ -211,7 +211,7 @@ export const search = tool({
 });
 
 export const documents = new Toolkit<SupermemoryContext>({
-  id: "supermemory_documents",
+  id: "supermemory.documents",
   description: "Document storage and search for Supermemory",
   tools: [add, get, list, update, rm, search],
 });

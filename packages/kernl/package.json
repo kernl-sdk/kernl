@@ -33,6 +33,10 @@
     "./tracing": {
       "types": "./dist/tracing/index.d.ts",
       "import": "./dist/tracing/index.js"
+    },
+    "./systools": {
+      "types": "./dist/systools.d.ts",
+      "import": "./dist/systools.js"
     }
   },
   "scripts": {

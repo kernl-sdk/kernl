@@ -291,10 +291,9 @@ export type KernlHookEvents = AgentHookEvents<unknown, unknown>;
 /**
  * Event emitter for agent-level lifecycle events.
  */
-export class AgentHooks<
-  TContext = unknown,
-  TOutput = unknown,
-> extends Emitter<AgentHookEvents<TContext, TOutput>> {}
+export class AgentHooks<TContext = unknown, TOutput = unknown> extends Emitter<
+  AgentHookEvents<TContext, TOutput>
+> {}
 
 /**
  * Event emitter for Kernl-level lifecycle events.

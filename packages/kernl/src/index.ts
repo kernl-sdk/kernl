@@ -76,8 +76,9 @@ export type {
 } from "./storage";
 
 // --- memory ---
-export { Memory, MemoryByteEncoder } from "./memory";
+export { Memory, MemoryByteEncoder, BaseMemorySnapshot } from "./memory";
 export type {
+  MemoryProvider,
   MemoryStore,
   MemoryScope,
   NewMemory,
@@ -89,6 +90,7 @@ export type {
   MemoryFilter,
   MemoryListOptions,
   MemorySearchQuery,
+  MemorySearchResult,
   WorkingMemorySnapshot,
   ShortTermMemorySnapshot,
   MemoryIndexBase,
@@ -101,5 +103,8 @@ export type {
   ArchiveResult,
   MemoryByte,
   MemoryByteCodec,
+  Renderable,
+  RenderFormat,
+  MemorySnapshot,
 } from "./memory";
 

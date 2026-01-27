@@ -246,7 +246,6 @@ describe.sequential("PGMemoryStore", () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       const updated = await storage.memories.update("update-1", {
-        id: "update-1",
         content: { text: "Updated" },
       });
 
@@ -265,7 +264,6 @@ describe.sequential("PGMemoryStore", () => {
       });
 
       const updated = await storage.memories.update("update-2", {
-        id: "update-2",
         wmem: true,
       });
       expect(updated.wmem).toBe(true);
@@ -282,7 +280,6 @@ describe.sequential("PGMemoryStore", () => {
 
       const expiresAt = Date.now() + 7200000;
       const updated = await storage.memories.update("update-3", {
-        id: "update-3",
         smem: { expiresAt },
       });
 
@@ -299,7 +296,6 @@ describe.sequential("PGMemoryStore", () => {
       });
 
       const updated = await storage.memories.update("update-4", {
-        id: "update-4",
         metadata: { updated: true, count: 1 },
       });
 
@@ -308,7 +304,7 @@ describe.sequential("PGMemoryStore", () => {
 
     it("should throw for non-existent memory", async () => {
       await expect(
-        storage.memories.update("non-existent", { id: "non-existent", wmem: true }),
+        storage.memories.update("non-existent", { wmem: true }),
       ).rejects.toThrow("memory not found");
     });
   });

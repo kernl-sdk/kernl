@@ -3,6 +3,26 @@ title: Getting Started
 description: Installation via CLI or npm, project setup, and basic configuration.
 ---
 
+## AI-Assisted Development
+
+Make your AI assistant an expert at kernl:
+
+<Tabs items={["Claude Code", "Cursor"]}>
+<Tab value="Claude Code">
+```shell
+/plugin marketplace add kernl-sdk/skills
+/plugin install kernl@skills
+```
+</Tab>
+<Tab value="Cursor">
+```bash
+git clone https://github.com/kernl-sdk/skills.git /tmp/kernl-skills
+mkdir -p .cursor/skills
+cp -r /tmp/kernl-skills/plugins/kernl/skills/kernl .cursor/skills/kernl-docs
+```
+</Tab>
+</Tabs>
+
 <Steps>
 <Step>
 ### Install the CLI
