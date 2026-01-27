@@ -4,7 +4,7 @@ import { resolveEmbeddingModel } from "@kernl-sdk/retrieval";
 import { BaseAgent } from "@/agent/base";
 import { KernlHooks } from "@/lifecycle";
 import type { Thread } from "@/thread";
-import type { ResolvedAgentResponse } from "@/guardrail";
+import type { ResolvedAgentResponse } from "@/agent/types";
 import { InMemoryStorage, type KernlStorage } from "@/storage";
 import {
   Memory,

@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { Agent } from "@/agent";
 import { Kernl } from "@/kernl";
 import { createMockModel } from "@/thread/__tests__/fixtures/mock-model";
-import { MisconfiguredError } from "@/lib/error";
+import { MisconfiguredError } from "@/error";
 import { message } from "@kernl-sdk/protocol";
 import { InMemoryStorage } from "@/storage/in-memory";
 

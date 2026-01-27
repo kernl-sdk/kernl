@@ -2,7 +2,7 @@ import { z } from "zod";
 import { Context, UnknownContext } from "@/context";
 import type { BaseAgent } from "@/agent/base";
 
-import { ModelBehaviorError } from "@/lib/error";
+import { ModelBehaviorError } from "@/error";
 import { logger } from "@/lib/logger";
 
 import {

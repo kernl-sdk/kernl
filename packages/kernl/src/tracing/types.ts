@@ -75,14 +75,6 @@ export interface ThreadAbortedEvent {
   reason?: string;
 }
 
-export interface ThreadGuardrailTriggeredEvent {
-  kind: "thread.guardrail_triggered";
-  name: string;
-  type: "input" | "output";
-  passed: boolean;
-  reason?: string;
-}
-
 export interface ToolApprovalRequestedEvent {
   kind: "tool.approval_requested";
   toolId: string;
@@ -106,7 +98,6 @@ export interface ToolApprovalDeniedEvent {
 export type EventData =
   | ThreadErrorEvent
   | ThreadAbortedEvent
-  | ThreadGuardrailTriggeredEvent
   | ToolApprovalRequestedEvent
   | ToolApprovalGrantedEvent
   | ToolApprovalDeniedEvent;

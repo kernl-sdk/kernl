@@ -60,6 +60,16 @@ export {
   type ThreadStreamEvent,
 } from "./thread/types";
 
+export { Pipe, pipe } from "./thread/pipe";
+export type { PipeOp, GuardrailFn, RedactTerm } from "./thread/pipe";
+
+export {
+  GuardrailError,
+  RuntimeError,
+  MisconfiguredError,
+  ModelBehaviorError,
+} from "./error";
+
 // --- storage ---
 
 export type {

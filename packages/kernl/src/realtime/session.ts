@@ -11,7 +11,7 @@ import {
 } from "@kernl-sdk/protocol";
 
 import { Context, UnknownContext } from "@/context";
-import { MisconfiguredError } from "@/lib/error";
+import { MisconfiguredError } from "@/error";
 
 import { RealtimeAgent } from "./agent";
 import type { RealtimeSessionOptions } from "./types";

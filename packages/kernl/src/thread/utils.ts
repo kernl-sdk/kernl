@@ -1,6 +1,6 @@
 import { ZodType } from "zod";
 
-import type { ResolvedAgentResponse } from "@/guardrail";
+import type { ResolvedAgentResponse } from "@/agent/types";
 
 /* lib */
 import { json, randomID } from "@kernl-sdk/shared/lib";
@@ -9,16 +9,24 @@ import {
   LanguageModelItem,
   LanguageModelStreamEvent,
 } from "@kernl-sdk/protocol";
-import { ModelBehaviorError } from "@/lib/error";
+import { ModelBehaviorError } from "@/error";
 
 /* types */
 import type { AgentOutputType } from "@/agent/types";
+import type { MemorySnapshot } from "@/memory";
 import type {
   ThreadEvent,
   ThreadEventBase,
   ActionSet,
   PublicThreadEvent,
 } from "./types";
+
+/**
+ * Render a memory snapshot to a string.
+ */
+export function render(snapshot: MemorySnapshot): string {
+  return typeof snapshot === "string" ? snapshot : snapshot.render();
+}
 
 /**
  * Create a ThreadEvent from a LanguageModelItem with thread metadata.

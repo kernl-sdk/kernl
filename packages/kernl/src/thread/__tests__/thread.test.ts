@@ -9,7 +9,7 @@ import { Agent } from "@/agent";
 import { Kernl } from "@/kernl";
 import { Context } from "@/context";
 import { tool, FunctionToolkit } from "@/tool";
-import { ModelBehaviorError } from "@/lib/error";
+import { ModelBehaviorError } from "@/error";
 
 import type { ThreadEvent } from "@/thread/types";
 import { createMockModel } from "./fixtures/mock-model";

@@ -14,16 +14,17 @@ import type {
   RThreadUpdateParams,
 } from "@/api/resources/threads/types";
 import { Context, type UnknownContext } from "./context";
-import {
-  InputGuardrail,
-  OutputGuardrail,
-  type ResolvedAgentResponse,
-} from "./guardrail";
+import type { ResolvedAgentResponse } from "./agent/types";
 import { BaseAgent } from "./agent/base";
 
-import { MisconfiguredError, RuntimeError } from "./lib/error";
+import { MisconfiguredError, RuntimeError } from "./error";
 
-import type { AgentConfig, AgentOutputType } from "./agent/types";
+import type {
+  AgentConfig,
+  AgentMemoryConfig,
+  AgentOutputType,
+} from "./agent/types";
+import { pipe, type Pipe } from "./thread/pipe";
 import type {
   TextOutput,
   ThreadExecuteOptions,
@@ -41,24 +42,60 @@ export class Agent<
   readonly kind = "llm";
   readonly model: LanguageModel;
   readonly modelSettings: LanguageModelRequestSettings;
-
-  readonly guardrails: {
-    input: InputGuardrail[];
-    output: OutputGuardrail<AgentOutputType>[];
-  };
+  readonly memory?: AgentMemoryConfig<TContext>;
+  readonly processors: { pre: Pipe; post: Pipe };
   readonly output: TOutput = "text" as TOutput;
-  readonly resetToolChoice: boolean;
 
   constructor(config: AgentConfig<TContext, TOutput>) {
     super(config);
 
     this.model = config.model;
     this.modelSettings = config.modelSettings ?? {};
-    this.guardrails = config.guardrails ?? { input: [], output: [] };
+    this.memory = config.memory;
+    this.processors = {
+      pre: config.processors?.pre ?? pipe,
+      post: config.processors?.post ?? pipe,
+    };
     if (config.output) {
       this.output = config.output;
     }
-    this.resetToolChoice = config.resetToolChoice ?? true;
+  }
+
+  /**
+   * Thread management scoped to this agent.
+   *
+   * Convenience wrapper around kernl.threads that automatically filters to this agent's threads.
+   */
+  get threads() {
+    if (!this.kernl) {
+      throw new MisconfiguredError(
+        `Agent ${this.id} not bound to kernl. Call kernl.register(agent) first.`,
+      );
+    }
+
+    const agentId = this.id;
+    const kthreads = this.kernl.threads;
+
+    return {
+      get: (tid: string, options?: RThreadGetOptions) =>
+        kthreads.get(tid, options),
+      list: (params: Omit<RThreadsListParams, "agentId"> = {}) =>
+        kthreads.list({ ...params, agentId }),
+      delete: (tid: string) => kthreads.delete(tid),
+      history: (tid: string, params?: RThreadHistoryParams) =>
+        kthreads.history(tid, params),
+      create: (params: Omit<RThreadCreateParams, "agentId" | "model">) =>
+        kthreads.create({
+          ...params,
+          agentId,
+          model: {
+            provider: this.model.provider,
+            modelId: this.model.modelId,
+          },
+        }),
+      update: (tid: string, patch: RThreadUpdateParams) =>
+        kthreads.update(tid, patch),
+    };
   }
 
   /**
@@ -128,6 +165,7 @@ export class Agent<
       thread.model = options.model;
     }
     thread._abort = options?.abort;
+
     thread.append(...items);
     return this.kernl.schedule(thread);
   }
@@ -204,42 +242,5 @@ export class Agent<
     thread._abort = options?.abort;
     thread.append(...items);
     yield* this.kernl.scheduleStream(thread);
-  }
-
-  /**
-   * Thread management scoped to this agent.
-   *
-   * Convenience wrapper around kernl.threads that automatically filters to this agent's threads.
-   */
-  get threads() {
-    if (!this.kernl) {
-      throw new MisconfiguredError(
-        `Agent ${this.id} not bound to kernl. Call kernl.register(agent) first.`,
-      );
-    }
-
-    const agentId = this.id;
-    const kthreads = this.kernl.threads;
-
-    return {
-      get: (tid: string, options?: RThreadGetOptions) =>
-        kthreads.get(tid, options),
-      list: (params: Omit<RThreadsListParams, "agentId"> = {}) =>
-        kthreads.list({ ...params, agentId }),
-      delete: (tid: string) => kthreads.delete(tid),
-      history: (tid: string, params?: RThreadHistoryParams) =>
-        kthreads.history(tid, params),
-      create: (params: Omit<RThreadCreateParams, "agentId" | "model">) =>
-        kthreads.create({
-          ...params,
-          agentId,
-          model: {
-            provider: this.model.provider,
-            modelId: this.model.modelId,
-          },
-        }),
-      update: (tid: string, patch: RThreadUpdateParams) =>
-        kthreads.update(tid, patch),
-    };
   }
 }

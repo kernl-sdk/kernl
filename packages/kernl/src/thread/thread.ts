@@ -5,7 +5,7 @@ import * as z from "zod";
 import { Agent } from "@/agent";
 import { Context } from "@/context";
 import type { Task } from "@/task";
-import type { ResolvedAgentResponse } from "@/guardrail";
+import type { ResolvedAgentResponse } from "@/agent/types";
 import type { ThreadStore } from "@/storage";
 import {
   span,
@@ -51,6 +51,7 @@ import type { LanguageModelResponseType } from "@kernl-sdk/protocol";
 import {
   tevent,
   notDelta,
+  render,
   getIntentions,
   getFinalResponse,
   parseFinalResponse,
@@ -120,9 +121,10 @@ export class Thread<
   private history: ThreadEvent[] /* history representing the event log for the thread */;
   private tickres?: ResolvedAgentResponse<TOutput>; /* final result from terminal tick */
 
-  _abort?: AbortSignal;
   private storage?: ThreadStore;
   private _span?: Span; /* tracing span for current execution */
+
+  _abort?: AbortSignal;
 
   constructor(options: ThreadOptions<TContext, TOutput>) {
     this.tid = options.tid ?? `tid_${randomID()}`;
@@ -271,9 +273,10 @@ export class Thread<
         if (!text) continue; // run again, policy-dependent? (how to ensure no infinite loop here?)
 
         this.tickres = parseFinalResponse(text, this.agent.output);
+        // (TODO): run post-processors on LanguageModelItem[] (guardrails, etc.)
+
         await this.checkpoint(); /* c2: terminal tick - no tool calls */
 
-        // await this.agent.runOutputGuardails(context, state);
         // this.kernl.emit("thread.terminated", context, output);
         return;
       }
@@ -310,11 +313,11 @@ export class Thread<
   private async *tick(): AsyncGenerator<LanguageModelStreamEvent> {
     this._tick++;
 
-    // (TODO): 1. check limits (if this._tick > this.limits.maxTicks)
-    // (TODO): 2. microcompact if necessary (+ [maybe] compact?)
-    // (TODO): 3. Codec: ThreadEvent[] -> LanguageModelItem[]
-    // (TODO): 4. run transformers on LanguageModelItem[] (input guardrails, etc.) as order list (deterministic processing)
-    //
+    // (TODO): 1. check limits (maxTicks, maxTokens, ...)
+    // (TODO): 2. Codec: ThreadEvent[] -> LanguageModelItem[]
+    // (TODO): 3. run pre-processors on LanguageModelItem[] (guardrails, etc.)
+    // (TODO):  a. + pipe microcompact if necessary (+ [maybe] compact?)
+
     // (TODO): 5. const system = await this.agent.instructions(this.context);
     // (TODO): 6. serialize action repertoire (tools, systools, etc.)
     // (TODO): 7. agent.memory.load(contextId); // ensure stable prefix for caching
@@ -483,7 +486,7 @@ export class Thread<
         break;
     }
 
-    this.agent.emit(kind as any, { ...base, ...auto, ...payload } as any);
+    this.agent.emit(kind as any, { ...base, ...auto, ...payload } as any); // (TODO): as any?
   }
 
   /**
@@ -494,9 +497,11 @@ export class Thread<
     // if (actions.syscalls.length > 0) {
     //   switch (actions.syscalls.kind) { // is it possible to have more than one?
     //     case SYS_WAIT:
-    //       return this.state;
-    //     case SYS_EXIT:
-    //       return { state: this.state, output: this.output }
+    //       ...
+    //     case SYS_YIELD:
+    //       ...
+    //     case SYS_SPAWN:
+    //       ...
     //     default:
     //   }
     // }
@@ -634,11 +639,10 @@ export class Thread<
       ...this.agent.modelSettings,
     };
 
-    // (TODO): what do we want to do with this?
-    // settings = maybeResetToolChoice(this.agent, this.state.toolUse, settings);
-
     const system = await this.agent.instructions(this.context);
 
+    // (TODO): Codec for ThreadEvent[] -> LanguageModelItem[]
+    //
     // filter for model items + strip event headers
     const items = history
       .filter((e) => e.kind !== "system") // system events are not sent to model
@@ -647,14 +651,27 @@ export class Thread<
         return item as LanguageModelItem;
       });
 
-    const input: LanguageModelItem[] = system
-      ? [message({ role: "system", text: system }), ...items]
-      : items;
+    const input: LanguageModelItem[] = [];
 
-    // (TODO): apply custom input filters - arguably want global + agent-scoped -> apply in a middleware-like chain
-    // const filtered = await applyInputFilters(inputWithSystem, context);
+    input.push(message({ role: "system", text: system }));
 
-    const filtered = input;
+    // load working memory if configured
+    if (this.agent.memory?.load) {
+      const snapshot = await this.agent.memory.load(this.context);
+      const content = render(snapshot);
+      if (content) {
+        input.push(
+          message({
+            role: "user",
+            text: `<working_memory>\n${content}\n</working_memory>`,
+          }),
+        );
+      }
+    }
+
+    input.push(...items);
+
+    const filtered = await this.agent.processors.pre.run(this.context, input);
 
     // serialize action repertoire
     const all = await this.agent.tools(this.context);
@@ -664,11 +681,10 @@ export class Thread<
     );
     const tools = enabled.map((tool) => tool.serialize());
 
-    // derive responseType from agent.output
-    let responseType: LanguageModelResponseType | undefined;
-    if (this.agent.output && this.agent.output !== "text") {
+    let rt: LanguageModelResponseType | undefined;
+    if (this.agent.output !== "text") {
       const schema = this.agent.output as ZodType;
-      responseType = {
+      rt = {
         kind: "json",
         schema: z.toJSONSchema(schema, { target: "draft-7" }) as any,
       };
@@ -678,21 +694,8 @@ export class Thread<
       input: filtered,
       settings,
       tools,
-      responseType,
+      responseType: rt,
       abort: this._abort,
     };
-  }
-
-  // (MAYBE)
-
-  /**
-   * Abort the running thread.
-   *
-   * @throws {Error} Not implemented - use AbortSignal via options instead
-   */
-  abort() {
-    throw new Error(
-      "Not implemented: use AbortSignal via ThreadExecuteOptions",
-    );
   }
 }

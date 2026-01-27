@@ -1,4 +1,4 @@
-import { type ZodType } from "zod";
+import { z, type ZodType } from "zod";
 
 import {
   LanguageModel,
@@ -6,10 +6,23 @@ import {
 } from "@kernl-sdk/protocol";
 
 import { Context, UnknownContext } from "@/context";
-import { InputGuardrail, OutputGuardrail } from "@/guardrail";
 import { BaseToolkit } from "@/tool";
+import type { MemorySnapshot } from "@/memory";
+import type { Pipe } from "@/thread/pipe";
 
 import { TextOutput } from "@/thread/types";
+
+/**
+ * Resolves the agent output type based on the response type.
+ * - If TOutput is "text" → output is string
+ * - If TOutput is a ZodType → output is the inferred type from that schema
+ */
+export type ResolvedAgentResponse<TOutput extends AgentOutputType> =
+  TOutput extends TextOutput
+    ? string
+    : TOutput extends ZodType
+      ? z.infer<TOutput>
+      : never;
 
 /**
  * Configuration for an agent.
@@ -92,10 +105,39 @@ export interface AgentConfig<
   toolkits?: BaseToolkit<TContext>[];
 
   /**
-   * A list of checks that run in parallel to the agent's execution on the input + output for the agent,
-   * depending on the configuration.
+   * Memory configuration for working memory injection.
+   *
+   * @example
+   * ```ts
+   * const agent = new Agent({
+   *   memory: {
+   *     load: async (ctx) => {
+   *       const facts = await fetchUserFacts(ctx.context.userId);
+   *       return facts.map(f => `- ${f}`).join('\n');
+   *     },
+   *   },
+   * });
+   * ```
    */
-  guardrails?: AgentGuardrails<TOutput>;
+  memory?: AgentMemoryConfig<TContext>;
+
+  /**
+   * Input/output processors for the agent.
+   *
+   * @example
+   * ```ts
+   * const agent = new Agent({
+   *   processors: {
+   *     pre: pipe.filter(item => item.kind !== "delta").truncate(4000),
+   *     post: pipe.redact(['PII']).guardrail(myGuardrail),
+   *   },
+   * });
+   * ```
+   */
+  processors?: {
+    pre?: Pipe;
+    post?: Pipe;
+  };
 
   // /**
   //  * (TODO): Not sure if this is really necessary.. need to see use case examples
@@ -116,28 +158,6 @@ export interface AgentConfig<
   //  * search, etc. are always processed by the LLM
   //  */
   // toolUseBehavior: ToolUseBehavior;
-
-  /**
-   * Whether to reset the tool choice to the default value after a tool has been called. Defaults
-   * to `true`. This ensures that the agent doesn't enter an infinite loop of tool usage.
-   */
-  resetToolChoice?: boolean;
-}
-
-/**
- * Guardrails for an agent.
- */
-export interface AgentGuardrails<TOutput extends AgentOutputType = TextOutput> {
-  /**
-   * A list of checks that run in parallel to the agent's execution, before generating a response.
-   * Runs only if the agent is the first agent in the chain.
-   */
-  input: InputGuardrail[];
-  /**
-   * A list of checks that run on the final output of the agent, after generating a response. Runs
-   * only if the agent produces a final output.
-   */
-  output: OutputGuardrail<TOutput>[];
 }
 
 /**
@@ -150,3 +170,18 @@ export type AgentOutputType = TextOutput | ZodType;
  * Agent kind discriminator.
  */
 export type AgentKind = "llm" | "realtime";
+
+/**
+ * Memory configuration for an agent.
+ */
+export interface AgentMemoryConfig<TContext = UnknownContext> {
+  /**
+   * Load working memory snapshot to inject into the agent's context window.
+   *
+   * Called before each model request. Return a string or Renderable
+   * that will be wrapped in `<working_memory>` tags.
+   */
+  load?: (
+    context: Context<TContext>,
+  ) => Promise<MemorySnapshot> | MemorySnapshot;
+}

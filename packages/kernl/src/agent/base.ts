@@ -2,7 +2,7 @@ import { randomID } from "@kernl-sdk/shared/lib";
 
 import type { Context, UnknownContext } from "@/context";
 import type { Tool, BaseToolkit } from "@/tool";
-import { MisconfiguredError } from "@/lib/error";
+import { MisconfiguredError } from "@/error";
 import { AgentHooks, type AgentHookEvents } from "@/lifecycle";
 import type { Kernl } from "@/kernl";
 import type {

@@ -1,16 +1,8 @@
-import {
-  InputGuardrailResult,
-  OutputGuardrailMetadata,
-  OutputGuardrailResult,
-} from "@/guardrail";
-
 import { randomID } from "@kernl-sdk/shared/lib";
+
 // TODO: implement checkpointing/serialization
 // import { SerializedThread } from "@/lib/serde/thread";
 type SerializedThread = any;
-
-import { AgentOutputType } from "@/agent/types";
-import { TextOutput } from "@/thread/types";
 
 /**
  * Abstract base class for all `kernl` errors
@@ -103,17 +95,6 @@ export class MaxTurnsExceededError extends AgentError {}
 export class ModelBehaviorError extends AgentError {}
 
 /**
- * Error thrown when a guardrail execution fails.
- */
-export class GuardrailExecutionError extends AgentError {
-  error: Error;
-  constructor(message: string, error: Error, thread?: SerializedThread) {
-    super(message, thread);
-    this.error = error;
-  }
-}
-
-/**
  * Error thrown when a tool call fails.
  */
 export class ToolCallError extends AgentError {
@@ -125,34 +106,18 @@ export class ToolCallError extends AgentError {
 }
 
 /**
- * Error thrown when an input guardrail tripwire is triggered.
+ * Error thrown when a guardrail blocks a request.
  */
-export class InputGuardrailTripwireTriggered extends AgentError {
-  result: InputGuardrailResult;
-  constructor(
-    message: string,
-    result: InputGuardrailResult,
-    thread?: SerializedThread,
-  ) {
-    super(message, thread);
-    this.result = result;
+export class GuardrailError extends BaseError {
+  constructor(message: string) {
+    super(message);
   }
-}
 
-/**
- * Error thrown when an output guardrail tripwire is triggered.
- */
-export class OutputGuardrailTripwireTriggered<
-  TMeta extends OutputGuardrailMetadata,
-  TOutputType extends AgentOutputType = TextOutput,
-> extends AgentError {
-  result: OutputGuardrailResult<TMeta, TOutputType>;
-  constructor(
-    message: string,
-    result: OutputGuardrailResult<TMeta, TOutputType>,
-    thread?: SerializedThread,
-  ) {
-    super(message, thread);
-    this.result = result;
+  toJSON(): Record<string, any> {
+    return {
+      name: this.name,
+      message: this.message,
+      stack: this.stack,
+    };
   }
 }

@@ -10,7 +10,6 @@ export type {
   EventKind,
   ThreadErrorEvent,
   ThreadAbortedEvent,
-  ThreadGuardrailTriggeredEvent,
   ToolApprovalRequestedEvent,
   ToolApprovalGrantedEvent,
   ToolApprovalDeniedEvent,
