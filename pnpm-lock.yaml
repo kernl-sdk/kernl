@@ -770,6 +770,9 @@ importers:
       '@kernl-sdk/ai':
         specifier: workspace:*
         version: link:../../../packages/providers/ai
+      '@kernl-sdk/libsql':
+        specifier: workspace:*
+        version: link:../../../packages/storage/libsql
       '@kernl-sdk/pg':
         specifier: workspace:*
         version: link:../../../packages/storage/pg
