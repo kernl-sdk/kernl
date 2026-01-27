@@ -48,6 +48,7 @@ cp -r /tmp/kernl-skills/plugins/kernl/skills/kernl .cursor/skills/kernl-docs
 
 ```ts
 import { Agent, Kernl } from "kernl";
+import { memory } from "kernl/systools";
 import { anthropic } from "@kernl-sdk/ai/anthropic";
 
 import { math } from "@/toolkits/math";
@@ -57,8 +58,7 @@ const jarvis = new Agent({
   name: "Jarvis",
   model: anthropic("claude-sonnet-4-5"),
   instructions: "You are a helpful assistant.",
-  toolkits: [math],
-  memory: { enabled: true },
+  toolkits: [memory, math],
 });
 
 const kernl = new Kernl();
@@ -72,14 +72,14 @@ console.log(result.response);
 
 ```ts
 import { RealtimeAgent, RealtimeSession } from "kernl";
+import { memory } from "kernl/systools";
 import { openai } from "@kernl-sdk/openai";
 
 const agent = new RealtimeAgent({
   id: "watson",
   name: "Watson",
   instructions: "You are a helpful voice assistant. Be concise.",
-  toolkits: [math],
-  memory: { enabled: true },
+  toolkits: [memory, math],
 });
 
 const session = new RealtimeSession(agent, {

@@ -1,4 +1,5 @@
 import { Agent } from "kernl";
+import { memory } from "kernl/systools";
 import { anthropic } from "@kernl-sdk/ai/anthropic";
 
 export const watson = new Agent({
@@ -20,5 +21,5 @@ When asked for summaries or reports:
 4. Suggest next research questions based on gaps in understanding.
 `,
   model: anthropic("claude-sonnet-4-5"),
-  memory: { enabled: true },
+  toolkits: [memory],
 });

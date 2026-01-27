@@ -32,7 +32,7 @@ export function AgentDrawer({ agent, open, onOpenChange }: AgentDrawerProps) {
           </Avatar>
           <div className="flex items-center gap-2">
             <span className="text-lg font-semibold">{agent.name}</span>
-            {agent.memory.enabled && (
+            {agent.toolkits.includes("sys.memory") && (
               <Brain className="size-4 text-neon-green" />
             )}
           </div>

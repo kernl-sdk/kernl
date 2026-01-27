@@ -2,7 +2,7 @@ import { Agent } from "kernl";
 import { anthropic } from "@kernl-sdk/ai/anthropic";
 import { openai } from "@kernl-sdk/ai/openai";
 
-import { documents } from "@/toolkits/supermemory";
+import { documents, memory } from "@/toolkits/supermemory";
 
 export const jarvis = new Agent({
   id: "jarvis",
@@ -18,5 +18,5 @@ You have access to a Modal sandbox environment where you can:
 You can also store and search documents using Supermemory:
 - Add documents (text or URLs) to remember information
 - Search your knowledge base semantically`,
-  toolkits: [documents],
+  toolkits: [memory, documents],
 });
