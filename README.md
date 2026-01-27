@@ -49,6 +49,7 @@ cp -r /tmp/kernl-skills/plugins/kernl/skills/kernl .cursor/skills/kernl-docs
 ```ts
 import { Agent, Kernl } from "kernl";
 import { anthropic } from "@kernl-sdk/ai/anthropic";
+
 import { math } from "@/toolkits/math";
 
 const jarvis = new Agent({
