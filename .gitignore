@@ -40,6 +40,9 @@ yarn-error.log*
 # Velite
 .velite/
 
+# Tauri (temporary - developing on separate branch)
+apps/kernl/
+
 # Misc
 .DS_Store
 *.pem
