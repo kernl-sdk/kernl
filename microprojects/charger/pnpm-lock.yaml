@@ -28,25 +28,25 @@ importers:
         version: 0.128.1(ws@8.19.0)
       '@hono/node-server':
         specifier: ^1.19.6
-        version: 1.19.9(hono@4.11.5)
+        version: 1.19.9(hono@4.11.7)
       '@hono/zod-validator':
         specifier: ^0.7.5
-        version: 0.7.6(hono@4.11.5)(zod@4.3.6)
+        version: 0.7.6(hono@4.11.7)(zod@4.3.6)
       '@kernl-sdk/ai':
         specifier: ^0.4.5
-        version: 0.4.6(@ai-sdk/anthropic@3.0.23(zod@4.3.6))(@ai-sdk/provider@3.0.5)(hono@4.11.5)(zod@4.3.6)
+        version: 0.4.6(@ai-sdk/anthropic@3.0.23(zod@4.3.6))(@ai-sdk/provider@3.0.5)(hono@4.11.7)(zod@4.3.6)
       '@kernl-sdk/pg':
         specifier: ^0.2.0
-        version: 0.2.0(hono@4.11.5)(zod@4.3.6)
+        version: 0.2.0(hono@4.11.7)(zod@4.3.6)
       ai:
         specifier: ^5.0.93
         version: 5.0.123(zod@4.3.6)
       hono:
-        specifier: ^4.10.6
-        version: 4.11.5
+        specifier: ^4.11.7
+        version: 4.11.7
       kernl:
         specifier: ^0.12.7
-        version: 0.12.7(hono@4.11.5)(zod@4.3.6)
+        version: 0.12.7(hono@4.11.7)(zod@4.3.6)
       pino:
         specifier: ^10.1.0
         version: 10.2.1
@@ -3356,8 +3356,8 @@ packages:
     resolution: {integrity: sha512-eSmmWE5bZTK2Nou4g0AI3zZ9rswp7GRKoKXS1BLUkvPviOqs4YTN1djQIqrXy9k5gEtdLPy86JjRwsNM9tnDcA==}
     engines: {node: '>=0.10.0'}
 
-  hono@4.11.5:
-    resolution: {integrity: sha512-WemPi9/WfyMwZs+ZUXdiwcCh9Y+m7L+8vki9MzDw3jJ+W9Lc+12HGsd368Qc1vZi1xwW8BWMMsnK5efYKPdt4g==}
+  hono@4.11.7:
+    resolution: {integrity: sha512-l7qMiNee7t82bH3SeyUCt9UF15EVmaBvsppY2zQtrbIhl/yzBTny+YUxsVjSjQ6gaqaeVtZmGocom8TzBlA4Yw==}
     engines: {node: '>=16.9.0'}
 
   html-url-attributes@3.0.1:
@@ -6102,13 +6102,13 @@ snapshots:
 
   '@floating-ui/utils@0.2.10': {}
 
-  '@hono/node-server@1.19.9(hono@4.11.5)':
+  '@hono/node-server@1.19.9(hono@4.11.7)':
     dependencies:
-      hono: 4.11.5
+      hono: 4.11.7
 
-  '@hono/zod-validator@0.7.6(hono@4.11.5)(zod@4.3.6)':
+  '@hono/zod-validator@0.7.6(hono@4.11.7)(zod@4.3.6)':
     dependencies:
-      hono: 4.11.5
+      hono: 4.11.7
       zod: 4.3.6
 
   '@humanfs/core@0.19.1': {}
@@ -6248,13 +6248,13 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@kernl-sdk/ai@0.4.6(@ai-sdk/anthropic@3.0.23(zod@4.3.6))(@ai-sdk/provider@3.0.5)(hono@4.11.5)(zod@4.3.6)':
+  '@kernl-sdk/ai@0.4.6(@ai-sdk/anthropic@3.0.23(zod@4.3.6))(@ai-sdk/provider@3.0.5)(hono@4.11.7)(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.5
       '@kernl-sdk/protocol': 0.5.1(zod@4.3.6)
       '@kernl-sdk/retrieval': 0.1.10(zod@4.3.6)
       '@kernl-sdk/shared': 0.4.0(zod@4.3.6)
-      kernl: 0.12.4(hono@4.11.5)(zod@4.3.6)
+      kernl: 0.12.4(hono@4.11.7)(zod@4.3.6)
     optionalDependencies:
       '@ai-sdk/anthropic': 3.0.23(zod@4.3.6)
     transitivePeerDependencies:
@@ -6263,12 +6263,12 @@ snapshots:
       - supports-color
       - zod
 
-  '@kernl-sdk/pg@0.2.0(hono@4.11.5)(zod@4.3.6)':
+  '@kernl-sdk/pg@0.2.0(hono@4.11.7)(zod@4.3.6)':
     dependencies:
       '@kernl-sdk/retrieval': 0.1.10(zod@4.3.6)
       '@kernl-sdk/shared': 0.4.0(zod@4.3.6)
-      '@kernl-sdk/storage': 0.2.7(hono@4.11.5)(zod@4.3.6)
-      kernl: 0.12.7(hono@4.11.5)(zod@4.3.6)
+      '@kernl-sdk/storage': 0.2.7(hono@4.11.7)(zod@4.3.6)
+      kernl: 0.12.7(hono@4.11.7)(zod@4.3.6)
       pg: 8.17.2
     transitivePeerDependencies:
       - '@cfworker/json-schema'
@@ -6294,11 +6294,11 @@ snapshots:
     dependencies:
       zod: 4.3.6
 
-  '@kernl-sdk/storage@0.2.7(hono@4.11.5)(zod@4.3.6)':
+  '@kernl-sdk/storage@0.2.7(hono@4.11.7)(zod@4.3.6)':
     dependencies:
       '@kernl-sdk/protocol': 0.5.1(zod@4.3.6)
       '@kernl-sdk/shared': 0.4.0(zod@4.3.6)
-      kernl: 0.12.7(hono@4.11.5)(zod@4.3.6)
+      kernl: 0.12.7(hono@4.11.7)(zod@4.3.6)
       zod: 4.3.6
     transitivePeerDependencies:
       - '@cfworker/json-schema'
@@ -6309,9 +6309,9 @@ snapshots:
     dependencies:
       langium: 3.3.1
 
-  '@modelcontextprotocol/sdk@1.25.3(hono@4.11.5)(zod@4.3.6)':
+  '@modelcontextprotocol/sdk@1.25.3(hono@4.11.7)(zod@4.3.6)':
     dependencies:
-      '@hono/node-server': 1.19.9(hono@4.11.5)
+      '@hono/node-server': 1.19.9(hono@4.11.7)
       ajv: 8.17.1
       ajv-formats: 3.0.1(ajv@8.17.1)
       content-type: 1.0.5
@@ -9068,7 +9068,7 @@ snapshots:
     dependencies:
       parse-passwd: 1.0.0
 
-  hono@4.11.5: {}
+  hono@4.11.7: {}
 
   html-url-attributes@3.0.1: {}
 
@@ -9314,12 +9314,12 @@ snapshots:
     dependencies:
       commander: 8.3.0
 
-  kernl@0.12.4(hono@4.11.5)(zod@4.3.6):
+  kernl@0.12.4(hono@4.11.7)(zod@4.3.6):
     dependencies:
       '@kernl-sdk/protocol': 0.5.1(zod@4.3.6)
       '@kernl-sdk/retrieval': 0.1.10(zod@4.3.6)
       '@kernl-sdk/shared': 0.4.0(zod@4.3.6)
-      '@modelcontextprotocol/sdk': 1.25.3(hono@4.11.5)(zod@4.3.6)
+      '@modelcontextprotocol/sdk': 1.25.3(hono@4.11.7)(zod@4.3.6)
       yaml: 2.8.2
       zod: 4.3.6
     transitivePeerDependencies:
@@ -9327,12 +9327,12 @@ snapshots:
       - hono
       - supports-color
 
-  kernl@0.12.7(hono@4.11.5)(zod@4.3.6):
+  kernl@0.12.7(hono@4.11.7)(zod@4.3.6):
     dependencies:
       '@kernl-sdk/protocol': 0.5.1(zod@4.3.6)
       '@kernl-sdk/retrieval': 0.1.10(zod@4.3.6)
       '@kernl-sdk/shared': 0.4.0(zod@4.3.6)
-      '@modelcontextprotocol/sdk': 1.25.3(hono@4.11.5)(zod@4.3.6)
+      '@modelcontextprotocol/sdk': 1.25.3(hono@4.11.7)(zod@4.3.6)
       yaml: 2.8.2
       zod: 4.3.6
     transitivePeerDependencies:
