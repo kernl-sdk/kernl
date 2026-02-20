@@ -27,7 +27,7 @@
     "diff": "catalog:",
     "discord-api-types": "^0.37.119",
     "fuzzysort": "catalog:",
-    "hono": "^4.11.3",
+    "hono": "^4.11.10",
     "kernl": "workspace:*",
     "zod": "^4.1.8"
   },
