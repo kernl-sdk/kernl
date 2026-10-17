@@ -77,6 +77,49 @@ export const github = new MCPToolkit({
 
 MCPToolkit handles connection lifecycle automatically — connects lazily on first tool request, and cleans up via `destroy()`.
 
+### Web search with Parallel
+
+[Parallel Search MCP](https://docs.parallel.ai/integrations/mcp/search-mcp) gives your agent web search and page fetching without a Parallel account or API key. Anonymous searches use Fast mode. The free endpoint is intended for exploration and light use; authenticated connections support higher rate limits.
+
+Create a toolkit using the streamable HTTP transport:
+
+```ts
+import { MCPToolkit, MCPServerStreamableHttp } from "kernl";
+
+export const parallelSearch = new MCPToolkit({
+  id: "parallel-search",
+  description: "Search the web and fetch pages with Parallel",
+  server: new MCPServerStreamableHttp({
+    url: "https://search.parallel.ai/mcp",
+    requestInit: {
+      headers: {
+        "User-Agent": "kernl-parallel-search",
+      },
+    },
+  }),
+});
+```
+
+Add `parallelSearch` to your [agent's toolkits](/core/agents) alongside the tools it already uses, for example `toolkits: [math, parallelSearch]`. Keep your existing model configuration. The server exposes two tools:
+
+| Tool | Use case |
+|------|----------|
+| `web_search` | Find current information and relevant source URLs |
+| `web_fetch` | Read page content from specific URLs |
+
+To check the connection without calling a model, list the tools:
+
+```ts
+try {
+  const tools = await parallelSearch.list();
+  console.log(tools.map((tool) => tool.id));
+} finally {
+  await parallelSearch.destroy();
+}
+```
+
+This standalone check closes the connection when it finishes. In an application, keep the toolkit available while the agent runs and call `destroy()` during shutdown.
+
 ### Server types
 
 | Server | Transport | MCP Protocol |
